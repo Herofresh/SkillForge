@@ -28,8 +28,9 @@
   real file.
 - Add dependencies with `npx expo install <pkg>` so versions match SDK 57. `npx expo-doctor` passed
   21/21 checks at scaffold time.
-- CI (`.github/workflows/ci.yml`) runs on Node 22 for every PR and on every push to `main`: npm ci,
-  typecheck, lint, format:check, test. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
+- CI (`.github/workflows/ci.yml`) runs on Node 24 for every PR and on every push to `main`: npm ci,
+  typecheck, lint, format:check, test. Keep CI on the same npm major as local (npm 11): npm 10's
+  `npm ci` rejects this lockfile (missing optional peers `@emnapi/core`/`@emnapi/runtime`). Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
 - The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…014). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`

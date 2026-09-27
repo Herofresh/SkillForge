@@ -42,7 +42,7 @@ src/
   lib/                  generic helpers (dates, ids, math), e.g. clamp.ts
 assets/                 app icon, adaptive icon, splash, favicon
 docs/                   PLAN, DECISIONS, CONTEXT, research
-.github/workflows/ci.yml  CI: typecheck, lint, format:check, test (pending, see PLAN Blockers)
+.github/workflows/ci.yml  CI (Node 24): typecheck, lint, format:check, test
 ```
 
 **Path alias:** `@/*` → `src/*` (and `@/assets/*` → `assets/*`). It's defined in `tsconfig.json`
