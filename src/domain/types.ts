@@ -174,3 +174,73 @@ export interface ProgressionOverlay {
   /** Built-in node ids the user doesn't want to see. Their dependents inherit their prerequisites. */
   hidden: string[];
 }
+
+// ---------------------------------------------------------------------------------------------
+// Training history and derived progress (Phase 2). History is the source of truth (ADR-008);
+// everything under "derived" is rebuilt from it by `recompute` in `src/domain/recompute.ts`.
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * What one set asked for or achieved, in the set's metric.
+ * - `value`: reps (`reps`), seconds held (`hold_s`), seconds per lowering (`eccentric_s`) or load as a
+ *   multiple of bodyweight (`load_xbw`).
+ * - `reps`: lowerings (`eccentric_s`) or reps (`load_xbw`) in the set. Ignored for `reps` and
+ *   `hold_s`; treated as 1 when missing.
+ *
+ * A skipped set is logged with `value: 0`.
+ */
+export interface SetPerformance {
+  value: number;
+  reps?: number;
+}
+
+/** One logged set: the row of `session_sets`, the source of truth for all progress (ADR-008). */
+export interface LoggedSet {
+  sessionId: string;
+  nodeId: string;
+  /** Position of the set within the session (0-based, across all exercises). */
+  setIndex: number;
+  metric: Metric;
+  prescribed: SetPerformance;
+  actual: SetPerformance;
+  /** The set is part of a Trial attempt for `nodeId`. */
+  isTrial: boolean;
+  /** When the set was logged, in ms since the Unix epoch. */
+  timestamp: number;
+}
+
+export interface LoggedSession {
+  id: string;
+  /** In ms since the Unix epoch. Sessions are replayed in `startedAt` order. */
+  startedAt: number;
+  sets: LoggedSet[];
+}
+
+/** How a logged exercise (all sets of one node in one session) went against its prescription. */
+export const OUTCOMES = ['success', 'partial', 'failed'] as const;
+export type Outcome = (typeof OUTCOMES)[number];
+
+/** Derived node states, see `docs/CONTEXT.md` → Node states. */
+export const NODE_STATES = ['locked', 'available', 'training', 'proficient', 'mastered'] as const;
+export type NodeState = (typeof NODE_STATES)[number];
+
+/** Derived progress of one node: the `node_progress` cache row. */
+export interface NodeProgress {
+  nodeId: string;
+  /** All node XP ever earned, including XP banked beyond the level-5 cap. */
+  xp: number;
+  /** Node level 1–10; capped at `PROFICIENT_LEVEL` until the Trial is passed. */
+  level: number;
+  trialPassed: boolean;
+  trialPassedAt?: number;
+  /** Timestamp of the first logged set (starts the ADR-010 straight-arm clock). */
+  firstTrainedAt?: number;
+  lastTrainedAt?: number;
+}
+
+/** Character attributes, each fed by a group of branches (`ATTRIBUTE_BRANCHES` in `character.ts`). */
+export const ATTRIBUTES = ['push', 'pull', 'core', 'legs', 'balance', 'mobility'] as const;
+export type Attribute = (typeof ATTRIBUTES)[number];
+
+export const RANK_TITLES = ['Novice', 'Apprentice', 'Adept', 'Master', 'Legend'] as const;
+export type RankTitle = (typeof RANK_TITLES)[number];
