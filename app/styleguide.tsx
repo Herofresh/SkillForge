@@ -2,6 +2,7 @@ import { Redirect, Stack } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { stackHeaderOptions } from '@/components/stackHeader';
 import {
   AttributeColors,
   Colors,
@@ -59,15 +60,7 @@ export default function StyleGuideScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Style Guide',
-          headerStyle: { backgroundColor: Colors.surface },
-          headerTintColor: Colors.gold,
-          headerTitleStyle: { fontFamily: TypeScale.title.fontFamily },
-        }}
-      />
+      <Stack.Screen options={stackHeaderOptions('Style Guide')} />
       <Screen testID="styleguide">
         <PixelText variant="display">Style Guide</PixelText>
 

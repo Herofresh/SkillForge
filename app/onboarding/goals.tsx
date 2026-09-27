@@ -1,12 +1,12 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { BranchTabs } from '@/components/BranchTabs';
 import { NodeRow } from '@/components/NodeRow';
 import { OnboardingScaffold } from '@/components/onboarding/OnboardingScaffold';
 import { Spacing } from '@/components/theme';
-import { PixelChip, PixelFrame, PixelText } from '@/components/ui';
-import { BRANCH_NAMES } from '@/data/skills/branches';
+import { PixelFrame, PixelText } from '@/components/ui';
 import { nodesInBranch } from '@/domain/branch';
 import { MAX_GOALS, MIN_GOALS } from '@/domain/onboarding';
 import { BRANCHES, type Branch } from '@/domain/types';
@@ -51,22 +51,7 @@ export default function GoalsStep() {
           </PixelText>
         )}
       </PixelFrame>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.branches}
-        accessibilityRole="tablist">
-        {BRANCHES.map((entry) => (
-          <PixelChip
-            key={entry}
-            role="tab"
-            label={BRANCH_NAMES[entry]}
-            selected={entry === branch}
-            onPress={() => setBranch(entry)}
-            testID={`branch-${entry}`}
-          />
-        ))}
-      </ScrollView>
+      <BranchTabs value={branch} onChange={setBranch} />
       <View style={styles.list}>
         {branchNodes.map((node) => {
           const picked = goals.includes(node.id);
@@ -92,10 +77,6 @@ export default function GoalsStep() {
 const styles = StyleSheet.create({
   summary: {
     gap: Spacing.xs,
-  },
-  branches: {
-    gap: Spacing.sm,
-    paddingRight: Spacing.md,
   },
   list: {
     gap: Spacing.sm,

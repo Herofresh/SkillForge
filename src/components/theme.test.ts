@@ -1,6 +1,6 @@
 import { contrastRatio, MIN_TEXT_CONTRAST } from '@/lib/contrast';
 
-import { AttributeColors, ButtonStyles, Colors, TierColors } from './theme';
+import { AttributeColors, ButtonStyles, Colors, TierColors, TileFrames } from './theme';
 
 /** Every text color on every surface it is used on (docs/DESIGN.md → Palette). */
 const TEXT_PAIRS: readonly [string, string, string][] = [
@@ -19,6 +19,16 @@ const TEXT_PAIRS: readonly [string, string, string][] = [
   ['danger', Colors.danger, Colors.surfaceRaised],
   ['success', Colors.success, Colors.surface],
   ['textOnParchment', Colors.textOnParchment, Colors.parchment],
+  // Tiles (PLAN 4.2): name and state text on every tile fill.
+  ...Object.entries(TileFrames).flatMap(([state, frame]) => [
+    [`tile ${state} text`, Colors.text, frame.fill] as [string, string, string],
+    [`tile ${state} textMuted`, Colors.textMuted, frame.fill] as [string, string, string],
+    [`tile ${state} rune`, Colors.rune, frame.fill] as [string, string, string],
+    [`tile ${state} gold`, Colors.gold, frame.fill] as [string, string, string],
+  ]),
+  ...Object.entries(AttributeColors).map(
+    ([name, color]) => [`attribute ${name}`, color, Colors.surface] as [string, string, string],
+  ),
   ...Object.entries(ButtonStyles).map(
     ([name, style]) => [`button ${name}`, style.text, style.frame.fill] as [string, string, string],
   ),

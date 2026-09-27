@@ -1,0 +1,146 @@
+# Tree tab and node detail (PLAN 4.2, 4.3): from a fresh install, open the vertical pull branch, open
+# Dead hang, set it as a goal and pass its Trial (the chain to Scapular pull lights up), then
+# self-unlock the locked Jumping pull-up after acknowledging its prerequisites note (ADR-023) and
+# check its state on the detail and the tile. Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
+appId: host.exp.exponent
+name: Tree - branch, node detail, goal, Trial and unlock anyway
+---
+# Fresh data, so the node states are known (wipes Expo Go's data, including the app database).
+- clearState
+- openLink: exp://127.0.0.1:8081
+- extendedWaitUntil:
+    visible: 'Name your hero|Continue'
+    timeout: 180000
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+- runFlow:
+    when:
+      visible: 'Toggle performance monitor'
+    commands:
+      - back
+- extendedWaitUntil:
+    visible:
+      id: 'onboarding-hero'
+    timeout: 60000
+- runFlow: subflows/finish-onboarding.yaml
+- tapOn: 'Tree'
+- extendedWaitUntil:
+    visible:
+      id: 'tree-screen'
+    timeout: 20000
+# 4.2: pick the branch
+- tapOn:
+    id: 'branch-v_pull'
+- assertVisible:
+    id: 'tree-branch-title'
+    text: 'Vertical pull'
+- assertVisible:
+    id: 'tile-state-dead_hang'
+    text: 'Ready'
+- assertVisible:
+    id: 'tile-state-scapular_pull'
+    text: 'Locked'
+# 4.3: open Dead hang and make it a goal
+- tapOn:
+    id: 'tile-dead_hang'
+- extendedWaitUntil:
+    visible:
+      id: 'node-detail'
+    timeout: 20000
+- assertVisible:
+    id: 'detail-state'
+    text: 'Ready'
+- tapOn:
+    id: 'goal-toggle'
+- assertVisible:
+    id: 'detail-goal-marker'
+- assertVisible: 'Remove goal'
+# Attempt its Trial (no warnings for a non-straight-arm, open node) with the standard as the result
+- tapOn:
+    id: 'attempt-trial'
+- extendedWaitUntil:
+    visible:
+      id: 'node-trial-form'
+    timeout: 20000
+- takeScreenshot: 4.3-trial
+- scrollUntilVisible:
+    element:
+      id: 'log-trial'
+    direction: DOWN
+    timeout: 30000
+- tapOn:
+    id: 'log-trial'
+- extendedWaitUntil:
+    visible: 'TESTED OUT!'
+    timeout: 20000
+- tapOn:
+    id: 'trial-done'
+- extendedWaitUntil:
+    visible:
+      id: 'trial-passed-note'
+    timeout: 20000
+- assertVisible:
+    id: 'detail-state'
+    text: 'Proficient'
+- back
+# Back on the tree: Dead hang is a proficient goal and Scapular pull is open
+- extendedWaitUntil:
+    visible:
+      id: 'tile-goal-dead_hang'
+    timeout: 20000
+- assertVisible:
+    id: 'tile-state-scapular_pull'
+    text: 'Ready'
+- takeScreenshot: 4.2-tree
+# Unlock anyway: Jumping pull-up is still locked (it needs Scapular pull)
+- scrollUntilVisible:
+    element:
+      id: 'tile-jump_pull_up'
+    direction: DOWN
+    timeout: 30000
+- assertVisible:
+    id: 'tile-state-jump_pull_up'
+    text: 'Locked'
+- tapOn:
+    id: 'tile-jump_pull_up'
+- extendedWaitUntil:
+    visible:
+      id: 'unlock-anyway'
+    timeout: 20000
+- assertVisible:
+    id: 'detail-state'
+    text: 'Locked'
+- takeScreenshot: 4.3-node-detail
+- tapOn:
+    id: 'unlock-anyway'
+- extendedWaitUntil:
+    visible:
+      id: 'unlock-sheet'
+    timeout: 20000
+- takeScreenshot: 4.3-unlock
+- tapOn:
+    id: 'unlock-warning-0-acknowledge'
+- assertVisible:
+    id: 'unlock-warning-0-acknowledged'
+- tapOn:
+    id: 'unlock-confirm'
+- extendedWaitUntil:
+    notVisible:
+      id: 'unlock-sheet'
+    timeout: 20000
+- assertVisible:
+    id: 'detail-state'
+    text: 'Ready'
+- assertVisible:
+    id: 'detail-self-unlocked'
+- assertNotVisible:
+    id: 'unlock-anyway'
+- back
+- extendedWaitUntil:
+    visible:
+      id: 'tile-state-jump_pull_up'
+      text: 'Ready · Unlocked by you'
+    timeout: 20000
