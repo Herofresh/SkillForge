@@ -344,3 +344,22 @@ Template:
   - Locked status for a Trial is judged on the state before the session.
 - Consequences: Recompute is O(sessions × nodes) because unlocks are resolved per session; fine for
   the ~90-node tree. Hiding a node drops its XP from the character total until it is shown again.
+
+## ADR-022: Maestro for end-to-end tests, run against Expo Go
+- Date: 2026-09-27 · Status: Accepted
+- Numbering: ADR-018 to ADR-021 are reserved by the game-engine PR #6, which was open when this was
+  written.
+- Context: The user wants to see the app running on an Android emulator and to have E2E tests.
+  There's no native dev build yet (EAS comes in PLAN 5.3). Maestro flows are YAML, so they're readable
+  and close to the YAML matrix style of ADR-016.
+- Decision:
+  - Use Maestro (`.maestro/*.yaml`, run with `npm run e2e`).
+  - For now, flows target Expo Go (`host.exp.exponent`) and open `exp://127.0.0.1:8081` through
+    `adb reverse`.
+  - The first flow is a smoke test that the app starts and all four tabs render.
+  - UI tasks add or extend flows as they build screens.
+- Consequences:
+  - This is local only for now. The Maestro CLI and a running emulator plus Metro are required, and CI
+    for E2E is in the backlog.
+  - Flows match visible text, so UI copy changes must update them.
+  - When a dev build exists, switch `appId` to `at.skillforge.app` and drop the `openLink`.

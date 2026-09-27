@@ -7,8 +7,9 @@
 - Repo: https://github.com/Herofresh/SkillForge (public).
 - Phase 0 is done: docs (PR #1), the Expo SDK 57 scaffold with tooling (PR #2), and GitHub Actions
   CI (PR #3).
-- The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. The
-  Android bundle exports cleanly, but it hasn't been opened on a phone in Expo Go yet.
+- The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. It runs
+  in Expo Go on the `Pixel_6_Pro_API_34` emulator, and a Maestro smoke flow checks that every tab
+  renders (task 0.6, ADR-022).
 - Phase 1 is merged ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)) except 1.6 (OG verification) and 1.10 (coach review): shared
   types, the YAML progression format with build/check/review scripts, the validator, the user
   overlay and the full dataset of **89 nodes** in 12 branches (all `review.status: draft`, 52 with a
@@ -103,7 +104,10 @@
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
-- Local tooling: Node 24, npm 11, Java 17, jq. There's no Android SDK, so test with Expo Go on the phone.
+- Local tooling: Node 24, npm 11, Java 17, jq, the Android SDK (emulator) and Maestro; paths are in
+  `docs/CONTEXT.md`.
+- E2E (task 0.6, ADR-022): the runbook is in `docs/CONTEXT.md` "E2E tests". Flows in `.maestro/`
+  match visible text, so a UI task that changes copy must update them. They don't run in CI yet.
 
 ---
 
@@ -115,6 +119,7 @@
 - [x] 0.3 TypeScript strict, ESLint, Prettier, Jest (`jest-expo`); scripts `typecheck`, `lint`, `test` ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
 - [x] 0.4 GitHub Actions CI: typecheck, lint and test on every PR ([PR #3](https://github.com/Herofresh/SkillForge/pull/3))
 - [x] 0.5 Folder layout (`src/domain`, `src/data/skills`, `src/db`, `src/components`, `src/lib`) and README update ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
+- [x] 0.6 Emulator check and Maestro E2E smoke flow (`.maestro/smoke.yaml`, `npm run e2e`, ADR-022). Verified on `Pixel_6_Pro_API_34` via Expo Go ([PR #7](https://github.com/Herofresh/SkillForge/pull/7))
 
 ### Phase 1: Progression matrix
 The matrix is authored as human-editable YAML (one file per branch in `content/progressions/`) and
@@ -161,6 +166,9 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [ ] 5.3 EAS build profile and Android APK
 
 ### Later / Backlog
+- E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
+  `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
+  Expo Go. Every UI task in Phase 4 should also add or extend a flow in `.maestro/`.
 - Hold stopwatch and rest timer (rest durations are already stored in the prescription)
 - Weekly plans and scheduling
 - Notifications and reminders
