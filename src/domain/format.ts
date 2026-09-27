@@ -100,3 +100,26 @@ export function formatLevelProgress(progress: NodeLevelProgress): string {
   if (progress.xpForLevel === 0) return 'Max';
   return `${progress.xpIntoLevel} / ${progress.xpForLevel} XP`;
 }
+
+/** A prescription, e.g. "3 × 8 reps" or "1 × 30 s". */
+export function formatPrescription(metric: Metric, sets: number, target: SetPerformance): string {
+  return `${sets} × ${formatPerformance(metric, target)}`;
+}
+
+const SECONDS_PER_MINUTE = 60;
+
+/** A countdown as "m:ss", e.g. "1:05" (negative counts as 0). */
+export function formatCountdown(seconds: number): string {
+  const whole = Math.max(0, Math.ceil(seconds));
+  const minutes = Math.floor(whole / SECONDS_PER_MINUTE);
+  const rest = whole % SECONDS_PER_MINUTE;
+  return `${minutes}:${String(rest).padStart(2, '0')}`;
+}
+
+/** Rest after each set, e.g. "90 s rest" or "3 min rest" (whole minutes from 2 min on). */
+export function formatRest(seconds: number): string {
+  if (seconds >= 2 * SECONDS_PER_MINUTE && seconds % SECONDS_PER_MINUTE === 0) {
+    return `${seconds / SECONDS_PER_MINUTE} min rest`;
+  }
+  return `${seconds} s rest`;
+}

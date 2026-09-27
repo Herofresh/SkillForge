@@ -17,6 +17,12 @@
  *   setting, so it travels with backups).
  * - Tree and node detail (PLAN 4.2–4.3): `toggleGoal`, `logTrial` / `testOutWarnings` and
  *   `selfUnlock` / `selfUnlockWarnings` (what to acknowledge before the "unlock anyway").
+ * - Train flow (PLAN 4.4, ADR-034): `planTraining` turns a generated plan into an editable
+ *   `trainPlan` (swap, remove, add, acknowledge its warnings), `startTraining` makes it the
+ *   `activeSession`, which is saved to `active_session` after every change (log a set, skip, add,
+ *   rest) and read back by `loadAll`, so a killed app resumes it. `finishTraining` logs it as an
+ *   ordinary session (deleting the draft in the same transaction); `trainSummary` keeps the result
+ *   for the summary screen.
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
  *
  * `createAppStore` takes its dependencies (database, built-in tree, clock, id source, file access) so
@@ -24,6 +30,11 @@
  */
 import { createStore, type StoreApi } from 'zustand/vanilla';
 
+import {
+  clearActiveSession,
+  getActiveSession,
+  saveActiveSession,
+} from '@/db/activeSessionRepository';
 import type { AppDb } from '@/db/database';
 import {
   deleteEquipmentProfile,
@@ -41,7 +52,13 @@ import { insertUserAction, listUserActions } from '@/db/userActionRepository';
 import { readUserData, replaceUserData } from '@/db/userDataRepository';
 import { testOutWarnings, trialSession } from '@/domain/assessment';
 import { backupFileName, parseBackup, serializeBackup } from '@/domain/backup';
-import { generateWorkout } from '@/domain/generator';
+import {
+  generateWorkout,
+  plannedSets,
+  prescribeExercise,
+  workoutWarnings,
+  type WorkoutContext,
+} from '@/domain/generator';
 import { normalizeHeroName, toggleGoal } from '@/domain/onboarding';
 import { applyOverlay, EMPTY_OVERLAY } from '@/domain/overlay';
 import { nodeUseWarnings, resolveNode } from '@/domain/progression';
@@ -56,19 +73,41 @@ import {
   type SessionResult,
   type UserActionResult,
 } from '@/domain/recompute';
-import type {
-  EquipmentProfile,
-  EquipmentTag,
-  ExerciseNode,
-  HeroProfile,
-  LoggedSession,
-  ProgressionOverlay,
-  SafeguardWarning,
-  SessionDetails,
-  SetPerformance,
-  UserAction,
-  ValidationIssue,
-  WorkoutPlan,
+import {
+  acknowledgeWarning,
+  addExercise,
+  addOptions,
+  addSessionExercise,
+  finishedSession,
+  logSessionSet,
+  markedPerformance,
+  projectedSets,
+  removeExercise,
+  replaceExercise,
+  selectExercise,
+  sessionPlan,
+  skipExercise,
+  skipRest,
+  startSession,
+  swapOptions,
+  type ActiveSession,
+  type SessionPlan,
+  type SetMark,
+} from '@/domain/train';
+import {
+  EQUIPMENT_TAGS,
+  type EquipmentProfile,
+  type EquipmentTag,
+  type ExerciseNode,
+  type HeroProfile,
+  type LoggedSession,
+  type ProgressionOverlay,
+  type SafeguardWarning,
+  type SessionDetails,
+  type SetPerformance,
+  type UserAction,
+  type ValidationIssue,
+  type WorkoutPlan,
 } from '@/domain/types';
 import { createId } from '@/lib/id';
 import { MS_PER_DAY } from '@/lib/time';
@@ -147,6 +186,12 @@ export interface AppState {
   profile?: HeroProfile;
   /** When onboarding was finished; unset = show the first-run flow (PLAN 4.1). */
   onboardingCompletedAt?: number;
+  /** The plan preview being edited (PLAN 4.4); in memory only. */
+  trainPlan?: SessionPlan;
+  /** The session in progress, persisted after every change (resumed after a restart). */
+  activeSession?: ActiveSession;
+  /** The result of the last finished Train session, for the summary screen; in memory only. */
+  trainSummary?: { sessionId: string; result: SessionResult };
 
   loadAll(): void;
   logSession(session: LoggedSession, details?: SessionDetails): SessionResult;
@@ -183,6 +228,40 @@ export interface AppState {
    * `applyOverlay` issues instead (and writes nothing) when the merged tree would be broken.
    */
   saveOverlay(overlay: ProgressionOverlay): ValidationIssue[];
+  // --- Train flow (PLAN 4.4, ADR-034) ---
+  /** Generates a plan for the profile and time and makes it the editable `trainPlan`. */
+  planTraining(equipmentProfileId: string, minutes: number, seed?: number): SessionPlan;
+  /** Nodes that can replace plan exercise `key` (same pattern, trainable, doable). */
+  swapOptions(key: string): ExerciseNode[];
+  swapPlanExercise(key: string, nodeId: string): void;
+  removePlanExercise(key: string): void;
+  discardPlan(): void;
+  /**
+   * Advisory warnings (ADR-023) of the session as it stands: the live session's logged + remaining
+   * sets, else the plan preview's. Empty without either.
+   */
+  trainWarnings(): SafeguardWarning[];
+  /** Records the "I understand" for warning `key` (`warningKey`) on the live session or plan. */
+  acknowledgeTrainWarning(key: string): void;
+  /** Starts the edited plan as the live session (persisted). */
+  startTraining(): ActiveSession;
+  /** Logs one set of exercise `key`: `entered` as marked (`markedPerformance`), then rests. */
+  logTrainingSet(key: string, entered: SetPerformance, mark?: SetMark): void;
+  skipTrainingExercise(key: string): void;
+  selectTrainingExercise(key: string): void;
+  skipTrainingRest(): void;
+  /** Nodes to add to the live session (or the plan): suggestions, or matches for `query`. */
+  addTrainingOptions(query?: string): ExerciseNode[];
+  /** Adds `nodeId`, prescribed from its history, to the live session (else the plan). */
+  addTrainingExercise(nodeId: string): void;
+  /**
+   * Logs the live session as history (missing sets of started exercises as skipped) and clears the
+   * draft; `undefined` (and nothing logged) when no set was logged.
+   */
+  finishTraining(): SessionResult | undefined;
+  /** Throws the live session away; nothing is logged. */
+  abandonTraining(): void;
+  dismissTrainSummary(): void;
   /** All user data as backup text (`serializeBackup`), read from the database. */
   exportBackup(): { fileName: string; text: string };
   /**
@@ -232,6 +311,54 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       set({ ...changes, engine });
     };
 
+    /** Applies a session that is already stored (incrementally, or by recomputing the past). */
+    const applyStoredSession = (session: LoggedSession): SessionResult => {
+      const { engine, sessions, userActions, nodes } = get();
+      const allSessions = [...sessions, session].sort(compareHistory);
+      if (canApplyIncrementally(engine, session)) {
+        const step = applySession(engine, session, nodes);
+        commitEngine(step.state, { sessions: allSessions });
+        return step.result;
+      }
+      const rebuilt = recompute(nodes, allSessions, userActions);
+      commitEngine(rebuilt.state, { sessions: allSessions });
+      return rebuilt.results.find((result) => result.sessionId === session.id) as SessionResult;
+    };
+
+    /** What the generator and the Train flow's warnings and prescriptions need, at `at`. */
+    const workoutContext = (at: number): WorkoutContext => {
+      const { nodes, engine, sessions } = get();
+      const since = at - GENERATOR_HISTORY_DAYS * MS_PER_DAY;
+      return {
+        nodes,
+        progress: engine.progress,
+        recentSessions: sessions.filter((session) => session.startedAt >= since),
+        now: at,
+      };
+    };
+
+    /** The profile's tags; every tag when the profile was deleted after planning. */
+    const equipmentOf = (profileId: string): readonly EquipmentTag[] =>
+      get().equipmentProfiles.find((profile) => profile.id === profileId)?.tags ?? EQUIPMENT_TAGS;
+
+    const requirePlan = (): SessionPlan => {
+      const plan = get().trainPlan;
+      if (!plan) throw new Error('No workout is being planned');
+      return plan;
+    };
+
+    const requireSession = (): ActiveSession => {
+      const session = get().activeSession;
+      if (!session) throw new Error('No session is in progress');
+      return session;
+    };
+
+    /** Saves the live session's new state (the draft row) and shows it. */
+    const saveSession = (session: ActiveSession): void => {
+      saveActiveSession(db, session, now());
+      set({ activeSession: session });
+    };
+
     return {
       loaded: false,
       nodes: baseNodes,
@@ -261,21 +388,13 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           goals: listGoals(db),
           equipmentProfiles: listEquipmentProfiles(db),
           profile: getProfile(db),
+          activeSession: getActiveSession(db),
         });
       },
 
       logSession(session, details) {
         insertSession(db, session, details);
-        const { engine, sessions, userActions, nodes } = get();
-        const allSessions = [...sessions, session].sort(compareHistory);
-        if (canApplyIncrementally(engine, session)) {
-          const step = applySession(engine, session, nodes);
-          commitEngine(step.state, { sessions: allSessions });
-          return step.result;
-        }
-        const rebuilt = recompute(nodes, allSessions, userActions);
-        commitEngine(rebuilt.state, { sessions: allSessions });
-        return rebuilt.results.find((result) => result.sessionId === session.id) as SessionResult;
+        return applyStoredSession(session);
       },
 
       selfUnlock(nodeId) {
@@ -374,21 +493,154 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       },
 
       generateWorkout(equipmentProfileId, availableMinutes, seed) {
-        const { equipmentProfiles, goals, engine, sessions, nodes } = get();
+        const { equipmentProfiles, goals, sessions } = get();
         const profile = equipmentProfiles.find((candidate) => candidate.id === equipmentProfileId);
         if (!profile) throw new Error(`Unknown equipment profile '${equipmentProfileId}'`);
-        const at = now();
-        const since = at - GENERATOR_HISTORY_DAYS * MS_PER_DAY;
         return generateWorkout({
-          nodes,
+          ...workoutContext(now()),
           goals,
-          progress: engine.progress,
           equipment: profile.tags,
           availableMinutes,
-          recentSessions: sessions.filter((session) => session.startedAt >= since),
-          now: at,
           seed: seed ?? sessions.length,
         });
+      },
+
+      planTraining(equipmentProfileId, minutes, seed) {
+        const workout = get().generateWorkout(equipmentProfileId, minutes, seed);
+        const plan = sessionPlan(workout, equipmentProfileId, minutes);
+        set({ trainPlan: plan });
+        return plan;
+      },
+
+      swapOptions(key) {
+        const plan = requirePlan();
+        const { nodes, engine } = get();
+        return swapOptions(plan, key, {
+          nodes,
+          progress: engine.progress,
+          equipment: equipmentOf(plan.equipmentProfileId),
+        });
+      },
+
+      swapPlanExercise(key, nodeId) {
+        const plan = requirePlan();
+        const node = requireNode(nodeId);
+        const current = plan.exercises.find((exercise) => exercise.key === key);
+        if (!current) throw new Error(`No exercise '${key}' in the plan`);
+        const replacement = prescribeExercise(node, workoutContext(now()), current.restSec);
+        set({ trainPlan: replaceExercise(plan, key, replacement) });
+      },
+
+      removePlanExercise(key) {
+        set({ trainPlan: removeExercise(requirePlan(), key) });
+      },
+
+      discardPlan() {
+        set({ trainPlan: undefined });
+      },
+
+      trainWarnings() {
+        const { activeSession, trainPlan } = get();
+        const at = now();
+        if (activeSession) {
+          const exercises = activeSession.exercises.filter((exercise) => !exercise.skipped);
+          return workoutWarnings(
+            exercises,
+            projectedSets(activeSession, at),
+            workoutContext(at),
+            activeSession.startedAt,
+          );
+        }
+        if (trainPlan) {
+          return workoutWarnings(
+            trainPlan.exercises,
+            plannedSets(trainPlan.exercises, at),
+            workoutContext(at),
+          );
+        }
+        return [];
+      },
+
+      acknowledgeTrainWarning(key) {
+        const { activeSession, trainPlan } = get();
+        if (activeSession) saveSession(acknowledgeWarning(activeSession, key));
+        else if (trainPlan) set({ trainPlan: acknowledgeWarning(trainPlan, key) });
+      },
+
+      startTraining() {
+        const at = now();
+        const session = startSession(requirePlan(), newId(at), at);
+        saveActiveSession(db, session, at);
+        set({ activeSession: session, trainPlan: undefined, trainSummary: undefined });
+        return session;
+      },
+
+      logTrainingSet(key, entered, mark = 'done') {
+        const session = requireSession();
+        const exercise = session.exercises.find((entry) => entry.key === key);
+        if (!exercise) throw new Error(`No exercise '${key}' in the session`);
+        const actual = markedPerformance(exercise.metric, mark, entered, exercise.target);
+        saveSession(logSessionSet(session, key, actual, now()));
+      },
+
+      skipTrainingExercise(key) {
+        saveSession(skipExercise(requireSession(), key));
+      },
+
+      selectTrainingExercise(key) {
+        saveSession(selectExercise(requireSession(), key));
+      },
+
+      skipTrainingRest() {
+        saveSession(skipRest(requireSession()));
+      },
+
+      addTrainingOptions(query) {
+        const { activeSession, trainPlan, nodes, engine } = get();
+        const plan = activeSession ?? trainPlan;
+        if (!plan) return [];
+        return addOptions(
+          plan,
+          { nodes, progress: engine.progress, equipment: equipmentOf(plan.equipmentProfileId) },
+          query,
+        );
+      },
+
+      addTrainingExercise(nodeId) {
+        const exercise = prescribeExercise(requireNode(nodeId), workoutContext(now()));
+        const { activeSession } = get();
+        if (activeSession) saveSession(addSessionExercise(activeSession, exercise));
+        else set({ trainPlan: addExercise(requirePlan(), exercise) });
+      },
+
+      finishTraining() {
+        const active = requireSession();
+        const at = now();
+        const session = finishedSession(active, at);
+        if (session.sets.length === 0) {
+          get().abandonTraining();
+          return undefined;
+        }
+        db.transaction((tx) => {
+          insertSession(tx, session, {
+            endedAt: at,
+            equipmentProfileId: active.equipmentProfileId,
+          });
+          clearActiveSession(tx);
+        });
+        set({ activeSession: undefined });
+        const result = applyStoredSession(session);
+        set({ trainSummary: { sessionId: session.id, result } });
+        return result;
+      },
+
+      abandonTraining() {
+        clearActiveSession(db);
+        set({ activeSession: undefined });
+      },
+
+      dismissTrainSummary() {
+        set({ trainSummary: undefined });
       },
 
       saveOverlay(overlay) {

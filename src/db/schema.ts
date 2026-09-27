@@ -106,3 +106,15 @@ export const progressionOverlay = sqliteTable('progression_overlay', {
   savedAt: integer('saved_at').notNull(),
   body: text('body', { mode: 'json' }).notNull(),
 });
+
+/**
+ * The Train flow's session in progress (PLAN 4.4, ADR-034): one row (id 1) with the whole
+ * `ActiveSession` as JSON, rewritten after every logged set so an app kill loses nothing. It is a
+ * draft, not history: finishing it logs an ordinary session and deletes the row. Not part of backups;
+ * an import deletes it.
+ */
+export const activeSession = sqliteTable('active_session', {
+  id: integer('id').primaryKey(),
+  updatedAt: integer('updated_at').notNull(),
+  body: text('body', { mode: 'json' }).notNull(),
+});

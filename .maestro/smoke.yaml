@@ -37,7 +37,8 @@ name: Smoke - app opens and all tabs render
 - tapOn: 'Tree'
 - assertVisible: 'Skill Tree'
 - tapOn: 'Train'
-- assertVisible: 'COMING SOON'
+- assertVisible:
+    id: 'train-screen'
 - tapOn: 'Character'
 - assertVisible: 'COMING SOON'
 - tapOn: 'Settings'

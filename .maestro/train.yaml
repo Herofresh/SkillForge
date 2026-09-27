@@ -1,0 +1,137 @@
+# Train flow (PLAN 4.4): from a fresh install, plan a 30-min Home session, look at the plan preview
+# and a swap sheet, start it, log all sets of the first exercise, then kill the app and check that
+# the session resumes with its sets (the draft is saved after every set), finish it and see the
+# summary with XP > 0. Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
+appId: host.exp.exponent
+name: Train - plan, live session, resume after a restart, summary
+---
+# Fresh data, so the generated plan is known (wipes Expo Go's data, including the app database).
+- clearState
+- openLink: exp://127.0.0.1:8081
+- extendedWaitUntil:
+    visible: 'Name your hero|Continue'
+    timeout: 180000
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+- runFlow:
+    when:
+      visible: 'Toggle performance monitor'
+    commands:
+      - back
+- extendedWaitUntil:
+    visible:
+      id: 'onboarding-hero'
+    timeout: 60000
+- runFlow: subflows/finish-onboarding.yaml
+# Train now: Home, 30 min
+- tapOn: 'Train'
+- extendedWaitUntil:
+    visible:
+      id: 'train-now'
+    timeout: 20000
+- tapOn:
+    id: 'profile-home'
+- tapOn:
+    id: 'minutes-30'
+- takeScreenshot: 4.4-train
+- tapOn:
+    id: 'train-now'
+# Plan preview: blocks with prescriptions; open a swap sheet and cancel it
+- extendedWaitUntil:
+    visible:
+      id: 'plan-preview'
+    timeout: 20000
+- assertVisible:
+    id: 'plan-e0-prescription'
+- takeScreenshot: 4.4-plan-preview
+- tapOn:
+    id: 'swap-e0'
+- extendedWaitUntil:
+    visible:
+      id: 'swap-sheet'
+    timeout: 20000
+- takeScreenshot: 4.4-swap
+- tapOn: 'Cancel'
+- extendedWaitUntil:
+    notVisible:
+      id: 'swap-sheet'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'start-session'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'start-session'
+# Live session: the first exercise (the warm-up's wrist prep, 1 set)
+- extendedWaitUntil:
+    visible:
+      id: 'live-session'
+    timeout: 20000
+- assertVisible:
+    id: 'set-label'
+    text: 'Set 1 of 1'
+- takeScreenshot: 4.4-session
+- tapOn:
+    id: 'log-set'
+- extendedWaitUntil:
+    visible:
+      id: 'rest-panel'
+    timeout: 20000
+- assertVisible:
+    id: 'session-progress'
+- takeScreenshot: 4.4-rest
+# Kill the app mid-session and open it again: it resumes with the logged set
+- stopApp
+- launchApp
+- openLink: exp://127.0.0.1:8081
+- extendedWaitUntil:
+    visible:
+      id: 'resume-session'
+    timeout: 120000
+- takeScreenshot: 4.4-resume
+- tapOn:
+    id: 'resume-session'
+- extendedWaitUntil:
+    visible:
+      id: 'live-session'
+    timeout: 20000
+- assertVisible:
+    id: 'session-row-e0'
+    text: '.*1 / 1.*'
+# Finish (confirm) and see the summary
+- scrollUntilVisible:
+    element:
+      id: 'finish-session'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'finish-session'
+- extendedWaitUntil:
+    visible:
+      id: 'finish-dialog'
+    timeout: 20000
+- tapOn:
+    id: 'finish-confirm'
+- extendedWaitUntil:
+    visible:
+      id: 'session-summary'
+    timeout: 20000
+- assertVisible:
+    id: 'summary-total-xp'
+    text: '\+[1-9][0-9]* XP'
+- takeScreenshot: 4.4-summary
+- scrollUntilVisible:
+    element:
+      id: 'summary-done'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'summary-done'
+- extendedWaitUntil:
+    visible:
+      id: 'train-now'
+    timeout: 20000

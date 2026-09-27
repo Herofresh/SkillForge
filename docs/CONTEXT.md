@@ -24,13 +24,15 @@ Phase 1 progression pipeline (`content/progressions/`, `scripts/`, `src/domain/t
 overlay and backups), the Phase 4.0 design system (`docs/DESIGN.md`, `src/components/ui/`,
 `app/styleguide.tsx`), the 4.1 onboarding (`app/onboarding/`, ADR-031) and the 4.2/4.3 Tree tab and
 node detail (`app/(tabs)/tree.tsx`, `app/node/`, `src/components/tree/`, `src/components/node/`,
-ADR-033). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
+ADR-033) and the 4.4 Train flow (`app/(tabs)/train.tsx`, `app/train/`, `src/components/train/`,
+`src/domain/train.ts`, `trainView.ts`, ADR-034). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
   _layout.tsx           root Stack + dark navigation theme, loads the fonts, wrapped in DataGate
   styleguide.tsx        DEV ONLY: catalogue of tokens, components and icons (Settings → Style Guide)
-  index.tsx             redirects "/" to /tree, or to /onboarding until onboarding is completed
+  index.tsx             redirects "/" to /tree (/train while a session is in progress), or to
+                        /onboarding until onboarding is completed
   (tabs)/_layout.tsx    bottom tabs: Tree · Train · Character · Settings (pixel icons, ink/gold rules);
                         redirects to /onboarding while `onboardingCompletedAt` is unset
   (tabs)/tree.tsx       skill tree (PLAN 4.2, ADR-033): branch tabs + one FlatList column of NodeTiles
@@ -39,7 +41,14 @@ app/                    expo-router screens (UI only, no game logic)
     index.tsx           header (state, level, XP), actions (goal, Attempt Trial, Unlock anyway sheet),
                         prerequisites ✓/✗ + alternatives, trains, standards, cues, history, review
     trial.tsx           Trial attempt: warnings to acknowledge, steppers, logTrial, outcome + burst
-  (tabs)/train.tsx      Train now → plan preview → live session → summary
+  (tabs)/train.tsx      Train now (profile chips, 30/45/60 min → planTraining) or "Resume session"
+  train/                Train flow stack screens (PLAN 4.4, ADR-034)
+    preview.tsx         plan by block: sets × target, rest, markers, notes, warnings to acknowledge;
+                        swap / remove / add → Start session
+    session.tsx         live session: current exercise + SetLogger, RestPanel, session list, skip,
+                        add, finish / abandon (confirm dialogs)
+    summary.tsx         total XP + bonuses, per-exercise outcome/XP, level-up and unlock bursts,
+                        streak, SessionResult warnings acknowledged before Done
   (tabs)/character.tsx  level, rank, attributes, history
   (tabs)/settings.tsx   equipment profiles, export/import (today: placeholder + the stored
                         profile names as a DB proof)
@@ -84,6 +93,12 @@ src/
     treeView.ts         Tree/detail view models: TileState, branchColumn, treeTile (chainAbove, links),
                         prerequisiteViews (alternatives, satisfiedBy), branchSummary, defaultBranch,
                         nodeHistory, nodeDetail
+    train.ts            Train session model (ADR-034): SessionPlan / ActiveSession, sessionPlan,
+                        swapOptions / addOptions, replace/remove/addExercise, startSession,
+                        logSessionSet (pairs alternate), markedPerformance, skip, rest,
+                        projectedSets, finishedSession, warningKey, parseActiveSession
+    trainView.ts        Train view models: blockViews, exerciseView, liveView, summaryView,
+                        BLOCK_LABELS, OUTCOME_LABELS
   data/
     progressionFormat.ts  THE YAML <-> ExerciseNode parser/normalizer (build, tests, overlay)
     validate.ts         graph/content rules: validateNodes, formatIssue
@@ -101,6 +116,7 @@ src/
     database.ts         AppDb type, createDatabase(client) (foreign keys on)
     openAppDatabase.ts  opens skillforge.db with expo-sqlite (app only)
     migrate.ts          migrateDatabase: version guard, migrations, schema_version, first-run seed
+    activeSessionRepository.ts  the Train draft row (get/save/clear, ADR-034)
     *Repository.ts      session, userAction, goal, equipmentProfile, nodeProgress (cache), profile,
                         settings, meta, overlay: small sync functions taking AppDb (or a transaction)
     userDataRepository.ts  readUserData / replaceUserData (all user tables, one transaction)
@@ -111,7 +127,10 @@ src/
                         profile CRUD, generateWorkout(profileId, minutes, seed?), saveOverlay,
                         exportBackup, importBackup, shareBackup, importBackupFromFile; onboarding:
                         onboardingCompletedAt, setHeroName, toggleGoal, logTrial, testOutWarnings,
-                        completeOnboarding; node detail: selfUnlockWarnings
+                        completeOnboarding; node detail: selfUnlockWarnings; Train (ADR-034):
+                        trainPlan / activeSession / trainSummary, planTraining, swap/remove/add,
+                        trainWarnings, acknowledgeTrainWarning, startTraining, logTrainingSet,
+                        skip/select/rest, finishTraining, abandonTraining
     backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker)
     bootstrap.ts        startApp(): open, migrate, create store, loadAll (once)
     useAppStore.ts      useAppStore(selector) hook for components below DataGate
@@ -132,6 +151,10 @@ src/
                         icon, label, tone, description)
     node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
                         NodeHistoryList, AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
+    train/              Train flow parts: ExerciseCard (prescription, rest, markers), SetLogger
+                        (stepper + Log / Partial / Failed), RestPanel (countdown), NodeOptionSheet
+                        (swap/add picker), TrainWarningList (warnings acknowledged by key)
+    train.test.tsx      component tests of the Train parts
     tree.test.tsx       component tests: tiles, chains, prerequisite list, unlock sheet (real store)
     DataGate.tsx        keeps the splash until fonts + startApp are done; error screen on failure
     ui/                 the UI kit; import from '@/components/ui'
@@ -156,7 +179,8 @@ babel.config.js         babel-preset-expo + inline-import for .sql (also used by
 metro.config.js         Expo default + `sql` source extension
 jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
 .maestro/               E2E flows: onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
-                        proof), styleguide.yaml (UI kit), tree.yaml (clearState; branch, detail, goal,
+                        proof), styleguide.yaml (UI kit), train.yaml (clearState; plan, live session,
+                        kill + resume, summary; takes the 4.4 screenshots), tree.yaml (clearState; branch, detail, goal,
                         Trial, unlock anyway; takes the 4.2/4.3 screenshots); subflows/finish-onboarding.yaml (not run
                         on its own) finishes onboarding from any step
 ```
@@ -218,6 +242,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 |---|---|
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
+| **Session plan / active session** | The Train flow's editable plan preview (`SessionPlan`, in memory) and the started session (`ActiveSession`, the `active_session` draft) with its logged sets; `finishedSession` turns it into a `LoggedSession` (ADR-034). |
 | **Stored overlay** | The one current overlay in `progression_overlay`; the store's tree is `applyOverlay(ALL_NODES, overlay).nodes`. An overlay with issues is never saved; a stored one that stops applying is kept and reported as `overlayIssues` (ADR-028). |
 | **Backup** | A JSON file of all user data (`skillforge-backup`, `schemaVersion`). Import validates the whole file first and then replaces all data in one transaction; never a merge or a partial import (ADR-028). |
 | **Safety copy** | The backup of the current data that `importBackup` writes to `documents/backups/skillforge-before-import-<UTC>.json` before it replaces anything; importing it undoes the import. |
@@ -375,9 +400,12 @@ Schema in `src/db/schema.ts`; timestamps are integers in ms since the Unix epoch
   - `settings(key, value JSON)`: user settings (none used yet)
   - `progression_overlay(id = 1, revision, saved_at, body JSON)`: the current overlay in the
     `overlayToRaw` shape (ADR-028); `revision` counts saves
+  - `active_session(id = 1, updated_at, body JSON)`: the Train flow's session in progress
+    (`ActiveSession`, ADR-034), rewritten after every change; a draft, not history (not exported,
+    deleted by an import and when the session is finished or abandoned)
 - **Migrations:** `src/db/migrations/`, generated from the schema by `npm run db:generate`,
   additive only, applied by Drizzle (`__drizzle_migrations`) in one transaction on every start.
-- **Backups** (ADR-028): all tables above except `meta` and `node_progress`, as one JSON file with
+- **Backups** (ADR-028): all tables above except `meta`, `node_progress` and `active_session`, as one JSON file with
   `format: 'skillforge-backup'` and `schemaVersion` (`BACKUP_SCHEMA_VERSION` = 1, independent of the
   database schema version). Import replaces everything; a newer `schemaVersion` is refused.
 - Not stored (derived): node states, character level/attributes, session XP and outcome, streak.

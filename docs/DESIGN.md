@@ -155,6 +155,17 @@ built from `DetailSection` panels (caps heading + icon); its header reuses the t
 Screenshots: `docs/screenshots/4.2-tree.png`, `4.3-node-detail.png`, `4.3-unlock.png`,
 `4.3-trial.png`.
 
+**Train (PLAN 4.4, ADR-034)** in `src/components/train/`: `ExerciseCard` (stone card, gold-lined
+`Frames.selected` for the current exercise; sword icon, shield for a Trial, cross when skipped;
+rune TRIAL / ember STRAIGHT-ARM / green DONE caps tags; "Swapped from X", "Replaces X", "Pair"
+lines), `SetLogger` (the kit's `NumberStepper` + primary "Log set" and secondary Partial / Failed),
+`RestPanel` (rune frame, potion icon, big display-font countdown, "Skip rest"), `NodeOptionSheet`
+(`PixelModal` with an optional search field and a scrolling list of `NodeRow`s) and
+`TrainWarningList` (`WarningBanner`s acknowledged by key). The session bar is an `XPBar` in rune
+color; the summary opens with a "QUEST COMPLETE" `LevelUpBurst`, then LEVEL UP! / UNLOCKED! bursts,
+a gold streak panel with the flame and a parchment list of exercises. Screenshots:
+`docs/screenshots/4.4-*.png`.
+
 Bar math: `litSegments(fraction, count)` (`src/lib/segments.ts`) lights ≥ 1 segment for any gain and
 never shows full before 100 %. The fraction itself comes from the domain (e.g. XP thresholds in
 `progression.ts` / `character.ts`); components never compute game numbers.

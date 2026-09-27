@@ -1,0 +1,382 @@
+import { ALL_NODES } from '@/data/skills';
+import { makeNode } from '@/data/testFixtures';
+import { MS_PER_SECOND } from '@/lib/time';
+
+import { HOME_EQUIPMENT } from './equipment';
+import {
+  generateWorkout,
+  prescribeExercise,
+  workoutWarnings,
+  type WorkoutContext,
+} from './generator';
+import { recompute } from './recompute';
+import {
+  acknowledgeWarning,
+  addExercise,
+  addOptions,
+  addSessionExercise,
+  allAcknowledged,
+  exerciseSets,
+  finishedSession,
+  logSessionSet,
+  markedPerformance,
+  nextOpenExercise,
+  parseActiveSession,
+  planMinutes,
+  projectedSets,
+  removeExercise,
+  replaceExercise,
+  restSecondsLeft,
+  selectExercise,
+  sessionCounts,
+  sessionPlan,
+  setOutcome,
+  skipExercise,
+  skipRest,
+  startSession,
+  swapOptions,
+  warningKey,
+  type ActiveSession,
+  type SessionPlan,
+} from './train';
+import type { PlannedExercise, WorkoutPlan } from './types';
+
+const NOW = 1_790_000_000_000;
+
+const exercise = (nodeId: string, overrides: Partial<PlannedExercise> = {}): PlannedExercise => ({
+  nodeId,
+  sets: 3,
+  target: { value: 8 },
+  metric: 'reps',
+  restSec: 90,
+  ...overrides,
+});
+
+/** Warm-up (1 set), a strength pair (3 + 3 sets) and core (2 sets). */
+const WORKOUT: WorkoutPlan = {
+  blocks: [
+    { kind: 'warm_up', exercises: [exercise('wrist_prep', { sets: 1, restSec: 30 })] },
+    { kind: 'strength', exercises: [exercise('pull_up'), exercise('squat')] },
+    { kind: 'core', exercises: [exercise('hollow_hold', { sets: 2, metric: 'hold_s' })] },
+  ],
+  estimatedMinutes: 20,
+  warnings: [],
+  notes: ['a note'],
+};
+
+const plan = (): SessionPlan => sessionPlan(WORKOUT, 'home', 30);
+const started = (): ActiveSession => startSession(plan(), 's1', NOW);
+
+describe('session plan', () => {
+  it('keys the exercises, links strength pairs and keeps the notes', () => {
+    const result = plan();
+    expect(result.exercises.map((e) => [e.key, e.block, e.pairKey])).toEqual([
+      ['e0', 'warm_up', undefined],
+      ['e1', 'strength', 'e2'],
+      ['e2', 'strength', 'e1'],
+      ['e3', 'core', undefined],
+    ]);
+    expect(result.notes).toEqual(['a note']);
+    expect(result.nextKey).toBe(4);
+    expect(result.acknowledged).toEqual([]);
+  });
+
+  it('estimates the minutes like the generator', () => {
+    expect(planMinutes(plan().exercises)).toBeGreaterThan(0);
+    expect(planMinutes([])).toBe(0);
+  });
+
+  it('removes an exercise and unpairs its partner', () => {
+    const result = removeExercise(plan(), 'e1');
+    expect(result.exercises.map((e) => e.key)).toEqual(['e0', 'e2', 'e3']);
+    expect(result.exercises[1].pairKey).toBeUndefined();
+  });
+
+  it('replaces an exercise in place and remembers the first planned node', () => {
+    const once = replaceExercise(plan(), 'e1', exercise('chin_up', { restSec: 180 }));
+    expect(once.exercises[1]).toMatchObject({
+      key: 'e1',
+      nodeId: 'chin_up',
+      block: 'strength',
+      pairKey: 'e2',
+      restSec: 90,
+      swappedFrom: 'pull_up',
+    });
+    const twice = replaceExercise(once, 'e1', exercise('ring_row'));
+    expect(twice.exercises[1].swappedFrom).toBe('pull_up');
+    const back = replaceExercise(twice, 'e1', exercise('pull_up'));
+    expect(back.exercises[1].swappedFrom).toBeUndefined();
+  });
+
+  it('drops the generator substitution note when swapped', () => {
+    const substituted = sessionPlan(
+      {
+        ...WORKOUT,
+        blocks: [{ kind: 'skill', exercises: [exercise('a', { substitutedFrom: 'b' })] }],
+      },
+      'home',
+      30,
+    );
+    const swapped = replaceExercise(substituted, 'e0', exercise('c', { substitutedFrom: 'x' }));
+    expect(swapped.exercises[0].substitutedFrom).toBeUndefined();
+    expect(swapped.exercises[0].swappedFrom).toBe('a');
+  });
+
+  it('adds an exercise at the end with a new key', () => {
+    const result = addExercise(plan(), exercise('dip'));
+    expect(result.exercises[4]).toMatchObject({ key: 'e4', block: 'added', nodeId: 'dip' });
+    expect(result.nextKey).toBe(5);
+  });
+
+  it('acknowledges warnings by key, once', () => {
+    const warning = { code: 'straight_arm_rest', message: 'm', severity: 'warning' } as const;
+    const key = warningKey(warning);
+    expect(key).toBe('straight_arm_rest:');
+    const once = acknowledgeWarning(plan(), key);
+    expect(acknowledgeWarning(once, key)).toBe(once);
+    expect(allAcknowledged([warning], once.acknowledged)).toBe(true);
+    expect(allAcknowledged([warning], [])).toBe(false);
+    expect(allAcknowledged([], [])).toBe(true);
+  });
+});
+
+describe('swap and add options', () => {
+  const nodes = [
+    makeNode({ id: 'pull_up', patterns: ['vertical_pull'], ogLevel: 4, alternatives: ['far'] }),
+    makeNode({ id: 'chin_up', patterns: ['vertical_pull'], ogLevel: 3 }),
+    makeNode({ id: 'far', patterns: ['vertical_pull'], ogLevel: 9 }),
+    makeNode({ id: 'no_bar', patterns: ['vertical_pull'], equipment: [['rings']] }),
+    makeNode({
+      id: 'locked',
+      patterns: ['vertical_pull'],
+      prerequisites: [{ nodeId: 'far', minLevel: 5, kind: 'hard' }],
+    }),
+    makeNode({ id: 'squat', patterns: ['squat'], equipment: [['floor']] }),
+  ];
+  const context = { nodes, progress: {}, equipment: HOME_EQUIPMENT };
+  const onePlan = sessionPlan(
+    { ...WORKOUT, blocks: [{ kind: 'strength', exercises: [exercise('pull_up')] }] },
+    'home',
+    30,
+  );
+
+  it('offers trainable, doable nodes of the same pattern, alternatives first', () => {
+    expect(swapOptions(onePlan, 'e0', context).map((node) => node.id)).toEqual(['far', 'chin_up']);
+  });
+
+  it('offers nothing for an unknown key', () => {
+    expect(swapOptions(onePlan, 'nope', context)).toEqual([]);
+  });
+
+  it('suggests trainable nodes not in the session, and finds locked ones by name', () => {
+    expect(addOptions(onePlan, context).map((node) => node.id)).toEqual([
+      'far',
+      'chin_up',
+      'squat',
+    ]);
+    expect(addOptions(onePlan, context, 'lock').map((node) => node.id)).toEqual(['locked']);
+  });
+});
+
+describe('live session', () => {
+  it('starts on the first exercise with no sets', () => {
+    const session = started();
+    expect(session).toMatchObject({ id: 's1', startedAt: NOW, currentKey: 'e0', sets: [] });
+  });
+
+  it('logs a set with the prescription, rests and moves on when the exercise is done', () => {
+    const session = logSessionSet(started(), 'e0', { value: 8 }, NOW + 1);
+    expect(session.sets).toEqual([
+      expect.objectContaining({
+        sessionId: 's1',
+        nodeId: 'wrist_prep',
+        setIndex: 0,
+        prescribed: { value: 8 },
+        actual: { value: 8 },
+        isTrial: false,
+        exerciseKey: 'e0',
+      }),
+    ]);
+    expect(session.currentKey).toBe('e1');
+    expect(session.restEndsAt).toBe(NOW + 1 + 30 * MS_PER_SECOND);
+    expect(restSecondsLeft(session, NOW + 1 + 10 * MS_PER_SECOND)).toBe(20);
+    expect(restSecondsLeft(skipRest(session), NOW)).toBe(0);
+  });
+
+  it('alternates the sets of a strength pair', () => {
+    let session = selectExercise(started(), 'e1');
+    session = logSessionSet(session, 'e1', { value: 8 }, NOW);
+    expect(session.currentKey).toBe('e2');
+    session = logSessionSet(session, 'e2', { value: 8 }, NOW);
+    expect(session.currentKey).toBe('e1');
+  });
+
+  it('skips an exercise, moves on and un-skips it when a set is logged', () => {
+    const skipped = skipExercise(started(), 'e0');
+    expect(skipped.currentKey).toBe('e1');
+    expect(skipped.exercises[0].skipped).toBe(true);
+    const logged = logSessionSet(skipped, 'e0', { value: 8 }, NOW);
+    expect(logged.exercises[0].skipped).toBeUndefined();
+  });
+
+  it('has no current exercise and no rest once everything is done', () => {
+    let session = started();
+    for (const key of ['e1', 'e2', 'e3']) session = skipExercise(session, key);
+    session = logSessionSet(session, 'e0', { value: 8 }, NOW);
+    expect(session.currentKey).toBeUndefined();
+    expect(session.restEndsAt).toBeUndefined();
+    expect(nextOpenExercise(session)).toBeUndefined();
+    const added = addSessionExercise(session, exercise('dip'));
+    expect(added.currentKey).toBe('e4');
+  });
+
+  it('ignores a set for an unknown exercise', () => {
+    const session = started();
+    expect(logSessionSet(session, 'nope', { value: 1 }, NOW)).toBe(session);
+    expect(selectExercise(session, 'nope')).toBe(session);
+  });
+
+  it('counts sets and exercises', () => {
+    let session = logSessionSet(started(), 'e0', { value: 8 }, NOW);
+    session = skipExercise(session, 'e3');
+    expect(sessionCounts(session)).toEqual({
+      setsLogged: 1,
+      setsPlanned: 7,
+      exercisesDone: 2,
+      exercises: 4,
+    });
+  });
+
+  it('projects the logged plus the remaining sets', () => {
+    let session = logSessionSet(started(), 'e0', { value: 5 }, NOW);
+    session = skipExercise(session, 'e3');
+    const sets = projectedSets(session, NOW);
+    expect(sets).toHaveLength(7);
+    expect(sets[0].actual).toEqual({ value: 5 });
+    expect(sets.map((set) => set.setIndex)).toEqual([0, 1, 2, 3, 4, 5, 6]);
+  });
+
+  it('finishes into a session: missing sets of started exercises are logged as skipped', () => {
+    let session = logSessionSet(started(), 'e0', { value: 8 }, NOW);
+    session = logSessionSet(session, 'e1', { value: 6 }, NOW + 1);
+    const logged = finishedSession(session, NOW + 2);
+    expect(logged.id).toBe('s1');
+    expect(logged.startedAt).toBe(NOW);
+    expect(logged.sets.map((set) => [set.nodeId, set.actual.value, set.setIndex])).toEqual([
+      ['wrist_prep', 8, 0],
+      ['pull_up', 6, 1],
+      ['pull_up', 0, 2],
+      ['pull_up', 0, 3],
+    ]);
+    expect(logged.sets.every((set) => set.sessionId === 's1')).toBe(true);
+    expect('exerciseKey' in logged.sets[0]).toBe(false);
+  });
+
+  it('finishes into an empty session when nothing was logged', () => {
+    expect(finishedSession(started(), NOW).sets).toEqual([]);
+  });
+});
+
+describe('set marks', () => {
+  it('logs done as entered and failed as 0', () => {
+    expect(markedPerformance('reps', 'done', { value: 9 }, { value: 8 })).toEqual({ value: 9 });
+    expect(markedPerformance('reps', 'failed', { value: 9 }, { value: 8 })).toEqual({ value: 0 });
+  });
+
+  it('logs partial below the target', () => {
+    expect(markedPerformance('reps', 'partial', { value: 5 }, { value: 8 })).toEqual({ value: 5 });
+    expect(markedPerformance('reps', 'partial', { value: 8 }, { value: 8 })).toEqual({ value: 7 });
+    expect(markedPerformance('hold_s', 'partial', { value: 30 }, { value: 30 })).toEqual({
+      value: 25,
+    });
+    expect(
+      markedPerformance('eccentric_s', 'partial', { value: 5, reps: 3 }, { value: 5, reps: 3 }),
+    ).toEqual({ value: 5, reps: 2 });
+    expect(markedPerformance('reps', 'partial', { value: 1 }, { value: 1 })).toEqual({ value: 0 });
+  });
+
+  it('judges a logged set like an exercise', () => {
+    const session = logSessionSet(started(), 'e0', { value: 5 }, NOW);
+    expect(setOutcome(session.sets[0])).toBe('partial');
+    expect(exerciseSets(session, 'e0')).toHaveLength(1);
+  });
+});
+
+describe('stored draft', () => {
+  it('reads back what it wrote', () => {
+    const session = logSessionSet(started(), 'e0', { value: 8 }, NOW);
+    expect(parseActiveSession(JSON.parse(JSON.stringify(session)))).toEqual(session);
+  });
+
+  it('rejects data of the wrong shape', () => {
+    expect(parseActiveSession(undefined)).toBeUndefined();
+    expect(parseActiveSession({ ...started(), id: 3 })).toBeUndefined();
+    expect(
+      parseActiveSession({ ...started(), exercises: [{ ...plan().exercises[0], block: 'x' }] }),
+    ).toBeUndefined();
+    expect(parseActiveSession({ ...started(), sets: [{ nodeId: 'a' }] })).toBeUndefined();
+    expect(parseActiveSession({ ...started(), restEndsAt: 'soon' })).toBeUndefined();
+  });
+});
+
+describe('generator helpers for edited sessions (real tree)', () => {
+  const context: WorkoutContext = {
+    nodes: ALL_NODES,
+    progress: {},
+    recentSessions: [],
+    now: NOW,
+  };
+
+  it('prescribes a node on its own from its last working sets', () => {
+    const node = ALL_NODES.find((entry) => entry.id === 'wall_push_up');
+    if (!node) throw new Error('fixture');
+    expect(prescribeExercise(node, context)).toEqual({
+      nodeId: 'wall_push_up',
+      sets: 3,
+      target: { value: node.workingRange.min },
+      metric: 'reps',
+      restSec: 180,
+    });
+    const history = [
+      {
+        id: 'h',
+        startedAt: NOW - 1000,
+        sets: [0, 1, 2].map((setIndex) => ({
+          sessionId: 'h',
+          nodeId: node.id,
+          setIndex,
+          metric: node.metric,
+          prescribed: { value: node.workingRange.min },
+          actual: { value: node.workingRange.min },
+          isTrial: false,
+          timestamp: NOW - 1000,
+        })),
+      },
+    ];
+    const progress = recompute(ALL_NODES, history, []).state.progress;
+    expect(
+      prescribeExercise(node, { ...context, progress, recentSessions: history }, 90).target,
+    ).toEqual({ value: node.workingRange.min + 1 });
+  });
+
+  it('warns about straight-arm work the user adds over the budget', () => {
+    const plan = generateWorkout({
+      ...context,
+      goals: [],
+      equipment: HOME_EQUIPMENT,
+      availableMinutes: 30,
+      seed: 0,
+    });
+    expect(plan.warnings).toEqual([]);
+    const lean = ALL_NODES.find((entry) => entry.id === 'planche_lean');
+    if (!lean) throw new Error('fixture');
+    let session = startSession(sessionPlan(plan, 'home', 30), 's', NOW);
+    session = addSessionExercise(session, {
+      ...prescribeExercise(lean, context),
+      sets: 5,
+      target: { value: 30 },
+    });
+    const warnings = workoutWarnings(session.exercises, projectedSets(session, NOW), context);
+    expect(warnings.map((warning) => warning.code)).toContain('straight_arm_budget');
+  });
+});

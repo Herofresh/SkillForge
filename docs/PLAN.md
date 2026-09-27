@@ -62,11 +62,20 @@
   the unmet-prerequisites note to acknowledge), prerequisites ✓/✗ with alternatives, attributes,
   standards, cues, history, review status. Maestro `tree.yaml`; screenshots
   `docs/screenshots/4.2-tree.png`, `4.3-*.png`.
+- Train flow (4.4 + the session part of 4.x, ADR-034, PR link below): the Train tab plans a session
+  (equipment profile chips, 30/45/60 min) → `app/train/preview` (blocks with sets × target, rest,
+  Trial / straight-arm / "Swapped from X" / equipment-substitution markers, pairs, notes, advisory
+  warnings to acknowledge; swap, remove, add) → `app/train/session` (current exercise with a stepper
+  and Log / Partial / Failed, rest countdown from the stored `restSec`, pair sets alternate, session
+  list to jump, skip, add, finish/abandon with confirm) → `app/train/summary` (total XP and bonuses,
+  outcome + XP per exercise, LEVEL UP! / UNLOCKED! bursts, streak, safeguard warnings acknowledged
+  before Done). The live session is a draft in the new `active_session` table, saved after every
+  change; the app reopens on the Train tab with "Resume session". Maestro `train.yaml` (includes
+  the kill-and-resume check); screenshots `docs/screenshots/4.4-*.png`.
 
 ## Next up
 1. Phase 4 UI on top of the store (`useAppStore`) built from the design system (4.0,
-   `docs/DESIGN.md`): next 4.4 the Train flow, then 4.5 Character and 4.6 Settings (see the handoff
-   notes).
+   `docs/DESIGN.md`): next 4.5 Character, then 4.6 Settings (see the handoff notes).
 2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -74,6 +83,32 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Train flow (task 4.4, ADR-034):**
+  - Model: `src/domain/train.ts` (`SessionPlan` → `ActiveSession`, pure: swap/remove/add, pairs,
+    `logSessionSet`, `markedPerformance`, skip, rest, `projectedSets`, `finishedSession`,
+    `parseActiveSession`), view models in `src/domain/trainView.ts`, text in `format.ts`
+    (`formatPrescription`, `formatRest`, `formatCountdown`). The generator now exports
+    `workoutWarnings` (plan and live warnings share it) and `prescribeExercise` (swaps/additions).
+  - Store: `trainPlan` (memory), `activeSession` (row in `active_session`, migration 0002, read by
+    `loadAll`), `trainSummary` (memory, lost on restart). Actions `planTraining`, `swapOptions`,
+    `swapPlanExercise`, `removePlanExercise`, `trainWarnings`, `acknowledgeTrainWarning`,
+    `startTraining`, `logTrainingSet`, `skipTrainingExercise`, `selectTrainingExercise`,
+    `skipTrainingRest`, `addTrainingOptions`, `addTrainingExercise`, `finishTraining`,
+    `abandonTraining`, `dismissTrainSummary`.
+  - Warnings are acknowledged by `warningKey` (code + node) and stored with the plan/draft, so a new
+    warning (e.g. straight-arm work added on top) shows up unacknowledged while old ones keep their
+    answer. Logging waits for the acknowledgement; nothing blocks after it (ADR-023).
+  - Finishing: started exercises get their missing sets logged as skipped (value 0); never-started
+    ones are left out (so a skipped exercise doesn't count as trained). No sets = nothing logged.
+  - The draft is not in backups; an import deletes it (`USER_TABLES`). A draft that no longer parses
+    reads as "no session".
+  - `app/index.tsx` opens `/train` while a session is in progress. The summary's Done dismisses the
+    stack (or replaces with `/train` when the summary is the only screen).
+  - Not built (backlog): hold stopwatch / full rest timer, reordering exercises, "shuffle" the plan
+    (`planTraining(profile, minutes, seed)` already takes a seed), editing a logged set, Trial-day
+    note beyond the generator's notes. The Character tab (4.5) can list `state.sessions`.
+  - Maestro `train.yaml`: `stopApp` + `launchApp` + `openLink` restarted the app fine mid-flow
+    (the start-of-flow gotcha doesn't apply there). All five flows took ~8.5 min on the Pixel 8 Pro.
 - **Tree tab and node detail (tasks 4.2–4.3, ADR-033):**
   - View models are pure in `src/domain/treeView.ts`; screens `useMemo` them over `state.nodes`,
     `state.engine.progress`, `state.goals`, `state.sessions`. `nodeLevelProgress` (node XP bar) and
@@ -347,8 +382,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown (ADR-031) ([PR #15](https://github.com/Herofresh/SkillForge/pull/15))
 - [x] 4.2 Tree tab, column view: branch tabs, state-framed tiles in chain order with pixel chains and linked cross-branch chips, goal markers, legend (ADR-033) ([PR #17](https://github.com/Herofresh/SkillForge/pull/17))
 - [x] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗ with alternatives, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history, review status (ADR-033) ([PR #17](https://github.com/Herofresh/SkillForge/pull/17))
-- [ ] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove) → live logging → summary with XP, level-ups and unlocks
-- [ ] 4.x Safeguard warnings in the UI (ADR-023): every `SafeguardWarning` (before a Trial, test-out or self-unlock, during a live session and in the summary) is shown with its message and an acknowledge step; straight-arm ones explain why. Never a hard block. Part of 4.1, 4.3 and 4.4
+- [x] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove/add) → live logging (persisted draft, resume after restart) → summary with XP, level-ups and unlocks (ADR-034) (PR pending)
+- [x] 4.x Safeguard warnings in the UI (ADR-023): every `SafeguardWarning` (before a Trial, test-out or self-unlock, during a live session and in the summary) is shown with its message and an acknowledge step; straight-arm ones explain why. Never a hard block. Part of 4.1, 4.3 and 4.4 (the Train part: ADR-034) (PR pending)
 - [ ] 4.5 Character tab: level, rank, attribute radar, streak, recent sessions
 - [ ] 4.6 Settings: equipment profiles, export/import
 - [ ] 4.7 In-app node editor: add a `user_` node, edit a node's standards/prerequisites, hide a node; show `applyOverlay` issues inline and never save a broken tree
@@ -363,7 +398,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
   Expo Go. Every UI task in Phase 4 should also add or extend a flow in `.maestro/`.
-- Hold stopwatch and rest timer (rest durations are already stored in the prescription)
+- Hold stopwatch and a full rest timer (4.4 has a basic countdown from `restEndsAt`; sound/vibration, pause)
+- Train flow extras: reorder exercises, shuffle the plan (seed), edit or delete a logged set
 - Weekly plans and scheduling
 - Notifications and reminders
 - More content: advanced/elite nodes, full flexibility branch
