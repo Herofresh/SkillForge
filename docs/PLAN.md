@@ -26,6 +26,9 @@
   builds a `WorkoutPlan` from goals, progress, equipment, minutes and recent sessions (frontier,
   scoring, substitution, slots, double progression; suggestions respect the safeguards).
   **Phase 2 is complete.** No persistence or real UI yet.
+- Trial-day exception (2.8, ADR-025, PR #TBD): one straight-arm Trial's sets are exempt from the
+  ~60 s budget, and the generator now suggests a due straight-arm Trial (e.g. tuck planche 3 × 30 s)
+  as the session's only straight-arm work.
 
 ## Next up
 1. Phase 3.1–3.2: persistence; `session_sets` rows map 1:1 to `LoggedSet` (ADR-021), self-unlocks
@@ -50,8 +53,12 @@
     with an acknowledge step (ADR-023); never block.
   - Default profiles are not stored anywhere yet: Home = floor, wall, bar, parallettes, bands;
     Park = Home + dip_bars (`docs/CONTEXT.md` → Equipment tags). 3.1/4.1 should seed them.
-  - Straight-arm Trials of 3 × 30 s (10 nodes, listed in the backlog item) exceed the 60 s budget, so the generator never suggests them (a note
-    says so). See the backlog item; don't "fix" it by skipping the budget (AGENT.md §5).
+  - Straight-arm Trials of 3 × 30 s are suggested on a **Trial day** (2.8, ADR-025): one
+    straight-arm Trial's sets are exempt from the budget (`budgetExemptTrialSets`, used inside
+    `straightArmSecondsUsed`), and the generator then drops all other straight-arm candidates.
+    Changing this needs a new ADR and a user decision (AGENT.md §5). The Train flow can show the
+    "Trial day" note; straight-arm work the user adds on top gets `straight_arm_budget` only once
+    it goes over ~60 s besides the Trial.
   - Constants are a first pass (see `docs/CONTEXT.md` → Generator). Tune them in
     `generator.ts` only.
 - **Game engine (Phase 2.1–2.4, 2.6; ADR-018…021):**
@@ -130,7 +137,7 @@
   optional peers needed on Linux (here `@emnapi/core`/`@emnapi/runtime` for `@napi-rs/wasm-runtime`),
   and then CI's `npm ci` fails with "Missing: … from lock file". Fix it by adding the missing entries
   (see PR #3), not by switching `npm ci` to `npm install`. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…023). The
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…025). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
@@ -174,6 +181,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 2.5 `generator.ts`: frontier, scoring, equipment substitution, slot filling, double-progression prescription; suggestions respect the safeguards (ADR-023) ([PR #9](https://github.com/Herofresh/SkillForge/pull/9))
 - [x] 2.6 Recompute-from-history function (ADR-008) ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [x] 2.7 User autonomy: test-out anywhere (incl. straight-arm), self-unlock as a recorded user action, advisory safeguards (`SafeguardWarning`), multi-attribute stats (`PATTERN_ATTRIBUTES`, YAML `trains`) (ADR-023) ([PR #8](https://github.com/Herofresh/SkillForge/pull/8))
+- [x] 2.8 Trial-day exception (user decision 2026-09-27): one straight-arm Trial's sets don't count against the ~60 s budget; the generator suggests at most one due straight-arm Trial per session and then no other straight-arm work; budget warnings only for extra non-Trial volume (ADR-025) (PR #TBD)
 
 ### Phase 3: Persistence
 - [ ] 3.1 Drizzle schema and migrations (profile, goals, node_progress, equipment_profiles, sessions, session_sets, user_actions, settings)
@@ -206,9 +214,6 @@ compiled into a typed module for the app; users can layer their own changes on t
 - Notifications and reminders
 - More content: advanced/elite nodes, full flexibility branch
 - Optional cloud sync
-- Straight-arm Trial vs. budget (from 2.5, ADR-024): the 3 × 30 s Trials (tuck, advanced tuck and one-leg front lever, tuck and advanced tuck back lever, German hang, planche lean, straight-arm frog stand, tuck and advanced tuck planche) total 90 s, above the ~60 s
-  straight-arm budget, so the generator never suggests them. Needs a user/coach decision (1.10):
-  e.g. 2 × 30 s or 3 × 20 s Trials for those nodes, or a Trial-day exception to the budget.
 - Overlay safety (from the PR #4 review): `applyOverlay` only enforces `straight_arm: true` in the
   front_lever, back_lever and planche branches, so an overlay edit can set `straight_arm: false` on
   a built-in straight-arm node elsewhere (e.g. `german_hang`, `manna`, `tuck_human_flag`) or move it

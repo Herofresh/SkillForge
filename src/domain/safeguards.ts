@@ -11,7 +11,8 @@
  *
  * The rules:
  * - a straight-arm node's Trial is recommended only after `MIN_WEEKS_AT_LEVEL` weeks of training;
- * - a session holds at most `STRAIGHT_ARM_SESSION_BUDGET_S` seconds of straight-arm work;
+ * - a session holds at most `STRAIGHT_ARM_SESSION_BUDGET_S` seconds of straight-arm work, not
+ *   counting the sets of one straight-arm Trial (the Trial-day exception, ADR-025);
  * - straight-arm sessions are at least `STRAIGHT_ARM_REST_HOURS` apart.
  */
 import { MS_PER_HOUR, MS_PER_WEEK } from '@/lib/time';
@@ -63,8 +64,37 @@ export function straightArmSeconds(set: LoggedSet, nodes: NodeLookup): number {
   return setUnits(set.metric, set.actual) * HOLD_SECONDS_PER_UNIT;
 }
 
+/**
+ * The Trial-day exception (ADR-025): the sets of `sets` that do not count against the straight-arm
+ * budget. These are the Trial sets of the first straight-arm node with any, at most its
+ * `trial.sets` of them (in logged order). A second straight-arm Trial or extra Trial sets count.
+ */
+export function budgetExemptTrialSets(
+  sets: readonly LoggedSet[],
+  nodes: NodeLookup,
+): Set<LoggedSet> {
+  const exempt = new Set<LoggedSet>();
+  const first = sets.find((set) => set.isTrial && nodes.get(set.nodeId)?.straightArm);
+  if (!first) return exempt;
+  const limit = (nodes.get(first.nodeId) as ExerciseNode).trial.sets; // straightArm ⇒ known node
+  for (const set of sets) {
+    if (exempt.size >= limit) break;
+    if (set.isTrial && set.nodeId === first.nodeId) exempt.add(set);
+  }
+  return exempt;
+}
+
+/**
+ * Straight-arm hold seconds of `sets` that count against the session budget: every straight-arm
+ * set except the `budgetExemptTrialSets`. The one place the budget is measured (warnings and
+ * generator).
+ */
 export function straightArmSecondsUsed(sets: readonly LoggedSet[], nodes: NodeLookup): number {
-  return sets.reduce((sum, set) => sum + straightArmSeconds(set, nodes), 0);
+  const exempt = budgetExemptTrialSets(sets, nodes);
+  return sets.reduce(
+    (sum, set) => (exempt.has(set) ? sum : sum + straightArmSeconds(set, nodes)),
+    0,
+  );
 }
 
 /** Straight-arm hold seconds still recommended in a session that already contains `sets`. */
@@ -119,7 +149,9 @@ export function trialWarnings(
 
 /**
  * Session-wide warnings for straight-arm work in `sets` (the live session or a logged one) that
- * starts at `startedAt`: over the hold budget, or too soon after the last straight-arm session.
+ * starts at `startedAt`: over the hold budget (the Trial-day exception applies, so only extra
+ * straight-arm work in a Trial session can go over it), or too soon after the last straight-arm
+ * session (a Trial session counts as a straight-arm session).
  */
 export function sessionSafeguardWarnings(
   sets: readonly LoggedSet[],
@@ -131,10 +163,11 @@ export function sessionSafeguardWarnings(
   if (!sets.some((set) => nodes.get(set.nodeId)?.straightArm)) return warnings;
   const used = straightArmSecondsUsed(sets, nodes);
   if (used > STRAIGHT_ARM_SESSION_BUDGET_S) {
+    const besides = budgetExemptTrialSets(sets, nodes).size > 0 ? ' besides the Trial' : '';
     warnings.push({
       code: 'straight_arm_budget',
       message:
-        `This session has about ${roundSeconds(used)} s of straight-arm work; about ` +
+        `This session has about ${roundSeconds(used)} s of straight-arm work${besides}; about ` +
         `${STRAIGHT_ARM_SESSION_BUDGET_S} s per session is recommended for tendon health.`,
       severity: 'warning',
     });
