@@ -45,6 +45,7 @@ to be a programmer to read or change them.
     straight_arm: false               # optional, default false
     skill: false                      # optional, default false
     patterns: [vertical_pull]
+    trains: [pull, core]              # optional, rarely needed: replaces what patterns imply
     equipment:                        # each line is ONE way to do it
       - bar
       - rings
@@ -83,7 +84,8 @@ to be a programmer to read or change them.
 | Field | Meaning | Default |
 |---|---|---|
 | `prerequisites` | Exercises that must reach `level` first. `level` is the node level 1–10 in the app; **5 = Proficient** (trial passed), which is the usual choice. `kind: hard` locks the node until met; `kind: recommended` only shows a warning. `note` explains why. A prerequisite can be in another file (use its `id`). | none, `kind: hard` |
-| `straight_arm` | `true` for straight-arm strength work (planche, levers, German hang). The app then slows progress down to protect tendons. **Required `true` in `front_lever`, `back_lever` and `planche`.** | `false` |
+| `straight_arm` | `true` for straight-arm strength work (planche, levers, German hang). The app then recommends slowing down to protect tendons: its suggested workouts respect the tendon safeguards, and the user gets a warning when they go beyond them (ADR-010, ADR-023). **Required `true` in `front_lever`, `back_lever` and `planche`.** | `false` |
+| `trains` | The character attributes ("base stats") the exercise pays into: `push`, `pull`, `core`, `legs`, `balance`, `mobility`. Normally you leave it out and the app derives it from `patterns` (see below). Set it only when that is wrong for this exercise, e.g. `trains: [core, push]` for an L-sit, which is a support hold on straight arms. It **replaces** the derived list, so name every attribute. The review sheet marks overrides with *. | derived from `patterns` |
 | `skill` | `true` for balance and lever skills, `false` for plain strength exercises. | `false` |
 | `alternatives` | Ids of exercises that train the same thing with other equipment. | none |
 | `regression` | Id of the easier exercise to fall back to. | none |
@@ -91,6 +93,30 @@ to be a programmer to read or change them.
 | `cues` | Short coaching cues, one per line. | none |
 | `verify` | Anything uncertain that still needs checking, e.g. "OG2 level inferred". It shows as ⚠ on the review sheet. | none |
 | `review` | `status: draft` or `status: coach_reviewed`, plus `notes` for reviewer comments. | `status: draft` |
+
+## What an exercise trains (attributes)
+
+Every exercise someone trains raises the character attributes it trains, and harder exercises
+(higher `og_level`) and more-trained ones (higher level in the app) raise them more. Which
+attributes an exercise trains comes from its `patterns`:
+
+| Pattern | Attributes |
+|---|---|
+| `horizontal_push`, `vertical_push` | push |
+| `horizontal_pull`, `vertical_pull` | pull |
+| `straight_arm_push` | push, core |
+| `straight_arm_pull` | pull, core |
+| `squat`, `hinge` | legs |
+| `core` | core |
+| `balance` | balance |
+| `mobility` | mobility |
+| `explosive` | nothing on its own (add the pattern it trains, e.g. `vertical_pull`) |
+
+So a planche (`straight_arm_push`) trains push and core, a front lever (`straight_arm_pull`) pull
+and core. If the result is wrong for one exercise, give it a `trains:` line. If the mapping itself
+is wrong for many exercises, it lives in one place: `PATTERN_ATTRIBUTES` in
+`src/domain/character.ts`. Every exercise must train at least one attribute; the check tells you
+if one doesn't.
 
 ## Common changes
 
@@ -128,8 +154,8 @@ change can't slip into the app.
 ## For coaches: the review sheet
 
 `docs/review/progression-matrix.md` shows every branch as a table (order, OG level, standards,
-prerequisites, equipment, sources, ⚠ open questions, review status) with an empty **Coach notes**
-column. It's generated from these files, so don't edit it directly: write your notes on a copy or
+prerequisites, what it trains, equipment, sources, ⚠ open questions, review status) with an empty
+**Coach notes** column. Please also check the **Trains** column. It's generated from these files, so don't edit it directly: write your notes on a copy or
 printout, or as comments on the pull request, and a contributor copies them into `review.notes`.
 
 ## Users' own progressions

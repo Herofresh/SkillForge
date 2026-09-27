@@ -39,7 +39,17 @@ export type Metric = (typeof METRICS)[number];
 export const TIERS = ['beginner', 'intermediate', 'advanced', 'elite'] as const;
 export type Tier = (typeof TIERS)[number];
 
-/** Movement patterns, used later for the 48 h rule and push/pull pairing in the generator. */
+/**
+ * Character attributes ("base stats"). Every trained node feeds the attributes it trains: derived from
+ * its `patterns` via `PATTERN_ATTRIBUTES` in `character.ts`, or set per node with `trains` (ADR-023).
+ */
+export const ATTRIBUTES = ['push', 'pull', 'core', 'legs', 'balance', 'mobility'] as const;
+export type Attribute = (typeof ATTRIBUTES)[number];
+
+/**
+ * Movement patterns: they decide which attributes a node trains, and are used later for the 48 h
+ * rule and push/pull pairing in the generator.
+ */
 export const PATTERNS = [
   'horizontal_push',
   'vertical_push',
@@ -143,6 +153,11 @@ export interface ExerciseNode {
   /** Balance/lever skill (true) vs. strength exercise (false). */
   isSkill: boolean;
   patterns: Pattern[];
+  /**
+   * Attributes the node trains, replacing the ones derived from `patterns` (ADR-023). Only set it
+   * when the derivation is wrong for this node, e.g. an L-sit also trains `push` (straight-arm support).
+   */
+  trains?: Attribute[];
   /** OR of AND-sets: the node can be done with any one inner list of tags. */
   equipment: EquipmentTag[][];
   /** Ids of nodes that train the same thing with other equipment (generator substitution). */
@@ -158,6 +173,9 @@ export interface ExerciseNode {
   source: NodeSource;
   review: Review;
 }
+
+/** Nodes by id: the lookup the engine functions take next to the node list. */
+export type NodeLookup = ReadonlyMap<string, ExerciseNode>;
 
 /** A partial change to a built-in node, as stored in a user overlay. `id` and `source` never change. */
 export type NodeEdit = Partial<Omit<ExerciseNode, 'id' | 'source'>>;
@@ -216,6 +234,23 @@ export interface LoggedSession {
   sets: LoggedSet[];
 }
 
+/**
+ * A deliberate user decision outside a workout, stored in history next to the sessions so that
+ * `recompute` stays deterministic (ADR-008, ADR-023).
+ * - `self_unlock`: the user unlocks `nodeId` although its hard prerequisites are not met ("the app
+ *   suggests, the user decides"). The node is no longer `locked`; it can be trained and tested out.
+ */
+export const USER_ACTION_KINDS = ['self_unlock'] as const;
+export type UserActionKind = (typeof USER_ACTION_KINDS)[number];
+
+export interface UserAction {
+  id: string;
+  kind: UserActionKind;
+  nodeId: string;
+  /** When the user took the action, in ms since the Unix epoch. */
+  at: number;
+}
+
 /** How a logged exercise (all sets of one node in one session) went against its prescription. */
 export const OUTCOMES = ['success', 'partial', 'failed'] as const;
 export type Outcome = (typeof OUTCOMES)[number];
@@ -236,11 +271,38 @@ export interface NodeProgress {
   /** Timestamp of the first logged set (starts the ADR-010 straight-arm clock). */
   firstTrainedAt?: number;
   lastTrainedAt?: number;
+  /** When the user unlocked the node themselves (a `self_unlock` action), if they did. */
+  selfUnlockedAt?: number;
 }
-
-/** Character attributes, each fed by a group of branches (`ATTRIBUTE_BRANCHES` in `character.ts`). */
-export const ATTRIBUTES = ['push', 'pull', 'core', 'legs', 'balance', 'mobility'] as const;
-export type Attribute = (typeof ATTRIBUTES)[number];
 
 export const RANK_TITLES = ['Novice', 'Apprentice', 'Adept', 'Master', 'Legend'] as const;
 export type RankTitle = (typeof RANK_TITLES)[number];
+
+/**
+ * Advisory warnings (ADR-023). The engine computes them and the UI shows them with an acknowledge
+ * step; they never block logging, Trials or test-outs.
+ * - `straight_arm_min_weeks`: a straight-arm Trial before `MIN_WEEKS_AT_LEVEL` weeks of training.
+ * - `straight_arm_budget`: a session over the straight-arm hold budget.
+ * - `straight_arm_rest`: straight-arm work sooner than `STRAIGHT_ARM_REST_HOURS` after the last.
+ * - `prerequisites_unmet`: a node was trained, tested or self-unlocked with hard prerequisites unmet.
+ */
+export const SAFEGUARD_WARNING_CODES = [
+  'straight_arm_min_weeks',
+  'straight_arm_budget',
+  'straight_arm_rest',
+  'prerequisites_unmet',
+] as const;
+export type SafeguardWarningCode = (typeof SAFEGUARD_WARNING_CODES)[number];
+
+/** `warning`: a tendon safeguard is exceeded. `info`: guidance the user chose to skip. */
+export const SAFEGUARD_SEVERITIES = ['info', 'warning'] as const;
+export type SafeguardSeverity = (typeof SAFEGUARD_SEVERITIES)[number];
+
+export interface SafeguardWarning {
+  code: SafeguardWarningCode;
+  /** The node the warning is about; absent for session-wide warnings (budget, rest). */
+  nodeId?: string;
+  /** Plain-language explanation for the UI. */
+  message: string;
+  severity: SafeguardSeverity;
+}

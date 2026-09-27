@@ -40,10 +40,12 @@ src/
     overlay.ts          user overlay: applyOverlay, exportOverlay, importOverlay
     xp.ts               units, difficulty/outcome multipliers, exercise and session XP, streak
     progression.ts      node XP curve, level-5 cap, Trials, test-out, node states, unlocks
-    safeguards.ts       ADR-010 tendon rules: straight-arm Trial clock, 60 s budget, 48 h rest
-    character.ts        character level, attributes (ATTRIBUTE_BRANCHES), rank, balance warning
+    safeguards.ts       ADR-010 tendon rules (advisory, ADR-023): straight-arm Trial clock, 60 s
+                        budget, 48 h rest, and the SafeguardWarning producers
+    character.ts        character level, attributes (PATTERN_ATTRIBUTES, trains), rank, balance warning
     generator.ts        on-demand workout generator (planned)
-    recompute.ts        applySession (one reducer step) + recompute (fold over history), ADR-008/021
+    recompute.ts        applySession / applyUserAction (reducer steps) + recompute (fold over
+                        sessions and user actions), ADR-008/021/023
   data/
     progressionFormat.ts  THE YAML <-> ExerciseNode parser/normalizer (build, tests, overlay)
     validate.ts         graph/content rules: validateNodes, formatIssue
@@ -93,11 +95,21 @@ The 88 manifest nodes plus `straight_bar_dip` (Home dip, ADR-017). Content check
 (`node_progress`) updated → UI re-renders.
 
 **Engine flow:** a finished `LoggedSession` goes through `applySession(state, session, tree)` →
-new `EngineState` (progress per node, total XP, streak, last straight-arm session) + a
-`SessionResult` (exercise outcomes and XP, bonuses, level-ups, Trials, unlocks) for the summary
-screen. `computeCharacter(tree, state.progress, state.totalXp)` gives the character sheet. After a
-formula change, an import or an overlay edit, `recompute(tree, allSessions)` rebuilds the state with
-the same step. `tree` is `applyOverlay(ALL_NODES, overlay).nodes`.
+new `EngineState` (progress per node, total XP, streak, last straight-arm session, last applied
+history position) + a `SessionResult` (exercise outcomes and XP, bonuses, level-ups, Trials,
+unlocks, advisory `warnings`) for the summary screen. A self-unlock is a `UserAction` that goes
+through `applyUserAction(state, action, tree)` → new state + `UserActionResult` (unlocked ids,
+warnings). `computeCharacter(tree, state.progress, state.totalXp)` gives the character sheet. After
+a formula change, an import or an overlay edit, `recompute(tree, allSessions, allActions)` rebuilds
+the state with the same steps (`canApplyIncrementally` says when that is needed). `tree` is
+`applyOverlay(ALL_NODES, overlay).nodes`.
+
+**Warnings flow (ADR-023):** nothing in the engine blocks the user. Before an attempt the UI asks
+`nodeUseWarnings(node, status, progress, lookup, now)` (Trial / test-out) and
+`sessionSafeguardWarnings(sets, lookup, state.lastStraightArmSessionAt, now)` (live session), shows
+the `SafeguardWarning`s and lets the user acknowledge them; after logging, the same warnings come
+back in `SessionResult.warnings`. The generator (2.5) never suggests work that would trigger a
+`warning`-severity safeguard.
 
 ## Glossary
 
@@ -121,20 +133,26 @@ the same step. `tree` is `applyOverlay(ALL_NODES, overlay).nodes`.
 | **Banked XP** | XP earned while capped at level 5 before passing the Trial. It's applied once the Trial is passed. |
 | **Frontier** | The available or training nodes on the paths toward the user's goals. This is what the generator picks from. |
 | **Equipment profile** | A named set of equipment tags, e.g. Home or Park, chosen at session start (ADR-005). |
-| **Straight-arm budget** | About 60 s total of straight-arm holds per session (ADR-010). |
-| **Test-out** | Passing a Trial on an available node without training it first. Sets the node to level 5. Not possible on straight-arm nodes (ADR-020). |
+| **Straight-arm budget** | About 60 s total of straight-arm holds per session is recommended (ADR-010). Going over it gives a warning, not a block (ADR-023). |
+| **Test-out** | Passing a Trial on any node without training it first, including straight-arm nodes and locked nodes (ADR-023). Sets the node to level 5 / proficient and unlocks successors. |
+| **Self-unlock** | The user unlocks a locked node themselves (`UserAction` kind `self_unlock`, stored in history). The node is no longer `locked` and can be trained; its unmet prerequisites stay listed (ADR-023). |
+| **Advisory safeguard** | A safety rule (ADR-010 tendon rules, prerequisites) that the engine computes and the UI shows as a `SafeguardWarning` with an acknowledge step, but that never blocks the user. The generator's suggestions always respect it (ADR-023). |
+| **Safeguard warning** | `{ code, nodeId?, message, severity }`: `straight_arm_min_weeks`, `straight_arm_budget`, `straight_arm_rest` (`warning`), `prerequisites_unmet` (`info`). |
+| **Attribute contribution** | The points a trained node adds to each attribute it trains: `difficultyMult(ogLevel) × node level`. Which attributes comes from its patterns (`PATTERN_ATTRIBUTES`) or its `trains` override (ADR-023). |
 | **Outcome** | How an exercise went vs. its prescription: `success`, `partial` (≥ 50 % of prescribed units), `failed`. |
 | **Streak** | Consecutive sessions at most 72 h apart. Adds a character-XP bonus. |
-| **Engine state** | Derived state rebuilt from history: node progress, total XP, streak, last straight-arm session (`src/domain/recompute.ts`). |
+| **Engine state** | Derived state rebuilt from history (sessions and user actions): node progress, total XP, streak, last straight-arm session, last applied position (`src/domain/recompute.ts`). |
 | **Legendary node** | An elite node shown as a locked silhouette, there for motivation. |
 
 ## Node states
 `locked` → (all hard prerequisites met) → `available` → (first logged set) → `training` →
 (level 5 and Trial passed) → `proficient` → (level 10) → `mastered`. A passed Trial (including a
-test-out from `available`) goes straight to `proficient`. A hard prerequisite with `minLevel` ≥ 5
-needs that node proficient; a node's `alternatives` also satisfy prerequisites on it (ADR-019).
+test-out from any state, even `locked`) goes straight to `proficient`. A self-unlock takes a
+`locked` node to `available` without meeting its prerequisites (ADR-023). A hard prerequisite with
+`minLevel` ≥ 5 needs that node proficient; a node's `alternatives` also satisfy prerequisites on it
+(ADR-019). A prerequisite node counts only once it was trained or its Trial passed.
 
-## Formulas *(Phase 2, ADR-018…020; tune the constants in the owning module only)*
+## Formulas *(Phase 2, ADR-018, 019, 021, 023; tune the constants in the owning module only)*
 
 - **Set units** (`xp.ts`): `reps` → reps · `hold_s` → s / 2 · `eccentric_s` → lowerings × s / 3 ·
   `load_xbw` → reps × load (1 rep at 1×BW = 1 unit). A missing rep count is 1.
@@ -151,17 +169,24 @@ needs that node proficient; a node's `alternatives` also satisfy prerequisites o
   passed; XP above the level-5 threshold is banked and counts once the Trial passes. A passed Trial
   lifts XP to at least the level-5 threshold (test-out).
 - **Trial passed** = at least `trial.sets` Trial sets in one session, each ≥ `trial.target` (and ≥
-  `trial.reps` lowerings/reps where used), on an unlocked node that clears the safeguards.
-- **Safeguards** (`safeguards.ts`): straight-arm Trial opens 6 weeks after the node's first logged
-  set; ≤ 60 s straight-arm hold time per session (non-hold sets 2 s per unit); ≥ 48 h between
-  straight-arm sessions.
+  `trial.reps` lowerings/reps where used), on any node whose Trial isn't passed yet. Never blocked.
+- **Safeguards** (`safeguards.ts`, advisory): a straight-arm Trial is recommended 6 weeks after the
+  node's first logged set (never trained = not yet); ≤ 60 s straight-arm hold time per session
+  (non-hold sets 2 s per unit); ≥ 48 h between straight-arm sessions (session start times).
+  Violations are `warning` `SafeguardWarning`s; a locked node trained or tested, or a self-unlock
+  with unmet hard prerequisites, gives an `info` `prerequisites_unmet`.
 - **Character level** (`character.ts`): 100 XP to level 2, ×1.1 per level, max 99.
-- **Attributes:** highest proficient ogLevel per group. Push = h_push, v_push, planche · Pull = v_pull,
-  h_pull, front_lever, back_lever · Core = core · Legs = legs · Balance = handstand, dynamic ·
-  Mobility = flexibility.
+- **Attributes** (points): attribute = round(sum over the trained nodes that train it of
+  `difficultyMult(ogLevel) × node level`). A node counts once it has XP (trained or tested out);
+  its level is capped at 5 until the Trial. What a node trains = its `trains` list if set, else the
+  union of `PATTERN_ATTRIBUTES` over its patterns: horizontal_push, vertical_push → push ·
+  horizontal_pull, vertical_pull → pull · straight_arm_push → push + core · straight_arm_pull →
+  pull + core · squat, hinge → legs · core → core · balance → balance · mobility → mobility ·
+  explosive → nothing. Example: tuck planche (OG 5) at level 5 adds 2.25 × 5 = 11.25 to push and core.
+- **Attribute peaks:** highest ogLevel of a proficient node that trains the attribute (same mapping).
 - **Rank** from the median over the 12 branches of each branch's highest proficient ogLevel:
   Novice < 2 ≤ Apprentice < 6 ≤ Adept < 9 ≤ Master < 13 ≤ Legend.
-- **Balance warning:** |Push − Pull| > 2.
+- **Balance warning:** |push peak − pull peak| > 2 OG levels.
 
 ## Generator summary *(planned, Phase 2.5)*
 
@@ -172,6 +197,9 @@ needs that node proficient; a node's `alternatives` also satisfy prerequisites o
 4. Fill slots: warm-up, 1–2 skill, paired strength (pull + legs, push + hinge, row + push), core. Trim
    to the available time.
 5. Prescribe with double progression. Rest is 90 s within a pair and about 3 min otherwise.
+6. Respect the tendon safeguards in every suggestion (ADR-010, ADR-023): no straight-arm Trial
+   before `isTrialOpenBySafeguards`, straight-arm work within `remainingStraightArmBudget`, and only
+   when `isStraightArmRested`. The user may still go beyond them; the generator never suggests it.
 
 The generator is deterministic for the same inputs.
 
@@ -184,6 +212,7 @@ The generator is deterministic for the same inputs.
   - `sessions(id, startedAt, endedAt, profileId, outcome, xpEarned)`
   - `session_sets(sessionId, nodeId, setIndex, prescribed, actual, metric, isTrial, timestamp)`, the source
     of truth; `prescribed`/`actual` are `SetPerformance { value, reps? }` (`LoggedSet` in `types.ts`)
+  - `user_actions(id, kind, nodeId, at)`, also a source of truth: self-unlocks (`UserAction`, ADR-023)
   - `settings`
 
 ## Equipment tags

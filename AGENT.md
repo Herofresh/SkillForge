@@ -140,8 +140,13 @@ agent didn't write the code and starts with no context from the author.
 - **Content accuracy:** exercise standards must trace back to a source. Don't invent thresholds.
   Mark uncertain values with the node's `verify:` note (the YAML form of `TODO(verify)`).
 - **Safety:** straight-arm skills (planche, levers, cross) keep their tendon safeguards: the minimum
-  time before a Trial opens and the per-session volume budget. Don't remove them to "make progress
-  faster".
+  training time before a Trial, the per-session volume budget and the 48 h rest (ADR-010, ADR-023).
+  - The app suggests, the user decides. The safeguards are **advisory**: they must not hard-block
+    the user from logging, attempting a Trial, testing out or unlocking a node.
+  - They must be **kept**: as warnings/recommendations the UI shows with an acknowledge step, and as
+    rules the generator's own suggestions always respect.
+  - Never remove or weaken them silently, e.g. to "make progress faster". Changing them needs an
+    ADR and a user decision.
 
 ## 6. Handing over
 

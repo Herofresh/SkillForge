@@ -1,23 +1,58 @@
-import { makeNode } from '@/data/testFixtures';
+import { makeNode, makeSession } from '@/data/testFixtures';
 import { ALL_NODES } from '@/data/skills';
 import {
-  ATTRIBUTE_BRANCHES,
-  attributesFromBranches,
-  branchOgLevels,
+  attributePeakOgLevels,
   CHARACTER_LEVEL_THRESHOLDS,
   characterLevel,
+  computeAttributes,
   computeCharacter,
   hasPushPullImbalance,
+  nodeAttributes,
+  nodeContribution,
+  PATTERN_ATTRIBUTES,
   rankForMedianOgLevel,
 } from '@/domain/character';
-import { emptyProgress, type ProgressMap } from '@/domain/progression';
-import { ATTRIBUTES, BRANCHES, type Branch } from '@/domain/types';
+import { emptyProgress, selfUnlock, xpForLevel, type ProgressMap } from '@/domain/progression';
+import { recompute } from '@/domain/recompute';
+import { ATTRIBUTES, BRANCHES, PATTERNS, type NodeProgress } from '@/domain/types';
+import { difficultyMult } from '@/domain/xp';
+import { MS_PER_DAY } from '@/lib/time';
 
 const passed = (...ids: string[]): ProgressMap =>
-  Object.fromEntries(ids.map((id) => [id, { ...emptyProgress(id), level: 5, trialPassed: true }]));
+  Object.fromEntries(
+    ids.map((id) => [id, { ...emptyProgress(id), xp: 1, level: 5, trialPassed: true }]),
+  );
 
-const allBranches = (level: number) =>
-  Object.fromEntries(BRANCHES.map((branch) => [branch, level])) as Record<Branch, number>;
+const trainedTo = (nodeId: string, level: number): NodeProgress => ({
+  ...emptyProgress(nodeId),
+  xp: xpForLevel(level, 0),
+  level,
+  firstTrainedAt: 0,
+});
+
+const planche = makeNode({
+  id: 'tuck_planche',
+  branch: 'planche',
+  ogLevel: 5,
+  metric: 'hold_s',
+  workingRange: { min: 10, max: 30 },
+  trial: { sets: 3, target: 10 },
+  straightArm: true,
+  patterns: ['straight_arm_push'],
+});
+const pushUp = makeNode({
+  id: 'push_up',
+  branch: 'h_push',
+  ogLevel: 1,
+  patterns: ['horizontal_push'],
+});
+const frontLever = makeNode({
+  id: 'front_lever',
+  branch: 'front_lever',
+  ogLevel: 9,
+  straightArm: true,
+  patterns: ['straight_arm_pull'],
+});
 
 describe('characterLevel', () => {
   it('starts at 1 and rises with total XP', () => {
@@ -28,34 +63,80 @@ describe('characterLevel', () => {
   });
 });
 
-describe('attributes', () => {
-  it('maps every branch to exactly one attribute', () => {
-    const mapped = ATTRIBUTES.flatMap((attribute) => ATTRIBUTE_BRANCHES[attribute]);
-    expect([...mapped].sort()).toEqual([...BRANCHES].sort());
+describe('what a node trains', () => {
+  it('maps every pattern, and every node of the dataset trains at least one attribute', () => {
+    expect(Object.keys(PATTERN_ATTRIBUTES).sort()).toEqual([...PATTERNS].sort());
+    for (const node of ALL_NODES) expect(nodeAttributes(node).length).toBeGreaterThan(0);
   });
 
-  it('uses the highest proficient ogLevel per branch group', () => {
-    const nodes = [
-      makeNode({ id: 'push_up', branch: 'h_push', ogLevel: 2 }),
-      makeNode({ id: 'tuck_planche', branch: 'planche', ogLevel: 5 }),
-      makeNode({ id: 'pull_up', branch: 'v_pull', ogLevel: 2 }),
-      makeNode({ id: 'front_lever', branch: 'front_lever', ogLevel: 7 }),
-    ];
-    const progress = {
-      ...passed('push_up', 'tuck_planche', 'pull_up'),
-      front_lever: emptyProgress('front_lever'),
-    };
-    const levels = branchOgLevels(nodes, progress);
-    expect(levels.planche).toBe(5);
-    expect(levels.front_lever).toBe(0); // trained but not proficient
-    expect(attributesFromBranches(levels)).toEqual({
-      push: 5,
-      pull: 2,
-      core: 0,
+  it('derives several attributes from the patterns, in attribute order', () => {
+    expect(nodeAttributes(planche)).toEqual(['push', 'core']);
+    expect(nodeAttributes(frontLever)).toEqual(['pull', 'core']);
+    expect(nodeAttributes({ patterns: ['balance', 'vertical_push'] })).toEqual(['push', 'balance']);
+    expect(nodeAttributes({ patterns: ['explosive', 'vertical_pull'] })).toEqual(['pull']);
+  });
+
+  it('lets the node override the derivation with trains', () => {
+    expect(nodeAttributes({ patterns: ['core'], trains: ['push', 'core'] })).toEqual([
+      'push',
+      'core',
+    ]);
+    const lSit = ALL_NODES.find((node) => node.id === 'l_sit');
+    expect(lSit && nodeAttributes(lSit)).toEqual(['push', 'core']);
+  });
+
+  it('covers every attribute somewhere in the dataset', () => {
+    const covered = new Set(ALL_NODES.flatMap((node) => nodeAttributes(node)));
+    expect([...covered].sort()).toEqual([...ATTRIBUTES].sort());
+  });
+});
+
+describe('attribute points', () => {
+  it('weights a node by difficulty and level; untrained and self-unlocked-only nodes add nothing', () => {
+    expect(nodeContribution(planche, undefined)).toBe(0);
+    expect(nodeContribution(planche, selfUnlock(emptyProgress(planche.id), 0))).toBe(0);
+    expect(nodeContribution(planche, trainedTo(planche.id, 3))).toBe(difficultyMult(5) * 3);
+  });
+
+  it('lets harder and more-trained nodes contribute more', () => {
+    const same = (level: number) => ({
+      push_up: trainedTo('push_up', level),
+      tuck_planche: trainedTo('tuck_planche', level),
+    });
+    const points = (progress: ProgressMap) => computeAttributes([pushUp, planche], progress);
+    const pushUpOnly = computeAttributes([pushUp], same(4)).push;
+    const plancheOnly = computeAttributes([planche], same(4)).push;
+    expect(plancheOnly).toBeGreaterThan(pushUpOnly);
+    expect(points(same(5)).push).toBeGreaterThan(points(same(4)).push);
+    expect(points(same(4))).toEqual({
+      push: Math.round(4 * (difficultyMult(1) + difficultyMult(5))),
+      pull: 0,
+      core: Math.round(4 * difficultyMult(5)),
       legs: 0,
       balance: 0,
       mobility: 0,
     });
+  });
+
+  it('raises both push and core when the user trains planche', () => {
+    const hold = (id: string, day: number) =>
+      makeSession(id, day * MS_PER_DAY, [
+        {
+          nodeId: 'tuck_planche',
+          count: 3,
+          metric: 'hold_s',
+          prescribed: { value: 10 },
+          actual: { value: 10 },
+        },
+      ]);
+    const tree = [pushUp, planche, frontLever];
+    const before = computeCharacter(tree, {}, 0).attributes;
+    const { state } = recompute(tree, [hold('a', 0), hold('b', 3)]);
+    const after = computeCharacter(tree, state.progress, state.totalXp).attributes;
+    expect(before.push).toBe(0);
+    expect(after.push).toBeGreaterThan(0);
+    expect(after.core).toBe(after.push);
+    expect(after.pull).toBe(0);
   });
 });
 
@@ -73,11 +154,20 @@ describe('rank', () => {
 });
 
 describe('push/pull balance', () => {
-  it('warns only when the gap exceeds 2', () => {
-    const attributes = attributesFromBranches(allBranches(0));
-    expect(hasPushPullImbalance({ ...attributes, push: 5, pull: 3 })).toBe(false);
-    expect(hasPushPullImbalance({ ...attributes, push: 6, pull: 3 })).toBe(true);
-    expect(hasPushPullImbalance({ ...attributes, push: 1, pull: 4 })).toBe(true);
+  const zero = { push: 0, pull: 0, core: 0, legs: 0, balance: 0, mobility: 0 };
+
+  it('warns only when the peak gap exceeds 2', () => {
+    expect(hasPushPullImbalance({ ...zero, push: 5, pull: 3 })).toBe(false);
+    expect(hasPushPullImbalance({ ...zero, push: 6, pull: 3 })).toBe(true);
+    expect(hasPushPullImbalance({ ...zero, push: 1, pull: 4 })).toBe(true);
+  });
+
+  it('takes the highest proficient ogLevel per attribute from every node that trains it', () => {
+    const peaks = attributePeakOgLevels([pushUp, planche, frontLever], {
+      ...passed('push_up', 'tuck_planche'),
+      front_lever: trainedTo('front_lever', 3),
+    });
+    expect(peaks).toEqual({ ...zero, push: 5, core: 5 }); // front lever not proficient
   });
 });
 
@@ -87,6 +177,7 @@ describe('computeCharacter', () => {
       totalXp: 0,
       level: 1,
       attributes: { push: 0, pull: 0, core: 0, legs: 0, balance: 0, mobility: 0 },
+      peakOgLevels: { push: 0, pull: 0, core: 0, legs: 0, balance: 0, mobility: 0 },
       medianOgLevel: 0,
       rank: 'Novice',
       pushPullWarning: false,
@@ -99,12 +190,16 @@ describe('computeCharacter', () => {
         id: `n_${branch}`,
         branch,
         ogLevel: branch === 'planche' ? 9 : index < 7 ? 2 : 3,
+        patterns: branch === 'planche' ? ['straight_arm_push'] : ['mobility'],
       }),
     );
-    const character = computeCharacter(nodes, passed(...nodes.map((node) => node.id)), 500);
+    nodes.push(makeNode({ id: 'row', branch: 'h_pull', chainOrder: 20, ogLevel: 2 }));
+    const ids = nodes.map((node) => node.id);
+    const character = computeCharacter(nodes, passed(...ids), 500);
     expect(character.medianOgLevel).toBe(2.5);
     expect(character.rank).toBe('Apprentice');
-    expect(character.attributes.push).toBe(9);
+    expect(character.peakOgLevels.push).toBe(9);
+    expect(character.peakOgLevels.pull).toBe(2);
     expect(character.pushPullWarning).toBe(true);
     expect(character.level).toBe(characterLevel(500));
   });

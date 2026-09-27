@@ -18,11 +18,17 @@
   `progression.ts`, `safeguards.ts`, `character.ts`, `recompute.ts` in `src/domain/`, pure and
   tested. Formulas and constants are in `docs/CONTEXT.md` → Formulas and ADR-018…021. No generator
   (2.5), persistence or real UI yet.
+- User autonomy (2.7, ADR-023, PR link follows): "the app suggests, the user decides". Test-out works on
+  every node (straight-arm on day 1, locked nodes too), a user can self-unlock a locked node
+  (`UserAction` in history), the ADR-010 tendon safeguards are advisory `SafeguardWarning`s
+  instead of blocks, and every trained node pays into all the attributes it trains
+  (`PATTERN_ATTRIBUTES` or the new YAML field `trains`, weighted by ogLevel and node level).
 
 ## Next up
 1. Phase 2.5: `generator.ts` on top of the engine (frontier from goals, `resolveTree` for states,
-   `remainingStraightArmBudget` / `isStraightArmRested` from `safeguards.ts`, `lastTrainedAt` for
-   pattern recency).
+   `lastTrainedAt` for pattern recency). Its suggestions must respect the safeguards
+   (`isTrialOpenBySafeguards`, `remainingStraightArmBudget`, `isStraightArmRested`) even though
+   the user may override them (ADR-023). Self-unlocked nodes count as frontier candidates.
 2. Phase 3.1–3.2: persistence; `session_sets` rows map 1:1 to `LoggedSet` (ADR-021).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -39,11 +45,19 @@
     `canApplyIncrementally` before an incremental apply; an older session (import) needs a recompute.
     Recompute also after an overlay edit or a formula change.
   - A skipped set must be logged with `actual.value = 0` (completion bonus and outcome rely on it).
-  - Trials count only on unlocked nodes and, for straight-arm nodes, 6 weeks after the first logged
-    set. Straight-arm nodes therefore cannot be tested out; onboarding assessment Trials (4.1) must
-    not offer them, or the user must decide to relax ADR-020.
-  - The engine does not enforce the 60 s budget or the 48 h rule on logged sets; the generator (2.5)
-    and UI must call `remainingStraightArmBudget` and `isStraightArmRested`.
+  - **User autonomy (2.7, ADR-023):** nothing in the engine blocks the user. Trials count on every
+    node (a Trial on an already passed node is ignored). Safeguard violations and unmet
+    prerequisites come back as `SessionResult.warnings` / `UserActionResult.warnings`; the UI
+    must show them with an acknowledge step and can ask for them before an attempt with
+    `nodeUseWarnings` and `sessionSafeguardWarnings`. The generator must keep respecting the
+    safeguards (AGENT.md §5).
+  - Self-unlocks are `UserAction`s (`kind: 'self_unlock'`) and must be persisted next to the
+    sessions (a `user_actions` table in 3.1). `recompute(nodes, sessions, actions)` replays both
+    (actions before sessions at the same ms); `canApplyIncrementally` takes either kind.
+  - Attribute points are open-ended sums (`difficultyMult × level` per trained node); the radar
+    (4.5) should normalise them. The push/pull warning uses `peakOgLevels` instead.
+  - The L-sit support-hold chain has `trains: [core, push]` (chosen in this task from the user's own example);
+    the coach review (1.10) should confirm or change it via the review sheet's Trains column.
   - `alternatives` of a prerequisite node satisfy that prerequisite (ADR-019), so a proficient
     `straight_bar_dip` also meets the human flag's `parallel_bar_dip` gate.
   - All numbers are a first balance pass; tune them only in the owning module and recompute.
@@ -99,7 +113,7 @@
   optional peers needed on Linux (here `@emnapi/core`/`@emnapi/runtime` for `@napi-rs/wasm-runtime`),
   and then CI's `npm ci` fails with "Missing: … from lock file". Fix it by adding the missing entries
   (see PR #3), not by switching `npm ci` to `npm install`. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…021). The
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…023). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
@@ -140,20 +154,22 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 2.2 `progression.ts`: levels 1–10, level-5 cap and Trial, banked XP, node states, unlock resolution ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [x] 2.3 Tendon safeguards (ADR-010): min weeks at level, 60 s straight-arm budget, 48 h rule ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [x] 2.4 `character.ts`: character level, attributes, rank title, push/pull balance warning ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
-- [ ] 2.5 `generator.ts`: frontier, scoring, equipment substitution, slot filling, double-progression prescription
+- [ ] 2.5 `generator.ts`: frontier, scoring, equipment substitution, slot filling, double-progression prescription; suggestions respect the safeguards (ADR-023)
 - [x] 2.6 Recompute-from-history function (ADR-008) ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
+- [x] 2.7 User autonomy: test-out anywhere (incl. straight-arm), self-unlock as a recorded user action, advisory safeguards (`SafeguardWarning`), multi-attribute stats (`PATTERN_ATTRIBUTES`, YAML `trains`) (ADR-023) (PR link follows)
 
 ### Phase 3: Persistence
-- [ ] 3.1 Drizzle schema and migrations (profile, goals, node_progress, equipment_profiles, sessions, session_sets, settings)
+- [ ] 3.1 Drizzle schema and migrations (profile, goals, node_progress, equipment_profiles, sessions, session_sets, user_actions, settings)
 - [ ] 3.2 Repositories plus the Zustand stores that wire the domain to the database
 - [ ] 3.3 JSON export/import with validation
 - [ ] 3.4 Store the user progression overlay (ADR-016) in SQLite, apply it with `applyOverlay` when loading the tree, and include it in export/import
 
 ### Phase 4: Core UI
-- [ ] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials
+- [ ] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown
 - [ ] 4.2 Tree tab, column view
-- [ ] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗, set goal, attempt Trial, history
+- [ ] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history
 - [ ] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove) → live logging → summary with XP, level-ups and unlocks
+- [ ] 4.x Safeguard warnings in the UI (ADR-023): every `SafeguardWarning` (before a Trial, test-out or self-unlock, during a live session and in the summary) is shown with its message and an acknowledge step; straight-arm ones explain why. Never a hard block. Part of 4.1, 4.3 and 4.4
 - [ ] 4.5 Character tab: level, rank, attribute radar, streak, recent sessions
 - [ ] 4.6 Settings: equipment profiles, export/import
 - [ ] 4.7 In-app node editor: add a `user_` node, edit a node's standards/prerequisites, hide a node; show `applyOverlay` issues inline and never save a broken tree

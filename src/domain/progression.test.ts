@@ -9,11 +9,12 @@ import {
   MAX_NODE_LEVEL,
   newlyUnlocked,
   nodeLevel,
+  nodeUseWarnings,
   passTrial,
   PROFICIENT_LEVEL,
   resolveNode,
   resolveTree,
-  trialBlockReason,
+  selfUnlock,
   xpForLevel,
   type ProgressMap,
 } from '@/domain/progression';
@@ -165,6 +166,7 @@ describe('prerequisites and node states', () => {
     expect(resolveNode(negative, {}, lookup)).toEqual({
       state: 'locked',
       unmetHard: negative.prerequisites,
+      selfUnlocked: false,
       warnings: [],
     });
     const base: ProgressMap = { dead_hang: progressAt('dead_hang', 5, true) };
@@ -187,6 +189,34 @@ describe('prerequisites and node states', () => {
     expect(status.warnings).toEqual(pike.prerequisites);
   });
 
+  it('does not count an untrained self-unlocked node for a prerequisite', () => {
+    const prereq = { nodeId: 'dead_hang', minLevel: 1, kind: 'hard' as const };
+    const unlockedOnly = { dead_hang: selfUnlock(emptyProgress('dead_hang'), 0) };
+    expect(isPrerequisiteMet(prereq, unlockedOnly, lookup)).toBe(false);
+    expect(
+      isPrerequisiteMet(prereq, { dead_hang: progressAt('dead_hang', 1, false) }, lookup),
+    ).toBe(true);
+  });
+
+  it('keeps a self-unlocked node out of locked but still lists its unmet prerequisites', () => {
+    const progress = { pull_up: selfUnlock(emptyProgress('pull_up'), 100) };
+    const status = resolveNode(pullUp, progress, lookup);
+    expect(status).toEqual({
+      state: 'available',
+      unmetHard: pullUp.prerequisites,
+      selfUnlocked: true,
+      warnings: [],
+    });
+    const trained = { pull_up: { ...progressAt('pull_up', 2, false), selfUnlockedAt: 100 } };
+    expect(resolveNode(pullUp, trained, lookup).state).toBe('training');
+  });
+
+  it('keeps the earliest self-unlock time', () => {
+    const once = selfUnlock(emptyProgress('pull_up'), 500);
+    expect(selfUnlock(once, 900).selfUnlockedAt).toBe(500);
+    expect(selfUnlock(once, 100).selfUnlockedAt).toBe(100);
+  });
+
   it('lists nodes that became unlocked', () => {
     const before = resolveTree(nodes, {});
     const after = resolveTree(nodes, { dead_hang: progressAt('dead_hang', 5, true) });
@@ -194,32 +224,53 @@ describe('prerequisites and node states', () => {
   });
 });
 
-describe('trialBlockReason', () => {
+describe('nodeUseWarnings (advisory, never blocking)', () => {
   const [deadHang, negative] = makeChain();
-  const lookup = new Map([deadHang, negative].map((node) => [node.id, node]));
   const lever = makeNode({ id: 'tuck_front_lever', straightArm: true, metric: 'hold_s' });
+  const lookup = new Map([deadHang, negative, lever].map((node) => [node.id, node]));
 
-  it('allows a test-out from an available node', () => {
+  it('has nothing to say about a test-out from an available bent-arm node', () => {
     const status = resolveNode(deadHang, {}, lookup);
-    expect(trialBlockReason(deadHang, status, undefined, 0)).toBeUndefined();
+    expect(nodeUseWarnings(deadHang, status, undefined, lookup, 0)).toEqual([]);
   });
 
-  it('blocks locked nodes and passed Trials', () => {
-    expect(trialBlockReason(negative, resolveNode(negative, {}, lookup), undefined, 0)).toBe(
-      'locked',
-    );
-    const passed = progressAt('dead_hang', 5, true);
-    const status = resolveNode(deadHang, { dead_hang: passed }, lookup);
-    expect(trialBlockReason(deadHang, status, passed, 0)).toBe('already_passed');
-  });
-
-  it('blocks a straight-arm Trial before the minimum weeks', () => {
-    const status = resolveNode(lever, {}, new Map([[lever.id, lever]]));
-    const progress = { ...emptyProgress(lever.id), firstTrainedAt: 0 };
-    expect(trialBlockReason(lever, status, undefined, 0)).toBe('straight_arm_min_weeks');
-    expect(trialBlockReason(lever, status, progress, MS_PER_WEEK)).toBe('straight_arm_min_weeks');
-    expect(trialBlockReason(lever, status, progress, MIN_WEEKS_AT_LEVEL * MS_PER_WEEK)).toBe(
+  it('flags a locked node with an info warning naming the prerequisites', () => {
+    const warnings = nodeUseWarnings(
+      negative,
+      resolveNode(negative, {}, lookup),
       undefined,
+      lookup,
     );
+    expect(warnings).toEqual([
+      expect.objectContaining({
+        code: 'prerequisites_unmet',
+        nodeId: 'pull_up_negative',
+        severity: 'info',
+      }),
+    ]);
+    expect(warnings[0].message).toContain('dead_hang L5');
+  });
+
+  it('does not repeat the prerequisites warning once the user unlocked the node', () => {
+    const progress = { pull_up_negative: selfUnlock(emptyProgress('pull_up_negative'), 0) };
+    const status = resolveNode(negative, progress, lookup);
+    expect(nodeUseWarnings(negative, status, progress.pull_up_negative, lookup, 0)).toEqual([]);
+  });
+
+  it('warns about a straight-arm Trial before the minimum weeks', () => {
+    const status = resolveNode(lever, {}, lookup);
+    const progress = { ...emptyProgress(lever.id), firstTrainedAt: 0 };
+    const codes = (p: NodeProgress | undefined, at?: number) =>
+      nodeUseWarnings(lever, status, p, lookup, at).map((w) => [w.code, w.severity]);
+    expect(codes(undefined, 0)).toEqual([['straight_arm_min_weeks', 'warning']]);
+    expect(codes(progress, MS_PER_WEEK)).toEqual([['straight_arm_min_weeks', 'warning']]);
+    expect(codes(progress, MIN_WEEKS_AT_LEVEL * MS_PER_WEEK)).toEqual([]);
+    expect(codes(progress)).toEqual([]); // no Trial sets, no Trial warning
+  });
+
+  it('ignores Trial sets on a node whose Trial is already passed', () => {
+    const passed = { ...progressAt('tuck_front_lever', 5, true) };
+    const status = resolveNode(lever, { tuck_front_lever: passed }, lookup);
+    expect(nodeUseWarnings(lever, status, passed, lookup, 0)).toEqual([]);
   });
 });

@@ -41,7 +41,7 @@ Template:
 - Consequences: Two views to maintain. Layout is derived from the data, so there's no duplication (DRY).
 
 ## ADR-004: Unlocking via XP levels with a Trial at the level cap, plus test-out
-- Date: 2026-09-27 · Status: Accepted
+- Date: 2026-09-27 · Status: Accepted, amended by ADR-023 (test-out on every node, self-unlock)
 - Context: XP alone would let volume replace ability. Strict gating would force experienced users to
   grind through exercises they can already do.
 - Decision:
@@ -95,7 +95,7 @@ Template:
   UI code must not put logic in components.
 
 ## ADR-010: Tendon safeguards for straight-arm skills
-- Date: 2026-09-27 · Status: Accepted
+- Date: 2026-09-27 · Status: Accepted, amended by ADR-023 (the safeguards are advisory warnings)
 - Context: Connective tissue adapts about 7–10× slower than muscle (Low, Antranik). Gamification could
   push users to advance too fast.
 - Decision: Straight-arm nodes (`straightArm: true`) get a minimum of 6 weeks at level before their Trial
@@ -250,7 +250,7 @@ Template:
   muscle-up. Whether `alternatives` should satisfy prerequisites is left to PLAN 2.2.
 
 ## ADR-018: XP and character formulas (constants of Phase 2.1 and 2.4)
-- Date: 2026-09-27 · Status: Accepted
+- Date: 2026-09-27 · Status: Accepted, amended by ADR-023 (attributes and the balance-warning input)
 - Context: PLAN 2.1 and 2.4 needed concrete numbers for the planned formulas in `docs/CONTEXT.md`.
   The values are a first balance pass; ADR-008 makes retuning safe (recompute from history).
 - Decision (constants live only in `src/domain/xp.ts` and `src/domain/character.ts`):
@@ -279,7 +279,7 @@ Template:
   shared curve helper is `src/lib/curve.ts`; `median` is in `src/lib/median.ts`.
 
 ## ADR-019: Node levels, Trial and unlock rules (Phase 2.2)
-- Date: 2026-09-27 · Status: Accepted
+- Date: 2026-09-27 · Status: Accepted, amended by ADR-023 (Trials count on every node; self-unlock)
 - Context: ADR-004 fixed the idea (levels 1–10, level-5 cap, Trial, banked XP, test-out). PLAN 2.2
   and ADR-017 left open the curve, what "minLevel 5" means before a Trial, and whether a node's
   `alternatives` can satisfy a prerequisite.
@@ -308,7 +308,7 @@ Template:
   Alternatives are one-directional per entry; the dataset lists both directions.
 
 ## ADR-020: How the tendon safeguards are applied (Phase 2.3)
-- Date: 2026-09-27 · Status: Accepted
+- Date: 2026-09-27 · Status: Superseded by ADR-023
 - Context: ADR-010 set the rules (6 weeks before the Trial, ~60 s per session, 48 h rest) but not
   how to measure them.
 - Decision (`src/domain/safeguards.ts`):
@@ -363,3 +363,62 @@ Template:
     for E2E is in the backlog.
   - Flows match visible text, so UI copy changes must update them.
   - When a dev build exists, switch `appId` to `at.skillforge.app` and drop the `openLink`.
+
+## ADR-023: User autonomy: test-out anywhere, advisory safeguards, multi-attribute stats
+- Date: 2026-09-27 · Status: Accepted
+- Supersedes ADR-020. Amends ADR-004, ADR-010, ADR-018 and ADR-019 (their other rules stay).
+- Context: The user's product decision (2026-09-27): the app must not be too restrictive. Users
+  manage their own training with a base suggestion from the app and a progressive approach. Someone
+  who can already do a skill can test out and jump ahead, or unlock it into their training. Advanced
+  skills should still pay into base stats like arm or core strength. ADR-019 (alternatives satisfy
+  prerequisites) stays. In short: **the app suggests, the user decides.**
+- Decision:
+  - **Test-out on every node.** A Trial counts on any node at any time, including straight-arm
+    nodes on day 1 and nodes whose hard prerequisites are unmet. Passing it sets the node to level
+    5 / proficient (banked XP applies) and unlocks successors as usual. A Trial on an already passed
+    node is ignored (no second `trialPassedAt`). `trialBlockReason` and `trialBlocked` are gone.
+  - **Self-unlock.** The user can unlock a locked node without passing anything. It is a
+    `UserAction { id, kind: 'self_unlock', nodeId, at }` stored in history next to the sessions
+    (ADR-008), replayed by `applyUserAction` / `recompute(nodes, sessions, actions)`, and recorded
+    as `NodeProgress.selfUnlockedAt`. A self-unlocked node is never `locked`
+    (`NodeStatus.selfUnlocked`); its `unmetHard` list is kept for the UI. Replay order is time,
+    then actions before sessions at the same time, then id; `EngineState.lastApplied` makes
+    `canApplyIncrementally` exact for both kinds, so incremental == full recompute. An untrained,
+    self-unlocked node does not satisfy prerequisites (a prerequisite needs the node trained or
+    its Trial passed).
+  - **Advisory safeguards.** The ADR-010 rules (6 weeks of training before a straight-arm Trial,
+    ~60 s straight-arm hold budget per session, 48 h between straight-arm sessions) are still
+    computed by the pure functions in `safeguards.ts` and measured as in ADR-020 (clock from
+    `firstTrainedAt`, 2 s per unit for non-hold sets, session start times). They never block
+    logging, Trials or test-outs. Violations become `SafeguardWarning { code, nodeId?, message,
+    severity }`: `straight_arm_min_weeks`, `straight_arm_budget`, `straight_arm_rest` (severity
+    `warning`) and `prerequisites_unmet` (severity `info`, when a locked node is trained or tested,
+    or a node is self-unlocked). They are returned in `SessionResult.warnings` /
+    `UserActionResult.warnings` and by the query functions `trialWarnings`,
+    `sessionSafeguardWarnings`, `prerequisitesWarning` and `nodeUseWarnings`, so the UI shows
+    them before and after an attempt with an acknowledge step. The generator's own suggestions keep
+    respecting the safeguards (`isTrialOpenBySafeguards`, `remainingStraightArmBudget`,
+    `isStraightArmRested`), so the app's base suggestion stays safe.
+  - **Multi-attribute stats.** Every trained node pays into every attribute it trains. Which ones
+    comes from its patterns through one mapping, `PATTERN_ATTRIBUTES` in `character.ts`
+    (horizontal/vertical push → push; horizontal/vertical pull → pull; straight_arm_push → push +
+    core; straight_arm_pull → pull + core; squat, hinge → legs; core → core; balance → balance;
+    mobility → mobility; explosive → nothing on its own), or from the node's optional YAML field
+    `trains: [...]`, which replaces the derived list (coach-adjustable, shown in the review
+    sheet's Trains column). Every node must train at least one attribute (validator). A node adds
+    `difficultyMult(ogLevel) × node level` points to each of its attributes once it has XP; the
+    attribute is the rounded sum. Harder and more-trained nodes count more; the level is capped at
+    5 until the Trial, like everywhere else. The support-hold L-sit chain (`foot_supported_l_sit`,
+    `tuck_l_sit`, `l_sit`, `straddle_l_sit`, `v_sit`, `manna`)
+    gets `trains: [core, push]` as a support hold; a coach should confirm it.
+  - **Rank** is unchanged (median of each branch's highest proficient ogLevel). The **push/pull
+    balance warning** keeps its threshold (> 2 OG levels) but compares the highest proficient
+    ogLevel among the nodes that train push vs. pull (`attributePeakOgLevels`, via the same
+    mapping), since attribute points are now open-ended sums.
+  - AGENT.md §5 now says: keep the safeguards as warnings and in the generator's suggestions, never
+    remove them silently, but don't hard-block the user.
+- Consequences: Experienced users can skip ahead anywhere, including straight-arm skills in
+  onboarding (PLAN 4.1). The responsibility moves to clear UI: every warning must be shown with an
+  acknowledge step (Phase 4), and the straight-arm ones must explain why. Attribute points are no
+  longer on the OG scale; the radar (4.5) should normalise them (e.g. to the largest attribute).
+  Recompute is needed after this change for any stored caches (none exist yet).

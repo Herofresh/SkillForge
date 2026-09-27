@@ -234,6 +234,23 @@ describe('validateNodes', () => {
     });
   });
 
+  describe('trains', () => {
+    it('needs at least one trained attribute and no duplicates', () => {
+      expect(messages(chainWith('dead_hang', { trains: [] }))).toEqual([
+        'dead_hang: trains must list at least one attribute',
+      ]);
+      expect(messages(chainWith('dead_hang', { trains: ['pull', 'pull'] }))).toEqual([
+        'dead_hang: trains lists an attribute more than once',
+      ]);
+      expect(messages(chainWith('dead_hang', { patterns: ['explosive'] }))).toEqual([
+        'dead_hang: its patterns train no attribute; add a pattern or a trains: list',
+      ]);
+      expect(
+        messages(chainWith('dead_hang', { patterns: ['explosive'], trains: ['pull'] })),
+      ).toEqual([]);
+    });
+  });
+
   describe('straight-arm branches', () => {
     it('requires straightArm in front_lever, back_lever and planche', () => {
       const lever = makeNode({

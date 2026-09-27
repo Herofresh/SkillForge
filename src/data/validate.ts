@@ -3,6 +3,7 @@
  * and the user overlay (`src/domain/overlay.ts`), so a user edit can never produce a broken tree.
  * No React/Expo/DB imports: this module must run in plain Node (ADR-009).
  */
+import { nodeAttributes } from '@/domain/character';
 import { STRAIGHT_ARM_BRANCHES } from '@/domain/types';
 import type { ExerciseNode, Metric, ValidationIssue } from '@/domain/types';
 
@@ -63,6 +64,21 @@ export function formatIssue(issue: ValidationIssue): string {
   return [issue.file, issue.nodeId, issue.message].filter(Boolean).join(': ');
 }
 
+/** `trains` (ADR-023): no duplicates, and every node must feed at least one attribute. */
+function checkTrains(node: ExerciseNode, report: Report): void {
+  if (node.trains !== undefined && new Set(node.trains).size !== node.trains.length) {
+    report(node, 'trains lists an attribute more than once');
+  }
+  if (node.patterns.length > 0 && nodeAttributes(node).length === 0) {
+    report(
+      node,
+      node.trains === undefined
+        ? 'its patterns train no attribute; add a pattern or a trains: list'
+        : 'trains must list at least one attribute',
+    );
+  }
+}
+
 function checkIdentity(node: ExerciseNode, report: Report): void {
   if (!SNAKE_CASE_ID.test(node.id)) {
     report(node, `id '${node.id}' must be snake_case (lowercase letters, digits, underscores)`);
@@ -76,6 +92,7 @@ function checkIdentity(node: ExerciseNode, report: Report): void {
   }
   if (node.name.trim() === '') report(node, 'name must not be empty');
   if (node.patterns.length === 0) report(node, 'needs at least one pattern');
+  checkTrains(node, report);
 }
 
 function checkLevels(node: ExerciseNode, report: Report): void {

@@ -1,29 +1,41 @@
 /**
- * Tendon safeguards for straight-arm nodes (PLAN 2.3, ADR-010). Connective tissue adapts far slower
- * than muscle, so these rules slow straight-arm progress down on purpose. AGENT.md §5: never remove
- * them to make progress faster.
+ * Tendon safeguards for straight-arm nodes (PLAN 2.3, ADR-010, ADR-023). Connective tissue adapts
+ * far slower than muscle, so these rules recommend slowing straight-arm progress down.
  *
- * Pure checks for the progression engine, the generator and the UI:
- * - a straight-arm node's Trial opens only after `MIN_WEEKS_AT_LEVEL` weeks of training on it;
+ * Since ADR-023 they are ADVISORY: the user manages their own training. The pure checks below feed
+ * two consumers:
+ * - the generator's own suggestions keep respecting them (the app's base suggestion stays safe);
+ * - the engine and the UI turn violations into `SafeguardWarning`s that the user sees and can
+ *   acknowledge. Nothing here blocks logging, a Trial or a test-out.
+ * AGENT.md §5: keep them as warnings and in the generator; never remove them silently.
+ *
+ * The rules:
+ * - a straight-arm node's Trial is recommended only after `MIN_WEEKS_AT_LEVEL` weeks of training;
  * - a session holds at most `STRAIGHT_ARM_SESSION_BUDGET_S` seconds of straight-arm work;
  * - straight-arm sessions are at least `STRAIGHT_ARM_REST_HOURS` apart.
  */
 import { MS_PER_HOUR, MS_PER_WEEK } from '@/lib/time';
 
-import type { ExerciseNode, LoggedSession, LoggedSet, NodeProgress } from './types';
+import type {
+  ExerciseNode,
+  LoggedSession,
+  LoggedSet,
+  NodeLookup,
+  NodeProgress,
+  Prerequisite,
+  SafeguardWarning,
+} from './types';
 import { HOLD_SECONDS_PER_UNIT, setUnits } from './xp';
 
-/** Weeks between the first logged set on a straight-arm node and the opening of its Trial. */
+/** Weeks between the first logged set on a straight-arm node and its recommended Trial. */
 export const MIN_WEEKS_AT_LEVEL = 6;
 /** Straight-arm work per session, in hold seconds (non-hold sets count 2 s per unit). */
 export const STRAIGHT_ARM_SESSION_BUDGET_S = 60;
 /** Minimum rest between two sessions that contain straight-arm work. */
 export const STRAIGHT_ARM_REST_HOURS = 48;
 
-export type NodeLookup = ReadonlyMap<string, ExerciseNode>;
-
 /**
- * When the node's Trial opens: `undefined` (no gate) for a bent-arm node, `Infinity` for a
+ * When the node's Trial is recommended: `undefined` (no gate) for a bent-arm node, `Infinity` for a
  * straight-arm node that was never trained, else the first training time + `MIN_WEEKS_AT_LEVEL`.
  */
 export function trialOpensAt(
@@ -35,7 +47,7 @@ export function trialOpensAt(
   return first === undefined ? Infinity : first + MIN_WEEKS_AT_LEVEL * MS_PER_WEEK;
 }
 
-/** Whether the safeguards allow a Trial attempt on `node` at time `now`. */
+/** Whether the safeguards recommend a Trial attempt on `node` at time `now` (generator, UI). */
 export function isTrialOpenBySafeguards(
   node: ExerciseNode,
   progress: Pick<NodeProgress, 'firstTrainedAt'> | undefined,
@@ -55,7 +67,7 @@ export function straightArmSecondsUsed(sets: readonly LoggedSet[], nodes: NodeLo
   return sets.reduce((sum, set) => sum + straightArmSeconds(set, nodes), 0);
 }
 
-/** Straight-arm hold seconds still allowed in a session that already contains `sets`. */
+/** Straight-arm hold seconds still recommended in a session that already contains `sets`. */
 export function remainingStraightArmBudget(sets: readonly LoggedSet[], nodes: NodeLookup): number {
   return Math.max(0, STRAIGHT_ARM_SESSION_BUDGET_S - straightArmSecondsUsed(sets, nodes));
 }
@@ -73,9 +85,86 @@ export function lastStraightArmSessionAt(
   return latest;
 }
 
-/** Whether straight-arm work may be scheduled at `now` given the last straight-arm session. */
+/** Whether straight-arm work is recommended at `now` given the last straight-arm session. */
 export function isStraightArmRested(lastSessionAt: number | undefined, now: number): boolean {
   return (
     lastSessionAt === undefined || now - lastSessionAt >= STRAIGHT_ARM_REST_HOURS * MS_PER_HOUR
   );
+}
+
+// ---------------------------------------------------------------------------------------------
+// Advisory warnings (ADR-023): the same checks, turned into structured warnings for the UI.
+// ---------------------------------------------------------------------------------------------
+
+const roundSeconds = (seconds: number): number => Math.round(seconds);
+
+/**
+ * Warnings for a Trial attempt (or test-out) on `node` at `now`, before or after it is logged.
+ * Empty when the safeguards recommend the attempt.
+ */
+export function trialWarnings(
+  node: ExerciseNode,
+  progress: Pick<NodeProgress, 'firstTrainedAt'> | undefined,
+  now: number,
+): SafeguardWarning[] {
+  if (isTrialOpenBySafeguards(node, progress, now)) return [];
+  const trained = progress?.firstTrainedAt !== undefined;
+  const message = trained
+    ? `${node.name} is straight-arm work: a Trial is recommended after ${MIN_WEEKS_AT_LEVEL} weeks of ` +
+      'training it, so your tendons can catch up with your muscles.'
+    : `${node.name} is straight-arm work you have not trained here yet: a Trial is recommended ` +
+      `after ${MIN_WEEKS_AT_LEVEL} weeks of training it. Only test out if you already train it.`;
+  return [{ code: 'straight_arm_min_weeks', nodeId: node.id, message, severity: 'warning' }];
+}
+
+/**
+ * Session-wide warnings for straight-arm work in `sets` (the live session or a logged one) that
+ * starts at `startedAt`: over the hold budget, or too soon after the last straight-arm session.
+ */
+export function sessionSafeguardWarnings(
+  sets: readonly LoggedSet[],
+  nodes: NodeLookup,
+  lastStraightArmAt: number | undefined,
+  startedAt: number,
+): SafeguardWarning[] {
+  const warnings: SafeguardWarning[] = [];
+  if (!sets.some((set) => nodes.get(set.nodeId)?.straightArm)) return warnings;
+  const used = straightArmSecondsUsed(sets, nodes);
+  if (used > STRAIGHT_ARM_SESSION_BUDGET_S) {
+    warnings.push({
+      code: 'straight_arm_budget',
+      message:
+        `This session has about ${roundSeconds(used)} s of straight-arm work; about ` +
+        `${STRAIGHT_ARM_SESSION_BUDGET_S} s per session is recommended for tendon health.`,
+      severity: 'warning',
+    });
+  }
+  if (!isStraightArmRested(lastStraightArmAt, startedAt)) {
+    warnings.push({
+      code: 'straight_arm_rest',
+      message:
+        `Your last straight-arm session was less than ${STRAIGHT_ARM_REST_HOURS} h ago; ` +
+        `${STRAIGHT_ARM_REST_HOURS} h of rest between straight-arm sessions is recommended.`,
+      severity: 'warning',
+    });
+  }
+  return warnings;
+}
+
+/** Info warning for a node used while hard prerequisites are unmet; `undefined` when all are met. */
+export function prerequisitesWarning(
+  node: ExerciseNode,
+  unmetHard: readonly Prerequisite[],
+  nodes: NodeLookup,
+): SafeguardWarning | undefined {
+  if (unmetHard.length === 0) return undefined;
+  const list = unmetHard
+    .map((prereq) => `${nodes.get(prereq.nodeId)?.name ?? prereq.nodeId} L${prereq.minLevel}`)
+    .join(', ');
+  return {
+    code: 'prerequisites_unmet',
+    nodeId: node.id,
+    message: `${node.name} usually comes after ${list}. You chose to go ahead; build up if it feels too hard.`,
+    severity: 'info',
+  };
 }

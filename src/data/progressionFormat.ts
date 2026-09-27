@@ -11,6 +11,7 @@
 import { parseDocument } from 'yaml';
 
 import {
+  ATTRIBUTES,
   BRANCHES,
   EQUIPMENT_TAGS,
   METRICS,
@@ -251,6 +252,13 @@ const FIELDS: readonly FieldSpec[] = [
     prop: 'patterns',
     parse: listOf('patterns', oneOf('pattern', PATTERNS)),
     toRaw: (v: string[]) => [...v],
+  },
+  {
+    key: 'trains',
+    prop: 'trains',
+    fallback: () => undefined,
+    parse: listOf('trains', oneOf('attribute', ATTRIBUTES)),
+    toRaw: (v: string[] | undefined) => (v === undefined ? v : [...v]),
   },
   {
     key: 'equipment',
