@@ -53,7 +53,7 @@
   `onboarding_completed_at` setting; until then the tabs redirect to onboarding. Maestro
   `onboarding.yaml` covers it from a fresh install; smoke/styleguide finish it first. Screenshots in
   `docs/screenshots/4.1-*.png` (Pixel 8 Pro).
-- Tree tab and node detail (4.2–4.3, ADR-033, PR link below): the Tree tab shows one branch at a
+- Tree tab and node detail (4.2–4.3, ADR-033, [PR #17](https://github.com/Herofresh/SkillForge/pull/17)): the Tree tab shows one branch at a
   time (pixel branch tabs, opens on the first goal's branch) as a column of state-framed tiles
   (locked / ready glow / training XP bar / proficient gold / mastered star / legendary silhouette,
   goal markers) with pixel chains to the node above and linked chips for other prerequisites.
@@ -345,8 +345,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 ### Phase 4: Core UI
 - [x] 4.0 Design system (pixel-art × dark fantasy, ADR-030): `docs/DESIGN.md`, tokens in `theme.ts` (contrast-tested), OFL pixel/body fonts with the splash kept until fonts + DB are ready, UI kit in `src/components/ui/` (frames, text, buttons, grid-defined pixel icons, XP/stat bars, level badge, tier chip, warning banner, modal, empty state, level-up burst), restyled tab bar and placeholder tabs, dev-only Style Guide (`/styleguide`), component tests (RNTL), Maestro `styleguide.yaml` ([PR #14](https://github.com/Herofresh/SkillForge/pull/14))
 - [x] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown (ADR-031) ([PR #15](https://github.com/Herofresh/SkillForge/pull/15))
-- [x] 4.2 Tree tab, column view: branch tabs, state-framed tiles in chain order with pixel chains and linked cross-branch chips, goal markers, legend (ADR-033) (PR_LINK)
-- [x] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗ with alternatives, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history, review status (ADR-033) (PR_LINK)
+- [x] 4.2 Tree tab, column view: branch tabs, state-framed tiles in chain order with pixel chains and linked cross-branch chips, goal markers, legend (ADR-033) ([PR #17](https://github.com/Herofresh/SkillForge/pull/17))
+- [x] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗ with alternatives, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history, review status (ADR-033) ([PR #17](https://github.com/Herofresh/SkillForge/pull/17))
 - [ ] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove) → live logging → summary with XP, level-ups and unlocks
 - [ ] 4.x Safeguard warnings in the UI (ADR-023): every `SafeguardWarning` (before a Trial, test-out or self-unlock, during a live session and in the summary) is shown with its message and an acknowledge step; straight-arm ones explain why. Never a hard block. Part of 4.1, 4.3 and 4.4
 - [ ] 4.5 Character tab: level, rank, attribute radar, streak, recent sessions
