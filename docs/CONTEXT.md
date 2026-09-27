@@ -439,7 +439,7 @@ build is needed.
   go back from the Style Guide and tap Tree first. Don't put `stopApp` before `openLink` (Expo Go
   then stayed on the launcher). Give `scrollUntilVisible` a long `timeout` on long pages.
 - Screenshots: `adb exec-out screencap -p > docs/screenshots/<phase>-<screen>.png`, or Maestro
-  `takeScreenshot: name` (saved under `%USERPROFILE%\.maestro	ests\<run>\<flow>	akeScreenshot\`).
+  `takeScreenshot: name` (saved under `%USERPROFILE%\.maestro\tests\<run>\<flow>\takeScreenshot\`).
 - Onboarding (4.1): a fresh app starts in onboarding, so smoke/styleguide wait for
   `Tree|Style Guide|Step . / 5|Continue` and run `subflows/finish-onboarding.yaml`.
   `onboarding.yaml` starts with `clearState` (wipes Expo Go and the app database); after that Expo Go

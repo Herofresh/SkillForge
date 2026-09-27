@@ -52,7 +52,7 @@
   ADR-023 warnings acknowledged first), and "Your journey begins". Completion is the
   `onboarding_completed_at` setting; until then the tabs redirect to onboarding. Maestro
   `onboarding.yaml` covers it from a fresh install; smoke/styleguide finish it first. Screenshots in
-  `docs/screenshots/4.1-*.png`.
+  `docs/screenshots/4.1-*.png` (Pixel 8 Pro).
 
 ## Next up
 1. Phase 4 UI on top of the store (`useAppStore`) built from the design system (4.0,
@@ -75,6 +75,9 @@
     should use it the same way: `WarningBanner` per warning, action enabled once all are
     acknowledged), `trialSession`, `defaultTrialResults`, `stepTrialResult`, `formatTrial`,
     `formatPerformance`, `unlockedByTrial`, and the kit's `NumberStepper`.
+  - Show OG levels with `formatOgLevel` / `spokenOgLevel` (`format.ts`): level 0 reads
+    "Foundation" (below the OG2 chart), never "OG 0". The `rune` icon is a gem-rune (diamond) so
+    it no longer reads as the letter K in node rows.
   - `characterLevelProgress(totalXp)` now exists (`character.ts`) for the Character tab XP bar; a
     node-level equivalent still doesn't.
   - The trial screen freezes its warnings on mount (`useState` initializer) so they don't change

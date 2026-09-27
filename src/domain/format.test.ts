@@ -1,4 +1,4 @@
-import { formatPerformance, formatTrial } from './format';
+import { formatOgLevel, formatPerformance, formatTrial, spokenOgLevel } from './format';
 
 describe('formatPerformance', () => {
   it('words every metric', () => {
@@ -18,5 +18,17 @@ describe('formatTrial', () => {
     expect(formatTrial('eccentric_s', { sets: 3, target: 5, reps: 3 })).toBe(
       '3 sets of 3 × 5 s lowerings',
     );
+  });
+});
+
+describe('OG level labels', () => {
+  it('calls level 0 a foundation node instead of "OG 0"', () => {
+    expect(formatOgLevel(0)).toBe('Foundation');
+    expect(spokenOgLevel(0)).toBe('foundation');
+  });
+
+  it('shows other levels as OG n', () => {
+    expect(formatOgLevel(5)).toBe('OG 5');
+    expect(spokenOgLevel(5)).toBe('OG level 5');
   });
 });

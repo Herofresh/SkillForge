@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { formatOgLevel, spokenOgLevel } from '@/domain/format';
 import { tierForOgLevel } from '@/domain/tier';
 import type { ExerciseNode } from '@/domain/types';
 
@@ -41,7 +42,7 @@ export function NodeRow({
   const tier = tierForOgLevel(node.ogLevel);
   const label = [
     node.name,
-    `OG level ${node.ogLevel}`,
+    spokenOgLevel(node.ogLevel),
     node.straightArm ? 'straight-arm' : undefined,
     status,
   ]
@@ -61,7 +62,7 @@ export function NodeRow({
           <View style={styles.meta}>
             <TierChip tier={tier} />
             <PixelText variant="label" tone="textMuted">
-              OG {node.ogLevel}
+              {formatOgLevel(node.ogLevel)}
             </PixelText>
             {node.straightArm && (
               <PixelText variant="label" tone="ember">
