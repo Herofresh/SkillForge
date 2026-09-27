@@ -6,6 +6,7 @@
 # Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
 branch: h_push
 nodes:
+  # --- Foundations: build up to the first full push-up ---
   - id: wall_push_up
     name: Wall push-up
     order: 10
@@ -24,6 +25,200 @@ nodes:
     sources:
       - https://redditbwf.github.io/wiki/recommended_routine.html
       - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
+  - id: incline_push_up
+    name: Incline push-up
+    order: 20
+    og_level: 0 # foundation: easier than the OG2 level-1 push-up
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: wall_push_up
+        level: 5
+    patterns: [horizontal_push]
+    equipment:
+      - box
+      - bar
+      - dip_bars
+      - parallettes
+    regression: wall_push_up
+    cues:
+      - Hands on a raised surface; the lower the surface, the harder it gets.
+      - Body in one straight line from head to heels.
+      - Lower the chest to the edge, elbows about 45 degrees from the body.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
+  - id: knee_push_up
+    name: Knee push-up
+    order: 30
+    og_level: 0 # foundation: easier than the OG2 level-1 push-up
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: incline_push_up
+        level: 5
+    patterns: [horizontal_push]
+    equipment:
+      - floor
+    regression: incline_push_up
+    cues:
+      - Knees on the floor, body straight from head to knees; do not pike the hips.
+      - Hands under the shoulders, elbows about 45 degrees from the body.
+      - Chest to the floor, then press until the arms are straight.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
+  # --- Full push-up and harder two-arm variations ---
+  - id: push_up
+    name: Push-up
+    order: 40
+    og_level: 1 # OG2 anchor: push-up = level 1
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: knee_push_up
+        level: 5
+    patterns: [horizontal_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: knee_push_up
+    cues:
+      - Hands under the shoulders, body in one straight line; squeeze glutes and abs.
+      - Elbows about 45 degrees from the body.
+      - Chest to the floor (or between the parallettes), then lock the arms out.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""
+
+  - id: diamond_push_up
+    name: Diamond push-up
+    order: 50
+    og_level: 2
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: push_up
+        level: 5
+    patterns: [horizontal_push]
+    equipment:
+      - floor
+    regression: push_up
+    cues:
+      - Hands together under the chest, thumbs and index fingers forming a diamond.
+      - Keep the elbows close to the body as you lower.
+      - Body stays in one straight line; touch the chest to the hands.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""
+
+  # --- One-arm and archer work ---
+  - id: elevated_one_arm_push_up
+    name: Elevated one-arm push-up
+    order: 60
+    og_level: 5 # OG2: incline/elevated one-arm push-up
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per arm
+    prerequisites:
+      - node: diamond_push_up
+        level: 5
+    patterns: [horizontal_push]
+    equipment:
+      - box
+      - bar
+      - dip_bars
+    regression: diamond_push_up
+    cues:
+      - One hand on a raised surface, feet wide for balance.
+      - Keep the hips and shoulders square to the surface; do not twist.
+      - Lower the chest to the hand under control, elbow close to the body.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
+  - id: archer_push_up
+    name: Archer push-up
+    order: 70
+    og_level: 6
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per side
+    prerequisites:
+      - node: diamond_push_up
+        level: 5
+    patterns: [horizontal_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: diamond_push_up
+    cues:
+      - Hands very wide; lower toward one hand while the other arm stays straight.
+      - The bent arm does the work; the straight arm only helps a little.
+      - Body stays in one straight line from head to heels.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""
+
+  # --- Planche-specific pushing ---
+  - id: pseudo_planche_push_up
+    name: Pseudo planche push-up
+    order: 80
+    og_level: 6
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: diamond_push_up
+        level: 5
+      - node: planche_lean
+        level: 5
+        kind: recommended
+        note: Get used to leaning forward on straight arms first (planche lean, 3 x 30 s).
+    patterns: [horizontal_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: diamond_push_up
+    cues:
+      - Hands by the waist, fingers turned out; lean the shoulders past the hands.
+      - Keep the forward lean the whole time, also at the bottom.
+      - Push the floor away (round the upper back slightly) at the top of every rep.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://themovementathlete.com/planche-requirements/
+    verify: >-
+      OG2 level inferred: OG2 lists the rings-turned-out 40 degree PPPU at about level 6;
+      the floor version is placed at 6 too. Check with a coach.
     review:
       status: draft
       notes: ""

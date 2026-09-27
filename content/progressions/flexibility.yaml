@@ -6,6 +6,7 @@
 # Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
 branch: flexibility
 nodes:
+  # --- Joint prep (warm-up staples) ---
   - id: wrist_prep
     name: Wrist prep routine
     order: 10
@@ -26,6 +27,107 @@ nodes:
     verify: >-
       No sourced rep standard; the planche gate is 4-6 weeks of wrist prep (Movement Athlete).
       The trial is a placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  - id: shoulder_dislocate
+    name: Band shoulder dislocate
+    order: 20
+    og_level: 0
+    metric: reps
+    working_range: { min: 8, max: 12 }
+    trial: { sets: 3, target: 12 }
+    patterns: [mobility]
+    equipment:
+      - bands
+    cues:
+      - Hold the band wide with straight arms in front of the hips.
+      - Raise it overhead and behind you in one smooth arc, then back.
+      - Keep the elbows locked; widen the grip if you have to bend them.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    verify: >-
+      Warm-up staple in the RR shoulder band routine; no rep standard is sourced. The trial is a
+      placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Compression ---
+  - id: pike_fold
+    name: Pike fold
+    order: 30
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Sit with the legs straight and together, knees locked.
+      - Fold forward from the hips, not by rounding the upper back.
+      - Relax into it and breathe; reach for the toes or past them.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://antranik.org/progressions/
+    verify: >-
+      Our synthesis (compression prep for the L-sit and manna); no sourced hold or range standard.
+      A range standard (e.g. chest to knees) may suit better than a time.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Bridge (BWF chart chain) ---
+  - id: table_bridge
+    name: Table bridge
+    order: 40
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Sit with hands behind you, fingers pointing to the feet, knees bent.
+      - Push the hips up until the body is flat like a table top.
+      - Knees over the ankles, shoulders over the wrists, head in line.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: Our synthesis; 0 is assumed and the 3 x 30 s trial follows the general RR hold rule.
+    review:
+      status: draft
+      notes: ""
+
+  - id: full_bridge
+    name: Full bridge
+    order: 50
+    og_level: 2
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: table_bridge
+        level: 5
+      - node: shoulder_dislocate
+        level: 5
+        kind: recommended
+        note: Open shoulders make it much easier to straighten the arms.
+    patterns: [mobility]
+    equipment:
+      - floor
+    regression: table_bridge
+    cues:
+      - Lie on your back, hands by the ears with fingers pointing to the feet.
+      - Push up until the arms and legs are straight.
+      - Push the shoulders over the hands; don't just bend the lower back.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: >-
+      Our synthesis; the OG2 level 2 is inferred and the 3 x 30 s trial follows the general RR hold rule.
+      The BWF chart has angled and head bridge steps in between that are not modelled.
     review:
       status: draft
       notes: ""

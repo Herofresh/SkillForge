@@ -6,6 +6,31 @@
 # Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
 branch: h_pull
 nodes:
+  # --- Foundations: easy rows (band at home, or leaning back on rings/bar) ---
+  - id: band_row
+    name: Band row
+    order: 10
+    og_level: 0 # foundation: not on the OG2 chart
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    patterns: [horizontal_pull]
+    equipment:
+      - bands
+    alternatives: [incline_row]
+    cues:
+      - Anchor the band at chest height (door anchor or bar); step back until it is tight.
+      - Pull the hands to the lower ribs, elbows close to the body.
+      - Squeeze the shoulder blades together, then return slowly.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    verify: >-
+      Not on the OG2 chart; level 0 and the 3 x 8 standard are placeholders. Band tension
+      varies, so a coach should say how strong a band counts.
+    review:
+      status: draft
+      notes: ""
+
   - id: incline_row
     name: Incline row
     order: 20 # order 10 is kept for band_row (see docs/research/node-manifest.md)
@@ -17,12 +42,123 @@ nodes:
     equipment:
       - rings
       - bar
+    alternatives: [band_row]
     cues:
       - Feet on the floor, body straight and leaning back; the more upright, the easier.
       - Pull the chest to the hands, elbows about 45 degrees from the body.
       - Squeeze the shoulder blades together at the top, lower under control.
     sources:
       - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""
+
+  # --- Full rows ---
+  - id: horizontal_row
+    name: Horizontal row
+    order: 30
+    og_level: 2 # OG2: horizontal / ring row [2]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: incline_row
+        level: 5
+    patterns: [horizontal_pull]
+    equipment:
+      - rings
+      - bar
+    regression: incline_row
+    cues:
+      - Body horizontal, heels on the floor (or on a box), arms straight.
+      - Keep a straight line from head to heels; do not let the hips sag.
+      - Pull the chest to the hands, then lower all the way to straight arms.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""
+
+  - id: archer_row
+    name: Archer row
+    order: 40
+    og_level: 4 # OG2: archer row [4]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per side
+    prerequisites:
+      - node: horizontal_row
+        level: 5
+    patterns: [horizontal_pull]
+    equipment:
+      - rings
+      - bar
+    regression: horizontal_row
+    cues:
+      - Hands wide; pull toward one hand while the other arm stays straight out.
+      - The bent arm does the work; the straight arm only helps a little.
+      - Body stays straight and does not twist.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""
+
+  # --- Advanced: lever rows and one-arm rows ---
+  - id: tuck_front_lever_row
+    name: Tuck front lever row
+    order: 50
+    og_level: 5 # OG2: front lever rows, tuck [5]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: archer_row
+        level: 5
+        kind: recommended
+        note: Archer rows (3 x 8 per side) build the pulling strength for lever rows.
+      - node: tuck_front_lever
+        level: 5
+        note: Hold the tuck front lever (3 x 30 s) before rowing in it.
+    straight_arm: false # bent-arm pull, even though it starts in a lever
+    patterns: [horizontal_pull]
+    equipment:
+      - bar
+      - rings
+    regression: archer_row
+    cues:
+      - Start in a tuck front lever, arms straight, back flat.
+      - Pull the bar or rings to the lower chest while keeping the body horizontal.
+      - Lower back to straight arms without dropping the hips.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""
+
+  - id: straddle_one_arm_row
+    name: Straddle one-arm row
+    order: 60
+    og_level: 6 # OG2: straddle one-arm row [6]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per arm
+    prerequisites:
+      - node: archer_row
+        level: 5
+    patterns: [horizontal_pull]
+    equipment:
+      - rings
+      - bar
+    regression: archer_row
+    cues:
+      - Feet wide apart for balance, one hand on the ring or bar.
+      - Keep the hips and shoulders square; do not rotate open.
+      - Pull the chest to the hand, then lower to a straight arm under control.
+    sources:
       - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
     review:
       status: draft

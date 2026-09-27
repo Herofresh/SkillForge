@@ -50,6 +50,8 @@ src/
     skills/
       index.ts          ALL_NODES, NODE_BY_ID (what the app imports)
       progressions.generated.ts  GENERATED from the YAML; never edit
+      dataset.test.ts   real dataset is valid and the generated files are fresh
+      crossBranchGates.test.ts  content checks: key gates, straight-arm flags, Home paths
       branches.ts       BRANCH_NAMES (display names)
   db/                   Drizzle schema, migrations, repositories
   components/           reusable UI components
@@ -69,6 +71,20 @@ docs/                   PLAN, DECISIONS, CONTEXT, research
 **Content flow:** `content/progressions/*.yaml` → `npm run progressions:build` (parse with
 `progressionFormat.ts`, check with `validate.ts`) → `progressions.generated.ts` + review sheet → app
 imports `ALL_NODES` → at runtime `applyOverlay(ALL_NODES, userOverlay)` gives the user's tree.
+
+**Dataset (89 nodes, all `review.status: draft`):**
+
+| Branch | Nodes | Branch | Nodes | Branch | Nodes |
+|---|---|---|---|---|---|
+| `h_push` | 8 | `front_lever` | 5 | `core` | 10 |
+| `v_push` | 9 | `back_lever` | 7 | `legs` | 8 |
+| `v_pull` | 9 | `planche` | 6 | `dynamic` | 8 |
+| `h_pull` | 6 | `handstand` | 8 | `flexibility` | 5 |
+
+The 88 manifest nodes plus `straight_bar_dip` (Home dip, ADR-017). Content checks beyond the validator
+(cross-branch gates, straight-arm flags, a Home path per pattern) are in
+`src/data/skills/crossBranchGates.test.ts`. With the Home profile only `parallel_bar_dip` (dip bars),
+`iron_cross` (rings) and the three human flags (pole) are out of reach.
 
 **Data flow:** UI → store action → domain function (pure) → repository persists `session_sets` → caches
 (`node_progress`) updated → UI re-renders.

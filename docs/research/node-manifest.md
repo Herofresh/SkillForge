@@ -32,9 +32,10 @@ change here.
 |---|---|---|---|---|---|---|---|
 | 10 | `support_hold` | Support hold | 0 | hold_s | — | dip_bars or parallettes or rings | WRITTEN (example) |
 | 20 | `pike_push_up` | Pike push-up | 1 | reps | *`push_up`* (rec.) | floor or parallettes | OG2 pike HeSPU [1] |
-| 30 | `dip_negative` | Dip negative | 2 | eccentric_s | `support_hold` | dip_bars or rings | trial needs reps (lowerings per set) |
+| 30 | `dip_negative` | Dip negative | 2 | eccentric_s | `support_hold` | dip_bars or rings or bar | trial needs reps (lowerings per set); bar option added (ADR-017) |
 | 40 | `elevated_pike_push_up` | Elevated pike push-up | 2 | reps | `pike_push_up` | floor or box or parallettes | feet on a chair/box; OG2 [2] |
-| 50 | `parallel_bar_dip` | Parallel bar dip | 3 | reps | `dip_negative` | dip_bars | Park only (Home has no dip bars); OG2 PB dips [3] |
+| 50 | `parallel_bar_dip` | Parallel bar dip | 3 | reps | `dip_negative` | dip_bars | Park only (Home has no dip bars); OG2 PB dips [3]; alternatives: straight_bar_dip |
+| 55 | `straight_bar_dip` | Straight bar dip | 3 | reps | `dip_negative` | bar or dip_bars | ADDED by the integrator (ADR-017): Home dip, MU gate; level copied from PB dips; verify |
 | 60 | `wall_headstand_push_up` | Wall headstand push-up | 4 | reps | `elevated_pike_push_up`, *`wall_handstand`* | wall | OG2 wall HeSPU [4] |
 | 70 | `wall_handstand_push_up` | Wall handstand push-up (full range) | 5 | reps | `wall_headstand_push_up` | wall + parallettes | OG2 [5] |
 | 80 | `freestanding_handstand_push_up` | Freestanding handstand push-up | 7 | reps | `wall_handstand_push_up`, *`freestanding_handstand`* | floor or parallettes | OG2 [~6-7]; verify |
@@ -143,7 +144,7 @@ change here.
 | order | id | name | OG | metric | prerequisites | equipment | notes |
 |---|---|---|---|---|---|---|---|
 | 10 | `kipping_swing` | Kip swing | 1 | reps | *`dead_hang`*, *`hollow_hold`* (rec.) | bar | WRITTEN (example) |
-| 20 | `muscle_up_negative` | Muscle-up negative | 3 | eccentric_s | *`chest_to_bar_pull_up`*, *`parallel_bar_dip`*, `kipping_swing` | bar | OG2 MU negatives [3]; gate ~10 pull-ups, ~5 C2B, 10-15 dips; trial needs reps |
+| 20 | `muscle_up_negative` | Muscle-up negative | 3 | eccentric_s | *`chest_to_bar_pull_up`*, *`straight_bar_dip`* (was `parallel_bar_dip`, ADR-017), `kipping_swing` | bar | OG2 MU negatives [3]; gate ~10 pull-ups, ~5 C2B, 10-15 dips; trial needs reps |
 | 30 | `kipping_muscle_up` | Kipping muscle-up | 4 | reps | `muscle_up_negative` | bar | OG2 kipping MU [4] |
 | 40 | `elbow_lever` | Elbow lever | 5 | hold_s | *`frog_stand`*, *`wrist_prep`* (rec.) | floor or parallettes | OG2 two-arm EL [5] |
 | 50 | `tuck_human_flag` | Tuck human flag | 5 | hold_s | *`pull_up`*, *`parallel_bar_dip`*, *`side_plank`* | pole | OG2 [5]; gate 10 pull-ups, 10 dips, 60-90 s side plank; straight_arm: true |

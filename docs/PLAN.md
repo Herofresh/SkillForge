@@ -9,15 +9,18 @@
   CI (PR #3).
 - The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. The
   Android bundle exports cleanly, but it hasn't been opened on a phone in Expo Go yet.
-- Phase 1 is in progress on branch `feat/progression-matrix` (not yet a PR): shared types, the YAML
-  progression format with build/check/review scripts, the validator, the user overlay, the node
-  manifest and one example node per branch (12 nodes). No game logic or persistence yet.
+- Phase 1 is in review on branch `feat/progression-matrix` (PR pending): shared types, the YAML
+  progression format with build/check/review scripts, the validator, the user overlay and the full
+  dataset of **89 nodes** in 12 branches (all `review.status: draft`, 52 with a `verify:` note).
+  The coach review sheet `docs/review/progression-matrix.md` is generated and committed. No game
+  logic or persistence yet.
 
 ## Next up
-1. Phase 1.2–1.4: write the remaining 76 manifest nodes into `content/progressions/*.yaml`
-   (parallel authors, one branch file each), then `npm run progressions:build`.
-2. Open the Phase 1 PR once the dataset passes `npm run progressions:check`.
-3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet.
+1. Reviewer agent: review and merge the Phase 1 PR (PR pending).
+2. Phase 2.1–2.2: `xp.ts` and `progression.ts` on top of `ALL_NODES` (decide in 2.2 whether a
+   node's `alternatives` can satisfy a prerequisite, see ADR-017).
+3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+   find a coach).
 
 ## Blockers
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
@@ -29,11 +32,33 @@
   - After any YAML edit run `npm run progressions:build` and commit the YAML **and** the two
     generated files (`src/data/skills/progressions.generated.ts`, `docs/review/progression-matrix.md`).
     The dataset test and `progressions:check` (also in CI) fail when they are stale.
-  - Two example nodes carry a `TODO(manifest)` comment: `tuck_front_lever` still needs `pull_up` and
-    `planche_lean` still needs `push_up` as hard L5 prerequisites (they didn't exist yet). Add them
-    once those nodes are written and drop the `verify` note on `tuck_front_lever`.
-  - Cross-branch prerequisites only resolve once every branch is written, so run the check on the
-    merged set of files, not one branch in isolation.
+  - Dataset: 89 nodes (manifest's 88 + `straight_bar_dip`, ADR-017). Home profile reaches every
+    node except `parallel_bar_dip`, `iron_cross` and the three human flags; this and the key
+    cross-branch gates are asserted in `src/data/skills/crossBranchGates.test.ts`.
+  - The muscle-up negative's dip gate is `straight_bar_dip` (not `parallel_bar_dip`), so Home users
+    can reach it. The human flag still gates on `parallel_bar_dip`.
+  - Handstand presses (`wall_straddle_press_eccentric`, `straddle_press_to_handstand`) have the
+    `straight_arm_push` pattern but `straight_arm: false` (balance skills). The gate test pins this;
+    a coach may want them flagged.
+  - **Open `verify:` nodes (task 1.6 / 1.10), 52 total:**
+    - h_push: pseudo_planche_push_up
+    - v_push: support_hold, dip_negative, straight_bar_dip, freestanding_handstand_push_up
+    - v_pull: dead_hang, scapular_pull, pull_up_negative, chest_to_bar_pull_up, archer_pull_up,
+      one_arm_chin_up_negative, one_arm_chin_up
+    - h_pull: band_row
+    - front_lever: advanced_tuck_front_lever, one_leg_front_lever (OG2 may list it after straddle)
+    - back_lever: skin_the_cat, tuck_back_lever, back_lever, iron_cross
+    - planche: planche_lean, full_planche
+    - handstand: wall_handstand, chest_to_wall_handstand, freestanding_handstand,
+      straddle_press_to_handstand, one_arm_handstand
+    - core: hollow_hold, side_plank, foot_supported_l_sit, hanging_knee_raise, l_sit, toes_to_bar,
+      straddle_l_sit, v_sit, manna (big jump from the 45° V-sit to manna; OG2 gates on a 170° V-sit)
+    - legs: split_squat, bulgarian_split_squat, assisted_pistol_squat, nordic_curl_negative
+    - dynamic: kipping_swing, muscle_up_negative, kipping_muscle_up, elbow_lever, tuck_human_flag,
+      straddle_human_flag, human_flag, strict_bar_muscle_up
+    - flexibility: all 5 (our own synthesis)
+  - Placeholder standards worth a coach's eye first: one-arm chin-up 3×3, muscle-ups 3×5, all
+    eccentric trials 3×3 lowerings of 5 s, advanced holds 3×15 s, `skin_the_cat` 3×8.
   - `yaml` is a runtime dependency only for overlay import/export; the built-in matrix is never
     parsed on the phone. Jest maps `yaml` to its CJS build (`package.json` → `moduleNameMapper`)
     because jest-expo otherwise picks the ESM browser build.
@@ -51,7 +76,7 @@
   optional peers needed on Linux (here `@emnapi/core`/`@emnapi/runtime` for `@napi-rs/wasm-runtime`),
   and then CI's `npm ci` fails with "Missing: … from lock file". Fix it by adding the missing entries
   (see PR #3), not by switching `npm ci` to `npm install`. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…014). The
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…017). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
@@ -72,15 +97,15 @@
 The matrix is authored as human-editable YAML (one file per branch in `content/progressions/`) and
 compiled into a typed module for the app; users can layer their own changes on top (ADR-016).
 
-- [~] 1.1 `src/domain/types.ts`: `ExerciseNode`, `Branch`, `Metric`, `Prerequisite`, `Trial`, `EquipmentTag`, overlay types; `tierForOgLevel` (architect, branch `feat/progression-matrix`)
-- [ ] 1.2 Dataset: the 88 nodes of [`docs/research/node-manifest.md`](research/node-manifest.md) written as YAML blocks in `content/progressions/<branch>.yaml` (12 examples done; parallel authors)
-- [ ] 1.3 Cross-branch prerequisites (muscle-up, front lever, planche, freestanding HS, flag, pistol), as listed in the manifest
-- [ ] 1.4 Equipment options and `alternatives` (Home: floor/wall/bar/parallettes/bands; Park: + dip bars)
-- [~] 1.5 `src/data/validate.ts` + tests: unique snake_case ids, references resolve, DAG, ogLevel monotonic per branch, unique order, equipment, ranges/trials, sources, straight-arm flag (architect)
+- [x] 1.1 `src/domain/types.ts`: `ExerciseNode`, `Branch`, `Metric`, `Prerequisite`, `Trial`, `EquipmentTag`, overlay types; `tierForOgLevel` (PR pending)
+- [x] 1.2 Dataset: the 88 nodes of [`docs/research/node-manifest.md`](research/node-manifest.md) written as YAML blocks in `content/progressions/<branch>.yaml`, plus `straight_bar_dip` (89 nodes, ADR-017) (PR pending)
+- [x] 1.3 Cross-branch prerequisites (muscle-up, front lever, planche, freestanding HS, flag, pistol), as listed in the manifest (PR pending)
+- [x] 1.4 Equipment options and `alternatives` (Home: floor/wall/bar/parallettes/bands; Park: + dip bars) (PR pending)
+- [x] 1.5 `src/data/validate.ts` + tests: unique snake_case ids, references resolve, DAG, ogLevel monotonic per branch, unique order, equipment, ranges/trials, sources, straight-arm flag (PR pending)
 - [ ] 1.6 Verify the inferred (`~`) OG2 levels against the OG2 Google Sheet
-- [~] 1.7 YAML format (`src/data/progressionFormat.ts`), `npm run progressions:build|check|review`, generated `src/data/skills/progressions.generated.ts`, staleness test, contributor guide `content/progressions/README.md` (architect)
-- [~] 1.8 Coach review sheet `docs/review/progression-matrix.md` (generated, committed) (architect)
-- [~] 1.9 User overlay in `src/domain/overlay.ts`: `applyOverlay` (same validator), `exportOverlay`/`importOverlay` (YAML/JSON) (architect)
+- [x] 1.7 YAML format (`src/data/progressionFormat.ts`), `npm run progressions:build|check|review`, generated `src/data/skills/progressions.generated.ts`, staleness test, contributor guide `content/progressions/README.md` (PR pending)
+- [x] 1.8 Coach review sheet `docs/review/progression-matrix.md` (generated, committed) (PR pending)
+- [x] 1.9 User overlay in `src/domain/overlay.ts`: `applyOverlay` (same validator), `exportOverlay`/`importOverlay` (YAML/JSON) (PR pending)
 - [ ] 1.10 Coach review pass: a calisthenics coach reviews the sheet; notes go into `review.notes`, signed-off nodes get `review.status: coach_reviewed` (needs the user to find a coach)
 
 ### Phase 2: Game engine (`src/domain/`, pure TS, with tests)

@@ -6,6 +6,7 @@
 # Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
 branch: v_pull
 nodes:
+  # --- Foundation: hanging ---
   - id: dead_hang
     name: Dead hang
     order: 10
@@ -25,6 +26,221 @@ nodes:
       - https://redditbwf.github.io/wiki/recommended_routine.html
       - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
     verify: Not levelled in the OG2 chart (0 assumed); the 3 x 30 s gate follows the RR hold rule.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Beginner pulls: move the shoulder blades, then assisted pull-ups ---
+  - id: scapular_pull
+    name: Scapular pull
+    order: 20
+    og_level: 0
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: dead_hang
+        level: 5
+    patterns: [vertical_pull]
+    equipment:
+      - bar
+      - rings
+    cues:
+      - Hang with straight arms, then pull the shoulders down away from the ears.
+      - Arms stay straight the whole time; only the shoulder blades move.
+      - Pause at the top, then lower slowly back to a full hang.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://gist.github.com/sgup/f10f1d57e54b7876495f4bafb6d697eb
+    verify: Not levelled in the OG2 chart (0 assumed).
+    review:
+      status: draft
+      notes: ""
+
+  - id: jump_pull_up
+    name: Jumping pull-up
+    order: 30
+    og_level: 1
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: scapular_pull
+        level: 5
+    patterns: [vertical_pull]
+    equipment:
+      - bar
+    cues:
+      - Jump to bring the chin over the bar, using the legs only as much as needed.
+      - Lower yourself slowly to a full hang.
+      - A band-assisted pull-up is a fine substitute.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    review:
+      status: draft
+      notes: ""
+
+  # --- First strict pull-ups ---
+  - id: pull_up_negative
+    name: Pull-up negative
+    order: 40
+    og_level: 2
+    metric: eccentric_s
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, reps: 3, target: 5 }
+    prerequisites:
+      - node: jump_pull_up
+        level: 5
+    patterns: [vertical_pull]
+    equipment:
+      - bar
+      - rings
+    cues:
+      - Start with the chin over the bar (jump or step up).
+      - Lower slowly and evenly until the arms are fully straight.
+      - Keep the body tight; do not drop through the last part.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    verify: The 3 x 3 x 5 s trial is a placeholder based on the eccentric guidance, not a published standard.
+    review:
+      status: draft
+      notes: ""
+
+  - id: pull_up
+    name: Pull-up
+    order: 50
+    og_level: 2
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: pull_up_negative
+        level: 5
+    patterns: [vertical_pull]
+    equipment:
+      - bar
+      - rings
+    regression: pull_up_negative
+    cues:
+      - Start from a dead hang, arms fully straight.
+      - Pull until the chin is clearly over the bar.
+      - No kipping; keep the legs still and the body slightly hollow.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    review:
+      status: draft
+      notes: ""
+
+  # --- Harder pull-ups ---
+  - id: chest_to_bar_pull_up
+    name: Chest-to-bar pull-up
+    order: 60
+    og_level: 4
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: pull_up
+        level: 5
+    patterns: [vertical_pull]
+    equipment:
+      - bar
+    regression: pull_up
+    cues:
+      - Pull hard and fast until the chest touches the bar.
+      - Drive the elbows down and back; lean back slightly at the top.
+      - Lower under control to a full hang.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://bodyproskills.com/articles/muscle-up-prerequisites/
+    verify: Not levelled in OG2 (placed next to the L-pull-up at level 4); 4 is inferred.
+    review:
+      status: draft
+      notes: ""
+
+  - id: archer_pull_up
+    name: Archer pull-up
+    order: 70
+    og_level: 6
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: chest_to_bar_pull_up
+        level: 5
+    patterns: [vertical_pull]
+    equipment:
+      - bar
+      - rings
+    regression: chest_to_bar_pull_up
+    cues:
+      - Wide grip; pull towards one hand while the other arm stays nearly straight.
+      - Count reps per side and alternate sides.
+      - Lower slowly; do not let the working shoulder shrug up.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://gist.github.com/sgup/f10f1d57e54b7876495f4bafb6d697eb
+    verify: OG2 gives archer/typewriter pull-ups as ~6 (approximate).
+    review:
+      status: draft
+      notes: ""
+
+  # --- One-arm chin-up ---
+  - id: one_arm_chin_up_negative
+    name: One-arm chin-up negative
+    order: 80
+    og_level: 7
+    metric: eccentric_s
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, reps: 3, target: 5 }
+    prerequisites:
+      - node: archer_pull_up
+        level: 5
+    patterns: [vertical_pull]
+    equipment:
+      - bar
+    regression: archer_pull_up
+    cues:
+      - Get the chin over the bar with both arms, then let go with one hand.
+      - Lower slowly with the palm facing you; fight the rotation.
+      - Stop the set when you can no longer control the bottom half.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
+    verify: OG2 gives OAC negatives as ~7 (approximate); the 3 x 3 x 5 s trial is a placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  - id: one_arm_chin_up
+    name: One-arm chin-up
+    order: 90
+    og_level: 9
+    metric: reps
+    working_range: { min: 1, max: 3 }
+    trial: { sets: 3, target: 3 }
+    prerequisites:
+      - node: one_arm_chin_up_negative
+        level: 5
+    patterns: [vertical_pull]
+    equipment:
+      - bar
+    regression: one_arm_chin_up_negative
+    legendary: true
+    cues:
+      - Palm facing you; start from a full hang with the other hand free.
+      - Pull the chin over the bar without twisting away from it.
+      - Keep the free hand off the working arm and the bar.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://stevenlow.org/overcoming-gravity/
+    verify: >-
+      The 1-3 rep range and 3 x 3 trial are placeholders (OG2 levels the skill, not a rep
+      standard). A weighted pull-up of about 1.5 x bodyweight is a common extra gate.
     review:
       status: draft
       notes: ""

@@ -227,3 +227,24 @@ Template:
   - Contributors must run the build after editing YAML; tests and CI enforce it.
   - Persistence of the overlay (PLAN 3.4) and the editor UI (4.7, 4.8) are separate tasks.
   - AGENT.md §5 "Adding a skill node" now points at the YAML files.
+
+## ADR-017: Home-first dip: `straight_bar_dip` node and the bar muscle-up dip gate
+- Date: 2026-09-27 · Status: Accepted
+- Context: The node manifest had dips only on dip bars or rings (`dip_negative`, `parallel_bar_dip`),
+  and the muscle-up negative required `parallel_bar_dip` as a hard gate. The default Home profile
+  (floor, wall, bar, parallettes, bands; ADR-005) has neither, so Home users had no dip and could never
+  unlock the muscle-up chain. Prerequisites are single ids (no "either of" edges), and making
+  `alternatives` satisfy prerequisites would be new unlock semantics that belong to Phase 2.
+- Decision:
+  - Add `straight_bar_dip` to `v_push` (order 55, OG level 3 copied from PB dips, `verify:` note).
+    It needs only a bar. `parallel_bar_dip` and `straight_bar_dip` list each other as `alternatives`.
+  - `dip_negative` gains a `bar` equipment option (lowering from a support on a straight bar).
+  - `muscle_up_negative` requires `straight_bar_dip` (hard, L5) instead of `parallel_bar_dip`: the top
+    of a bar muscle-up is a straight-bar dip (bodyproskills: "the top of a muscle-up is a deep dip"),
+    so the more specific dip is also the better gate. The human flag keeps `parallel_bar_dip` (it
+    needs a pole anyway).
+  - `src/data/skills/crossBranchGates.test.ts` asserts that the Home profile reaches every node except
+    `parallel_bar_dip`, `iron_cross` and the three human flags, and at least two nodes per movement
+    pattern (one for `hinge`).
+- Consequences: 89 nodes instead of the manifest's 88. Park users also do straight-bar dips before the
+  muscle-up. Whether `alternatives` should satisfy prerequisites is left to PLAN 2.2.

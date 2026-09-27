@@ -6,6 +6,7 @@
 # Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
 branch: dynamic
 nodes:
+  # --- Foundation: the kip swing ---
   - id: kipping_swing
     name: Kip swing
     order: 10
@@ -31,6 +32,228 @@ nodes:
       - https://wodprep.com/blog/bar-muscle-up-progression-pull-up/
       - http://www.startbodyweight.com/2014/01/muscle-up-progression.html
     verify: Not levelled in OG2 (the kip pull-up is level 2); 1 is inferred. The rep standard is a placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Muscle-up ---
+  - id: muscle_up_negative
+    name: Muscle-up negative
+    order: 20
+    og_level: 3
+    metric: eccentric_s
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, reps: 3, target: 5 }
+    prerequisites:
+      - node: kipping_swing
+        level: 5
+      - node: chest_to_bar_pull_up
+        level: 5
+        note: About 10 strict pull-ups and 5 explosive chest-to-bar pull-ups.
+      - node: straight_bar_dip
+        level: 5
+        note: >-
+          About 10-15 dips. The top of a bar muscle-up is a deep straight-bar dip, so this gate
+          uses the straight-bar dip (which also works at home); parallel bar dips build the same base.
+    skill: true
+    patterns: [vertical_pull, vertical_push]
+    equipment:
+      - bar
+    regression: chest_to_bar_pull_up
+    cues:
+      - Start in the top support above the bar (jump or use a box).
+      - Lower through the dip, then slowly through the transition to a hang.
+      - Keep the bar close to the body the whole way down.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
+      - https://bodyproskills.com/articles/muscle-up-prerequisites/
+      - https://wodprep.com/blog/bar-muscle-up-progression-pull-up/
+    verify: >-
+      The 3 x 3 x 5 s trial is a placeholder; the pull-up and dip gates come from
+      secondary coaching sites.
+    review:
+      status: draft
+      notes: ""
+
+  - id: kipping_muscle_up
+    name: Kipping muscle-up
+    order: 30
+    og_level: 4
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: muscle_up_negative
+        level: 5
+    skill: true
+    patterns: [vertical_pull, vertical_push, explosive]
+    equipment:
+      - bar
+    regression: muscle_up_negative
+    cues:
+      - Use the kip swing, then pull the bar towards the hips, not the chin.
+      - Bring the chest over the bar quickly and press out to straight arms.
+      - Both arms go over together; no chicken-wing (one arm at a time).
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://wodprep.com/blog/bar-muscle-up-progression-pull-up/
+      - http://www.startbodyweight.com/2014/01/muscle-up-progression.html
+    verify: The 3-5 rep range and 3 x 5 trial are placeholders, not a published standard.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Elbow lever ---
+  - id: elbow_lever
+    name: Elbow lever
+    order: 40
+    og_level: 5
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: frog_stand
+        level: 5
+      - node: wrist_prep
+        level: 5
+        kind: recommended
+        note: The wrists carry the whole body in a bent position.
+    skill: true
+    patterns: [balance, core]
+    equipment:
+      - floor
+      - parallettes
+    cues:
+      - Hands close together, fingers turned out or back; elbows into the hips.
+      - Lean forward until the legs float, body straight and parallel to the floor.
+      - Squeeze the glutes and keep the elbows from sliding apart.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    verify: The 3 x 30 s trial follows the RR hold rule, not an elbow-lever-specific standard.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Human flag (on a vertical pole) ---
+  - id: tuck_human_flag
+    name: Tuck human flag
+    order: 50
+    og_level: 5
+    metric: hold_s
+    working_range: { min: 5, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: pull_up
+        level: 5
+        note: About 10 strict pull-ups.
+      - node: parallel_bar_dip
+        level: 5
+        note: About 10 dips.
+      - node: side_plank
+        level: 5
+        note: A 60-90 s side plank.
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull, straight_arm_push, core]
+    equipment:
+      - pole
+    cues:
+      - Top hand pulls, bottom hand pushes; both arms stay straight.
+      - Stack the shoulders over each other and tuck the knees to the chest.
+      - Keep the hips up at the level of the hands.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://bodyproskills.com/articles/human-flag-prerequisites/
+    verify: The 5-15 s range and 3 x 15 s trial are placeholders for an advanced hold.
+    review:
+      status: draft
+      notes: ""
+
+  - id: straddle_human_flag
+    name: Straddle human flag
+    order: 60
+    og_level: 6
+    metric: hold_s
+    working_range: { min: 5, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: tuck_human_flag
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull, straight_arm_push, core]
+    equipment:
+      - pole
+    regression: tuck_human_flag
+    cues:
+      - From the tuck, open the legs wide into a straddle.
+      - Body stays level with the floor; do not let the hips sag.
+      - Keep pushing hard with the bottom arm.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://bodyproskills.com/articles/human-flag-prerequisites/
+    verify: The 5-15 s range and 3 x 15 s trial are placeholders for an advanced hold.
+    review:
+      status: draft
+      notes: ""
+
+  - id: human_flag
+    name: Human flag
+    order: 70
+    og_level: 6
+    metric: hold_s
+    working_range: { min: 5, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: straddle_human_flag
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull, straight_arm_push, core]
+    equipment:
+      - pole
+    regression: straddle_human_flag
+    cues:
+      - Legs together, body in one straight line parallel to the floor.
+      - Top arm pulls, bottom arm pushes, both locked straight.
+      - Squeeze the legs and glutes to stop the hips from dropping.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://bodyproskills.com/articles/human-flag-prerequisites/
+    verify: OG2 gives the full flag as ~6 (approximate); the hold standard is a placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Strict muscle-up ---
+  - id: strict_bar_muscle_up
+    name: Strict bar muscle-up
+    order: 80
+    og_level: 7
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: kipping_muscle_up
+        level: 5
+      - node: chest_to_bar_pull_up
+        level: 5
+        note: Strong, explosive chest-to-bar pull-ups.
+    skill: true
+    patterns: [vertical_pull, vertical_push]
+    equipment:
+      - bar
+    regression: kipping_muscle_up
+    cues:
+      - Start from a still dead hang; no swing or kip.
+      - Pull explosively low towards the hips, then turn the wrists over the bar.
+      - Press out to a straight-arm support with both arms together.
+    sources:
+      - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
+      - https://bodyproskills.com/articles/muscle-up-prerequisites/
+    verify: The 3-5 rep range and 3 x 5 trial are placeholders, not a published standard.
     review:
       status: draft
       notes: ""
