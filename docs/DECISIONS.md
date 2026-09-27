@@ -422,3 +422,64 @@ Template:
   acknowledge step (Phase 4), and the straight-arm ones must explain why. Attribute points are no
   longer on the OG scale; the radar (4.5) should normalise them (e.g. to the largest attribute).
   Recompute is needed after this change for any stored caches (none exist yet).
+
+## ADR-024: Workout generator: frontier, scoring, slots and prescription (Phase 2.5)
+- Date: 2026-09-27 · Status: Accepted
+- Context: ADR-005 and ADR-006 fixed the idea (on-demand session from goals, progress, history,
+  equipment and time) and `docs/CONTEXT.md` sketched the steps. PLAN 2.5 needed concrete rules and
+  numbers, and ADR-023 requires the generator's own suggestions to keep respecting the advisory
+  safeguards while the user may override them.
+- Decision (`src/domain/generator.ts`, pure; `generateWorkout(request)` with the tree, goals,
+  progress, equipment tags, minutes, recent sessions, `now` and a `seed` as inputs):
+  - **Frontier:** for each goal, walk its unmet hard prerequisites (`resolveTree`, so alternatives
+    satisfy prerequisites, ADR-019) down to trainable nodes (available, training, self-unlocked).
+    A locked prerequisite with a trainable alternative walks to that alternative. A goal without
+    unmet prerequisites trains itself; mastered and unknown goals are skipped.
+  - **Candidates:** the frontier plus every available/training node the user has not outgrown (a
+    node is outgrown once a node that lists it as prerequisite or regression is trained). Equipment
+    is OR-of-AND; a node the profile can't do is replaced by one of its `alternatives` that the
+    profile can do and that shares its main pattern (unlocked first, then closest ogLevel, then id),
+    else dropped with a note.
+  - **Recovery:** a node is skipped when one of its patterns had working sets less than 48 h ago
+    (`PATTERN_REST_HOURS`); `balance` and `mobility` are exempt (low fatigue, daily practice).
+    Only ≥ 2 sets of a node in a session count as working sets (`MIN_WORKING_SETS`), so the
+    one-set warm-up items never block the next day. All straight-arm work is skipped when
+    `isStraightArmRested` says no.
+  - **Score** = goal-path weight (per goal: 50 + 30 × distance-to-goal / the goal's longest
+    distance, so the start of the critical path comes first; summed over goals) + 5 points per day
+    since the node's most recent pattern (max 7 days) + up to 20 for training the weaker of push /
+    pull (share of the attribute-point gap, `computeAttributes`, via `nodeAttributes`) + 10 for a
+    stalled node (best set not improved over its last 3 sessions, below the range top) + 1 per
+    ogLevel (train at your edge). Ties break by an FNV-1a hash of `seed:nodeId`, then id.
+  - **Slots:** fixed prep (`wrist_prep`, `shoulder_dislocate`) first; then, repeatedly, the open
+    slot whose best unused candidate scores highest is filled: 2 skill slots (`isSkill` or
+    straight-arm; the second only for goal skills), 3 strength pairs (vertical pull + squat, push +
+    hinge, horizontal pull + push), 1 core slot and 1 cool-down (mobility, goal nodes only). A slot
+    is added only if it fits the minutes left, first at full sets, then trimmed to 2 sets; else it
+    is skipped. Last, up to 2 warm-up ramp sets (the `regressionId` of the day's main exercises,
+    never straight-arm) are added if time is left. Blocks are output in session order.
+  - **Straight-arm budget:** each straight-arm exercise is fitted to the ~60 s left
+    (`straightArmSecondsUsed` on the planned sets): fewer sets, or not at all. A straight-arm
+    Trial is suggested only after `isTrialOpenBySafeguards` (else a note says in how many days)
+    and only if it fits the budget; otherwise top-of-range working sets are suggested and a note
+    says the user may still attempt it (with the budget warning). The warm-up never contains
+    straight-arm work.
+  - **Prescription (double progression):** no history → 3 × the bottom of the working range.
+    After a session where every set met its prescription: the weakest set + one step (1 rep, 5 s
+    hold, 1 s eccentric, 0.05 × BW), else the weakest set again, always inside the range. Once
+    every set reached the top of the range and the Trial isn't passed, the Trial is prescribed
+    (`trial.sets × trial.target`, `isTrial`). Eccentric and loaded nodes keep `trial.reps`
+    lowerings/reps per set. Warm-up items are 1 set at the range bottom.
+  - **Rest and time:** 90 s after each set inside a pair, 180 s otherwise, 30 s in the warm-up,
+    stored per exercise for the future rest timer. Estimate = Σ (30 s setup + sets × (work + rest)),
+    work = 3 s per rep, hold seconds, lowerings × seconds; rounded up to whole minutes and never
+    above the available minutes.
+  - **Output:** `WorkoutPlan { blocks, estimatedMinutes, warnings, notes }` (types in `types.ts`).
+    `warnings` are the advisory `SafeguardWarning`s that still apply (unmet prerequisites of a
+    self-unlocked or substituted node, and as a guard the session and Trial checks, which by
+    construction find nothing); `notes` explain substitutions, drops, rested patterns, deferred
+    Trials, stalls and push/pull priority.
+- Consequences: The content has straight-arm Trials of 3 × 30 s (tuck, advanced tuck and one-leg front lever, tuck and advanced tuck back lever, German hang, planche lean, straight-arm frog stand, tuck and advanced tuck planche), i.e. 90 s, above the 60 s budget, so the generator never suggests those Trials;
+  users reach them by their own choice (with the warning). The coach review (PLAN 1.10) should
+  decide whether those Trial standards or the budget should change (backlog). All numbers are a
+  first pass; tune them in `generator.ts` only.

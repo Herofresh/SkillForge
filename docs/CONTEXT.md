@@ -14,7 +14,8 @@ What exists today: the root and tabs layouts, four placeholder tab screens,
 `src/components/theme.ts`, `src/components/PlaceholderScreen.tsx`, `src/lib/clamp.ts`, and the
 Phase 1 progression pipeline (`content/progressions/`, `scripts/`, `src/domain/types.ts`,
 `tier.ts`, `overlay.ts`, `src/data/*`) and the Phase 2 game engine (`xp.ts`, `progression.ts`,
-`safeguards.ts`, `character.ts`, `recompute.ts`, `src/lib/curve.ts`, `median.ts`, `time.ts`). Files marked *(planned)* don't exist yet. Empty folders hold a
+`safeguards.ts`, `character.ts`, `recompute.ts`, `generator.ts`, `src/lib/curve.ts`, `median.ts`,
+`time.ts`, `hash.ts`). Files marked *(planned)* don't exist yet. Empty folders hold a
 `.gitkeep`.
 
 ```
@@ -43,7 +44,8 @@ src/
     safeguards.ts       ADR-010 tendon rules (advisory, ADR-023): straight-arm Trial clock, 60 s
                         budget, 48 h rest, and the SafeguardWarning producers
     character.ts        character level, attributes (PATTERN_ATTRIBUTES, trains), rank, balance warning
-    generator.ts        on-demand workout generator (planned)
+    generator.ts        on-demand workout generator: frontier, scoring, equipment substitution,
+                        slots, double progression (ADR-024)
     recompute.ts        applySession / applyUserAction (reducer steps) + recompute (fold over
                         sessions and user actions), ADR-008/021/023
   data/
@@ -62,7 +64,7 @@ src/
     theme.ts            UI colors, spacing, navigation theme (single source of UI colors)
     PlaceholderScreen.tsx  temporary tab body until Phase 4
   lib/                  generic helpers: clamp.ts, curve.ts (geometric level curves), median.ts,
-                        time.ts (MS_PER_HOUR/DAY/WEEK)
+                        time.ts (MS_PER_HOUR/DAY/WEEK), hash.ts (FNV-1a, seeded tie-breaks)
 assets/                 app icon, adaptive icon, splash, favicon
 docs/                   PLAN, DECISIONS, CONTEXT, research
   research/node-manifest.md  planned MVP nodes (ids, order, OG level, prerequisites)
@@ -108,8 +110,8 @@ the state with the same steps (`canApplyIncrementally` says when that is needed)
 `nodeUseWarnings(node, status, progress, lookup, now)` (Trial / test-out) and
 `sessionSafeguardWarnings(sets, lookup, state.lastStraightArmSessionAt, now)` (live session), shows
 the `SafeguardWarning`s and lets the user acknowledge them; after logging, the same warnings come
-back in `SessionResult.warnings`. The generator (2.5) never suggests work that would trigger a
-`warning`-severity safeguard.
+back in `SessionResult.warnings`. The generator never suggests work that would trigger a
+`warning`-severity safeguard (ADR-024).
 
 ## Glossary
 
@@ -131,7 +133,9 @@ back in `SessionResult.warnings`. The generator (2.5) never suggests work that w
 | **Proficient** | Node level 5 with the Trial passed. Unlocks successor nodes. |
 | **Mastered** | Node level 10. |
 | **Banked XP** | XP earned while capped at level 5 before passing the Trial. It's applied once the Trial is passed. |
-| **Frontier** | The available or training nodes on the paths toward the user's goals. This is what the generator picks from. |
+| **Frontier** | The trainable nodes (available, training or self-unlocked) reached by walking a goal's unmet hard prerequisites; a goal without unmet ones is its own frontier. The generator weights them by how far they are from the goal (critical path first). |
+| **Working sets** | At least `MIN_WORKING_SETS` (2) sets of one node in one session. Only they count for pattern recency, last performance and stagnation; the 1-set warm-up items don't. |
+| **Workout plan** | The generator's output: blocks (`warm_up`, `skill`, `strength` pairs, `core`, `cool_down`) of `PlannedExercise`s (`sets`, `target`, `restSec`, `isTrial?`, `substitutedFrom?`), an estimate in minutes, advisory warnings and notes. A suggestion the user can edit. |
 | **Equipment profile** | A named set of equipment tags, e.g. Home or Park, chosen at session start (ADR-005). |
 | **Straight-arm budget** | About 60 s total of straight-arm holds per session is recommended (ADR-010). Going over it gives a warning, not a block (ADR-023). |
 | **Test-out** | Passing a Trial on any node without training it first, including straight-arm nodes and locked nodes (ADR-023). Sets the node to level 5 / proficient and unlocks successors. |
@@ -188,20 +192,51 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
   Novice < 2 ≤ Apprentice < 6 ≤ Adept < 9 ≤ Master < 13 ≤ Legend.
 - **Balance warning:** |push peak − pull peak| > 2 OG levels.
 
-## Generator summary *(planned, Phase 2.5)*
+## Generator *(Phase 2.5, ADR-024; constants in `src/domain/generator.ts` only)*
 
-1. Build the frontier from the goals.
-2. Score each node: goal-path weight + days since the pattern was trained (skip anything trained
-   <48 h ago) + push/pull deficit + stagnation.
-3. Substitute exercises for the chosen equipment profile.
-4. Fill slots: warm-up, 1–2 skill, paired strength (pull + legs, push + hinge, row + push), core. Trim
-   to the available time.
-5. Prescribe with double progression. Rest is 90 s within a pair and about 3 min otherwise.
-6. Respect the tendon safeguards in every suggestion (ADR-010, ADR-023): no straight-arm Trial
-   before `isTrialOpenBySafeguards`, straight-arm work within `remainingStraightArmBudget`, and only
-   when `isStraightArmRested`. The user may still go beyond them; the generator never suggests it.
+`generateWorkout({ nodes, goals, progress, equipment, availableMinutes, recentSessions, now, seed })`
+→ `WorkoutPlan`. Pure and deterministic (same request and seed → same plan, independent of the
+order of `recentSessions`). Pass the merged tree and `EngineState.progress`.
 
-The generator is deterministic for the same inputs.
+1. **Frontier** (`goalFrontier`): per goal, walk unmet hard prerequisites (from `resolveTree`,
+   so alternatives satisfy them) to trainable nodes; a locked prerequisite with a trainable
+   alternative walks to the alternative. Goal weight per frontier node =
+   `GOAL_BASE_WEIGHT` 50 + `CRITICAL_PATH_WEIGHT` 30 × distance / the goal's longest distance,
+   summed over goals.
+2. **Candidates:** frontier + available/training nodes not outgrown (a dependent or harder
+   variation is trained). Equipment (OR-of-AND, `isDoableWith`): otherwise
+   `substituteFor` picks a doable alternative with the same main pattern (unlocked, then closest
+   ogLevel, then id), else the node is dropped (note for goal nodes).
+3. **Skips:** any non-exempt pattern with working sets < `PATTERN_REST_HOURS` 48 h ago
+   (`balance`, `mobility` are exempt); all straight-arm nodes when not `isStraightArmRested`.
+4. **Score** = goal weight + `RECENCY_POINTS_PER_DAY` 5 × days since the node's most recent
+   pattern (max `RECENCY_MAX_DAYS` 7; never = 7) + `BALANCE_WEIGHT` 20 × push/pull
+   attribute-point deficit share (for nodes training the weaker side) + `STAGNATION_BONUS` 10
+   (best set not improved over the last `STAGNATION_SESSIONS` 3 sessions) + `OG_LEVEL_POINTS` 1 ×
+   ogLevel. Ties: FNV-1a hash of `seed:nodeId`, then id.
+5. **Slots:** fixed prep `WARM_UP_PREP_IDS` (`wrist_prep`, `shoulder_dislocate`, 1 set each);
+   then greedily the open slot with the best unused candidate: 2 skill slots (`isSkill` or
+   straight-arm; the 2nd for goal skills only), 3 `STRENGTH_PAIRS` (vertical pull + squat, push +
+   hinge, horizontal pull + push; a missing side leaves a single), 1 core, 1 cool-down (mobility,
+   goal nodes only). A slot is added at `WORKING_SETS` 3, else trimmed to `MIN_WORKING_SETS` 2,
+   else skipped when it doesn't fit the minutes left. Then up to `WARM_UP_MAX_RAMP` 2 ramp sets
+   (`regressionId` of the main exercises, never straight-arm).
+6. **Safeguards:** straight-arm exercises are fitted to the `STRAIGHT_ARM_SESSION_BUDGET_S` 60 s
+   left (fewer sets or none); a straight-arm Trial only after `isTrialOpenBySafeguards` and only
+   if it fits the budget (3 × 30 s Trials never do; a note says the user may still attempt them).
+   `warnings` carries the advisory warnings that still apply (a self-unlocked or substituted node's
+   `prerequisites_unmet`); the suggestion never triggers a `warning`-severity safeguard.
+7. **Prescription** (`prescribe`, double progression): no history → 3 × range min. After a
+   fully successful session → weakest set + `PROGRESSION_STEP` (reps 1, hold 5 s, eccentric 1 s,
+   load 0.05), else the weakest set; clamped to the working range. Every set at the range top and
+   Trial not passed → the Trial (`trial.sets × trial.target`, `isTrial`).
+8. **Rest and time:** `PAIR_REST_SEC` 90 inside a pair, `SINGLE_REST_SEC` 180 otherwise,
+   `WARM_UP_REST_SEC` 30 (per exercise, for the rest timer). Estimate per exercise
+   (`exerciseSeconds`) = `TRANSITION_SEC` 30 + sets × (work + rest), work = `SECONDS_PER_REP` 3 per
+   rep, hold seconds, or lowerings × seconds. `estimatedMinutes` = ceil(total / 60) ≤ available.
+
+Helpers for the UI and tests: `planExercises(plan)`, `plannedSets(exercises, at)` (the plan as
+`LoggedSet`s, e.g. for `sessionSafeguardWarnings` while the user edits the plan).
 
 ## Data model *(planned, Phase 3)*
 - **Tables:**

@@ -16,20 +16,21 @@
   `verify:` note). The coach review sheet `docs/review/progression-matrix.md` is generated and committed.
 - Phase 2 game engine (2.1–2.4, 2.6) is merged ([PR #6](https://github.com/Herofresh/SkillForge/pull/6)): `xp.ts`,
   `progression.ts`, `safeguards.ts`, `character.ts`, `recompute.ts` in `src/domain/`, pure and
-  tested. Formulas and constants are in `docs/CONTEXT.md` → Formulas and ADR-018…021. No generator
-  (2.5), persistence or real UI yet.
+  tested. Formulas and constants are in `docs/CONTEXT.md` → Formulas and ADR-018…021.
 - User autonomy (2.7, ADR-023, [PR #8](https://github.com/Herofresh/SkillForge/pull/8)): "the app suggests, the user decides". Test-out works on
   every node (straight-arm on day 1, locked nodes too), a user can self-unlock a locked node
   (`UserAction` in history), the ADR-010 tendon safeguards are advisory `SafeguardWarning`s
   instead of blocks, and every trained node pays into all the attributes it trains
   (`PATTERN_ATTRIBUTES` or the new YAML field `trains`, weighted by ogLevel and node level).
+- Workout generator (2.5, ADR-024, [PR #9](https://github.com/Herofresh/SkillForge/pull/9)): `generateWorkout` in `src/domain/generator.ts`
+  builds a `WorkoutPlan` from goals, progress, equipment, minutes and recent sessions (frontier,
+  scoring, substitution, slots, double progression; suggestions respect the safeguards).
+  **Phase 2 is complete.** No persistence or real UI yet.
 
 ## Next up
-1. Phase 2.5: `generator.ts` on top of the engine (frontier from goals, `resolveTree` for states,
-   `lastTrainedAt` for pattern recency). Its suggestions must respect the safeguards
-   (`isTrialOpenBySafeguards`, `remainingStraightArmBudget`, `isStraightArmRested`) even though
-   the user may override them (ADR-023). Self-unlocked nodes count as frontier candidates.
-2. Phase 3.1–3.2: persistence; `session_sets` rows map 1:1 to `LoggedSet` (ADR-021).
+1. Phase 3.1–3.2: persistence; `session_sets` rows map 1:1 to `LoggedSet` (ADR-021), self-unlocks
+   go to `user_actions`, goals and equipment profiles feed `generateWorkout` (`WorkoutRequest`).
+2. Phase 3.3–3.4: export/import and the stored overlay.
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -37,6 +38,22 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Workout generator (Phase 2.5, ADR-024):**
+  - `generateWorkout(request)` is pure; pass `now` and a `seed` (e.g. the session id hash or a
+    counter). Same request + seed = same plan, so the plan preview can be regenerated safely.
+  - `recentSessions` should cover at least the last two weeks: it drives pattern recency, the
+    48 h rules, the last performance for double progression and stagnation. Only ≥ 2 sets of a
+    node in a session count as working sets, so a 1-set warm-up item never blocks a pattern.
+  - The Train flow (4.4) should log a planned exercise with `prescribed = target` and
+    `isTrial` from the plan. When the user edits the plan, re-check it with
+    `sessionSafeguardWarnings(plannedSets(planExercises(plan), now), …)` and show the warnings
+    with an acknowledge step (ADR-023); never block.
+  - Default profiles are not stored anywhere yet: Home = floor, wall, bar, parallettes, bands;
+    Park = Home + dip_bars (`docs/CONTEXT.md` → Equipment tags). 3.1/4.1 should seed them.
+  - Straight-arm Trials of 3 × 30 s (10 nodes, listed in the backlog item) exceed the 60 s budget, so the generator never suggests them (a note
+    says so). See the backlog item; don't "fix" it by skipping the budget (AGENT.md §5).
+  - Constants are a first pass (see `docs/CONTEXT.md` → Generator). Tune them in
+    `generator.ts` only.
 - **Game engine (Phase 2.1–2.4, 2.6; ADR-018…021):**
   - Everything takes the node list as a parameter. Pass the user's merged tree
     (`applyOverlay(ALL_NODES, overlay).nodes`), not `ALL_NODES`, once the overlay is persisted (3.4),
@@ -154,7 +171,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 2.2 `progression.ts`: levels 1–10, level-5 cap and Trial, banked XP, node states, unlock resolution ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [x] 2.3 Tendon safeguards (ADR-010): min weeks at level, 60 s straight-arm budget, 48 h rule ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [x] 2.4 `character.ts`: character level, attributes, rank title, push/pull balance warning ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
-- [ ] 2.5 `generator.ts`: frontier, scoring, equipment substitution, slot filling, double-progression prescription; suggestions respect the safeguards (ADR-023)
+- [x] 2.5 `generator.ts`: frontier, scoring, equipment substitution, slot filling, double-progression prescription; suggestions respect the safeguards (ADR-023) ([PR #9](https://github.com/Herofresh/SkillForge/pull/9))
 - [x] 2.6 Recompute-from-history function (ADR-008) ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [x] 2.7 User autonomy: test-out anywhere (incl. straight-arm), self-unlock as a recorded user action, advisory safeguards (`SafeguardWarning`), multi-attribute stats (`PATTERN_ATTRIBUTES`, YAML `trains`) (ADR-023) ([PR #8](https://github.com/Herofresh/SkillForge/pull/8))
 
@@ -189,6 +206,9 @@ compiled into a typed module for the app; users can layer their own changes on t
 - Notifications and reminders
 - More content: advanced/elite nodes, full flexibility branch
 - Optional cloud sync
+- Straight-arm Trial vs. budget (from 2.5, ADR-024): the 3 × 30 s Trials (tuck, advanced tuck and one-leg front lever, tuck and advanced tuck back lever, German hang, planche lean, straight-arm frog stand, tuck and advanced tuck planche) total 90 s, above the ~60 s
+  straight-arm budget, so the generator never suggests them. Needs a user/coach decision (1.10):
+  e.g. 2 × 30 s or 3 × 20 s Trials for those nodes, or a Trial-day exception to the budget.
 - Overlay safety (from the PR #4 review): `applyOverlay` only enforces `straight_arm: true` in the
   front_lever, back_lever and planche branches, so an overlay edit can set `straight_arm: false` on
   a built-in straight-arm node elsewhere (e.g. `german_hang`, `manna`, `tuck_human_flag`) or move it
