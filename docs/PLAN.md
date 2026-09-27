@@ -9,23 +9,46 @@
   CI (PR #3).
 - The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. The
   Android bundle exports cleanly, but it hasn't been opened on a phone in Expo Go yet.
-- Phase 1 is in review on branch `feat/progression-matrix` ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)): shared types, the YAML
-  progression format with build/check/review scripts, the validator, the user overlay and the full
-  dataset of **89 nodes** in 12 branches (all `review.status: draft`, 52 with a `verify:` note).
-  The coach review sheet `docs/review/progression-matrix.md` is generated and committed. No game
-  logic or persistence yet.
+- Phase 1 is merged ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)) except 1.6 (OG verification) and 1.10 (coach review): shared
+  types, the YAML progression format with build/check/review scripts, the validator, the user
+  overlay and the full dataset of **89 nodes** in 12 branches (all `review.status: draft`, 52 with a
+  `verify:` note). The coach review sheet `docs/review/progression-matrix.md` is generated and committed.
+- Phase 2 game engine (2.1–2.4, 2.6) is in review on branch `feat/game-engine` ([PR #6](https://github.com/Herofresh/SkillForge/pull/6)): `xp.ts`,
+  `progression.ts`, `safeguards.ts`, `character.ts`, `recompute.ts` in `src/domain/`, pure and
+  tested. Formulas and constants are in `docs/CONTEXT.md` → Formulas and ADR-018…021. No generator
+  (2.5), persistence or real UI yet.
 
 ## Next up
-1. Reviewer agent: review and merge the Phase 1 PR ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)).
-2. Phase 2.1–2.2: `xp.ts` and `progression.ts` on top of `ALL_NODES` (decide in 2.2 whether a
-   node's `alternatives` can satisfy a prerequisite, see ADR-017).
-3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+1. Reviewer agent: review and merge the game-engine PR ([PR #6](https://github.com/Herofresh/SkillForge/pull/6)).
+2. Phase 2.5: `generator.ts` on top of the engine (frontier from goals, `resolveTree` for states,
+   `remainingStraightArmBudget` / `isStraightArmRested` from `safeguards.ts`, `lastTrainedAt` for
+   pattern recency).
+3. Phase 3.1–3.2: persistence; `session_sets` rows map 1:1 to `LoggedSet` (ADR-021).
+4. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
 ## Blockers
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Game engine (Phase 2.1–2.4, 2.6; ADR-018…021):**
+  - Everything takes the node list as a parameter. Pass the user's merged tree
+    (`applyOverlay(ALL_NODES, overlay).nodes`), not `ALL_NODES`, once the overlay is persisted (3.4),
+    so user-added or edited progressions (and later coach changes) flow through the same rules.
+  - `applySession` is the only reducer step; `recompute` folds it over the sorted history. Use
+    `canApplyIncrementally` before an incremental apply; an older session (import) needs a recompute.
+    Recompute also after an overlay edit or a formula change.
+  - A skipped set must be logged with `actual.value = 0` (completion bonus and outcome rely on it).
+  - Trials count only on unlocked nodes and, for straight-arm nodes, 6 weeks after the first logged
+    set. Straight-arm nodes therefore cannot be tested out; onboarding assessment Trials (4.1) must
+    not offer them, or the user must decide to relax ADR-020.
+  - The engine does not enforce the 60 s budget or the 48 h rule on logged sets; the generator (2.5)
+    and UI must call `remainingStraightArmBudget` and `isStraightArmRested`.
+  - `alternatives` of a prerequisite node satisfy that prerequisite (ADR-019), so a proficient
+    `straight_bar_dip` also meets the human flag's `parallel_bar_dip` gate.
+  - All numbers are a first balance pass; tune them only in the owning module and recompute.
+  - PR #5 (docs-only PLAN update after PR #4) also edits "Current state" / "Next up"; whichever merges
+    second has to resolve a small conflict in this file.
 - **Progression matrix (Phase 1, ADR-015/016):**
   - Content lives in `content/progressions/<branch>.yaml`. Authors follow
     `content/progressions/README.md` and the node list in `docs/research/node-manifest.md`.
@@ -76,7 +99,7 @@
   optional peers needed on Linux (here `@emnapi/core`/`@emnapi/runtime` for `@napi-rs/wasm-runtime`),
   and then CI's `npm ci` fails with "Missing: … from lock file". Fix it by adding the missing entries
   (see PR #3), not by switching `npm ci` to `npm install`. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…017). The
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…021). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
@@ -109,12 +132,12 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [ ] 1.10 Coach review pass: a calisthenics coach reviews the sheet; notes go into `review.notes`, signed-off nodes get `review.status: coach_reviewed` (needs the user to find a coach)
 
 ### Phase 2: Game engine (`src/domain/`, pure TS, with tests)
-- [ ] 2.1 `xp.ts`: unit normalization (1 rep = 2 s hold = 3 s eccentric), difficulty and outcome multipliers, bonuses
-- [ ] 2.2 `progression.ts`: levels 1–10, level-5 cap and Trial, banked XP, node states, unlock resolution
-- [ ] 2.3 Tendon safeguards (ADR-010): min weeks at level, 60 s straight-arm budget, 48 h rule
-- [ ] 2.4 `character.ts`: character level, attributes, rank title, push/pull balance warning
+- [x] 2.1 `xp.ts`: unit normalization (1 rep = 2 s hold = 3 s eccentric), difficulty and outcome multipliers, bonuses ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
+- [x] 2.2 `progression.ts`: levels 1–10, level-5 cap and Trial, banked XP, node states, unlock resolution ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
+- [x] 2.3 Tendon safeguards (ADR-010): min weeks at level, 60 s straight-arm budget, 48 h rule ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
+- [x] 2.4 `character.ts`: character level, attributes, rank title, push/pull balance warning ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [ ] 2.5 `generator.ts`: frontier, scoring, equipment substitution, slot filling, double-progression prescription
-- [ ] 2.6 Recompute-from-history function (ADR-008)
+- [x] 2.6 Recompute-from-history function (ADR-008) ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 
 ### Phase 3: Persistence
 - [ ] 3.1 Drizzle schema and migrations (profile, goals, node_progress, equipment_profiles, sessions, session_sets, settings)
