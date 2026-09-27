@@ -9,17 +9,16 @@
   CI (PR #3).
 - The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. The
   Android bundle exports cleanly, but it hasn't been opened on a phone in Expo Go yet.
-- Phase 1 is in review on branch `feat/progression-matrix` ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)): shared types, the YAML
+- Phase 1 is merged ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)) except 1.6 (OG verification) and 1.10 (coach review): shared types, the YAML
   progression format with build/check/review scripts, the validator, the user overlay and the full
   dataset of **89 nodes** in 12 branches (all `review.status: draft`, 52 with a `verify:` note).
   The coach review sheet `docs/review/progression-matrix.md` is generated and committed. No game
   logic or persistence yet.
 
 ## Next up
-1. Reviewer agent: review and merge the Phase 1 PR ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)).
-2. Phase 2.1–2.2: `xp.ts` and `progression.ts` on top of `ALL_NODES` (decide in 2.2 whether a
+1. Phase 2.1–2.2: `xp.ts` and `progression.ts` on top of `ALL_NODES` (decide in 2.2 whether a
    node's `alternatives` can satisfy a prerequisite, see ADR-017).
-3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
 ## Blockers
