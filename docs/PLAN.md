@@ -14,18 +14,17 @@
   types, the YAML progression format with build/check/review scripts, the validator, the user
   overlay and the full dataset of **89 nodes** in 12 branches (all `review.status: draft`, 52 with a
   `verify:` note). The coach review sheet `docs/review/progression-matrix.md` is generated and committed.
-- Phase 2 game engine (2.1–2.4, 2.6) is in review on branch `feat/game-engine` ([PR #6](https://github.com/Herofresh/SkillForge/pull/6)): `xp.ts`,
+- Phase 2 game engine (2.1–2.4, 2.6) is merged ([PR #6](https://github.com/Herofresh/SkillForge/pull/6)): `xp.ts`,
   `progression.ts`, `safeguards.ts`, `character.ts`, `recompute.ts` in `src/domain/`, pure and
   tested. Formulas and constants are in `docs/CONTEXT.md` → Formulas and ADR-018…021. No generator
   (2.5), persistence or real UI yet.
 
 ## Next up
-1. Reviewer agent: review and merge the game-engine PR ([PR #6](https://github.com/Herofresh/SkillForge/pull/6)).
-2. Phase 2.5: `generator.ts` on top of the engine (frontier from goals, `resolveTree` for states,
+1. Phase 2.5: `generator.ts` on top of the engine (frontier from goals, `resolveTree` for states,
    `remainingStraightArmBudget` / `isStraightArmRested` from `safeguards.ts`, `lastTrainedAt` for
    pattern recency).
-3. Phase 3.1–3.2: persistence; `session_sets` rows map 1:1 to `LoggedSet` (ADR-021).
-4. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+2. Phase 3.1–3.2: persistence; `session_sets` rows map 1:1 to `LoggedSet` (ADR-021).
+3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
 ## Blockers
