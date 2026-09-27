@@ -111,3 +111,18 @@ Template:
   `docs/CONTEXT.md` is the lookup reference, and `docs/research/` holds the source material. Every task
   updates them in the same PR.
 - Consequences: A small amount of overhead per task in exchange for continuity.
+
+## ADR-012: PRs are reviewed and merged by an independent reviewer agent
+- Date: 2026-09-27 · Status: Accepted
+- Context: The user doesn't want to review every change personally.
+- Decision:
+  - Every PR is handed to a fresh reviewer agent that didn't author it.
+  - The reviewer verifies it (install, typecheck, lint, test, CI), reviews the diff against AGENT.md,
+    and squash-merges if it's fine.
+  - The reviewer requests changes if there are substantive issues.
+  - The reviewer escalates to the user (`needs-user` label) for product decisions, ADR reversals,
+    risky dependencies, data-destructive changes, or non-converging reviews.
+- Consequences:
+  - Faster flow with less user overhead.
+  - Review quality depends on independence, so the author must never merge their own PR.
+  - The rules live in AGENT.md §4a.

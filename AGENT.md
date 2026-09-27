@@ -68,6 +68,44 @@ If these documents disagree with the code, the code is the truth. Fix the docume
 8. **Open a PR.**
    - Say what changed, why, how it was verified, and link the PLAN.md task.
    - Report failures honestly. If something is untested or skipped, say so.
+9. **Hand the PR to a reviewer agent.** Never merge your own PR. See §4a.
+
+## 4a. PR review and merge (agent-reviewed, not user-reviewed)
+
+The user doesn't review every PR. Each PR is handed to a **fresh, independent reviewer agent**. That
+agent didn't write the code and starts with no context from the author.
+
+**The reviewer:**
+
+1. **Reads the context.** It reads `AGENT.md`, the PR description, the linked PLAN.md task and the
+   relevant ADRs.
+2. **Checks out the branch and verifies it.**
+   - `npm ci`, then `npm run typecheck && npm run lint && npm test` must all pass.
+   - GitHub Actions CI must be green once it exists.
+3. **Reviews the diff against:**
+   - correctness and tests;
+   - the §2 principles (DRY, the pure domain layer, no logic in components);
+   - scope, meaning only the claimed task;
+   - the docs, meaning PLAN.md, DECISIONS.md and CONTEXT.md are updated;
+   - accuracy of content against `docs/research/`;
+   - the safety rules in §5.
+4. **Acts on the result.**
+   - **If everything looks fine:** approve, **squash-merge**
+     (`gh pr merge <n> --squash --delete-branch`), then update `docs/PLAN.md` on `main` if the merge
+     changes the "Current state".
+   - **If the problems are small and mechanical** (typos, a missing doc line, lint): the reviewer may
+     push a fix commit to the branch, re-verify, then merge.
+   - **If the problems are substantive:** don't merge. Leave a PR review with concrete, actionable
+     findings. The PR then goes back to an implementing agent, and after the fix a new reviewer checks
+     it again.
+5. **Escalates to the user instead of merging** when:
+   - a product decision is involved;
+   - an ADR would be reversed;
+   - a dependency with licence or security concerns is added;
+   - the change deletes user data or migrations;
+   - review has gone around more than twice without converging.
+
+   To escalate, label the PR `needs-user` and write the reason in PLAN.md under "Blockers".
 
 ## 4. Documentation duty (non-negotiable)
 
