@@ -660,3 +660,46 @@ Template:
 - Consequences: The first `lockfile:*` run downloads npm 11.19.0 into the npx cache. The lockfile
   written by 11.19.0 also normalizes some `peer`/`dev` flags. Bumping npm means changing the pin,
   running `lockfile:fix` and committing both files; CI follows automatically.
+
+## ADR-030: Design system: pixel-art × dark fantasy, OFL pixel fonts, grid-defined icons (PLAN 4.0)
+- Date: 2026-09-27 · Status: Accepted
+- Context: Phase 4 builds every screen. Without one visual language each screen would invent its own
+  colors and widgets. The user chose the direction: "a mix of pixel-art and fantasy RPG". The app
+  must stay legible on a phone (body text contrast, touch targets, screen readers) and must not need
+  an artist for icons.
+- Decision:
+  - **Look:** retro 16-bit JRPG menus on a dark grimoire: night/stone surfaces, gold and parchment
+    accents, rune colors; panels with two-step notched corners, 2 dp ink + accent frame lines and a
+    hard 4 dp shadow; no blur, gradients or rounded corners. Documented in `docs/DESIGN.md`.
+  - **Tokens only in `src/components/theme.ts`:** `Palette` → semantic `Colors`, `TierColors`,
+    `AttributeColors`, `FontFamily`, `TypeScale`, `PIXEL` (2 dp), `Spacing`, `Border`, `Frames`,
+    `ButtonStyles`, `Motion`, `TOUCH_TARGET`. Text/fill pairs are pinned at ≥ 4.5:1 (bars ≥ 3:1) by
+    `theme.test.ts` using `src/lib/contrast.ts`.
+  - **Fonts (all SIL OFL, `@expo-google-fonts`):** Pixelify Sans Bold/SemiBold for titles, headings
+    and buttons; Silkscreen for tiny caps tags; **Alegreya Sans** for body text, because pixel fonts
+    tire the eye in sentences and a humanist sans with calligraphic roots fits the grimoire. Press
+    Start 2P was rejected (too wide, poor at body sizes). Only the five used weights are imported.
+    `useFonts` runs in the root layout; `DataGate` keeps the native splash until fonts and the
+    database are ready; a font error falls back to the system font instead of blocking.
+  - **Icons:** 12×12 character grids in `src/components/ui/icons.ts` (roles `# + * o`, mapped to theme
+    colors), parsed by `src/lib/pixelGrid.ts` into horizontal runs and drawn with `react-native-svg`
+    rects (`PixelIcon`, optional single `tint`). No image assets, no icon font; the tab bar uses the
+    same icons instead of expo-symbols. Tests check every grid's shape and colors.
+  - **Frames without SVG:** `PixelFrame` stacks absolutely positioned Views (notched shape = union of
+    three rects, `frameGeometry.ts`), so panels size to their content and stay cheap.
+  - **Components** in `src/components/ui/` (Screen, PixelFrame, PixelText, PixelButton, PixelIcon,
+    SegmentedBar, XPBar, StatBar, LevelBadge, TierChip, WarningBanner, PixelModal, EmptyState,
+    LevelUpBurst). They take display values (fractions, levels, messages) as props and compute no
+    game numbers. `WarningBanner` is controlled (`acknowledged` + `onAcknowledge`) and never blocks
+    anything (ADR-023).
+  - **Motion:** Reanimated with `Easing.steps` for sprite-like frames, ≤ 640 ms, and
+    `useReducedMotion` everywhere (burst shows only its title, sheets don't slide).
+  - **Dev Style Guide:** route `/styleguide`, linked from Settings only when `__DEV__`; a release
+    build redirects to the tree. It is the living catalogue and a Maestro flow (`styleguide.yaml`).
+  - **Component tests:** `@testing-library/react-native` 14 (with its `test-renderer` peer, React 19)
+    in `*.test.tsx` next to the components; `jest.setup.ts` loads the Reanimated and Worklets JS
+    mocks (the Reanimated mock gets a `useReducedMotion` stub).
+- Consequences: New deps `react-native-svg` (Expo Go, MIT), three `@expo-google-fonts` packages
+  (OFL fonts, MIT loaders), dev deps RNTL + test-renderer (MIT). Every Phase 4 screen builds from the
+  kit and adds tokens to `theme.ts` (with a contrast test) instead of local styles. Silkscreen is
+  all caps: `label` is for short tags only. `expo-symbols` is no longer imported (left installed).

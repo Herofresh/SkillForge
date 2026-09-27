@@ -1,0 +1,63 @@
+# Design system (PLAN 4.0): the dev-only Style Guide opens from Settings and its interactive parts
+# work (warning acknowledge, modal). Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
+appId: host.exp.exponent
+name: Style guide - components render and respond
+---
+- openLink: exp://127.0.0.1:8081
+# Wait for the app. It may still be open where an earlier flow left it: any tab, or the Style Guide.
+- extendedWaitUntil:
+    visible: 'Tree|Style Guide'
+    timeout: 180000
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+- runFlow:
+    when:
+      visible:
+        id: 'styleguide'
+    commands:
+      - back
+- tapOn: 'Tree'
+- assertVisible: 'Skill Tree'
+- tapOn: 'Settings'
+- scrollUntilVisible:
+    element:
+      id: 'open-styleguide'
+    direction: DOWN
+    timeout: 90000 # a long page on a software-rendered emulator
+- tapOn:
+    id: 'open-styleguide'
+- extendedWaitUntil:
+    visible:
+      id: 'styleguide'
+    timeout: 20000
+- assertVisible: 'Typography'
+- scrollUntilVisible:
+    element:
+      id: 'demo-warning-acknowledge'
+    direction: DOWN
+    timeout: 90000 # a long page on a software-rendered emulator
+- tapOn:
+    id: 'demo-warning-acknowledge'
+- assertVisible:
+    id: 'demo-warning-acknowledged'
+- scrollUntilVisible:
+    element:
+      id: 'open-modal'
+    direction: DOWN
+    timeout: 90000 # a long page on a software-rendered emulator
+- tapOn:
+    id: 'open-modal'
+- assertVisible: 'Choose a profile'
+- tapOn: 'Close'
+- assertNotVisible: 'Choose a profile'
+- scrollUntilVisible:
+    element: 'Replay burst'
+    direction: DOWN
+    timeout: 90000 # a long page on a software-rendered emulator
+- tapOn: 'Replay burst'
+- assertVisible: 'LEVEL UP!'
+- back
+- assertVisible: 'Equipment profiles'
