@@ -143,3 +143,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 - Notifications and reminders
 - More content: advanced/elite nodes, full flexibility branch
 - Optional cloud sync
+- Overlay safety (from the PR #4 review): `applyOverlay` only enforces `straight_arm: true` in the
+  front_lever, back_lever and planche branches, so an overlay edit can set `straight_arm: false` on
+  a built-in straight-arm node elsewhere (e.g. `german_hang`, `manna`, `tuck_human_flag`) or move it
+  to another `branch`, which would drop its tendon safeguards (AGENT.md §5, ADR-010). Decide before
+  the editor UI (4.7/4.8) whether overlays may clear `straightArm` on built-in nodes.
