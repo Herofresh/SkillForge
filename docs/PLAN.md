@@ -8,8 +8,8 @@
 - Phase 0 is done: docs (PR #1), the Expo SDK 57 scaffold with tooling (PR #2), and GitHub Actions
   CI (PR #3).
 - The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. It runs
-  in Expo Go on the `Pixel_6_Pro_API_34` emulator, and a Maestro smoke flow checks that every tab
-  renders (task 0.6, ADR-022).
+  in Expo Go on the emulator, and a Maestro smoke flow checks that every tab renders (task 0.6,
+  ADR-022). The default E2E AVD is now `Pixel_8_Pro_API_35` with `-gpu host` (task 0.8, ADR-032).
 - Phase 1 is merged ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)) except 1.6 (OG verification) and 1.10 (coach review): shared
   types, the YAML progression format with build/check/review scripts, the validator, the user
   overlay and the full dataset of **89 nodes** in 12 branches (all `review.status: draft`, 52 with a
@@ -249,8 +249,8 @@
 - [x] 0.4 GitHub Actions CI: typecheck, lint and test on every PR ([PR #3](https://github.com/Herofresh/SkillForge/pull/3))
 - [x] 0.5 Folder layout (`src/domain`, `src/data/skills`, `src/db`, `src/components`, `src/lib`) and README update ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
 - [x] 0.6 Emulator check and Maestro E2E smoke flow (`.maestro/smoke.yaml`, `npm run e2e`, ADR-022). Verified on `Pixel_6_Pro_API_34` via Expo Go ([PR #7](https://github.com/Herofresh/SkillForge/pull/7))
-- [x] 0.7 Emulator upgrade: Emulator 37.1.11, API 35, default AVD `Pixel_8_Pro_API_35` with host GPU (matches the user's phone), runbook updated (ADR-032) ([PR #16](https://github.com/Herofresh/SkillForge/pull/16))
 - [x] 0.7 Lockfile guard: `lockfile:check` / `lockfile:fix` with the npm pinned in `devEngines`, CI on the same npm (ADR-029) ([PR #13](https://github.com/Herofresh/SkillForge/pull/13))
+- [x] 0.8 Emulator upgrade: Emulator 37.1.11, API 35, default AVD `Pixel_8_Pro_API_35` with host GPU (matches the user's phone), runbook updated (ADR-032) ([PR #16](https://github.com/Herofresh/SkillForge/pull/16))
 
 ### Phase 1: Progression matrix
 The matrix is authored as human-editable YAML (one file per branch in `content/progressions/`) and
