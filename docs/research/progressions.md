@@ -31,6 +31,8 @@ RTO 60° PPPU [7] → RTO Maltese PU [9] → Wall PPPU [10] → Wall Maltese PU 
 - **Ring dips:** Ring Support [1] → RTO Support [2] → Ring Dip Negatives [3] → Ring Dips [4] →
   Ring L-Dips [5] → Ring Wide Dips [6] → RTO 45° Dips [~6] → RTO 75° [7] → RTO 90° [9] → RTO 90°+ variants [10–11]
 - **Weighted dips (total load):** 1.2× BW [2] up to 2.25× BW [5]
+- **Straight bar dips (not in the OG2 printout):** added to the dataset as the Home-profile dip and the
+  bar muscle-up dip gate (ADR-017). Level 3 is copied from PB dips and still needs verifying.
 - **HSPU:** Pike HeSPU [1] → Box/Elevated Pike HeSPU [2] → Wall HeSPU negative [~2] → Wall HeSPU [4] →
   Wall HSPU (full ROM) [5] → Freestanding HeSPU [6] → Freestanding HSPU [~6–7] → Ring Wide / Strap / Free HSPU [~7]
 

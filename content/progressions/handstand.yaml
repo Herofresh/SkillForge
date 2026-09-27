@@ -1,0 +1,251 @@
+# Handstand and balance
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: handstand
+nodes:
+  # --- Wall work (hold standard: RR 3 x 30 s) ---
+  - id: wall_plank
+    name: Wall plank
+    order: 10
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: wrist_prep
+        level: 5
+        kind: recommended
+    skill: true
+    patterns: [balance, vertical_push]
+    equipment:
+      - wall
+    cues:
+      - Start in a push-up position with the feet against the wall.
+      - Walk the feet up the wall until the body forms an L (hips over the shoulders).
+      - Push tall through the shoulders; arms straight, head between the arms.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://gmb.io/handstand/
+    review:
+      status: draft
+      notes: ""
+
+  - id: wall_handstand
+    name: Wall handstand (back to wall)
+    order: 20
+    og_level: 1
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: wall_plank
+        level: 5
+      - node: pike_push_up
+        level: 5
+        kind: recommended
+        note: Builds the shoulder strength to hold bodyweight overhead.
+    skill: true
+    patterns: [balance, vertical_push]
+    equipment:
+      - wall
+    regression: wall_plank
+    cues:
+      - Kick up with your back to the wall, hands a hand-width from it.
+      - Arms locked, push tall through the shoulders.
+      - Ribs in, glutes squeezed; try to touch the wall only with the heels.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://gmb.io/handstand/
+    verify: OG2 gives level 1-2; 1 is used.
+    review:
+      status: draft
+      notes: ""
+
+  - id: chest_to_wall_handstand
+    name: Chest-to-wall handstand
+    order: 30
+    og_level: 2
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: wall_handstand
+        level: 5
+    skill: true
+    patterns: [balance, vertical_push]
+    equipment:
+      - wall
+    regression: wall_handstand
+    cues:
+      - Walk the feet up the wall until the chest and toes face it, hands close to the wall.
+      - Straight line from wrists to toes; ribs in, no banana back.
+      - Shoulders pushed up by the ears, fingers active to balance.
+    sources:
+      - https://gmb.io/freestanding-handstand/
+      - https://gmb.io/handstand/
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: Not levelled in OG2 (2 inferred between wall HS and freestanding HS).
+    review:
+      status: draft
+      notes: ""
+
+  # --- Bent-arm balance ---
+  - id: frog_stand
+    name: Frog stand (crow)
+    order: 40
+    og_level: 3
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: wrist_prep
+        level: 5
+    skill: true
+    patterns: [balance]
+    equipment:
+      - floor
+      - parallettes
+    cues:
+      - Hands shoulder-width apart, knees resting on the backs of the bent elbows.
+      - Lean forward slowly until the feet lift.
+      - Look slightly ahead, not straight down.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    review:
+      status: draft
+      notes: ""
+
+  # --- Freestanding ---
+  - id: freestanding_handstand
+    name: Freestanding handstand
+    order: 50
+    og_level: 4
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: chest_to_wall_handstand
+        level: 5
+        note: About 3 x 20-30 s chest-to-wall first (GMB).
+    skill: true
+    patterns: [balance, vertical_push]
+    equipment:
+      - floor
+    regression: chest_to_wall_handstand
+    cues:
+      - Kick up gently and find the stack of wrists, shoulders, hips and feet.
+      - Balance with the fingers (press to stop falling over, relax to stop falling back).
+      - Learn to bail safely first (cartwheel out or step down).
+    sources:
+      - https://gmb.io/freestanding-handstand/
+      - https://gmb.io/handstand/
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    verify: >-
+      OG2 gives level 4-5; 4 is used. GMB's common gate is about 60 s; the 3 x 30 s trial
+      follows the RR hold rule.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Press to handstand ---
+  - id: wall_straddle_press_eccentric
+    name: Wall straddle press eccentric
+    order: 60
+    og_level: 5
+    metric: eccentric_s
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, reps: 3, target: 5 }
+    prerequisites:
+      - node: chest_to_wall_handstand
+        level: 5
+      - node: l_sit
+        level: 5
+        kind: recommended
+        note: Compression strength helps control the lowering.
+    skill: true
+    patterns: [balance, straight_arm_push, core]
+    equipment:
+      - wall
+    regression: chest_to_wall_handstand
+    cues:
+      - From a handstand with the heels on the wall, open the legs wide.
+      - Lower the legs slowly to the floor, shoulders leaning forward over the hands.
+      - Arms stay straight; count the seconds of the lowering.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
+    review:
+      status: draft
+      notes: ""
+
+  - id: straddle_press_to_handstand
+    name: Straddle press to handstand
+    order: 70
+    og_level: 7
+    metric: reps
+    working_range: { min: 3, max: 6 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: wall_straddle_press_eccentric
+        level: 5
+      - node: freestanding_handstand
+        level: 5
+      - node: straddle_l_sit
+        level: 5
+    skill: true
+    patterns: [balance, straight_arm_push, core]
+    equipment:
+      - floor
+      - parallettes
+    regression: wall_straddle_press_eccentric
+    cues:
+      - Start standing in a wide straddle, hands on the floor close to the feet.
+      - Shift the shoulders forward over the hands until the feet float.
+      - Lift the hips over the shoulders, then bring the legs together.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/the-fundamentals-of-bodyweight-strength-training/
+    verify: >-
+      No rep standard in the sources; 3 x 5 follows Steven Low's strength rule (advance past
+      5-6 reps) and is a placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  # --- One-arm (legendary) ---
+  - id: one_arm_handstand
+    name: One-arm handstand
+    order: 80
+    og_level: 10
+    metric: hold_s
+    working_range: { min: 8, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: freestanding_handstand
+        level: 5
+        note: About 60 s freestanding handstand first (GMB).
+    skill: true
+    patterns: [balance, vertical_push]
+    equipment:
+      - floor
+    regression: freestanding_handstand
+    legendary: true
+    cues:
+      - Shift the weight onto one hand while the body stays in one straight line.
+      - Open the legs to a straddle for balance at first.
+      - Balance through the fingers and the shoulder of the support arm.
+    sources:
+      - https://gmb.io/handstand/
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    verify: >-
+      The 3 x 15 s trial is a placeholder (advanced-hold rule); no source gives a one-arm HS
+      standard.
+    review:
+      status: draft
+      notes: ""

@@ -167,3 +167,84 @@ Template:
     `userInterfaceStyle: dark`.
 - Consequences: Expo docs that assume `src/app/` need translating to `app/`. Don't create `src/app/`,
   because Expo Router would switch to it.
+
+## ADR-015: Libraries for the progression content pipeline: `yaml` and `tsx`, no schema library
+- Date: 2026-09-27 · Status: Accepted
+- Context: The progression matrix is authored in YAML (ADR-016). We need a YAML parser, a way to run
+  TypeScript build scripts, and field validation with messages a non-programmer can act on.
+- Decision:
+  - **`yaml`** (eemeli/yaml, ISC, no dependencies, pure JS) parses and writes YAML. It keeps comments
+    out of the data, reports syntax errors with line and column, and rejects duplicate keys. It is a
+    runtime dependency because overlay import/export (`src/domain/overlay.ts`) runs in the app; the
+    built-in matrix is still never parsed on the phone.
+  - **`tsx`** (dev) runs `scripts/progressions.ts` directly, honouring the `@/*` alias from
+    `tsconfig.json`, so the script and the app share the same modules.
+  - **`@types/node`** (dev) for the script and the dataset test's file access; `tsconfig.json`
+    `types` now lists `node` next to `jest`.
+  - **No `zod`.** A small field table in `src/data/progressionFormat.ts` parses each node and writes
+    plain-language errors ("metric 'repetitions' is not allowed; use one of: …"), and the same table
+    converts nodes back to YAML for overlay export. A schema library would add a dependency and
+    produce messages that need rewriting for coaches anyway.
+- Consequences: One small runtime dependency. Jest maps `yaml` to its CommonJS build because the
+  jest-expo resolver otherwise picks its ESM browser entry.
+
+## ADR-016: Progression matrix as YAML source + generated module, with a user overlay
+- Date: 2026-09-27 · Status: Accepted
+- Context: The user wants the matrix easy to read and edit for people who don't program: a calisthenics
+  coach will review it, and users should be able to add or change progressions. The earlier plan
+  (AGENT.md §5, CONTEXT.md) had TypeScript files in `src/data/skills/<branch>.ts`.
+- Decision:
+  - **Source of truth:** one YAML file per branch in `content/progressions/<branch>.yaml`. One block
+    per node, readable snake_case field names, comments allowed, cross-references by id. Each node
+    has `review: { status: draft | coach_reviewed, notes }` and an optional `verify:` note that
+    replaces the `// TODO(verify):` comment convention. Field guide: `content/progressions/README.md`.
+  - **One parse/normalize function** (`parseBranchFile`/`nodeFromRaw` in
+    `src/data/progressionFormat.ts`) is used by the build script, the tests and overlay import.
+    Graph rules live in `validateNodes` (`src/data/validate.ts`), also shared.
+  - **Generated artifact:** `npm run progressions:build` writes
+    `src/data/skills/progressions.generated.ts` (a typed TS module, so `tsc` checks it against
+    `ExerciseNode`) and the coach sheet `docs/review/progression-matrix.md`. Both are committed. The
+    app imports the module via `src/data/skills/index.ts` (`ALL_NODES`, `NODE_BY_ID`); nothing parses
+    YAML at runtime. A test fails when either generated file is stale, and CI runs
+    `npm run progressions:check`.
+  - **`order` (chainOrder)** is an explicit number, suggested in steps of 10 so nodes can be inserted
+    without renumbering. It only orders the column; ids carry identity.
+  - **`ogLevel` 0** means "foundation exercise below OG2 level 1" (wall push-up, dead hang). Range is
+    0–17. Tier is derived by `tierForOgLevel` (`src/domain/tier.ts`) and never stored.
+  - **Straight-arm branches** (`front_lever`, `back_lever`, `planche`) must have `straight_arm: true`
+    on every node; bent-arm work that belongs to those skills (frog stand, FL rows) lives in the
+    handstand and h_pull branches.
+  - **User overlay:** `ProgressionOverlay { added, edited, hidden }` in `src/domain/types.ts`.
+    `applyOverlay(base, overlay)` merges and then runs the same `validateNodes`; it is all or nothing
+    and returns the unchanged base plus issues if anything breaks (cycles, dangling ids, bad trials).
+    Added nodes have ids starting `user_` and `source: 'user'`; edits never change `id` or `source`.
+    Hiding a node routes its dependents to the hidden node's own prerequisites. `exportOverlay` /
+    `importOverlay` use the same YAML field format (plus `branch:` per node), so a user's progression
+    can be sent back as a suggestion and pasted into a content file.
+  - `src/domain/overlay.ts` imports the pure `src/data` format and validator modules. That is the
+    one allowed domain → data import; both modules stay free of React/Expo/DB (ADR-009).
+- Consequences:
+  - Contributors must run the build after editing YAML; tests and CI enforce it.
+  - Persistence of the overlay (PLAN 3.4) and the editor UI (4.7, 4.8) are separate tasks.
+  - AGENT.md §5 "Adding a skill node" now points at the YAML files.
+
+## ADR-017: Home-first dip: `straight_bar_dip` node and the bar muscle-up dip gate
+- Date: 2026-09-27 · Status: Accepted
+- Context: The node manifest had dips only on dip bars or rings (`dip_negative`, `parallel_bar_dip`),
+  and the muscle-up negative required `parallel_bar_dip` as a hard gate. The default Home profile
+  (floor, wall, bar, parallettes, bands; ADR-005) has neither, so Home users had no dip and could never
+  unlock the muscle-up chain. Prerequisites are single ids (no "either of" edges), and making
+  `alternatives` satisfy prerequisites would be new unlock semantics that belong to Phase 2.
+- Decision:
+  - Add `straight_bar_dip` to `v_push` (order 55, OG level 3 copied from PB dips, `verify:` note).
+    It needs only a bar. `parallel_bar_dip` and `straight_bar_dip` list each other as `alternatives`.
+  - `dip_negative` gains a `bar` equipment option (lowering from a support on a straight bar).
+  - `muscle_up_negative` requires `straight_bar_dip` (hard, L5) instead of `parallel_bar_dip`: the top
+    of a bar muscle-up is a straight-bar dip (bodyproskills: "the top of a muscle-up is a deep dip"),
+    so the more specific dip is also the better gate. The human flag keeps `parallel_bar_dip` (it
+    needs a pole anyway).
+  - `src/data/skills/crossBranchGates.test.ts` asserts that the Home profile reaches every node except
+    `parallel_bar_dip`, `iron_cross` and the three human flags, and at least two nodes per movement
+    pattern (one for `hinge`).
+- Consequences: 89 nodes instead of the manifest's 88. Park users also do straight-bar dips before the
+  muscle-up. Whether `alternatives` should satisfy prerequisites is left to PLAN 2.2.

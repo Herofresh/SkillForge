@@ -1,0 +1,164 @@
+# Front lever (straight-arm pulling: every node here must have straight_arm: true)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: front_lever
+nodes:
+  # --- Tuck positions (hold standard: RR 3 x 30 s) ---
+  - id: tuck_front_lever
+    name: Tuck front lever
+    order: 10
+    og_level: 4
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: pull_up
+        level: 5
+        note: About 8-15 strict pull-ups before front lever work.
+      - node: dead_hang
+        level: 5
+      - node: hollow_hold
+        level: 5
+        note: A 30 s hollow hold is the common front lever gate.
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - bar
+      - rings
+    cues:
+      - Arms locked straight; pull the bar down towards the hips.
+      - Shoulder blades pulled down and slightly back.
+      - Knees tucked to the chest, back rounded, hips level with the shoulders.
+    sources:
+      - https://www.calisthenics-corner.com/skills/front-lever/
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""
+
+  - id: advanced_tuck_front_lever
+    name: Advanced tuck front lever
+    order: 20
+    og_level: 4
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: tuck_front_lever
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - bar
+      - rings
+    regression: tuck_front_lever
+    cues:
+      - Open the hips so the thighs are about 90 degrees to the body.
+      - Flatten the back; no rounding like in the tuck.
+      - Keep the hips level with the shoulders, arms locked.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-corner.com/skills/front-lever/
+    verify: OG2 level ~4 is inferred from the chart layout.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Leg-extended positions ---
+  - id: one_leg_front_lever
+    name: One-leg front lever
+    order: 30
+    og_level: 6
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: advanced_tuck_front_lever
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - bar
+      - rings
+    regression: advanced_tuck_front_lever
+    cues:
+      - One leg straight out in line with the body, the other tucked.
+      - Squeeze the glutes; do not let the hips pike or sag.
+      - Switch the extended leg between sets.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-corner.com/skills/front-lever/
+    verify: >-
+      OG2 level ~6 is inferred; OG2 lists the one-leg / half-lay FL next to the straddle FL,
+      so the order of these two may be swapped.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Advanced holds (standard: about 15 s, Antranik / Steven Low) ---
+  - id: straddle_front_lever
+    name: Straddle front lever
+    order: 40
+    og_level: 6
+    metric: hold_s
+    working_range: { min: 8, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: one_leg_front_lever
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - bar
+      - rings
+    regression: one_leg_front_lever
+    cues:
+      - Legs straight and spread wide; the wider, the easier.
+      - Body in one line from shoulders to hips, parallel to the floor.
+      - Arms locked, shoulders pulled down.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://antranik.org/ssc/
+      - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
+    review:
+      status: draft
+      notes: ""
+
+  - id: front_lever
+    name: Front lever
+    order: 50
+    og_level: 7
+    metric: hold_s
+    working_range: { min: 8, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: straddle_front_lever
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - bar
+      - rings
+    regression: straddle_front_lever
+    cues:
+      - Legs together and straight, toes pointed.
+      - Whole body horizontal and rigid, a slight hollow.
+      - Arms locked; pull the bar towards the hips.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://antranik.org/ssc/
+      - https://en.wikipedia.org/wiki/Front_lever
+    review:
+      status: draft
+      notes: ""

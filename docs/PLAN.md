@@ -9,23 +9,66 @@
   CI (PR #3).
 - The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. The
   Android bundle exports cleanly, but it hasn't been opened on a phone in Expo Go yet.
-- There's no game logic, data or persistence yet.
+- Phase 1 is in review on branch `feat/progression-matrix` ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)): shared types, the YAML
+  progression format with build/check/review scripts, the validator, the user overlay and the full
+  dataset of **89 nodes** in 12 branches (all `review.status: draft`, 52 with a `verify:` note).
+  The coach review sheet `docs/review/progression-matrix.md` is generated and committed. No game
+  logic or persistence yet.
 
 ## Next up
-1. Phase 1.1: `src/domain/types.ts`.
-2. Phase 1.2–1.4: the progression dataset in `src/data/skills/`.
-3. Phase 1.5: `src/data/validate.ts` with tests.
+1. Reviewer agent: review and merge the Phase 1 PR ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)).
+2. Phase 2.1–2.2: `xp.ts` and `progression.ts` on top of `ALL_NODES` (decide in 2.2 whether a
+   node's `alternatives` can satisfy a prerequisite, see ADR-017).
+3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+   find a coach).
 
 ## Blockers
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Progression matrix (Phase 1, ADR-015/016):**
+  - Content lives in `content/progressions/<branch>.yaml`. Authors follow
+    `content/progressions/README.md` and the node list in `docs/research/node-manifest.md`.
+  - After any YAML edit run `npm run progressions:build` and commit the YAML **and** the two
+    generated files (`src/data/skills/progressions.generated.ts`, `docs/review/progression-matrix.md`).
+    The dataset test and `progressions:check` (also in CI) fail when they are stale.
+  - Dataset: 89 nodes (manifest's 88 + `straight_bar_dip`, ADR-017). Home profile reaches every
+    node except `parallel_bar_dip`, `iron_cross` and the three human flags; this and the key
+    cross-branch gates are asserted in `src/data/skills/crossBranchGates.test.ts`.
+  - The muscle-up negative's dip gate is `straight_bar_dip` (not `parallel_bar_dip`), so Home users
+    can reach it. The human flag still gates on `parallel_bar_dip`.
+  - Handstand presses (`wall_straddle_press_eccentric`, `straddle_press_to_handstand`) have the
+    `straight_arm_push` pattern but `straight_arm: false` (balance skills). The gate test pins this;
+    a coach may want them flagged.
+  - **Open `verify:` nodes (task 1.6 / 1.10), 52 total:**
+    - h_push: pseudo_planche_push_up
+    - v_push: support_hold, dip_negative, straight_bar_dip, freestanding_handstand_push_up
+    - v_pull: dead_hang, scapular_pull, pull_up_negative, chest_to_bar_pull_up, archer_pull_up,
+      one_arm_chin_up_negative, one_arm_chin_up
+    - h_pull: band_row
+    - front_lever: advanced_tuck_front_lever, one_leg_front_lever (OG2 may list it after straddle)
+    - back_lever: skin_the_cat, tuck_back_lever, back_lever, iron_cross
+    - planche: planche_lean, full_planche
+    - handstand: wall_handstand, chest_to_wall_handstand, freestanding_handstand,
+      straddle_press_to_handstand, one_arm_handstand
+    - core: hollow_hold, side_plank, foot_supported_l_sit, hanging_knee_raise, l_sit, toes_to_bar,
+      straddle_l_sit, v_sit, manna (big jump from the 45° V-sit to manna; OG2 gates on a 170° V-sit)
+    - legs: split_squat, bulgarian_split_squat, assisted_pistol_squat, nordic_curl_negative
+    - dynamic: kipping_swing, muscle_up_negative, kipping_muscle_up, elbow_lever, tuck_human_flag,
+      straddle_human_flag, human_flag, strict_bar_muscle_up
+    - flexibility: all 5 (our own synthesis)
+  - Placeholder standards worth a coach's eye first: one-arm chin-up 3×3, muscle-ups 3×5, all
+    eccentric trials 3×3 lowerings of 5 s, advanced holds 3×15 s, `skin_the_cat` 3×8.
+  - `yaml` is a runtime dependency only for overlay import/export; the built-in matrix is never
+    parsed on the phone. Jest maps `yaml` to its CJS build (`package.json` → `moduleNameMapper`)
+    because jest-expo otherwise picks the ESM browser build.
+  - Windows `npm install` dropped the `@emnapi/*` lockfile entries again; they were restored by hand
+    (see the CI gotcha below). Check for this after every install.
 - Scaffold (tasks 0.2–0.5): routes are in root `app/` (not the template's `src/app/`, see ADR-014).
   Tooling choices are in ADR-013. Folder layout, alias and commands are in `docs/CONTEXT.md`.
 - UI colors live only in `src/components/theme.ts`. Tab screens use `PlaceholderScreen`; replace them
   in Phase 4.
-- `src/domain`, `src/data/skills` and `src/db` only contain `.gitkeep`. Delete it when you add the first
-  real file.
+- `src/db` only contains `.gitkeep`. Delete it when you add the first real file.
 - Add dependencies with `npx expo install <pkg>` so versions match SDK 57. `npx expo-doctor` passed
   21/21 checks at scaffold time.
 - CI (`.github/workflows/ci.yml`) runs on Node 24 for every PR and on every push to `main`: npm ci,
@@ -33,7 +76,7 @@
   optional peers needed on Linux (here `@emnapi/core`/`@emnapi/runtime` for `@napi-rs/wasm-runtime`),
   and then CI's `npm ci` fails with "Missing: … from lock file". Fix it by adding the missing entries
   (see PR #3), not by switching `npm ci` to `npm install`. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…014). The
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…017). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
@@ -51,12 +94,19 @@
 - [x] 0.5 Folder layout (`src/domain`, `src/data/skills`, `src/db`, `src/components`, `src/lib`) and README update ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
 
 ### Phase 1: Progression matrix
-- [ ] 1.1 `src/domain/types.ts`: `ExerciseNode`, `Branch`, `Metric`, `Prerequisite`, `Trial`, `EquipmentTag`
-- [ ] 1.2 Dataset, about 80 nodes across 12 branches (OG levels 1–8, plus elite "legendary" teasers)
-- [ ] 1.3 Cross-branch prerequisites (muscle-up, front lever, planche, freestanding HS, flag, pistol)
-- [ ] 1.4 Equipment tags and `alternatives` (Home: bar/parallettes/bands; Park: + dip bars)
-- [ ] 1.5 `src/data/validate.ts` + tests: DAG/no cycles, IDs resolve, ogLevel monotonic per chain, equipment present
+The matrix is authored as human-editable YAML (one file per branch in `content/progressions/`) and
+compiled into a typed module for the app; users can layer their own changes on top (ADR-016).
+
+- [x] 1.1 `src/domain/types.ts`: `ExerciseNode`, `Branch`, `Metric`, `Prerequisite`, `Trial`, `EquipmentTag`, overlay types; `tierForOgLevel` ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.2 Dataset: the 88 nodes of [`docs/research/node-manifest.md`](research/node-manifest.md) written as YAML blocks in `content/progressions/<branch>.yaml`, plus `straight_bar_dip` (89 nodes, ADR-017) ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.3 Cross-branch prerequisites (muscle-up, front lever, planche, freestanding HS, flag, pistol), as listed in the manifest ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.4 Equipment options and `alternatives` (Home: floor/wall/bar/parallettes/bands; Park: + dip bars) ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.5 `src/data/validate.ts` + tests: unique snake_case ids, references resolve, DAG, ogLevel monotonic per branch, unique order, equipment, ranges/trials, sources, straight-arm flag ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
 - [ ] 1.6 Verify the inferred (`~`) OG2 levels against the OG2 Google Sheet
+- [x] 1.7 YAML format (`src/data/progressionFormat.ts`), `npm run progressions:build|check|review`, generated `src/data/skills/progressions.generated.ts`, staleness test, contributor guide `content/progressions/README.md` ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.8 Coach review sheet `docs/review/progression-matrix.md` (generated, committed) ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.9 User overlay in `src/domain/overlay.ts`: `applyOverlay` (same validator), `exportOverlay`/`importOverlay` (YAML/JSON) ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [ ] 1.10 Coach review pass: a calisthenics coach reviews the sheet; notes go into `review.notes`, signed-off nodes get `review.status: coach_reviewed` (needs the user to find a coach)
 
 ### Phase 2: Game engine (`src/domain/`, pure TS, with tests)
 - [ ] 2.1 `xp.ts`: unit normalization (1 rep = 2 s hold = 3 s eccentric), difficulty and outcome multipliers, bonuses
@@ -70,6 +120,7 @@
 - [ ] 3.1 Drizzle schema and migrations (profile, goals, node_progress, equipment_profiles, sessions, session_sets, settings)
 - [ ] 3.2 Repositories plus the Zustand stores that wire the domain to the database
 - [ ] 3.3 JSON export/import with validation
+- [ ] 3.4 Store the user progression overlay (ADR-016) in SQLite, apply it with `applyOverlay` when loading the tree, and include it in export/import
 
 ### Phase 4: Core UI
 - [ ] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials
@@ -78,6 +129,8 @@
 - [ ] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove) → live logging → summary with XP, level-ups and unlocks
 - [ ] 4.5 Character tab: level, rank, attribute radar, streak, recent sessions
 - [ ] 4.6 Settings: equipment profiles, export/import
+- [ ] 4.7 In-app node editor: add a `user_` node, edit a node's standards/prerequisites, hide a node; show `applyOverlay` issues inline and never save a broken tree
+- [ ] 4.8 "Suggest to project": share the overlay as YAML (`exportOverlay`) and import someone else's (`importOverlay`)
 
 ### Phase 5: Graph view and release
 - [ ] 5.1 Graph view: dagre layout, SVG, pan/zoom, glowing unlocked edges, legendary silhouettes
@@ -90,3 +143,8 @@
 - Notifications and reminders
 - More content: advanced/elite nodes, full flexibility branch
 - Optional cloud sync
+- Overlay safety (from the PR #4 review): `applyOverlay` only enforces `straight_arm: true` in the
+  front_lever, back_lever and planche branches, so an overlay edit can set `straight_arm: false` on
+  a built-in straight-arm node elsewhere (e.g. `german_hang`, `manna`, `tuck_human_flag`) or move it
+  to another `branch`, which would drop its tendon safeguards (AGENT.md §5, ADR-010). Decide before
+  the editor UI (4.7/4.8) whether overlays may clear `straightArm` on built-in nodes.

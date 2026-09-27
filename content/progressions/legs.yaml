@@ -1,0 +1,214 @@
+# Legs (squat, single-leg, hinge)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: legs
+nodes:
+  # --- Squat (two legs) ---
+  - id: assisted_squat
+    name: Assisted squat
+    order: 10
+    og_level: 0 # foundation: easier than the OG2 level-1 parallel squat
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    patterns: [squat]
+    equipment:
+      - floor # hold on to a door frame, pole or bar for balance
+    cues:
+      - Hold something sturdy in front of you and use it only as much as needed.
+      - Feet shoulder width, toes slightly out, knees track over the toes.
+      - Sit down between the heels as deep as you can with a neutral back.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""
+
+  - id: squat
+    name: Bodyweight squat
+    order: 20
+    og_level: 1 # OG2 parallel squat
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: assisted_squat
+        level: 5
+    patterns: [squat]
+    equipment:
+      - floor
+    regression: assisted_squat
+    cues:
+      - Feet shoulder width, toes slightly out.
+      - Sit down until the thighs are at least parallel to the floor.
+      - Knees track over the toes, heels stay down, chest up.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    review:
+      status: draft
+      notes: ""
+
+  - id: deep_squat
+    name: Deep squat
+    order: 30
+    og_level: 2 # OG2 full squat
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: squat
+        level: 5
+    patterns: [squat]
+    equipment:
+      - floor
+    regression: squat
+    cues:
+      - Go all the way down, hips well below the knees.
+      - Heels stay flat on the floor the whole time.
+      - Keep the back neutral at the bottom; stand up without bouncing.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    review:
+      status: draft
+      notes: ""
+
+  # --- Single leg ---
+  - id: split_squat
+    name: Split squat
+    order: 40
+    og_level: 2
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per leg
+    prerequisites:
+      - node: squat
+        level: 5
+    patterns: [squat]
+    equipment:
+      - floor
+    regression: squat
+    cues:
+      - Long stance, one foot forward, back heel up.
+      - Lower straight down until the back knee almost touches the floor.
+      - Front knee tracks over the toes; torso stays upright.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://gist.github.com/sgup/f10f1d57e54b7876495f4bafb6d697eb
+    verify: Order follows the RR squat progression; the OG2 level is inferred.
+    review:
+      status: draft
+      notes: ""
+
+  - id: bulgarian_split_squat
+    name: Bulgarian split squat
+    order: 50
+    og_level: 3
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per leg
+    prerequisites:
+      - node: split_squat
+        level: 5
+    patterns: [squat]
+    equipment:
+      - floor # rear foot on a chair, sofa or bench
+      - box
+    regression: split_squat
+    cues:
+      - Rear foot up on a chair or box behind you.
+      - Lower until the front thigh is about parallel to the floor.
+      - Push up through the whole front foot; keep the hips square.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://gist.github.com/sgup/f10f1d57e54b7876495f4bafb6d697eb
+    verify: Order follows the RR squat progression; the OG2 level is inferred.
+    review:
+      status: draft
+      notes: ""
+
+  - id: assisted_pistol_squat
+    name: Assisted pistol squat
+    order: 60
+    og_level: 3
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per leg
+    prerequisites:
+      - node: bulgarian_split_squat
+        level: 5
+      - node: deep_squat
+        level: 5
+    patterns: [squat]
+    equipment:
+      - floor # hold a door frame, pole or bar for balance
+    regression: bulgarian_split_squat
+    cues:
+      - Stand on one leg and hold a door frame or pole lightly.
+      - Other leg straight out in front, off the floor.
+      - Squat all the way down and up, using the hands as little as possible.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://gist.github.com/sgup/f10f1d57e54b7876495f4bafb6d697eb
+    verify: Order follows the RR squat progression; the OG2 level is inferred.
+    review:
+      status: draft
+      notes: ""
+
+  - id: pistol_squat
+    name: Pistol squat
+    order: 70
+    og_level: 4
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per leg
+    prerequisites:
+      - node: assisted_pistol_squat
+        level: 5
+    patterns: [squat]
+    equipment:
+      - floor
+    regression: assisted_pistol_squat
+    cues:
+      - Stand on one leg, other leg straight out in front.
+      - Squat all the way down with the heel flat; reach the arms forward for balance.
+      - Stand up without bouncing or letting the knee cave in.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    review:
+      status: draft
+      notes: ""
+
+  # --- Hinge (hamstrings) ---
+  - id: nordic_curl_negative
+    name: Nordic curl negative
+    order: 80
+    og_level: 4
+    metric: eccentric_s
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, reps: 3, target: 5 } # 3 sets of 3 lowerings of 5 s
+    prerequisites:
+      - node: squat
+        level: 5
+    patterns: [hinge]
+    equipment:
+      - floor # heels anchored under a sofa, heavy furniture or a partner
+    cues:
+      - Kneel with the heels anchored and the body straight from knees to head.
+      - Lower forward as slowly as you can, hips stay extended.
+      - Catch yourself with the hands and push back up to the start.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
+    verify: >-
+      The OG2 level is inferred. The trial follows Steven Low's eccentric guide (2-3 sets of 2-3 reps
+      at 3-5 s); there is no Nordic-specific standard.
+    review:
+      status: draft
+      notes: ""

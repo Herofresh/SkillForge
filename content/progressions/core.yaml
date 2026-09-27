@@ -1,0 +1,298 @@
+# Core and compression
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: core
+nodes:
+  # --- Body line (floor) ---
+  - id: hollow_hold
+    name: Hollow body hold
+    order: 10
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    patterns: [core]
+    equipment:
+      - floor
+    cues:
+      - Lower back pressed into the floor the whole time.
+      - Arms overhead and legs straight, both just off the floor.
+      - Make it easier by tucking the knees or bringing the arms to the sides.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://antranik.org/progressions/
+    verify: Not levelled in the OG2 chart; 0 is assumed.
+    review:
+      status: draft
+      notes: ""
+
+  - id: side_plank
+    name: Side plank
+    order: 20
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 10, max: 60 }
+    trial: { sets: 3, target: 60 } # seconds per side
+    patterns: [core]
+    equipment:
+      - floor
+    cues:
+      - Elbow under the shoulder, body in one straight line from head to feet.
+      - Lift the hips; don't let them sag or pike back.
+      - Train both sides. Make it easier by resting on the bottom knee.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://bodyproskills.com/articles/human-flag-prerequisites/
+    verify: >-
+      Not levelled in the OG2 chart; 0 is assumed. The 60 s target comes from the human flag gate
+      (60-90 s side plank, secondary source), not from a side plank standard.
+    review:
+      status: draft
+      notes: ""
+
+  # --- L-sit chain (compression): foot-supported, tuck, L-sit, straddle, V-sit, manna ---
+  - id: foot_supported_l_sit
+    name: Foot-supported L-sit
+    order: 30
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: support_hold
+        level: 5
+        note: Hold a straight-arm support for 3 x 30 s first.
+    patterns: [core]
+    equipment:
+      - parallettes
+      - dip_bars
+      - floor
+    regression: support_hold
+    cues:
+      - Arms locked, shoulders pushed down away from the ears.
+      - Heels stay on the floor and carry only as much weight as needed.
+      - Lift the hips off the floor and keep the chest up.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: Not levelled in the OG2 chart; 0 is assumed.
+    review:
+      status: draft
+      notes: ""
+
+  - id: tuck_l_sit
+    name: Tuck L-sit
+    order: 40
+    og_level: 1
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: foot_supported_l_sit
+        level: 5
+    patterns: [core]
+    equipment:
+      - parallettes
+      - dip_bars
+      - floor
+    regression: foot_supported_l_sit
+    cues:
+      - Arms locked, shoulders pushed down.
+      - Knees pulled up to the chest, feet off the floor.
+      - Keep the hips level with or slightly in front of the hands.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    review:
+      status: draft
+      notes: ""
+
+  # --- Hanging (bar) ---
+  - id: hanging_knee_raise
+    name: Hanging knee raise
+    order: 50
+    og_level: 1
+    metric: reps
+    working_range: { min: 8, max: 12 }
+    trial: { sets: 3, target: 12 }
+    prerequisites:
+      - node: dead_hang
+        level: 5
+        note: Hang from the bar for 3 x 30 s first.
+    patterns: [core]
+    equipment:
+      - bar
+    cues:
+      - Start from a still dead hang; no swinging.
+      - Curl the pelvis up and bring the knees to the chest.
+      - Lower slowly under control.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: Not levelled in the OG2 chart; level 1 is inferred. Uses the RR core range 3 x 8-12.
+    review:
+      status: draft
+      notes: ""
+
+  # --- L-sit chain (continued) ---
+  - id: l_sit
+    name: L-sit
+    order: 60
+    og_level: 2
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: tuck_l_sit
+        level: 5
+    patterns: [core]
+    equipment:
+      - parallettes
+      - dip_bars
+      - floor
+    regression: tuck_l_sit
+    cues:
+      - Legs straight and together, level with the floor.
+      - Lock the knees and point the toes.
+      - Arms locked, shoulders pushed down, chest up.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    verify: OG2 places the L-sit at about level 2 (approximate anchor).
+    review:
+      status: draft
+      notes: ""
+
+  # --- Hanging (continued) ---
+  - id: toes_to_bar
+    name: Toes-to-bar
+    order: 70
+    og_level: 3
+    metric: reps
+    working_range: { min: 8, max: 12 }
+    trial: { sets: 3, target: 12 }
+    prerequisites:
+      - node: hanging_knee_raise
+        level: 5
+      - node: hollow_hold
+        level: 5
+        kind: recommended
+        note: A solid hollow body stops the swing.
+    patterns: [core]
+    equipment:
+      - bar
+    regression: hanging_knee_raise
+    cues:
+      - Start from a still dead hang, legs together.
+      - Keep the legs as straight as you can and touch the bar with the toes.
+      - Lower slowly; don't swing into the next rep.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: Not levelled in the OG2 chart; level 3 is inferred. Uses the RR core range 3 x 8-12.
+    review:
+      status: draft
+      notes: ""
+
+  # --- L-sit chain (continued) ---
+  - id: straddle_l_sit
+    name: Straddle L-sit
+    order: 80
+    og_level: 4
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: l_sit
+        level: 5
+    patterns: [core]
+    equipment:
+      - parallettes
+      - floor
+    regression: l_sit
+    cues:
+      - Legs straight and wide, hands on the floor between the legs.
+      - Lean the shoulders forward over the hands to lift the hips.
+      - Squeeze the legs up; the heels must not touch the floor.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    verify: The 3 x 30 s trial follows the general RR hold rule; there is no straddle-specific standard.
+    review:
+      status: draft
+      notes: ""
+
+  - id: v_sit
+    name: V-sit
+    order: 90
+    og_level: 6
+    metric: hold_s
+    working_range: { min: 5, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: straddle_l_sit
+        level: 5
+    skill: true
+    patterns: [core]
+    equipment:
+      - parallettes
+      - floor
+    regression: straddle_l_sit
+    cues:
+      - Legs straight and raised about 45 degrees above horizontal.
+      - Push the floor away and let the shoulders move back behind the hands.
+      - Keep the knees locked; drop back to a straddle L-sit if the legs sink.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://antranik.org/ssc/
+    verify: >-
+      This is the OG2 45 degree V-sit [6]. The 3 x 15 s trial uses Antranik's ~15 s gate for
+      advanced holds; there is no V-sit-specific standard.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Legendary teaser ---
+  - id: manna
+    name: Manna
+    order: 100
+    og_level: 13
+    metric: hold_s
+    working_range: { min: 3, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: v_sit
+        level: 5
+      - node: german_hang
+        level: 5
+        kind: recommended
+        note: Needs a lot of shoulder extension; German hang comfortable for 30-60 s.
+      - node: pike_fold
+        level: 5
+        kind: recommended
+        note: Needs a deep pike to fold the legs up to the face.
+    straight_arm: true
+    skill: true
+    patterns: [core]
+    equipment:
+      - parallettes
+      - floor
+    regression: v_sit
+    legendary: true
+    cues:
+      - Hands behind the hips, arms locked.
+      - Push the shoulders back into extension and lift the hips high.
+      - Legs straight and folded up towards the face.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://antranik.org/ssc/
+    verify: >-
+      OG2 gates the manna behind the 170 degree V-sit [8]. The V-sit stages between 45 and 170 degrees
+      are not modelled yet, so the jump from v_sit [6] is large. The trial is a placeholder
+      (~15 s advanced hold, Antranik).
+    review:
+      status: draft
+      notes: ""

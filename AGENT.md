@@ -21,7 +21,8 @@ If these documents disagree with the code, the code is the truth. Fix the docume
 ## 2. Principles
 
 - **DRY: one source of truth.**
-  - Skill content lives only in `src/data/skills/`.
+  - Skill content lives only in `content/progressions/*.yaml`; `src/data/skills/` holds the
+    module generated from it.
   - Game formulas (XP, levels, unlocks) live only in `src/domain/`.
   - Shared types live only in `src/domain/types.ts`.
   - Never copy a formula, constant or type into a UI component. Import it.
@@ -131,12 +132,13 @@ agent didn't write the code and starts with no context from the author.
 - **IDs:** skill node IDs are `snake_case` and stable forever, e.g. `tuck_front_lever`. Renaming an ID
   breaks users' saved progress. If you must rename, add a migration.
 - **Adding a skill node:**
-  1. Add it to the correct `src/data/skills/<branch>.ts`.
-  2. Set its prerequisites, `ogLevel`, `trial`, `equipment` and `sourceUrls`.
-  3. Run the data validator tests.
+  1. Add a block to the correct `content/progressions/<branch>.yaml` (field guide:
+     `content/progressions/README.md`, ADR-016).
+  2. Set its `prerequisites`, `og_level`, `trial`, `equipment` and `sources`.
+  3. Run `npm run progressions:build` and commit the YAML together with the regenerated files.
   4. If the change is non-obvious, note it in `docs/research/progressions.md`.
 - **Content accuracy:** exercise standards must trace back to a source. Don't invent thresholds.
-  Mark uncertain values with a `// TODO(verify):` comment.
+  Mark uncertain values with the node's `verify:` note (the YAML form of `TODO(verify)`).
 - **Safety:** straight-arm skills (planche, levers, cross) keep their tendon safeguards: the minimum
   time before a Trial opens and the per-session volume budget. Don't remove them to "make progress
   faster".

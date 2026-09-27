@@ -1,0 +1,202 @@
+# Planche (straight-arm pushing: every node here must have straight_arm: true)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: planche
+nodes:
+  # --- Entry and wrist conditioning (hold standard: RR 3 x 30 s) ---
+  - id: planche_lean
+    name: Planche lean
+    order: 10
+    og_level: 2
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: push_up
+        level: 5
+        note: About 3 x 20 push-ups before planche work.
+      - node: wrist_prep
+        level: 5
+        note: 4-6 weeks of wrist prep before planche work.
+      - node: support_hold
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_push]
+    equipment:
+      - floor
+      - parallettes
+    cues:
+      - Push-up position, fingers turned slightly out, arms locked.
+      - Push the floor away (shoulders protracted) and keep a slight hollow.
+      - Lean forward until the shoulders are past the hands; lean further to progress.
+    sources:
+      - https://themovementathlete.com/planche-requirements/
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://antranik.org/connective-tissue-basics/
+    verify: OG2 gives no level for the lean; 2 is inferred (below the level-3 frog stand).
+    review:
+      status: draft
+      notes: ""
+
+  - id: straight_arm_frog_stand
+    name: Straight-arm frog stand
+    order: 20
+    og_level: 4
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: planche_lean
+        level: 5
+      - node: frog_stand
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_push, balance]
+    equipment:
+      - floor
+      - parallettes
+    regression: planche_lean
+    cues:
+      - Knees rest on the outside of the straight arms.
+      - Lean forward until the feet lift; arms stay locked.
+      - Push the floor away, back rounded.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://antranik.org/connective-tissue-basics/
+    review:
+      status: draft
+      notes: ""
+
+  # --- Tuck positions ---
+  - id: tuck_planche
+    name: Tuck planche
+    order: 30
+    og_level: 5
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: straight_arm_frog_stand
+        level: 5
+      - node: pseudo_planche_push_up
+        level: 5
+        kind: recommended
+        note: Builds the forward lean strength for the planche.
+      - node: wall_handstand
+        level: 5
+        kind: recommended
+        note: About 30 s wall handstand.
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: straight_arm_frog_stand
+    cues:
+      - Knees tucked to the chest, feet off the floor, arms locked.
+      - Round the back and push the floor away.
+      - Hips at shoulder height; lean the shoulders past the hands.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://themovementathlete.com/planche-requirements/
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    review:
+      status: draft
+      notes: ""
+
+  - id: advanced_tuck_planche
+    name: Advanced tuck planche
+    order: 40
+    og_level: 6
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: tuck_planche
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: tuck_planche
+    cues:
+      - Flatten the back; hips move back and level with the shoulders.
+      - Knees stay bent but move away from the chest.
+      - Arms locked, shoulders protracted.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://antranik.org/connective-tissue-basics/
+    review:
+      status: draft
+      notes: ""
+
+  # --- Advanced holds (standard: about 15 s, Antranik / Steven Low) ---
+  - id: straddle_planche
+    name: Straddle planche
+    order: 50
+    og_level: 7
+    metric: hold_s
+    working_range: { min: 8, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: advanced_tuck_planche
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: advanced_tuck_planche
+    cues:
+      - Legs straight and spread wide, body parallel to the floor.
+      - Arms locked, shoulders protracted and leaning past the hands.
+      - Squeeze the glutes; no sag in the hips.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://antranik.org/ssc/
+      - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
+    review:
+      status: draft
+      notes: ""
+
+  - id: full_planche
+    name: Full planche
+    order: 60
+    og_level: 10
+    metric: hold_s
+    working_range: { min: 8, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: straddle_planche
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: straddle_planche
+    legendary: true
+    cues:
+      - Legs together and straight, whole body horizontal.
+      - Arms locked, shoulders well past the hands.
+      - Keep a slight hollow; no arch in the lower back.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://antranik.org/ssc/
+      - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
+    verify: OG2 level ~10 is inferred from the chart layout.
+    review:
+      status: draft
+      notes: ""
