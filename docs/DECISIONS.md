@@ -631,3 +631,32 @@ Template:
   app's documents folder; a later task can list or prune them in Settings (4.6). A backup can only
   be imported by an app that has every node its goals point at; history on unknown nodes survives
   but earns nothing until the node is back. The Settings buttons come with Phase 4.6.
+
+## ADR-029: Lockfile guard with a pinned npm version
+- Date: 2026-09-27 · Status: Accepted
+- Context: Repeatedly, `npx expo install` / `npm install` on the Windows dev machine wrote a
+  package-lock.json without the optional peer entries `node_modules/@emnapi/core` and
+  `node_modules/@emnapi/runtime` (peers of `@napi-rs/wasm-runtime`, via
+  `@unrs/resolver-binding-wasm32-wasi`), and CI's `npm ci` then failed with "Missing: … from lock
+  file". Earlier notes blamed Windows. Reproduced on 2026-09-27: local npm **11.6.2** drops the
+  entries on a plain `npm install` and its own `npm ci --dry-run` still passes (also with
+  `--os=linux --cpu=x64`); CI's npm **11.19.0** (Node 24.21 on ubuntu) rejects the same lockfile,
+  and on the same Windows machine `npx npm@11.19.0 ci --dry-run` rejects it too, while
+  `npx npm@11.19.0 install --package-lock-only` restores the entries. The cause is npm version
+  skew, not the OS.
+- Decision:
+  - Pin the npm version once, in `package.json` `devEngines.packageManager` (`11.19.0`,
+    `onFail: "warn"`, so a different local npm prints `EBADDEVENGINES` but still works).
+  - `scripts/lockfile.ts` (plain Node with type stripping, built-ins only) runs that npm through
+    `npx npm@<pin>`: `lockfile:fix` = `install --package-lock-only --ignore-scripts`, then the check;
+    `lockfile:check` = `ci --dry-run --ignore-scripts` on a temp copy of package.json +
+    package-lock.json (+ .npmrc), so it is independent of `node_modules` and takes seconds.
+  - CI installs the pinned npm before anything else and runs `lockfile:check` before `npm ci`, so
+    local fix, local check and CI all use one npm version and a future npm bump in the runner image
+    can't reintroduce the mismatch. AGENT.md §3 step 5 requires `lockfile:fix` after dependency
+    changes.
+  - Rejected: hand-patching entries (fragile, done three times), `npm install` in CI (hides real
+    drift), a jq check for specific package names (only catches this one symptom).
+- Consequences: The first `lockfile:*` run downloads npm 11.19.0 into the npx cache. The lockfile
+  written by 11.19.0 also normalizes some `peer`/`dev` flags. Bumping npm means changing the pin,
+  running `lockfile:fix` and committing both files; CI follows automatically.

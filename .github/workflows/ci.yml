@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      # Use the npm pinned in package.json devEngines, so CI and lockfile:fix agree (ADR-029).
+      - run: npm install -g npm@$(node -p "require('./package.json').devEngines.packageManager.version")
+      - run: npm run lockfile:check
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint

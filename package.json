@@ -60,7 +60,9 @@
     "progressions:build": "tsx scripts/progressions.ts build",
     "progressions:review": "tsx scripts/progressions.ts review",
     "e2e": "maestro test .maestro",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "lockfile:check": "node scripts/lockfile.ts check",
+    "lockfile:fix": "node scripts/lockfile.ts fix"
   },
   "private": true,
   "jest": {
@@ -69,6 +71,13 @@
       "^yaml$": "<rootDir>/node_modules/yaml/dist/index.js",
       "^@/assets/(.*)$": "<rootDir>/assets/$1",
       "^@/(.*)$": "<rootDir>/src/$1"
+    }
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": "11.19.0",
+      "onFail": "warn"
     }
   }
 }
