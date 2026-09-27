@@ -3175,6 +3175,10 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "patterns": [
       "core"
     ],
+    "trains": [
+      "core",
+      "push"
+    ],
     "equipment": [
       [
         "parallettes"
@@ -3229,6 +3233,10 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "isSkill": false,
     "patterns": [
       "core"
+    ],
+    "trains": [
+      "core",
+      "push"
     ],
     "equipment": [
       [
@@ -3332,6 +3340,10 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "isSkill": false,
     "patterns": [
       "core"
+    ],
+    "trains": [
+      "core",
+      "push"
     ],
     "equipment": [
       [
@@ -3443,6 +3455,10 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "patterns": [
       "core"
     ],
+    "trains": [
+      "core",
+      "push"
+    ],
     "equipment": [
       [
         "parallettes"
@@ -3494,6 +3510,10 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "isSkill": true,
     "patterns": [
       "core"
+    ],
+    "trains": [
+      "core",
+      "push"
     ],
     "equipment": [
       [
@@ -3558,6 +3578,10 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "isSkill": true,
     "patterns": [
       "core"
+    ],
+    "trains": [
+      "core",
+      "push"
     ],
     "equipment": [
       [

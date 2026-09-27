@@ -162,6 +162,25 @@ describe('nodeToRaw / nodeFromRaw', () => {
     expect(back.value).toEqual(node);
   });
 
+  it('round-trips the optional trains list and rejects unknown attributes', () => {
+    const node = makeNode({
+      id: 'user_l_sit',
+      source: 'user',
+      patterns: ['core'],
+      trains: ['core', 'push'],
+    });
+    const raw = nodeToRaw(node, true);
+    expect(raw.trains).toEqual(['core', 'push']);
+    expect(nodeFromRaw(raw, { file: 'overlay', source: 'user' }).value).toEqual(node);
+    expect(nodeToRaw(makeNode({ id: 'user_x', source: 'user' }), true)).not.toHaveProperty(
+      'trains',
+    );
+    const bad = { ...raw, trains: ['arms'] };
+    expect(nodeFromRaw(bad, { file: 'overlay', source: 'user' }).issues.map(formatIssue)).toEqual([
+      "overlay: user_l_sit: trains #1: attribute 'arms' is not allowed; use one of: push, pull, core, legs, balance, mobility",
+    ]);
+  });
+
   it('requires branch when the context has none', () => {
     const raw = nodeToRaw(makeNode({ id: 'user_a', source: 'user' }), false);
     expect(nodeFromRaw(raw, { file: 'overlay', source: 'user' }).issues.map(formatIssue)).toEqual([
@@ -226,5 +245,15 @@ describe('renderReviewSheet', () => {
     expect(sheet).toContain('**Pull \\| up** `pull_up`');
     expect(sheet).toContain('⚠ check level');
     expect(sheet.match(/_No nodes yet._/g)).toHaveLength(BRANCHES.length - 1);
+  });
+
+  it('shows what each node trains and marks a trains override', () => {
+    const sheet = renderReviewSheet([
+      makeNode({ id: 'front_lever', branch: 'front_lever', patterns: ['straight_arm_pull'] }),
+      makeNode({ id: 'l_sit', branch: 'core', patterns: ['core'], trains: ['core', 'push'] }),
+    ]);
+    expect(sheet).toContain('| Trains |');
+    expect(sheet).toContain('| pull, core |');
+    expect(sheet).toContain('| push, core * |');
   });
 });

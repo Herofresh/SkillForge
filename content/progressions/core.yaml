@@ -66,6 +66,7 @@ nodes:
         level: 5
         note: Hold a straight-arm support for 3 x 30 s first.
     patterns: [core]
+    trains: [core, push] # hands-on-floor support hold also trains the push side (ADR-023)
     equipment:
       - parallettes
       - dip_bars
@@ -94,6 +95,7 @@ nodes:
       - node: foot_supported_l_sit
         level: 5
     patterns: [core]
+    trains: [core, push] # hands-on-floor support hold also trains the push side (ADR-023)
     equipment:
       - parallettes
       - dip_bars
@@ -149,6 +151,7 @@ nodes:
       - node: tuck_l_sit
         level: 5
     patterns: [core]
+    trains: [core, push] # hands-on-floor support hold also trains the push side (ADR-023)
     equipment:
       - parallettes
       - dip_bars
@@ -209,6 +212,7 @@ nodes:
       - node: l_sit
         level: 5
     patterns: [core]
+    trains: [core, push] # hands-on-floor support hold also trains the push side (ADR-023)
     equipment:
       - parallettes
       - floor
@@ -237,6 +241,7 @@ nodes:
         level: 5
     skill: true
     patterns: [core]
+    trains: [core, push] # hands-on-floor support hold also trains the push side (ADR-023)
     equipment:
       - parallettes
       - floor
@@ -277,6 +282,7 @@ nodes:
     straight_arm: true
     skill: true
     patterns: [core]
+    trains: [core, push] # hands-on-floor support hold also trains the push side (ADR-023)
     equipment:
       - parallettes
       - floor

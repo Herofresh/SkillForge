@@ -5,14 +5,24 @@
  *   sessions to level no matter its ogLevel (harder nodes earn more XP per unit).
  * - Level `PROFICIENT_LEVEL` (5) is a cap until the Trial is passed. XP beyond the cap is banked
  *   (kept in `xp`) and counts as soon as the Trial is passed.
- * - Passing a Trial from any unlocked node (test-out) lifts the node to at least level 5.
+ * - Passing a Trial on any node (test-out) lifts the node to at least level 5 (ADR-023). Nothing
+ *   blocks a Trial: the ADR-010 safeguards and unmet prerequisites only produce warnings.
+ * - A user can unlock a locked node themselves (`self_unlock`, ADR-023); it then counts as unlocked.
  * - A hard prerequisite is met when its node, or one of that node's `alternatives`, reaches
  *   `minLevel`. Reaching level 5 or more for a prerequisite needs the Trial passed (Proficient).
  */
 import { geometricThresholds, levelForThresholds } from '@/lib/curve';
 
-import { isTrialOpenBySafeguards, type NodeLookup } from './safeguards';
-import type { ExerciseNode, LoggedSet, NodeProgress, NodeState, Prerequisite } from './types';
+import { prerequisitesWarning, trialWarnings } from './safeguards';
+import type {
+  ExerciseNode,
+  LoggedSet,
+  NodeLookup,
+  NodeProgress,
+  NodeState,
+  Prerequisite,
+  SafeguardWarning,
+} from './types';
 import { difficultyMult, meetsTarget } from './xp';
 
 export const MAX_NODE_LEVEL = 10;
@@ -74,6 +84,11 @@ export function addNodeXp(
   };
 }
 
+/** Records a `self_unlock` at `at`; the earliest self-unlock is kept. */
+export function selfUnlock(progress: NodeProgress, at: number): NodeProgress {
+  return { ...progress, selfUnlockedAt: Math.min(progress.selfUnlockedAt ?? at, at) };
+}
+
 /**
  * Marks the Trial passed at `at`. Banked XP now counts; a test-out (below level 5) is lifted to
  * exactly level 5.
@@ -105,9 +120,13 @@ export function evaluateTrial(node: ExerciseNode, sets: readonly LoggedSet[]): b
   return passedSets.length >= node.trial.sets;
 }
 
-/** A node counts for a prerequisite at `minLevel`; level 5+ also needs the Trial passed. */
+/**
+ * A node counts for a prerequisite at `minLevel` once it was trained or its Trial passed (a
+ * self-unlocked, untrained node does not); level 5+ also needs the Trial passed.
+ */
 function reachesLevel(progress: NodeProgress | undefined, minLevel: number): boolean {
   if (!progress) return false;
+  if (progress.firstTrainedAt === undefined && !progress.trialPassed) return false;
   if (minLevel >= PROFICIENT_LEVEL && !progress.trialPassed) return false;
   return progress.level >= minLevel;
 }
@@ -124,13 +143,21 @@ export function isPrerequisiteMet(
 
 export interface NodeStatus {
   state: NodeState;
-  /** Hard prerequisites that are not met yet (non-empty exactly when a non-proficient node is locked). */
+  /**
+   * Hard prerequisites that are not met yet. A non-proficient node with unmet ones is locked unless
+   * the user unlocked it themselves.
+   */
   unmetHard: Prerequisite[];
+  /** The user unlocked the node themselves (`self_unlock`, ADR-023). */
+  selfUnlocked: boolean;
   /** Recommended prerequisites that are not met: shown as warnings, never locking. */
   warnings: Prerequisite[];
 }
 
-/** State of one node. A passed Trial keeps a node proficient even if a prerequisite changes later. */
+/**
+ * State of one node. A passed Trial keeps a node proficient even if a prerequisite changes later; a
+ * self-unlock keeps it out of `locked`.
+ */
 export function resolveNode(
   node: ExerciseNode,
   progress: ProgressMap,
@@ -140,12 +167,13 @@ export function resolveNode(
   const unmetHard = unmet.filter((prereq) => prereq.kind === 'hard');
   const warnings = unmet.filter((prereq) => prereq.kind === 'recommended');
   const own = progress[node.id];
+  const selfUnlocked = own?.selfUnlockedAt !== undefined;
   let state: NodeState;
   if (own?.trialPassed) state = own.level >= MAX_NODE_LEVEL ? 'mastered' : 'proficient';
-  else if (unmetHard.length > 0) state = 'locked';
+  else if (unmetHard.length > 0 && !selfUnlocked) state = 'locked';
   else if (own?.firstTrainedAt !== undefined) state = 'training';
   else state = 'available';
-  return { state, unmetHard, warnings };
+  return { state, unmetHard, selfUnlocked, warnings };
 }
 
 /** States of every node, keyed by id. */
@@ -169,20 +197,24 @@ export function newlyUnlocked(
   return ids;
 }
 
-export type TrialBlockReason = 'locked' | 'already_passed' | 'straight_arm_min_weeks';
-
 /**
- * Whether a Trial may be attempted at `now`: the node must be unlocked, not passed yet, and clear the
- * straight-arm safeguard (ADR-010). Test-out from an `available` node is allowed.
+ * Advisory warnings for using `node` (ADR-023): training it while it is locked, and, when `trialAt`
+ * is given, a Trial attempt or test-out at that time (ADR-010 straight-arm clock). Never a block.
+ * The engine uses it for logged sets; the UI calls it before an attempt to show what to acknowledge.
  */
-export function trialBlockReason(
+export function nodeUseWarnings(
   node: ExerciseNode,
   status: NodeStatus,
   progress: NodeProgress | undefined,
-  now: number,
-): TrialBlockReason | undefined {
-  if (progress?.trialPassed) return 'already_passed';
-  if (status.state === 'locked') return 'locked';
-  if (!isTrialOpenBySafeguards(node, progress, now)) return 'straight_arm_min_weeks';
-  return undefined;
+  nodes: NodeLookup,
+  trialAt?: number,
+): SafeguardWarning[] {
+  const warnings: SafeguardWarning[] = [];
+  const prerequisites =
+    status.state === 'locked' ? prerequisitesWarning(node, status.unmetHard, nodes) : undefined;
+  if (prerequisites) warnings.push(prerequisites);
+  if (trialAt !== undefined && !progress?.trialPassed) {
+    warnings.push(...trialWarnings(node, progress, trialAt));
+  }
+  return warnings;
 }

@@ -4,6 +4,7 @@
  *
  * Pure: it takes file contents and returns strings. File I/O lives in `scripts/progressions.ts`.
  */
+import { nodeAttributes } from '@/domain/character';
 import { BRANCHES } from '@/domain/types';
 import type { Branch, ExerciseNode, Metric, Trial, ValidationIssue } from '@/domain/types';
 
@@ -140,6 +141,8 @@ export function renderReviewSheet(nodes: readonly ExerciseNode[]): string {
     '- **Prerequisites** = other exercises that must reach the given level (L1–L10; L5 = Proficient) ' +
       'first. *(rec.)* = recommended only, does not lock.',
     '- **Equipment**: "or" separates alternatives; "+" means both are needed.',
+    '- **Trains** = the character attributes the exercise pays into. Derived from its movement ' +
+      "patterns; an entry with * comes from the node's own `trains:` line (change it there).",
     '',
   ];
 
@@ -151,8 +154,8 @@ export function renderReviewSheet(nodes: readonly ExerciseNode[]): string {
       continue;
     }
     lines.push(
-      '| # | Exercise | OG | Metric | Working range | Trial | Prerequisites | Equipment | Sources | ⚠ Verify | Review | Coach notes |',
-      '|---|---|---|---|---|---|---|---|---|---|---|---|',
+      '| # | Exercise | OG | Metric | Working range | Trial | Prerequisites | Trains | Equipment | Sources | ⚠ Verify | Review | Coach notes |',
+      '|---|---|---|---|---|---|---|---|---|---|---|---|---|',
     );
     for (const node of chain) {
       const flags = [node.legendary ? 'legendary' : '', node.straightArm ? 'straight-arm' : '']
@@ -176,6 +179,7 @@ export function renderReviewSheet(nodes: readonly ExerciseNode[]): string {
         `${node.workingRange.min}–${node.workingRange.max} ${UNIT[node.metric]}`,
         formatTrial(node.metric, node.trial),
         prerequisites || '—',
+        nodeAttributes(node).join(', ') + (node.trains ? ' *' : ''),
         node.equipment.map((option) => option.join(' + ')).join(' or '),
         node.sourceUrls.map((url, i) => `[${i + 1}](${url})`).join(' '),
         node.verify ? `⚠ ${node.verify}` : '',
