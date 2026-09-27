@@ -46,7 +46,7 @@
   `@expo-google-fonts` behind the splash, pixel icons from code grids, and a dev-only Style Guide
   (Settings → Style Guide). The four tabs are restyled placeholders. Screenshots in
   `docs/screenshots/4.0-*.png`.
-- Onboarding (4.1, ADR-031, PR link below): a fresh app opens a five-step first-run flow
+- Onboarding (4.1, ADR-031, [PR #15](https://github.com/Herofresh/SkillForge/pull/15)): a fresh app opens a five-step first-run flow
   (`app/onboarding/`): hero name, equipment (Home/Park tags, add/remove), 1–5 goals by branch, an
   optional assessment (anchors on the goal paths + search → log a Trial → test-out, with the
   ADR-023 warnings acknowledged first), and "Your journey begins". Completion is the
@@ -312,7 +312,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 
 ### Phase 4: Core UI
 - [x] 4.0 Design system (pixel-art × dark fantasy, ADR-030): `docs/DESIGN.md`, tokens in `theme.ts` (contrast-tested), OFL pixel/body fonts with the splash kept until fonts + DB are ready, UI kit in `src/components/ui/` (frames, text, buttons, grid-defined pixel icons, XP/stat bars, level badge, tier chip, warning banner, modal, empty state, level-up burst), restyled tab bar and placeholder tabs, dev-only Style Guide (`/styleguide`), component tests (RNTL), Maestro `styleguide.yaml` ([PR #14](https://github.com/Herofresh/SkillForge/pull/14))
-- [x] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown (ADR-031) (PR TBD)
+- [x] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown (ADR-031) ([PR #15](https://github.com/Herofresh/SkillForge/pull/15))
 - [ ] 4.2 Tree tab, column view
 - [ ] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history
 - [ ] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove) → live logging → summary with XP, level-ups and unlocks
