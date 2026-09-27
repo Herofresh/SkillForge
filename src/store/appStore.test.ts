@@ -100,6 +100,25 @@ describe('app store', () => {
     reopened.close();
   });
 
+  it('lists what to acknowledge before a self-unlock, and nothing once unlocked', async () => {
+    const test = await openTestDatabase();
+    const store = storeFor(test);
+    const before = store.getState().selfUnlockWarnings('scapular_pull');
+    expect(before).toEqual([
+      expect.objectContaining({
+        code: 'prerequisites_unmet',
+        nodeId: 'scapular_pull',
+        severity: 'info',
+      }),
+    ]);
+    expect(before[0].message).toContain('Dead hang');
+    expect(store.getState().selfUnlockWarnings('dead_hang')).toEqual([]);
+    store.getState().selfUnlock('scapular_pull');
+    expect(store.getState().selfUnlockWarnings('scapular_pull')).toEqual([]);
+    expect(() => store.getState().selfUnlockWarnings('nope')).toThrow('Unknown node');
+    test.close();
+  });
+
   it('rebuilds a deleted node_progress cache identically', async () => {
     const test = await openTestDatabase();
     const store = storeFor(test);

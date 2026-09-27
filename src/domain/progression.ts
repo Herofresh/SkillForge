@@ -16,6 +16,7 @@ import { geometricThresholds, levelForThresholds } from '@/lib/curve';
 import { prerequisitesWarning, trialWarnings } from './safeguards';
 import type {
   ExerciseNode,
+  LevelProgress,
   LoggedSet,
   NodeLookup,
   NodeProgress,
@@ -61,6 +62,41 @@ export function nodeLevel(xp: number, trialPassed: boolean, ogLevel: number): nu
 export function bankedXp(progress: NodeProgress, node: ExerciseNode): number {
   if (progress.trialPassed) return 0;
   return Math.max(0, progress.xp - xpForLevel(PROFICIENT_LEVEL, node.ogLevel));
+}
+
+/** A node's level and XP bar: `LevelProgress` plus the level-5 cap (ADR-004). */
+export interface NodeLevelProgress extends LevelProgress {
+  /** At level 5 without the Trial: the bar is full and waits for the Trial. */
+  capped: boolean;
+  /** XP banked beyond the cap (`bankedXp`), counted once the Trial is passed. */
+  banked: number;
+}
+
+/**
+ * Level and progress towards the next node level (for the node's XP bar). A node without progress
+ * is level 1 with an empty bar; a capped node shows a full bar until its Trial is passed.
+ */
+export function nodeLevelProgress(
+  node: ExerciseNode,
+  progress: NodeProgress | undefined,
+): NodeLevelProgress {
+  const own = progress ?? emptyProgress(node.id);
+  const level = own.level;
+  if (level >= MAX_NODE_LEVEL) {
+    return { level, xpIntoLevel: 0, xpForLevel: 0, fraction: 1, capped: false, banked: 0 };
+  }
+  const floor = xpForLevel(level, node.ogLevel);
+  const span = xpForLevel(level + 1, node.ogLevel) - floor;
+  const xpIntoLevel = Math.min(Math.max(own.xp - floor, 0), span);
+  const capped = !own.trialPassed && level >= PROFICIENT_LEVEL;
+  return {
+    level,
+    xpIntoLevel,
+    xpForLevel: span,
+    fraction: capped ? 1 : xpIntoLevel / span,
+    capped,
+    banked: bankedXp(own, node),
+  };
 }
 
 export function emptyProgress(nodeId: string): NodeProgress {
@@ -131,14 +167,26 @@ function reachesLevel(progress: NodeProgress | undefined, minLevel: number): boo
   return progress.level >= minLevel;
 }
 
+/**
+ * The node that meets `prerequisite`: the prerequisite node itself if it reaches `minLevel`, else the
+ * first of its `alternatives` that does (ADR-019); `undefined` while it is unmet.
+ */
+export function prerequisiteSatisfiedBy(
+  prerequisite: Prerequisite,
+  progress: ProgressMap,
+  nodes: NodeLookup,
+): string | undefined {
+  const candidates = [prerequisite.nodeId, ...(nodes.get(prerequisite.nodeId)?.alternatives ?? [])];
+  return candidates.find((id) => reachesLevel(progress[id], prerequisite.minLevel));
+}
+
 /** Met when the prerequisite node or one of its `alternatives` reaches `minLevel` (ADR-019). */
 export function isPrerequisiteMet(
   prerequisite: Prerequisite,
   progress: ProgressMap,
   nodes: NodeLookup,
 ): boolean {
-  const candidates = [prerequisite.nodeId, ...(nodes.get(prerequisite.nodeId)?.alternatives ?? [])];
-  return candidates.some((id) => reachesLevel(progress[id], prerequisite.minLevel));
+  return prerequisiteSatisfiedBy(prerequisite, progress, nodes) !== undefined;
 }
 
 export interface NodeStatus {

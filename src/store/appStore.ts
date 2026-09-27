@@ -15,6 +15,8 @@
  * - Onboarding (PLAN 4.1, ADR-031): `setHeroName`, `toggleGoal`, `logTrial` (assessment test-outs,
  *   logged as ordinary Trial sessions) and `completeOnboarding` (the `onboarding_completed_at`
  *   setting, so it travels with backups).
+ * - Tree and node detail (PLAN 4.2–4.3): `toggleGoal`, `logTrial` / `testOutWarnings` and
+ *   `selfUnlock` / `selfUnlockWarnings` (what to acknowledge before the "unlock anyway").
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
  *
  * `createAppStore` takes its dependencies (database, built-in tree, clock, id source, file access) so
@@ -42,6 +44,7 @@ import { backupFileName, parseBackup, serializeBackup } from '@/domain/backup';
 import { generateWorkout } from '@/domain/generator';
 import { normalizeHeroName, toggleGoal } from '@/domain/onboarding';
 import { applyOverlay, EMPTY_OVERLAY } from '@/domain/overlay';
+import { nodeUseWarnings, resolveNode } from '@/domain/progression';
 import {
   applySession,
   applyUserAction,
@@ -163,6 +166,11 @@ export interface AppState {
   logTrial(nodeId: string, results: readonly SetPerformance[]): SessionResult;
   /** What to show and acknowledge before `logTrial` on `nodeId` now (`testOutWarnings`). */
   testOutWarnings(nodeId: string): SafeguardWarning[];
+  /**
+   * What to show and acknowledge before `selfUnlock(nodeId)` (ADR-023): the unmet hard
+   * prerequisites of a locked node (`nodeUseWarnings`). Empty when the node isn't locked.
+   */
+  selfUnlockWarnings(nodeId: string): SafeguardWarning[];
   /** Marks onboarding as done (the app then opens on the tabs). */
   completeOnboarding(): void;
   createEquipmentProfile(name: string, tags: readonly EquipmentTag[]): EquipmentProfile;
@@ -325,6 +333,14 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           engine.lastStraightArmSessionAt,
           now(),
         );
+      },
+
+      selfUnlockWarnings(nodeId) {
+        const node = requireNode(nodeId);
+        const { nodes, engine } = get();
+        const lookup = new Map(nodes.map((entry) => [entry.id, entry]));
+        const status = resolveNode(node, engine.progress, lookup);
+        return nodeUseWarnings(node, status, engine.progress[nodeId], lookup);
       },
 
       completeOnboarding() {

@@ -2,7 +2,8 @@
  * Plain-language text for prescriptions and Trials (shared by onboarding, node detail and the Train
  * flow). Pure, so the wording is tested once and screens never build it themselves.
  */
-import type { Metric, SetPerformance, Trial } from './types';
+import type { NodeLevelProgress } from './progression';
+import type { Metric, SetPerformance, Trial, WorkingRange } from './types';
 
 /** Load values are shown with two decimals (0.05 × BW steps). */
 const LOAD_DECIMALS = 2;
@@ -50,4 +51,52 @@ export function formatOgLevel(ogLevel: number): string {
 /** The OG level for screen readers: "foundation" for level 0, else "OG level 5". */
 export function spokenOgLevel(ogLevel: number): string {
   return ogLevel === FOUNDATION_OG_LEVEL ? 'foundation' : `OG level ${ogLevel}`;
+}
+
+/**
+ * A working range, e.g. "5–8 reps", "10–30 s", "3–6 s lowerings" or "0.10–0.30× BW". Equal ends
+ * show one value.
+ */
+export function formatWorkingRange(metric: Metric, range: WorkingRange): string {
+  const value = (n: number) => (metric === 'load_xbw' ? n.toFixed(LOAD_DECIMALS) : String(n));
+  const span =
+    range.min === range.max ? value(range.min) : `${value(range.min)}–${value(range.max)}`;
+  switch (metric) {
+    case 'reps':
+      return `${span} ${range.max === 1 ? 'rep' : 'reps'}`;
+    case 'hold_s':
+      return `${span} s`;
+    case 'eccentric_s':
+      return `${span} s lowerings`;
+    case 'load_xbw':
+      return `${span}× BW`;
+  }
+}
+
+const MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+] as const;
+
+/** A day in the device's time zone, e.g. "27 Sep 2026" (history lists). */
+export function formatShortDate(at: number): string {
+  const date = new Date(at);
+  return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+/** The value next to a node's XP bar: "34 / 60 XP", "Trial ready" at the cap, "Max" at level 10. */
+export function formatLevelProgress(progress: NodeLevelProgress): string {
+  if (progress.capped) return 'Trial ready';
+  if (progress.xpForLevel === 0) return 'Max';
+  return `${progress.xpIntoLevel} / ${progress.xpForLevel} XP`;
 }

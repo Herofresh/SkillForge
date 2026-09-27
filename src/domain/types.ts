@@ -275,6 +275,17 @@ export interface NodeProgress {
   selfUnlockedAt?: number;
 }
 
+/** A level and the progress towards the next one (character and node XP bars). */
+export interface LevelProgress {
+  level: number;
+  /** XP earned inside the current level. */
+  xpIntoLevel: number;
+  /** XP the current level needs in total (0 at the max level). */
+  xpForLevel: number;
+  /** 0–1 towards the next level (1 at the max level). */
+  fraction: number;
+}
+
 export const RANK_TITLES = ['Novice', 'Apprentice', 'Adept', 'Master', 'Legend'] as const;
 export type RankTitle = (typeof RANK_TITLES)[number];
 

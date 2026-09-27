@@ -18,6 +18,7 @@ import {
   type Attribute,
   type Branch,
   type ExerciseNode,
+  type LevelProgress,
   type NodeProgress,
   type Pattern,
   type RankTitle,
@@ -181,16 +182,6 @@ export function computeCharacter(
     rank: rankForMedianOgLevel(medianOgLevel),
     pushPullWarning: hasPushPullImbalance(peakOgLevels),
   };
-}
-
-export interface LevelProgress {
-  level: number;
-  /** XP earned inside the current level. */
-  xpIntoLevel: number;
-  /** XP the current level needs in total (0 at the max level). */
-  xpForLevel: number;
-  /** 0–1 towards the next level (1 at the max level). */
-  fraction: number;
 }
 
 /** Character level and the progress towards the next one (for the XP bar). */
