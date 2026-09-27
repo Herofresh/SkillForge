@@ -22,7 +22,7 @@
   (`UserAction` in history), the ADR-010 tendon safeguards are advisory `SafeguardWarning`s
   instead of blocks, and every trained node pays into all the attributes it trains
   (`PATTERN_ATTRIBUTES` or the new YAML field `trains`, weighted by ogLevel and node level).
-- Workout generator (2.5, ADR-024, PR_LINK): `generateWorkout` in `src/domain/generator.ts`
+- Workout generator (2.5, ADR-024, [PR #9](https://github.com/Herofresh/SkillForge/pull/9)): `generateWorkout` in `src/domain/generator.ts`
   builds a `WorkoutPlan` from goals, progress, equipment, minutes and recent sessions (frontier,
   scoring, substitution, slots, double progression; suggestions respect the safeguards).
   **Phase 2 is complete.** No persistence or real UI yet.
@@ -171,7 +171,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 2.2 `progression.ts`: levels 1–10, level-5 cap and Trial, banked XP, node states, unlock resolution ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [x] 2.3 Tendon safeguards (ADR-010): min weeks at level, 60 s straight-arm budget, 48 h rule ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [x] 2.4 `character.ts`: character level, attributes, rank title, push/pull balance warning ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
-- [~] 2.5 (in-progress, implementer agent) `generator.ts`: frontier, scoring, equipment substitution, slot filling, double-progression prescription; suggestions respect the safeguards (ADR-023)
+- [x] 2.5 `generator.ts`: frontier, scoring, equipment substitution, slot filling, double-progression prescription; suggestions respect the safeguards (ADR-023) ([PR #9](https://github.com/Herofresh/SkillForge/pull/9))
 - [x] 2.6 Recompute-from-history function (ADR-008) ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [x] 2.7 User autonomy: test-out anywhere (incl. straight-arm), self-unlock as a recorded user action, advisory safeguards (`SafeguardWarning`), multi-attribute stats (`PATTERN_ATTRIBUTES`, YAML `trains`) (ADR-023) ([PR #8](https://github.com/Herofresh/SkillForge/pull/8))
 
