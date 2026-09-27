@@ -18,7 +18,7 @@
   `progression.ts`, `safeguards.ts`, `character.ts`, `recompute.ts` in `src/domain/`, pure and
   tested. Formulas and constants are in `docs/CONTEXT.md` → Formulas and ADR-018…021. No generator
   (2.5), persistence or real UI yet.
-- User autonomy (2.7, ADR-023, PR link follows): "the app suggests, the user decides". Test-out works on
+- User autonomy (2.7, ADR-023, [PR #8](https://github.com/Herofresh/SkillForge/pull/8)): "the app suggests, the user decides". Test-out works on
   every node (straight-arm on day 1, locked nodes too), a user can self-unlock a locked node
   (`UserAction` in history), the ADR-010 tendon safeguards are advisory `SafeguardWarning`s
   instead of blocks, and every trained node pays into all the attributes it trains
@@ -156,7 +156,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 2.4 `character.ts`: character level, attributes, rank title, push/pull balance warning ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
 - [ ] 2.5 `generator.ts`: frontier, scoring, equipment substitution, slot filling, double-progression prescription; suggestions respect the safeguards (ADR-023)
 - [x] 2.6 Recompute-from-history function (ADR-008) ([PR #6](https://github.com/Herofresh/SkillForge/pull/6))
-- [x] 2.7 User autonomy: test-out anywhere (incl. straight-arm), self-unlock as a recorded user action, advisory safeguards (`SafeguardWarning`), multi-attribute stats (`PATTERN_ATTRIBUTES`, YAML `trains`) (ADR-023) (PR link follows)
+- [x] 2.7 User autonomy: test-out anywhere (incl. straight-arm), self-unlock as a recorded user action, advisory safeguards (`SafeguardWarning`), multi-attribute stats (`PATTERN_ATTRIBUTES`, YAML `trains`) (ADR-023) ([PR #8](https://github.com/Herofresh/SkillForge/pull/8))
 
 ### Phase 3: Persistence
 - [ ] 3.1 Drizzle schema and migrations (profile, goals, node_progress, equipment_profiles, sessions, session_sets, user_actions, settings)
