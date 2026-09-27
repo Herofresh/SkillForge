@@ -1,7 +1,7 @@
-# SkillForge â€” Living Plan & Progress
+# SkillForge — Living Plan & Progress
 
 > Agents: read [AGENT.md](../AGENT.md) first. Update this file at the end of every task.
-> Status legend: `[ ]` todo Â· `[~]` in progress (owner) Â· `[x]` done (PR link)
+> Status legend: `[ ]` todo · `[~]` in progress (owner) · `[x]` done (PR link)
 
 ## Current state
 - Repo created: https://github.com/Herofresh/SkillForge (public). Branch `main` has the initial README.
@@ -10,14 +10,14 @@
 
 ## Next up
 1. Phase 0: scaffold the Expo app (see task 0.2).
-2. Phase 0: tooling and CI (tasks 0.3â€“0.4).
+2. Phase 0: tooling and CI (tasks 0.3–0.4).
 3. Phase 1: domain types and the progression dataset.
 
 ## Blockers
 - None.
 
 ## Handoff notes
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001â€¦011). The
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…011). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
@@ -29,14 +29,14 @@
 
 ### Phase 0: Docs and scaffold
 - [x] 0.1 Documentation set: AGENT.md, CLAUDE.md, PLAN.md, DECISIONS.md, CONTEXT.md, research doc ([PR #1](https://github.com/Herofresh/SkillForge/pull/1))
-- [ ] 0.2 `create-expo-app` (TypeScript, expo-router, tabs: Tree Â· Train Â· Character Â· Settings)
+- [ ] 0.2 `create-expo-app` (TypeScript, expo-router, tabs: Tree · Train · Character · Settings)
 - [ ] 0.3 TypeScript strict, ESLint, Prettier, Jest (`jest-expo`); scripts `typecheck`, `lint`, `test`
 - [ ] 0.4 GitHub Actions CI: typecheck, lint and test on every PR
 - [ ] 0.5 Folder layout (`src/domain`, `src/data/skills`, `src/db`, `src/components`, `src/lib`) and README update
 
 ### Phase 1: Progression matrix
 - [ ] 1.1 `src/domain/types.ts`: `ExerciseNode`, `Branch`, `Metric`, `Prerequisite`, `Trial`, `EquipmentTag`
-- [ ] 1.2 Dataset, about 80 nodes across 12 branches (OG levels 1â€“8, plus elite "legendary" teasers)
+- [ ] 1.2 Dataset, about 80 nodes across 12 branches (OG levels 1–8, plus elite "legendary" teasers)
 - [ ] 1.3 Cross-branch prerequisites (muscle-up, front lever, planche, freestanding HS, flag, pistol)
 - [ ] 1.4 Equipment tags and `alternatives` (Home: bar/parallettes/bands; Park: + dip bars)
 - [ ] 1.5 `src/data/validate.ts` + tests: DAG/no cycles, IDs resolve, ogLevel monotonic per chain, equipment present
@@ -44,7 +44,7 @@
 
 ### Phase 2: Game engine (`src/domain/`, pure TS, with tests)
 - [ ] 2.1 `xp.ts`: unit normalization (1 rep = 2 s hold = 3 s eccentric), difficulty and outcome multipliers, bonuses
-- [ ] 2.2 `progression.ts`: levels 1â€“10, level-5 cap and Trial, banked XP, node states, unlock resolution
+- [ ] 2.2 `progression.ts`: levels 1–10, level-5 cap and Trial, banked XP, node states, unlock resolution
 - [ ] 2.3 Tendon safeguards (ADR-010): min weeks at level, 60 s straight-arm budget, 48 h rule
 - [ ] 2.4 `character.ts`: character level, attributes, rank title, push/pull balance warning
 - [ ] 2.5 `generator.ts`: frontier, scoring, equipment substitution, slot filling, double-progression prescription
@@ -58,8 +58,8 @@
 ### Phase 4: Core UI
 - [ ] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials
 - [ ] 4.2 Tree tab, column view
-- [ ] 4.3 Node detail: cues, level/XP, prerequisites âœ“/âœ—, set goal, attempt Trial, history
-- [ ] 4.4 Train flow: Train now â†’ profile and time â†’ plan preview (swap/remove) â†’ live logging â†’ summary with XP, level-ups and unlocks
+- [ ] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗, set goal, attempt Trial, history
+- [ ] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove) → live logging → summary with XP, level-ups and unlocks
 - [ ] 4.5 Character tab: level, rank, attribute radar, streak, recent sessions
 - [ ] 4.6 Settings: equipment profiles, export/import
 

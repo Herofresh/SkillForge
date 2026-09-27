@@ -121,3 +121,7 @@ The generator is deterministic for the same inputs.
 - Skill node IDs are permanent, because saved progress references them.
 - Some OG2 levels in the research are inferred (`~`). Check them before relying on exact numbers.
 - Never put formulas in components. Import them from `src/domain/`.
+- **Encoding:** the docs are UTF-8 with non-ASCII characters (—, →, ✓).
+  - Don't edit them with Windows PowerShell 5.1 `Get-Content`/`Set-Content`. They read and write the ANSI
+    codepage and corrupt the text into mojibake like `â€”`.
+  - Use a proper file-editing tool, or Git Bash tools.
