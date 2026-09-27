@@ -50,7 +50,8 @@
     "format:check": "prettier --check .",
     "progressions:check": "tsx scripts/progressions.ts check",
     "progressions:build": "tsx scripts/progressions.ts build",
-    "progressions:review": "tsx scripts/progressions.ts review"
+    "progressions:review": "tsx scripts/progressions.ts review",
+    "e2e": "maestro test .maestro"
   },
   "private": true,
   "jest": {

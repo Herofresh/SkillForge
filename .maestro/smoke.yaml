@@ -1,0 +1,28 @@
+# Smoke test: the app starts in Expo Go and every tab renders.
+#
+# Prerequisites (see docs/CONTEXT.md "E2E tests"):
+#   1. An Android emulator (or phone) is running and visible to `adb devices`.
+#   2. The dev server runs on port 8081: `npx expo start`.
+#   3. `adb reverse tcp:8081 tcp:8081` so the device can reach Metro at 127.0.0.1.
+# Run: npm run e2e
+appId: host.exp.exponent
+name: Smoke - app opens and all tabs render
+---
+- openLink: exp://127.0.0.1:8081
+- extendedWaitUntil:
+    visible: 'Skill Tree'
+    timeout: 180000 # the first bundle on a cold emulator can take ~2 min
+# Expo Go shows a one-time developer menu intro on first launch.
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+- tapOn: 'Train'
+- assertVisible: 'COMING SOON'
+- tapOn: 'Character'
+- assertVisible: 'COMING SOON'
+- tapOn: 'Settings'
+- assertVisible: 'COMING SOON'
+- tapOn: 'Tree'
+- assertVisible: 'Skill Tree'
