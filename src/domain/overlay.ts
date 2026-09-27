@@ -35,6 +35,15 @@ export const OVERLAY_VERSION = 1;
 
 export const EMPTY_OVERLAY: ProgressionOverlay = { added: [], edited: {}, hidden: [] };
 
+/** The overlay changes nothing (same tree as the built-in matrix). */
+export function isEmptyOverlay(overlay: ProgressionOverlay): boolean {
+  return (
+    overlay.added.length === 0 &&
+    Object.keys(overlay.edited).length === 0 &&
+    overlay.hidden.length === 0
+  );
+}
+
 export interface OverlayResult {
   /** The merged tree, or the unchanged `base` when there are issues. */
   nodes: ExerciseNode[];
@@ -146,12 +155,18 @@ function mergeDuplicates(list: readonly Prerequisite[]): Prerequisite[] {
 
 export type OverlayTextFormat = 'yaml' | 'json';
 
-/** Serializes an overlay to shareable text in the same field format as `content/progressions/`. */
-export function exportOverlay(
-  overlay: ProgressionOverlay,
-  format: OverlayTextFormat = 'yaml',
-): string {
-  const raw = {
+export interface OverlayImport {
+  overlay: ProgressionOverlay | undefined;
+  issues: ValidationIssue[];
+}
+
+/**
+ * The overlay as plain data in the field format of `content/progressions/`, with the
+ * `format`/`version` header. The one shape for shared text (`exportOverlay`), the database row
+ * (PLAN 3.4) and backups (PLAN 3.3); `overlayFromRaw` reads it back.
+ */
+export function overlayToRaw(overlay: ProgressionOverlay): Record<string, unknown> {
+  return {
     format: OVERLAY_FORMAT,
     version: OVERLAY_VERSION,
     added: overlay.added.map((node) => nodeToRaw(node, true)),
@@ -160,6 +175,14 @@ export function exportOverlay(
     ),
     hidden: [...overlay.hidden],
   };
+}
+
+/** Serializes an overlay to shareable text in the same field format as `content/progressions/`. */
+export function exportOverlay(
+  overlay: ProgressionOverlay,
+  format: OverlayTextFormat = 'yaml',
+): string {
+  const raw = overlayToRaw(overlay);
   return format === 'json' ? `${JSON.stringify(raw, null, 2)}\n` : stringify(raw);
 }
 
@@ -167,17 +190,17 @@ export function exportOverlay(
  * Reads overlay text (YAML or JSON). Checks the fields only; call `applyOverlay` to check that the
  * result fits the tree. Returns `overlay: undefined` when there are issues.
  */
-export function importOverlay(overlayText: string): {
-  overlay: ProgressionOverlay | undefined;
-  issues: ValidationIssue[];
-} {
+export function importOverlay(overlayText: string): OverlayImport {
   const parsed = parseYamlText(overlayText, OVERLAY_FILE);
   if (parsed.issues.length > 0) return { overlay: undefined, issues: parsed.issues };
+  return overlayFromRaw(parsed.value);
+}
 
+/** Reads the `overlayToRaw` shape (already parsed data). Same checks as `importOverlay`. */
+export function overlayFromRaw(raw: unknown): OverlayImport {
   const issues: ValidationIssue[] = [];
   const fail = (message: string, nodeId?: string) =>
     issues.push({ file: OVERLAY_FILE, message, ...(nodeId === undefined ? {} : { nodeId }) });
-  const raw = parsed.value;
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
     fail('must be a group of fields (format, version, added, edited, hidden)');
     return { overlay: undefined, issues };

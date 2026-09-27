@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 
 import type { AppDb } from './database';
 import { settings } from './schema';
@@ -13,4 +13,16 @@ export function setSetting(db: AppDb, key: string, value: unknown): void {
     .values({ key, value })
     .onConflictDoUpdate({ target: settings.key, set: { value } })
     .run();
+}
+
+/** Every stored setting by key. */
+export function listSettings(db: AppDb): Record<string, unknown> {
+  return Object.fromEntries(
+    db
+      .select()
+      .from(settings)
+      .orderBy(asc(settings.key))
+      .all()
+      .map((row) => [row.key, row.value]),
+  );
 }

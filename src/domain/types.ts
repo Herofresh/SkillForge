@@ -388,3 +388,34 @@ export interface HeroProfile {
   /** When the profile was first created (first app start), in ms since the Unix epoch. */
   createdAt: number;
 }
+
+/** What a stored session keeps beyond the domain `LoggedSession` (the `sessions` row). */
+export interface SessionDetails {
+  endedAt?: number;
+  /** The profile chosen at session start; kept when that profile is deleted later. */
+  equipmentProfileId?: string;
+}
+
+/** A logged session together with its stored details, as read back from the database. */
+export type StoredSession = LoggedSession & SessionDetails;
+
+/**
+ * Everything the user owns (PLAN 3.3, ADR-028): what a backup contains and an import replaces.
+ * Derived data (`node_progress`, character stats) is not part of it; it is recomputed (ADR-008).
+ */
+export interface UserData {
+  /** Missing only before the first app start has seeded it. */
+  profile?: HeroProfile;
+  /** Goal node ids, most important first. */
+  goals: string[];
+  /** In display order. */
+  equipmentProfiles: EquipmentProfile[];
+  /** Oldest first, with their sets. */
+  sessions: StoredSession[];
+  /** Oldest first. */
+  userActions: UserAction[];
+  /** The user's progression overlay (ADR-016); empty when the user changed nothing. */
+  overlay: ProgressionOverlay;
+  /** User settings by key; values are JSON. */
+  settings: Record<string, unknown>;
+}

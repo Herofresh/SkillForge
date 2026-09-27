@@ -8,7 +8,7 @@ been implemented yet.
 Expo SDK 57 (`expo` 57.0.x), React Native 0.86, React 19.2, expo-router 57, TypeScript 6.0 (`strict`),
 Jest 29 with `jest-expo`, ESLint 9 (flat config) with `eslint-config-expo`, and Prettier 3.
 Persistence: `expo-sqlite` 57, `drizzle-orm` 0.45 (expo-sqlite driver), `drizzle-kit` 0.31,
-`zustand` 5 (ADR-026).
+`zustand` 5 (ADR-026). Backups: `expo-file-system`, `expo-sharing`, `expo-document-picker` 57 (ADR-028).
 
 ## Architecture map
 
@@ -17,8 +17,8 @@ What exists today: the root and tabs layouts, four placeholder tab screens,
 Phase 1 progression pipeline (`content/progressions/`, `scripts/`, `src/domain/types.ts`,
 `tier.ts`, `overlay.ts`, `src/data/*`) and the Phase 2 game engine (`xp.ts`, `progression.ts`,
 `safeguards.ts`, `character.ts`, `recompute.ts`, `generator.ts`, `src/lib/curve.ts`, `median.ts`,
-`time.ts`, `hash.ts`), and the Phase 3 persistence core (`src/db/`, `src/store/`,
-`DataGate`). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
+`time.ts`, `hash.ts`), and the Phase 3 persistence (`src/db/`, `src/store/`, `DataGate`, the stored
+overlay and backups). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
@@ -41,7 +41,10 @@ src/
   domain/               PURE TS game rules. No React/Expo/DB imports (ADR-009)
     types.ts            single source of shared types (nodes, issues, overlay, logged sets, progress)
     tier.ts             tierForOgLevel (tier is derived, never stored)
-    overlay.ts          user overlay: applyOverlay, exportOverlay, importOverlay
+    overlay.ts          user overlay: applyOverlay, exportOverlay/importOverlay (text),
+                        overlayToRaw/overlayFromRaw (data: DB row, backups), isEmptyOverlay
+    backup.ts           backup file format (ADR-028): serializeBackup, parseBackup (validates
+                        everything before an import), backupFileName, BACKUP_SCHEMA_VERSION
     xp.ts               units, difficulty/outcome multipliers, exercise and session XP, streak
     progression.ts      node XP curve, level-5 cap, Trials, test-out, node states, unlocks
     safeguards.ts       ADR-010 tendon rules (advisory, ADR-023): straight-arm Trial clock, 60 s
@@ -70,12 +73,15 @@ src/
     openAppDatabase.ts  opens skillforge.db with expo-sqlite (app only)
     migrate.ts          migrateDatabase: version guard, migrations, schema_version, first-run seed
     *Repository.ts      session, userAction, goal, equipmentProfile, nodeProgress (cache), profile,
-                        settings, meta: small sync functions taking AppDb (or a transaction)
+                        settings, meta, overlay: small sync functions taking AppDb (or a transaction)
+    userDataRepository.ts  readUserData / replaceUserData (all user tables, one transaction)
     rowGuards.ts        oneOf/optional checks for values read back
     testing/            TEST-ONLY: nodeSqliteClient (expo-sqlite API on node:sqlite), testDatabase (ADR-027)
   store/                Zustand store: UI actions -> domain -> repositories
     appStore.ts         createAppStore(deps): loadAll, logSession, selfUnlock, setGoals, equipment
-                        profile CRUD, generateWorkout(profileId, minutes, seed?)
+                        profile CRUD, generateWorkout(profileId, minutes, seed?), saveOverlay,
+                        exportBackup, importBackup, shareBackup, importBackupFromFile
+    backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker)
     bootstrap.ts        startApp(): open, migrate, create store, loadAll (once)
     useAppStore.ts      useAppStore(selector) hook for components below DataGate
   components/           reusable UI components
@@ -120,7 +126,14 @@ The 88 manifest nodes plus `straight_bar_dip` (Home dip, ADR-017). Content check
 (`sessions` + `session_sets`, or `user_actions`) → domain step (`applySession` /
 `applyUserAction`, or `recompute` for an entry in the past) → `node_progress` cache rewritten →
 store state set → UI re-renders. **Start-up:** `DataGate` → `startApp` → open → `migrateDatabase`
-→ `loadAll` (read history → `recompute` → rewrite cache) → screens render.
+→ `loadAll` (read overlay → `applyOverlay(ALL_NODES, overlay)` = `state.nodes` → read history →
+`recompute` → rewrite cache) → screens render. **Overlay edit:** `saveOverlay(overlay)` →
+`applyOverlay` issues? return them, write nothing : store the row → `loadAll`.
+
+**Backup flow (ADR-028):** export: `exportBackup` / `shareBackup` → `readUserData` →
+`serializeBackup` → share sheet. Import: `importBackupFromFile` (document picker) → `importBackup`
+→ `parseBackup` (all checks; issues → nothing written) → safety copy of the current data to
+`documents/backups/` → `replaceUserData` (one transaction) → `loadAll`.
 
 **Engine flow:** a finished `LoggedSession` goes through `applySession(state, session, tree)` →
 new `EngineState` (progress per node, total XP, streak, last straight-arm session, last applied
@@ -145,6 +158,9 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 |---|---|
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
+| **Stored overlay** | The one current overlay in `progression_overlay`; the store's tree is `applyOverlay(ALL_NODES, overlay).nodes`. An overlay with issues is never saved; a stored one that stops applying is kept and reported as `overlayIssues` (ADR-028). |
+| **Backup** | A JSON file of all user data (`skillforge-backup`, `schemaVersion`). Import validates the whole file first and then replaces all data in one transaction; never a merge or a partial import (ADR-028). |
+| **Safety copy** | The backup of the current data that `importBackup` writes to `documents/backups/skillforge-before-import-<UTC>.json` before it replaces anything; importing it undoes the import. |
 | **Source** | `core` (built-in YAML) or `user` (from the overlay). |
 | **Review status** | `draft` or `coach_reviewed`, per node, with free-text `review.notes`. |
 | **Verify note** | A node's `verify:` text: something still uncertain (the `TODO(verify)` flag, ⚠ on the review sheet). |
@@ -271,7 +287,7 @@ order of `recentSessions`). Pass the merged tree and `EngineState.progress`.
 Helpers for the UI and tests: `planExercises(plan)`, `plannedSets(exercises, at)` (the plan as
 `LoggedSet`s, e.g. for `sessionSafeguardWarnings` while the user edits the plan).
 
-## Data model *(Phase 3.1, ADR-026)*
+## Data model *(Phase 3.1, 3.3–3.4, ADR-026, ADR-028)*
 Schema in `src/db/schema.ts`; timestamps are integers in ms since the Unix epoch. Sources of truth
 (ADR-008): `sessions` + `session_sets` and `user_actions`. Everything else is settings or cache.
 
@@ -291,8 +307,13 @@ Schema in `src/db/schema.ts`; timestamps are integers in ms since the Unix epoch
     last_trained_at?, self_unlocked_at?)`: CACHE of `NodeProgress`, rewritten after every
     recompute/apply; safe to delete (`loadAll` rebuilds it identically)
   - `settings(key, value JSON)`: user settings (none used yet)
+  - `progression_overlay(id = 1, revision, saved_at, body JSON)`: the current overlay in the
+    `overlayToRaw` shape (ADR-028); `revision` counts saves
 - **Migrations:** `src/db/migrations/`, generated from the schema by `npm run db:generate`,
   additive only, applied by Drizzle (`__drizzle_migrations`) in one transaction on every start.
+- **Backups** (ADR-028): all tables above except `meta` and `node_progress`, as one JSON file with
+  `format: 'skillforge-backup'` and `schemaVersion` (`BACKUP_SCHEMA_VERSION` = 1, independent of the
+  database schema version). Import replaces everything; a newer `schemaVersion` is refused.
 - Not stored (derived): node states, character level/attributes, session XP and outcome, streak.
 
 ## Equipment tags
@@ -344,6 +365,8 @@ build is needed.
 **Gotchas:**
 - The first cold bundle takes about 2 minutes on the emulator. The smoke flow waits up to 3 minutes.
 - If Android shows "System UI isn't responding" while it loads, tap *Wait*.
+- If the first run after a cold boot times out on a white Expo Go loading screen, run
+  `adb shell am force-stop host.exp.exponent` and run the flows again (the bundle is cached by then).
 - The flows aren't in CI yet (see the backlog).
 - Match on visible text. When the real UI replaces the placeholders, update or extend the flows in
   the same PR.
