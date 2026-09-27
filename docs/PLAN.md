@@ -51,6 +51,12 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Lockfile guard (task 0.7, ADR-029):** root cause of the recurring `@emnapi/*` drops was npm
+  version skew (local 11.6.2 writes the lockfile without them; CI's 11.19.0 requires them), not the
+  OS. `npm run lockfile:fix` re-resolves with the pinned npm through `npx`, so it works whatever npm
+  is installed; local npm prints an `EBADDEVENGINES` warning until it is upgraded
+  (`npm install -g npm@11.19.0`, optional). To bump the pin, change `devEngines` in package.json,
+  run `lockfile:fix` and commit both files.
 - **Stored overlay and backups (Phase 3.3–3.4, ADR-028):**
   - Overlay: `useAppStore((s) => s.saveOverlay)(overlay)` returns `ValidationIssue[]`; empty =
     saved and reloaded. The node editor (4.7) shows the issues inline (`formatIssue`) and keeps
@@ -184,12 +190,14 @@
   in Phase 4.
 - Add dependencies with `npx expo install <pkg>` so versions match SDK 57. `npx expo-doctor` passed
   21/21 checks at scaffold time.
-- CI (`.github/workflows/ci.yml`) runs on Node 24 for every PR and on every push to `main`: npm ci,
-  typecheck, lint, format:check, test. Gotcha: npm on Windows can write a lockfile that leaves out
-  optional peers needed on Linux (here `@emnapi/core`/`@emnapi/runtime` for `@napi-rs/wasm-runtime`),
-  and then CI's `npm ci` fails with "Missing: … from lock file". Fix it by adding the missing entries
-  (see PR #3), not by switching `npm ci` to `npm install`. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…028). The
+- CI (`.github/workflows/ci.yml`) runs on Node 24 for every PR and on every push to `main`: it
+  installs the npm pinned in `package.json` `devEngines` (11.19.0), then lockfile:check, npm ci,
+  typecheck, lint, format:check, test, progressions:check. Lockfile gotcha (task 0.7, ADR-029): the
+  local npm 11.6.2 drops the optional peers `@emnapi/core`/`@emnapi/runtime` from
+  package-lock.json and CI's newer npm then rejects it ("Missing: … from lock file"). After every
+  `npx expo install` / `npm install`, run `npm run lockfile:fix` (never hand-patch, never switch CI
+  to `npm install`); `npm run lockfile:check` must pass before committing. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…029). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
@@ -208,6 +216,7 @@
 - [x] 0.3 TypeScript strict, ESLint, Prettier, Jest (`jest-expo`); scripts `typecheck`, `lint`, `test` ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
 - [x] 0.4 GitHub Actions CI: typecheck, lint and test on every PR ([PR #3](https://github.com/Herofresh/SkillForge/pull/3))
 - [x] 0.5 Folder layout (`src/domain`, `src/data/skills`, `src/db`, `src/components`, `src/lib`) and README update ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
+- [x] 0.7 Lockfile guard: `lockfile:check` / `lockfile:fix` with the npm pinned in `devEngines`, CI on the same npm (ADR-029) ([PR #PRNUM](https://github.com/Herofresh/SkillForge/pull/PRNUM))
 - [x] 0.6 Emulator check and Maestro E2E smoke flow (`.maestro/smoke.yaml`, `npm run e2e`, ADR-022). Verified on `Pixel_6_Pro_API_34` via Expo Go ([PR #7](https://github.com/Herofresh/SkillForge/pull/7))
 
 ### Phase 1: Progression matrix

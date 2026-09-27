@@ -61,6 +61,8 @@ If these documents disagree with the code, the code is the truth. Fix the docume
    - Bug fixes get a regression test.
 5. **Check before committing.**
    - Run `npm run typecheck && npm run lint && npm test`. All three must pass.
+   - If you installed or changed a dependency, run `npm run lockfile:fix` and commit the lockfile;
+     `npm run lockfile:check` must pass (CI runs it too, ADR-029).
    - Don't skip hooks and don't disable failing tests to get green.
 6. **Update the docs.** Do this in the same PR (see §4).
 7. **Commit.**

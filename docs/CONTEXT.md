@@ -335,6 +335,8 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 | `npm run progressions:build` | Validate, then write `src/data/skills/progressions.generated.ts` and `docs/review/progression-matrix.md`. Run after every YAML edit. |
 | `npm run progressions:review` | Validate, then write only the coach review sheet. |
 | `npm run db:generate` | `drizzle-kit generate`: write a new migration in `src/db/migrations/` after editing `src/db/schema.ts` (add `-- --name <slug>` to name it). Commit the generated files. |
+| `npm run lockfile:check` | `npm ci --dry-run` with the pinned npm on a clean copy of package.json + package-lock.json: fails if CI's `npm ci` would reject the lockfile (ADR-029). Also runs in CI. |
+| `npm run lockfile:fix` | Re-resolve package-lock.json with the pinned npm (`install --package-lock-only`), then run the check. Run after every `npx expo install` / `npm install`. |
 | `npm run e2e` | Maestro E2E flows in `.maestro/` against Expo Go on a running emulator (see "E2E tests") |
 | `npx expo-doctor` | Checks dependency versions and config against the SDK |
 | `npx expo install <pkg>` | Add a dependency at the SDK-compatible version (prefer it over `npm install`) |
@@ -342,7 +344,7 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 ## Environment notes
 - **OS:** Windows 10 with PowerShell 5.1 (no `&&`; use `; if ($?) {}`) and Git Bash.
 - **GitHub CLI:** `C:\Program Files\GitHub CLI\gh.exe`, logged in as `Herofresh`.
-- **Tooling:** Node 24, npm 11, Java 17, jq 1.8.
+- **Tooling:** Node 24, npm 11 (local 11.6.2; the project pins 11.19.0 for the lockfile, ADR-029), Java 17, jq 1.8.
 - **Android:**
   - The Android SDK and Android Studio are installed at `%LOCALAPPDATA%\Android\Sdk`, but
     `ANDROID_HOME` and PATH aren't set. Call `adb` and `emulator` by their full paths.
@@ -395,5 +397,11 @@ build is needed.
   Tests use `openTestDatabase()` from `src/db/testing/testDatabase.ts` (ADR-027); Node prints an
   "SQLite is experimental" warning, which is expected. After editing a `.sql` file clear the caches
   (`npx jest --clearCache`, `npx expo start -c`), because they are inlined by Babel.
+- **Lockfile (ADR-029):** npm 11.6.2 (this machine's npm) writes package-lock.json without the
+  optional peers `@emnapi/core`/`@emnapi/runtime` (of `@napi-rs/wasm-runtime`), and the newer npm
+  in CI then fails `npm ci` with "Missing: … from lock file". The npm version is pinned in
+  `package.json` `devEngines.packageManager` (a mismatch prints `EBADDEVENGINES`, a warning only).
+  After any install run `npm run lockfile:fix`; don't hand-patch the lockfile. The script lives in
+  `scripts/lockfile.ts` and runs on plain Node (type stripping), so keep it free of dependencies.
 - **Line endings:** `.gitattributes` forces LF. Git may warn "CRLF will be replaced by LF" once per file;
   that's expected.
