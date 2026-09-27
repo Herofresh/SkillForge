@@ -9,14 +9,14 @@
   CI (PR #3).
 - The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. The
   Android bundle exports cleanly, but it hasn't been opened on a phone in Expo Go yet.
-- Phase 1 is in review on branch `feat/progression-matrix` (PR pending): shared types, the YAML
+- Phase 1 is in review on branch `feat/progression-matrix` ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)): shared types, the YAML
   progression format with build/check/review scripts, the validator, the user overlay and the full
   dataset of **89 nodes** in 12 branches (all `review.status: draft`, 52 with a `verify:` note).
   The coach review sheet `docs/review/progression-matrix.md` is generated and committed. No game
   logic or persistence yet.
 
 ## Next up
-1. Reviewer agent: review and merge the Phase 1 PR (PR pending).
+1. Reviewer agent: review and merge the Phase 1 PR ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)).
 2. Phase 2.1–2.2: `xp.ts` and `progression.ts` on top of `ALL_NODES` (decide in 2.2 whether a
    node's `alternatives` can satisfy a prerequisite, see ADR-017).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
@@ -97,15 +97,15 @@
 The matrix is authored as human-editable YAML (one file per branch in `content/progressions/`) and
 compiled into a typed module for the app; users can layer their own changes on top (ADR-016).
 
-- [x] 1.1 `src/domain/types.ts`: `ExerciseNode`, `Branch`, `Metric`, `Prerequisite`, `Trial`, `EquipmentTag`, overlay types; `tierForOgLevel` (PR pending)
-- [x] 1.2 Dataset: the 88 nodes of [`docs/research/node-manifest.md`](research/node-manifest.md) written as YAML blocks in `content/progressions/<branch>.yaml`, plus `straight_bar_dip` (89 nodes, ADR-017) (PR pending)
-- [x] 1.3 Cross-branch prerequisites (muscle-up, front lever, planche, freestanding HS, flag, pistol), as listed in the manifest (PR pending)
-- [x] 1.4 Equipment options and `alternatives` (Home: floor/wall/bar/parallettes/bands; Park: + dip bars) (PR pending)
-- [x] 1.5 `src/data/validate.ts` + tests: unique snake_case ids, references resolve, DAG, ogLevel monotonic per branch, unique order, equipment, ranges/trials, sources, straight-arm flag (PR pending)
+- [x] 1.1 `src/domain/types.ts`: `ExerciseNode`, `Branch`, `Metric`, `Prerequisite`, `Trial`, `EquipmentTag`, overlay types; `tierForOgLevel` ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.2 Dataset: the 88 nodes of [`docs/research/node-manifest.md`](research/node-manifest.md) written as YAML blocks in `content/progressions/<branch>.yaml`, plus `straight_bar_dip` (89 nodes, ADR-017) ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.3 Cross-branch prerequisites (muscle-up, front lever, planche, freestanding HS, flag, pistol), as listed in the manifest ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.4 Equipment options and `alternatives` (Home: floor/wall/bar/parallettes/bands; Park: + dip bars) ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.5 `src/data/validate.ts` + tests: unique snake_case ids, references resolve, DAG, ogLevel monotonic per branch, unique order, equipment, ranges/trials, sources, straight-arm flag ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
 - [ ] 1.6 Verify the inferred (`~`) OG2 levels against the OG2 Google Sheet
-- [x] 1.7 YAML format (`src/data/progressionFormat.ts`), `npm run progressions:build|check|review`, generated `src/data/skills/progressions.generated.ts`, staleness test, contributor guide `content/progressions/README.md` (PR pending)
-- [x] 1.8 Coach review sheet `docs/review/progression-matrix.md` (generated, committed) (PR pending)
-- [x] 1.9 User overlay in `src/domain/overlay.ts`: `applyOverlay` (same validator), `exportOverlay`/`importOverlay` (YAML/JSON) (PR pending)
+- [x] 1.7 YAML format (`src/data/progressionFormat.ts`), `npm run progressions:build|check|review`, generated `src/data/skills/progressions.generated.ts`, staleness test, contributor guide `content/progressions/README.md` ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.8 Coach review sheet `docs/review/progression-matrix.md` (generated, committed) ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
+- [x] 1.9 User overlay in `src/domain/overlay.ts`: `applyOverlay` (same validator), `exportOverlay`/`importOverlay` (YAML/JSON) ([PR #4](https://github.com/Herofresh/SkillForge/pull/4))
 - [ ] 1.10 Coach review pass: a calisthenics coach reviews the sheet; notes go into `review.notes`, signed-off nodes get `review.status: coach_reviewed` (needs the user to find a coach)
 
 ### Phase 2: Game engine (`src/domain/`, pure TS, with tests)
