@@ -1,0 +1,106 @@
+# First run (PLAN 4.1): a fresh install walks through onboarding (hero name, keep Home, one goal, one
+# test-out with its advisory warning acknowledged, ADR-023) and lands on the Tree tab.
+# Prerequisites and run: see smoke.yaml / docs/CONTEXT.md "E2E tests".
+appId: host.exp.exponent
+name: Onboarding - fresh install to the Tree tab
+---
+# Fresh install: wipes Expo Go's data, including the app's SQLite database.
+- clearState
+- openLink: exp://127.0.0.1:8081
+- extendedWaitUntil:
+    visible: 'Name your hero|Continue'
+    timeout: 180000 # the first bundle on a cold emulator can take ~2 min
+# Expo Go shows a one-time developer menu intro on first launch.
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+# After a clearState the dev menu itself then stays open over the app: close it.
+- runFlow:
+    when:
+      visible: 'Toggle performance monitor'
+    commands:
+      - back
+- extendedWaitUntil:
+    visible:
+      id: 'onboarding-hero'
+    timeout: 60000
+# 1. Name your hero
+- assertVisible: 'Welcome to SkillForge'
+- tapOn:
+    id: 'hero-name-input'
+- inputText: 'Aria'
+- hideKeyboard
+- tapOn:
+    id: 'onboarding-next'
+# 2. Equipment: the seeded profiles, keep them as they are
+- extendedWaitUntil:
+    visible: 'Your armory'
+    timeout: 20000
+- assertVisible:
+    id: 'profile-home'
+- assertVisible:
+    id: 'tag-home-bar'
+- tapOn:
+    id: 'onboarding-next'
+# 3. Goals: pick the pull-up from the vertical pull branch
+- extendedWaitUntil:
+    visible: 'Choose your quests'
+    timeout: 20000
+- tapOn:
+    id: 'branch-v_pull'
+- scrollUntilVisible:
+    element:
+      id: 'goal-pull_up'
+    direction: DOWN
+    timeout: 90000
+- tapOn:
+    id: 'goal-pull_up'
+- assertVisible:
+    id: 'goal-pull_up'
+    checked: true
+- tapOn:
+    id: 'onboarding-next'
+# 4. Assessment: test out the pull-up (locked: an info warning to acknowledge first)
+- extendedWaitUntil:
+    visible: 'Prove your might'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'anchor-pull_up'
+    direction: DOWN
+    timeout: 90000
+- tapOn:
+    id: 'anchor-pull_up'
+- extendedWaitUntil:
+    visible: 'The Trial'
+    timeout: 20000
+- tapOn:
+    id: 'trial-warning-0-acknowledge'
+- assertVisible:
+    id: 'trial-warning-0-acknowledged'
+- tapOn:
+    id: 'onboarding-next' # Log Trial
+- extendedWaitUntil:
+    visible: 'TESTED OUT!'
+    timeout: 20000
+- tapOn:
+    id: 'onboarding-next' # Done
+- extendedWaitUntil:
+    visible: 'Prove your might'
+    timeout: 20000
+- assertVisible: 'Tested out'
+- tapOn:
+    id: 'onboarding-next' # Continue
+# 5. Summary
+- extendedWaitUntil:
+    visible: 'Your journey begins'
+    timeout: 20000
+- assertVisible: '.*Pull-up'
+- tapOn:
+    id: 'onboarding-next' # Begin
+- extendedWaitUntil:
+    visible: 'Skill Tree'
+    timeout: 20000
+- assertVisible: 'Tree'

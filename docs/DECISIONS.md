@@ -703,3 +703,38 @@ Template:
   (OFL fonts, MIT loaders), dev deps RNTL + test-renderer (MIT). Every Phase 4 screen builds from the
   kit and adds tokens to `theme.ts` (with a contrast test) instead of local styles. Silkscreen is
   all caps: `label` is for short tags only. `expo-symbols` is no longer imported (left installed).
+
+## ADR-031: First-run onboarding: gated by a setting, saved step by step, assessment = Trial sessions (PLAN 4.1)
+- Date: 2026-09-27 · Status: Accepted
+- Context: A new user needs a hero name, equipment that matches their places, goals for the
+  generator and, if they already train, a way to start further up the tree. ADR-023 says any node
+  (straight-arm and locked ones included) can be tested out, with advisory warnings.
+- Decision:
+  - **Gate:** onboarding shows until the setting `onboarding_completed_at` (ms) exists
+    (`settings` table, no migration; it travels with backups and an import restores it). The tabs
+    layout and `/` redirect to `/onboarding` until then; the onboarding layout redirects to `/tree`
+    once the store's `completeOnboarding()` sets it. A missing hero name alone does not re-open it.
+  - **Steps and routes:** `app/onboarding/` stack: `index` (welcome + "Name your hero", required,
+    `normalizeHeroName`, ≤ 24 characters) → `equipment` (toggle the seeded Home/Park tags, add or
+    remove profiles; the last one can't be removed) → `goals` (browse by branch, tier + OG level,
+    1–5 goals via `toggleGoal`; "Later" skips) → `assessment` (optional) → `trial/[nodeId]` →
+    `summary` ("Your journey begins", Begin). Every step writes through store actions immediately,
+    so Back (button or Android back) shows what is saved and a restart resumes with the data kept.
+  - **Assessment anchors:** the goals plus all their transitive hard prerequisites, sorted by
+    ogLevel, and up to 6 picked evenly from easiest to hardest (`assessmentAnchors`); independent of
+    progress so the list does not jump. Any other node is reachable through a name/id search.
+  - **Test-out = a logged Trial session:** "I can already do this" opens the Trial with one stepper
+    per set (prefilled with the standard, steps from `PROGRESSION_STEP`); `logTrial` stores it as an
+    ordinary session of `isTrial` sets (`trialSession`), so recompute, XP and unlocks need nothing
+    new. Below the standard it just counts as training. Each test-out is its own session.
+  - **Warnings (ADR-023):** before the attempt the screen shows `testOutWarnings` (unmet
+    prerequisites, straight-arm Trial clock, 48 h straight-arm rest; the Trial itself is budget
+    exempt, ADR-025) as `WarningBanner`s; "Log Trial" is enabled once each is acknowledged. Nothing
+    is blocked beyond that acknowledge step. A second straight-arm test-out right after a first one
+    therefore shows the 48 h rest warning, which is correct for the tendons.
+- Consequences: New pure modules `src/domain/onboarding.ts`, `assessment.ts`, `format.ts`,
+  `branch.ts` (+ `characterLevelProgress`, `EQUIPMENT_TAG_LABELS`, `toggleEquipmentTag`), store
+  actions `setHeroName`, `toggleGoal`, `logTrial`, `testOutWarnings`, `completeOnboarding`, and kit
+  components `PixelTextInput`, `PixelChip`, `NumberStepper` plus `NodeRow` and
+  `OnboardingScaffold`. Settings (4.6) should offer "Replay onboarding" by clearing the setting if
+  the user asks for it (not built). Maestro flows finish onboarding first (`subflows/`).

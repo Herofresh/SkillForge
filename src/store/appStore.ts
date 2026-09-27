@@ -12,6 +12,9 @@
  * - Backups (PLAN 3.3, ADR-028): `exportBackup` serializes all user data; `importBackup` validates
  *   the whole file first, saves a safety copy of the current data, then replaces everything in one
  *   transaction and reloads. Never a partial import.
+ * - Onboarding (PLAN 4.1, ADR-031): `setHeroName`, `toggleGoal`, `logTrial` (assessment test-outs,
+ *   logged as ordinary Trial sessions) and `completeOnboarding` (the `onboarding_completed_at`
+ *   setting, so it travels with backups).
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
  *
  * `createAppStore` takes its dependencies (database, built-in tree, clock, id source, file access) so
@@ -29,12 +32,15 @@ import {
 import { listGoals, replaceGoals } from '@/db/goalRepository';
 import { replaceNodeProgress } from '@/db/nodeProgressRepository';
 import { getOverlay, saveOverlay } from '@/db/overlayRepository';
-import { getProfile } from '@/db/profileRepository';
+import { getProfile, setHeroName } from '@/db/profileRepository';
 import { insertSession, listSessions } from '@/db/sessionRepository';
+import { getSetting, setSetting } from '@/db/settingsRepository';
 import { insertUserAction, listUserActions } from '@/db/userActionRepository';
 import { readUserData, replaceUserData } from '@/db/userDataRepository';
+import { testOutWarnings, trialSession } from '@/domain/assessment';
 import { backupFileName, parseBackup, serializeBackup } from '@/domain/backup';
 import { generateWorkout } from '@/domain/generator';
+import { normalizeHeroName, toggleGoal } from '@/domain/onboarding';
 import { applyOverlay, EMPTY_OVERLAY } from '@/domain/overlay';
 import {
   applySession,
@@ -54,7 +60,9 @@ import type {
   HeroProfile,
   LoggedSession,
   ProgressionOverlay,
+  SafeguardWarning,
   SessionDetails,
+  SetPerformance,
   UserAction,
   ValidationIssue,
   WorkoutPlan,
@@ -67,6 +75,9 @@ import { MS_PER_DAY } from '@/lib/time';
  * pattern recency); four weeks also cover its 3-session stagnation check for weekly trainers.
  */
 export const GENERATOR_HISTORY_DAYS = 28;
+
+/** Setting key: when the user finished onboarding (ms since the Unix epoch). */
+export const ONBOARDING_COMPLETED_SETTING = 'onboarding_completed_at';
 
 /** File name prefix of the safety copy written before an import replaces the data. */
 export const SAFETY_COPY_PREFIX = 'skillforge-before-import';
@@ -131,11 +142,29 @@ export interface AppState {
   goals: string[];
   equipmentProfiles: EquipmentProfile[];
   profile?: HeroProfile;
+  /** When onboarding was finished; unset = show the first-run flow (PLAN 4.1). */
+  onboardingCompletedAt?: number;
 
   loadAll(): void;
   logSession(session: LoggedSession, details?: SessionDetails): SessionResult;
   selfUnlock(nodeId: string): UserActionResult;
   setGoals(nodeIds: readonly string[]): void;
+  /**
+   * Adds `nodeId` to the goals or removes it (`toggleGoal`, at most `MAX_GOALS`). Returns false when
+   * the list is full and nothing changed.
+   */
+  toggleGoal(nodeId: string): boolean;
+  /** Stores the hero name (`normalizeHeroName`). Throws when nothing is left of it. */
+  setHeroName(name: string): void;
+  /**
+   * Logs a Trial attempt on `nodeId` now, one set per result (the assessment's "I can already do
+   * this"). A passed Trial is a test-out (ADR-023); warnings come back in the result, never a block.
+   */
+  logTrial(nodeId: string, results: readonly SetPerformance[]): SessionResult;
+  /** What to show and acknowledge before `logTrial` on `nodeId` now (`testOutWarnings`). */
+  testOutWarnings(nodeId: string): SafeguardWarning[];
+  /** Marks onboarding as done (the app then opens on the tabs). */
+  completeOnboarding(): void;
   createEquipmentProfile(name: string, tags: readonly EquipmentTag[]): EquipmentProfile;
   updateEquipmentProfile(id: string, changes: EquipmentProfileChanges): void;
   deleteEquipmentProfile(id: string): void;
@@ -183,10 +212,10 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
   };
 
   return createStore<AppState>()((set, get) => {
-    const requireNode = (nodeId: string): void => {
-      if (!get().nodes.some((node) => node.id === nodeId)) {
-        throw new Error(`Unknown node '${nodeId}'`);
-      }
+    const requireNode = (nodeId: string): ExerciseNode => {
+      const node = get().nodes.find((candidate) => candidate.id === nodeId);
+      if (!node) throw new Error(`Unknown node '${nodeId}'`);
+      return node;
     };
 
     /** Stores the new engine state and rewrites the progress cache from it. */
@@ -212,7 +241,9 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const sessions = listSessions(db);
         const userActions = listUserActions(db);
         const { state: engine } = recompute(nodes, sessions, userActions);
+        const completedAt = getSetting(db, ONBOARDING_COMPLETED_SETTING);
         commitEngine(engine, {
+          onboardingCompletedAt: typeof completedAt === 'number' ? completedAt : undefined,
           loaded: true,
           nodes,
           overlay,
@@ -262,6 +293,44 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         goalIds.forEach(requireNode);
         replaceGoals(db, goalIds);
         set({ goals: listGoals(db) });
+      },
+
+      toggleGoal(nodeId) {
+        requireNode(nodeId);
+        const { goals, changed } = toggleGoal(get().goals, nodeId);
+        if (changed) get().setGoals(goals);
+        return changed;
+      },
+
+      setHeroName(name) {
+        const heroName = normalizeHeroName(name);
+        if (heroName === undefined) throw new Error('The hero needs a name');
+        setHeroName(db, heroName);
+        set({ profile: getProfile(db) });
+      },
+
+      logTrial(nodeId, results) {
+        const node = requireNode(nodeId);
+        const at = now();
+        return get().logSession(trialSession(node, results, newId(at), at), { endedAt: at });
+      },
+
+      testOutWarnings(nodeId) {
+        const node = requireNode(nodeId);
+        const { nodes, engine } = get();
+        return testOutWarnings(
+          node,
+          nodes,
+          engine.progress,
+          engine.lastStraightArmSessionAt,
+          now(),
+        );
+      },
+
+      completeOnboarding() {
+        const at = now();
+        setSetting(db, ONBOARDING_COMPLETED_SETTING, at);
+        set({ onboardingCompletedAt: at });
       },
 
       createEquipmentProfile(name, tags) {

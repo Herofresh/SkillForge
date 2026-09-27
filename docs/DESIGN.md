@@ -114,6 +114,7 @@ stepped corners and a hard shadow.
 | `parchment` | `bronze` | `parchment` | Lists and "documents" (ink text) |
 | `rune` | `rune` | `surface` | Magic moments: level-up, unlocks |
 | `danger` | `danger` | `surface` | Safeguard warnings |
+| `selected` | `gold` | `surfaceRaised` | A picked chip or row (goal, tag, branch) |
 
 ## 5. Components (`src/components/ui/`, import from `@/components/ui`)
 
@@ -133,6 +134,14 @@ stepped corners and a hard shadow.
 | `PixelModal` | Bottom sheet with title, content and a close button over an ink backdrop |
 | `EmptyState` | Big icon, title, message, optional caps note and action |
 | `LevelUpBurst` | "LEVEL UP!" with a stepped pixel burst; `playKey` replays, `onDone` |
+| `PixelTextInput` | Labelled text field in a stone frame that turns gold on focus; body font, ≥ 48 dp |
+| `PixelChip` | Selectable tag: stone off, `Frames.selected` + check on; `checkbox` or `tab` role |
+| `NumberStepper` | Label, − / value / + (48 dp buttons); the caller formats the value (`formatPerformance`) |
+
+Built from the kit outside `ui/`: `NodeRow` (a skill node as a list row: icon, name, `TierChip`, OG
+level, ember "Straight-arm" tag, caps status; `selected` uses `Frames.selected`) and
+`onboarding/OnboardingScaffold` (rune step bar, title with a 48 dp icon, scrolling body, footer with
+Back / Skip / Next pinned above the content). Onboarding screenshots: `docs/screenshots/4.1-*.png`.
 
 Bar math: `litSegments(fraction, count)` (`src/lib/segments.ts`) lights ≥ 1 segment for any gain and
 never shows full before 100 %. The fraction itself comes from the domain (e.g. XP thresholds in

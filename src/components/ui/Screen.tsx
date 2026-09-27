@@ -16,6 +16,7 @@ export function Screen({ children, centered = false, testID }: Props) {
     <ScrollView
       testID={testID}
       style={styles.scroll}
+      keyboardShouldPersistTaps="handled"
       contentContainerStyle={[styles.content, centered && styles.centered]}>
       {children}
     </ScrollView>

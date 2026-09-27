@@ -9,9 +9,10 @@ appId: host.exp.exponent
 name: Smoke - app opens and all tabs render
 ---
 - openLink: exp://127.0.0.1:8081
-# Wait for the app. It may still be open where an earlier flow left it: any tab, or the Style Guide.
+# Wait for the app. It may still be open where an earlier flow left it: any tab, the Style Guide or
+# an onboarding step.
 - extendedWaitUntil:
-    visible: 'Tree|Style Guide'
+    visible: 'Tree|Style Guide|Step . / 5|Continue'
     timeout: 180000 # the first bundle on a cold emulator can take ~2 min
 # Expo Go shows a one-time developer menu intro on first launch.
 - runFlow:
@@ -19,12 +20,20 @@ name: Smoke - app opens and all tabs render
       visible: 'Continue'
     commands:
       - tapOn: 'Continue'
+# On a fresh install the dev menu then stays open over the app: close it.
+- runFlow:
+    when:
+      visible: 'Toggle performance monitor'
+    commands:
+      - back
 - runFlow:
     when:
       visible:
         id: 'styleguide'
     commands:
       - back
+# First run (PLAN 4.1): finish onboarding if it is showing.
+- runFlow: subflows/finish-onboarding.yaml
 - tapOn: 'Tree'
 - assertVisible: 'Skill Tree'
 - tapOn: 'Train'

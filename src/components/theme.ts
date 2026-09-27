@@ -148,6 +148,8 @@ export const Frames = {
   parchment: { lines: [Colors.ink, Colors.bronze], fill: Colors.parchment },
   rune: { lines: [Colors.ink, Colors.rune], fill: Colors.surface },
   danger: { lines: [Colors.ink, Colors.danger], fill: Colors.surface },
+  /** A picked chip or row (goal, tag, branch). */
+  selected: { lines: [Colors.ink, Colors.gold], fill: Colors.surfaceRaised },
 } as const satisfies Record<string, FrameStyle>;
 
 export type FrameVariant = keyof typeof Frames;
