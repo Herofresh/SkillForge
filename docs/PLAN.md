@@ -17,7 +17,7 @@
 - None.
 
 ## Handoff notes
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…011). The
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…012). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.

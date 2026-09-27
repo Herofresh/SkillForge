@@ -70,6 +70,21 @@ If these documents disagree with the code, the code is the truth. Fix the docume
    - Report failures honestly. If something is untested or skipped, say so.
 9. **Hand the PR to a reviewer agent.** Never merge your own PR. See §4a.
 
+## 4. Documentation duty (non-negotiable)
+
+At the end of every task:
+
+- **`docs/PLAN.md`:**
+  - Tick the task and add the PR link.
+  - Update "Current state", "Next up" and "Blockers".
+  - Write **Handoff notes** for the next agent: what's half-done, gotchas, where to continue.
+- **`docs/DECISIONS.md`:**
+  - Append an ADR for any non-trivial choice: a library, a data shape, a formula, a trade-off, or a
+    change of direction.
+  - Never rewrite old ADRs. To reverse one, add a new ADR and mark the old one `Superseded by ADR-NNN`.
+- **`docs/CONTEXT.md`:** update it whenever you add or move folders, change formulas, add commands, or
+  introduce a new concept that belongs in the glossary.
+
 ## 4a. PR review and merge (agent-reviewed, not user-reviewed)
 
 The user doesn't review every PR. Each PR is handed to a **fresh, independent reviewer agent**. That
@@ -106,21 +121,6 @@ agent didn't write the code and starts with no context from the author.
    - review has gone around more than twice without converging.
 
    To escalate, label the PR `needs-user` and write the reason in PLAN.md under "Blockers".
-
-## 4. Documentation duty (non-negotiable)
-
-At the end of every task:
-
-- **`docs/PLAN.md`:**
-  - Tick the task and add the PR link.
-  - Update "Current state", "Next up" and "Blockers".
-  - Write **Handoff notes** for the next agent: what's half-done, gotchas, where to continue.
-- **`docs/DECISIONS.md`:**
-  - Append an ADR for any non-trivial choice: a library, a data shape, a formula, a trade-off, or a
-    change of direction.
-  - Never rewrite old ADRs. To reverse one, add a new ADR and mark the old one `Superseded by ADR-NNN`.
-- **`docs/CONTEXT.md`:** update it whenever you add or move folders, change formulas, add commands, or
-  introduce a new concept that belongs in the glossary.
 
 ## 5. Conventions
 
