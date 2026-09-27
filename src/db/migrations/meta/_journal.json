@@ -15,6 +15,13 @@
       "when": 1790525076857,
       "tag": "0001_progression_overlay",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790547721708,
+      "tag": "0002_active_session",
+      "breakpoints": true
     }
   ]
 }

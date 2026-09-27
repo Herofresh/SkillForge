@@ -36,7 +36,7 @@ import {
   nodeAttributes,
   type AttributeValues,
 } from './character';
-import { resolveTree, type NodeStatus } from './progression';
+import { resolveNode, resolveTree, type NodeStatus } from './progression';
 import { compareHistory } from './recompute';
 import {
   isStraightArmRested,
@@ -543,7 +543,7 @@ function prescribeFrom(
 }
 
 function toExercise(
-  candidate: Candidate,
+  candidate: Pick<Candidate, 'node' | 'substitutedFrom'>,
   prescription: Prescription,
   restSec: number,
 ): PlannedExercise {
@@ -910,43 +910,68 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
   return {
     blocks,
     estimatedMinutes: Math.ceil(builder.seconds / 60),
-    warnings: planWarnings(exercises, lookup, statuses, request, lastStraightArmAt),
+    warnings: workoutWarnings(exercises, plannedSets(exercises, now), request),
     notes,
   };
 }
 
+/** What `workoutWarnings` and `prescribeExercise` need besides the exercises. */
+export interface WorkoutContext {
+  /** The user's merged tree. */
+  nodes: readonly ExerciseNode[];
+  progress: Readonly<Record<string, NodeProgress>>;
+  /** Recent logged sessions (as in `WorkoutRequest.recentSessions`). */
+  recentSessions: readonly LoggedSession[];
+  now: number;
+}
+
 /**
- * Advisory warnings that still apply to the plan: unmet prerequisites of self-unlocked or
- * substituted nodes, and (as a guard) any safeguard the suggestion would break, which by
- * construction is none.
+ * Advisory warnings (ADR-023) for a session made of `exercises` whose sets are `sets` (the plan's
+ * `plannedSets`, or a live session's logged + remaining sets): unmet hard prerequisites of the nodes
+ * (self-unlocked, substituted or picked by the user), the straight-arm Trial clock for Trials, and
+ * the session-wide straight-arm rules. For a generated plan this is, by construction, only the
+ * prerequisites of self-unlocked nodes; a plan the user edited can raise any of them.
  */
-function planWarnings(
+export function workoutWarnings(
   exercises: readonly PlannedExercise[],
-  lookup: NodeLookup,
-  statuses: ReadonlyMap<string, NodeStatus>,
-  request: WorkoutRequest,
-  lastStraightArmAt: number | undefined,
+  sets: readonly LoggedSet[],
+  context: WorkoutContext,
+  startedAt: number = context.now,
 ): SafeguardWarning[] {
+  const lookup = lookupOf(context.nodes);
   const warnings: SafeguardWarning[] = [];
+  const seen = new Set<string>();
   for (const exercise of exercises) {
-    const node = lookup.get(exercise.nodeId) as ExerciseNode;
-    const prerequisites = prerequisitesWarning(
-      node,
-      statuses.get(node.id)?.unmetHard ?? [],
-      lookup,
-    );
+    const node = lookup.get(exercise.nodeId);
+    if (!node || seen.has(node.id)) continue;
+    seen.add(node.id);
+    const status = resolveNode(node, context.progress, lookup);
+    const prerequisites = prerequisitesWarning(node, status.unmetHard, lookup);
     if (prerequisites) warnings.push(prerequisites);
     if (exercise.isTrial) {
-      warnings.push(...trialWarnings(node, request.progress[node.id], request.now));
+      warnings.push(...trialWarnings(node, context.progress[node.id], context.now));
     }
   }
-  warnings.push(
-    ...sessionSafeguardWarnings(
-      plannedSets(exercises, request.now),
-      lookup,
-      lastStraightArmAt,
-      request.now,
-    ),
-  );
+  const lastStraightArmAt = lastStraightArmSessionAt(context.recentSessions, lookup);
+  warnings.push(...sessionSafeguardWarnings(sets, lookup, lastStraightArmAt, startedAt));
   return warnings;
+}
+
+/**
+ * `node` prescribed on its own (the user swapped or added it, ADR-023): double progression from its
+ * last working sets in `context.recentSessions`, with `restSec` of rest after each set.
+ */
+export function prescribeExercise(
+  node: ExerciseNode,
+  context: WorkoutContext,
+  restSec: number = SINGLE_REST_SEC,
+): PlannedExercise {
+  const history = workingSetsBySession(context.recentSessions);
+  const prescription = prescribe(
+    node,
+    context.progress[node.id],
+    lastPerformance(node, history),
+    context.now,
+  );
+  return toExercise({ node }, prescription, restSec);
 }

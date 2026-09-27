@@ -12,6 +12,7 @@ import { listGoals, replaceGoals } from './goalRepository';
 import { clearOverlay, getOverlay, saveOverlay } from './overlayRepository';
 import { createProfile, getProfile, setHeroName } from './profileRepository';
 import {
+  activeSession,
   equipmentProfiles,
   goals,
   nodeProgress,
@@ -26,8 +27,12 @@ import { insertSession, listStoredSessions } from './sessionRepository';
 import { listSettings, setSetting } from './settingsRepository';
 import { insertUserAction, listUserActions } from './userActionRepository';
 
-/** Tables an import replaces: every user table except `meta`. */
+/**
+ * Tables an import replaces: every user table except `meta`. `active_session` (a Train draft, not
+ * exported) is only deleted: the imported history replaces the one the draft was built on.
+ */
 const USER_TABLES = [
+  activeSession,
   sessionSets,
   sessions,
   userActions,

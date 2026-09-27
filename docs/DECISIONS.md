@@ -794,3 +794,42 @@ Template:
   by touch, while screen-reader users get the same prerequisites as links in the detail. The 5.1
   graph view can reuse `treeTile`/`prerequisiteViews` for its nodes and edges. A second route to the
   detail from Train/Character only needs `router.push('/node/<id>')`.
+
+## ADR-034: Train flow: editable plan, persisted live-session draft, keyed warning acknowledgements (PLAN 4.4, 4.x)
+- Date: 2026-09-28 · Status: Accepted
+- Context: The Train tab must turn the generator's suggestion (ADR-024) into a session the user can
+  change, log set by set without losing anything when Android kills the app, and end in a summary
+  with XP, level-ups, unlocks and the ADR-023 warnings. History stays the source of truth (ADR-008):
+  a half-done session must not count as training until it is finished.
+- Decision:
+  - **Screens:** Train tab (profile + 30/45/60 min, or "Resume session") → stack routes
+    `app/train/preview` → `session` → `summary`. The live session is a pushed screen, so leaving it
+    keeps the session (the tab offers to resume it); `app/index.tsx` opens `/train` while one exists.
+  - **Plan edits (ADR-023):** swap an exercise for a trainable, doable node sharing its main
+    pattern (alternatives first, then closest ogLevel), remove it, or add any doable node (search
+    also finds locked ones). A swapped/added node is prescribed on its own by the generator's double
+    progression (`prescribeExercise`); a swap keeps the slot's rest and pair. The card shows
+    "Swapped from X" for user swaps and "Replaces X" for equipment substitutions.
+  - **Live logging:** one stepper per set starting at the last result (else the target); "Log set"
+    logs it as entered, "Partial" logs it below the target (as entered, or one step / one rep short
+    when the entry meets it), "Failed" logs 0. Outcomes stay derived from actual vs. prescribed
+    (`classifyOutcome`), so the engine needs no new field. Strength pairs alternate their sets. After
+    each set a basic countdown from the exercise's `restSec` runs from a stored `restEndsAt` (full
+    timers are a later feature); logging early is always possible.
+  - **Persistence:** the whole `ActiveSession` is one JSON row in a new `active_session` table
+    (additive migration 0002), rewritten after every change and validated when read back
+    (`parseActiveSession`; unreadable = no session). It is a draft, not history: not exported, deleted
+    by an import. Finishing inserts the session and deletes the draft in one transaction.
+  - **Finishing:** exercises with at least one logged set get their missing planned sets as skipped
+    sets (`actual.value` 0, the engine's convention for outcome and completion bonus); exercises
+    never started are left out, so skipping one doesn't mark its pattern as trained or reset its
+    progression. Finishing with no set logs nothing. Abandon throws the draft away (confirmed).
+  - **Warnings:** the plan and the live session use the same `workoutWarnings` (generator) over the
+    plan's planned sets or the live session's logged + remaining sets: unmet prerequisites,
+    straight-arm Trial clock, budget and 48 h rest. They are acknowledged by key (`code` + `nodeId`)
+    stored with the plan/draft, so edits that raise a new warning ask again while old answers stay.
+    Acknowledging enables "Start session" / logging; the summary's warnings (`SessionResult`) are
+    acknowledged before "Done". Nothing is blocked beyond that step.
+- Consequences: an app kill loses at most the set being entered. The summary result is kept in
+  memory only (after a restart the session is in history, just without the summary screen). The
+  Character tab (4.5) reads the finished sessions from `state.sessions`.
