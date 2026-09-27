@@ -1,0 +1,40 @@
+# Front lever (straight-arm pulling: every node here must have straight_arm: true)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: front_lever
+nodes:
+  - id: tuck_front_lever
+    name: Tuck front lever
+    order: 10
+    og_level: 4
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      # TODO(manifest): add pull_up (level 5, hard) once the v_pull chain is written.
+      - node: dead_hang
+        level: 5
+      - node: hollow_hold
+        level: 5
+        note: A 30 s hollow hold is the common front lever gate.
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - bar
+      - rings
+    cues:
+      - Arms locked straight; pull the bar down towards the hips.
+      - Shoulder blades pulled down and slightly back.
+      - Knees tucked to the chest, back rounded, hips level with the shoulders.
+    sources:
+      - https://www.calisthenics-corner.com/skills/front-lever/
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    verify: Pull-up prerequisite (8-15 strict pull-ups, secondary sources) still to be added.
+    review:
+      status: draft
+      notes: ""

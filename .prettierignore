@@ -6,3 +6,5 @@ package-lock.json
 docs/
 *.md
 .claude/
+src/data/skills/progressions.generated.ts
+content/

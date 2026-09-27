@@ -1,0 +1,33 @@
+# Vertical push (dips and handstand push-ups)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: v_push
+nodes:
+  - id: support_hold
+    name: Support hold
+    order: 10
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    patterns: [vertical_push]
+    equipment:
+      - dip_bars
+      - parallettes
+      - rings
+    cues:
+      - Arms locked straight, hands by the hips.
+      - Push the shoulders down, away from the ears.
+      - Squeeze the glutes and point the toes; slight hollow body.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    verify: >-
+      OG2 puts ring support at level 1; the easier bar/parallettes support is set to 0.
+      The RR may use a 60 s gate instead of 3 x 30 s.
+    review:
+      status: draft
+      notes: ""

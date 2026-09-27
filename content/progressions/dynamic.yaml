@@ -1,0 +1,36 @@
+# Dynamic skills and hybrids (muscle-up, elbow lever, human flag)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: dynamic
+nodes:
+  - id: kipping_swing
+    name: Kip swing
+    order: 10
+    og_level: 1
+    metric: reps
+    working_range: { min: 5, max: 10 }
+    trial: { sets: 3, target: 10 }
+    prerequisites:
+      - node: dead_hang
+        level: 5
+      - node: hollow_hold
+        level: 5
+        kind: recommended
+    skill: true
+    patterns: [explosive, vertical_pull]
+    equipment:
+      - bar
+    cues:
+      - From a dead hang, push the chest through into an arch, then pull back into a hollow.
+      - Arms stay straight; the swing comes from the shoulders and hips, not the legs.
+      - Keep the swing small and controlled before making it bigger.
+    sources:
+      - https://wodprep.com/blog/bar-muscle-up-progression-pull-up/
+      - http://www.startbodyweight.com/2014/01/muscle-up-progression.html
+    verify: Not levelled in OG2 (the kip pull-up is level 2); 1 is inferred. The rep standard is a placeholder.
+    review:
+      status: draft
+      notes: ""

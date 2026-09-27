@@ -1,0 +1,29 @@
+# Horizontal pull (rows)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: h_pull
+nodes:
+  - id: incline_row
+    name: Incline row
+    order: 20 # order 10 is kept for band_row (see docs/research/node-manifest.md)
+    og_level: 0 # OG2 puts the row negative at level 1, so the incline row sits below it
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    patterns: [horizontal_pull]
+    equipment:
+      - rings
+      - bar
+    cues:
+      - Feet on the floor, body straight and leaning back; the more upright, the easier.
+      - Pull the chest to the hands, elbows about 45 degrees from the body.
+      - Squeeze the shoulder blades together at the top, lower under control.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""

@@ -1,0 +1,40 @@
+# Planche (straight-arm pushing: every node here must have straight_arm: true)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: planche
+nodes:
+  - id: planche_lean
+    name: Planche lean
+    order: 10
+    og_level: 2
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      # TODO(manifest): add push_up (level 5, hard) once the h_push chain is written.
+      - node: wrist_prep
+        level: 5
+        note: 4-6 weeks of wrist prep before planche work.
+      - node: support_hold
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_push]
+    equipment:
+      - floor
+      - parallettes
+    cues:
+      - Push-up position, fingers turned slightly out, arms locked.
+      - Push the floor away (shoulders protracted) and keep a slight hollow.
+      - Lean forward until the shoulders are past the hands; lean further to progress.
+    sources:
+      - https://themovementathlete.com/planche-requirements/
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://antranik.org/connective-tissue-basics/
+    verify: OG2 gives no level for the lean; 2 is inferred (below the level-3 frog stand).
+    review:
+      status: draft
+      notes: ""

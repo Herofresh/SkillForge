@@ -1,0 +1,29 @@
+# Core and compression
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: core
+nodes:
+  - id: hollow_hold
+    name: Hollow body hold
+    order: 10
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    patterns: [core]
+    equipment:
+      - floor
+    cues:
+      - Lower back pressed into the floor the whole time.
+      - Arms overhead and legs straight, both just off the floor.
+      - Make it easier by tucking the knees or bringing the arms to the sides.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://antranik.org/progressions/
+    verify: Not levelled in the OG2 chart; 0 is assumed.
+    review:
+      status: draft
+      notes: ""

@@ -1,0 +1,28 @@
+# Legs (squat, single-leg, hinge)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: legs
+nodes:
+  - id: assisted_squat
+    name: Assisted squat
+    order: 10
+    og_level: 0 # foundation: easier than the OG2 level-1 parallel squat
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    patterns: [squat]
+    equipment:
+      - floor # hold on to a door frame, pole or bar for balance
+    cues:
+      - Hold something sturdy in front of you and use it only as much as needed.
+      - Feet shoulder width, toes slightly out, knees track over the toes.
+      - Sit down between the heels as deep as you can with a neutral back.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""

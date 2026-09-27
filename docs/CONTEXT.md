@@ -10,9 +10,11 @@ Jest 29 with `jest-expo`, ESLint 9 (flat config) with `eslint-config-expo`, and 
 
 ## Architecture map
 
-What exists today (Phase 0): the root and tabs layouts, four placeholder tab screens,
-`src/components/theme.ts`, `src/components/PlaceholderScreen.tsx` and `src/lib/clamp.ts`. Everything
-else below is *(planned)*. Empty folders hold a `.gitkeep`.
+What exists today: the root and tabs layouts, four placeholder tab screens,
+`src/components/theme.ts`, `src/components/PlaceholderScreen.tsx`, `src/lib/clamp.ts`, and the
+Phase 1 progression pipeline (`content/progressions/`, `scripts/`, `src/domain/types.ts`,
+`tier.ts`, `overlay.ts`, `src/data/*`). Files marked *(planned)* don't exist yet. Empty folders hold a
+`.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
@@ -24,17 +26,31 @@ app/                    expo-router screens (UI only, no game logic)
   (tabs)/character.tsx  level, rank, attributes, history
   (tabs)/settings.tsx   equipment profiles, export/import
   onboarding/           first-run flow
+content/progressions/   SOURCE OF TRUTH for skill content (ADR-016)
+  <branch>.yaml         one file per branch, one block per node (human-editable)
+  README.md             field guide for coaches and contributors
+scripts/
+  progressions.ts       CLI behind npm run progressions:check|build|review (runs via tsx)
+  progressionSources.ts Node-only file access shared by the CLI and the dataset test
 src/
   domain/               PURE TS game rules. No React/Expo/DB imports (ADR-009)
-    types.ts            single source of shared types
-    xp.ts               XP calculation
-    progression.ts      levels, Trials, node states, unlocks
-    character.ts        character level, attributes, rank
-    generator.ts        on-demand workout generator
-    recompute.ts        rebuild progress from session_sets (ADR-008)
+    types.ts            single source of shared types (nodes, issues, overlay)
+    tier.ts             tierForOgLevel (tier is derived, never stored)
+    overlay.ts          user overlay: applyOverlay, exportOverlay, importOverlay
+    xp.ts               XP calculation (planned)
+    progression.ts      levels, Trials, node states, unlocks (planned)
+    character.ts        character level, attributes, rank (planned)
+    generator.ts        on-demand workout generator (planned)
+    recompute.ts        rebuild progress from session_sets, ADR-008 (planned)
   data/
-    skills/<branch>.ts  static progression matrix (single source of skill content)
-    validate.ts         dataset integrity checks
+    progressionFormat.ts  THE YAML <-> ExerciseNode parser/normalizer (build, tests, overlay)
+    validate.ts         graph/content rules: validateNodes, formatIssue
+    progressionBuild.ts buildMatrix, renderGeneratedModule, renderReviewSheet (pure)
+    testFixtures.ts     synthetic nodes for unit tests
+    skills/
+      index.ts          ALL_NODES, NODE_BY_ID (what the app imports)
+      progressions.generated.ts  GENERATED from the YAML; never edit
+      branches.ts       BRANCH_NAMES (display names)
   db/                   Drizzle schema, migrations, repositories
   components/           reusable UI components
     theme.ts            UI colors, spacing, navigation theme (single source of UI colors)
@@ -42,11 +58,17 @@ src/
   lib/                  generic helpers (dates, ids, math), e.g. clamp.ts
 assets/                 app icon, adaptive icon, splash, favicon
 docs/                   PLAN, DECISIONS, CONTEXT, research
-.github/workflows/ci.yml  CI (Node 24): typecheck, lint, format:check, test
+  research/node-manifest.md  planned MVP nodes (ids, order, OG level, prerequisites)
+  review/progression-matrix.md  GENERATED coach review sheet
+.github/workflows/ci.yml  CI (Node 24): typecheck, lint, format:check, test, progressions:check
 ```
 
 **Path alias:** `@/*` → `src/*` (and `@/assets/*` → `assets/*`). It's defined in `tsconfig.json`
 (Metro reads it) and mirrored in `package.json` → `jest.moduleNameMapper`. Change both together.
+
+**Content flow:** `content/progressions/*.yaml` → `npm run progressions:build` (parse with
+`progressionFormat.ts`, check with `validate.ts`) → `progressions.generated.ts` + review sheet → app
+imports `ALL_NODES` → at runtime `applyOverlay(ALL_NODES, userOverlay)` gives the user's tree.
 
 **Data flow:** UI → store action → domain function (pure) → repository persists `session_sets` → caches
 (`node_progress`) updated → UI re-renders.
@@ -55,11 +77,15 @@ docs/                   PLAN, DECISIONS, CONTEXT, research
 
 | Term | Meaning |
 |---|---|
-| **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Static data in `src/data/skills/`. |
+| **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
+| **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
+| **Source** | `core` (built-in YAML) or `user` (from the overlay). |
+| **Review status** | `draft` or `coach_reviewed`, per node, with free-text `review.notes`. |
+| **Verify note** | A node's `verify:` text: something still uncertain (the `TODO(verify)` flag, ⚠ on the review sheet). |
 | **Branch** | A progression family, e.g. `planche` or `v_pull`. Nodes in a branch form a chain ordered by `chainOrder`. |
 | **Prerequisite** | An edge from another node that must reach `minLevel`. `hard` edges lock the node; `recommended` edges only show a warning. |
-| **ogLevel** | Cross-branch difficulty from 1 to 17, taken from the Overcoming Gravity 2 charts (ADR-007). |
-| **Tier** | Beginner 1–5 · Intermediate 6–8 · Advanced 9–12 · Elite 13+ (derived from ogLevel). |
+| **ogLevel** | Cross-branch difficulty from 0 to 17, taken from the Overcoming Gravity 2 charts (ADR-007). 0 = foundation exercise below OG2 level 1 (ADR-016). |
+| **Tier** | Beginner 0–5 · Intermediate 6–8 · Advanced 9–12 · Elite 13+ (derived by `tierForOgLevel`). |
 | **Metric** | What a node measures: `reps`, `hold_s`, `eccentric_s`, or `load_xbw` (load as a multiple of bodyweight). |
 | **Unit** | Normalized volume: 1 rep = 2 s hold = 3 s eccentric = 1 unit. |
 | **Working range** | The prescribed training range for a node, e.g. 5–8 reps or 10–30 s. |
@@ -117,7 +143,9 @@ The generator is deterministic for the same inputs.
   - `settings`
 
 ## Equipment tags
-`floor`, `wall`, `bar` (pull-up bar), `dip_bars`, `parallettes`, `bands`, `rings`, `pole`.
+`floor`, `wall`, `bar` (pull-up bar), `dip_bars`, `parallettes`, `bands`, `rings`, `pole`, `box`
+(chair/bench/box to elevate hands or feet). A node's `equipment` is a list of options (OR); each option
+is a set of tags needed together (AND), written `floor + wall` in YAML.
 - **Default profiles:** Home = floor, wall, bar, parallettes, bands. Park = Home + dip_bars.
 
 ## Commands
@@ -129,6 +157,9 @@ The generator is deterministic for the same inputs.
 | `npm run lint` | ESLint (`eslint .`, flat config in `eslint.config.js`) |
 | `npm test` | Jest (`jest-expo` preset). Tests live next to the code as `*.test.ts`. |
 | `npm run format` / `npm run format:check` | Prettier write / check (config in `.prettierrc.json`) |
+| `npm run progressions:check` | Validate `content/progressions/*.yaml` and report stale generated files. Writes nothing. |
+| `npm run progressions:build` | Validate, then write `src/data/skills/progressions.generated.ts` and `docs/review/progression-matrix.md`. Run after every YAML edit. |
+| `npm run progressions:review` | Validate, then write only the coach review sheet. |
 | `npx expo-doctor` | Checks dependency versions and config against the SDK |
 | `npx expo install <pkg>` | Add a dependency at the SDK-compatible version (prefer it over `npm install`) |
 
@@ -147,7 +178,13 @@ The generator is deterministic for the same inputs.
     codepage and corrupt the text into mojibake like `â€”`.
   - Use a proper file-editing tool, or Git Bash tools.
 - **TypeScript 6 `types`:** TS 6 no longer auto-includes every `@types/*` package. `tsconfig.json` sets
-  `"types": ["jest"]`. If you need other global types (e.g. `node`), add them there.
+  `"types": ["jest", "node"]` (`node` is for `scripts/` and the dataset test). Don't use Node APIs in
+  `app/` or `src/` runtime code.
+- **Generated files:** never edit `src/data/skills/progressions.generated.ts` or
+  `docs/review/progression-matrix.md` by hand; edit the YAML and run `npm run progressions:build`.
+  Both are Prettier-ignored, as is `content/` (hand-formatted YAML).
+- **`yaml` in Jest:** `package.json` → `jest.moduleNameMapper` maps `yaml` to its CommonJS build,
+  because jest-expo resolves the ESM browser entry otherwise.
 - **Routes live in root `app/`,** not `src/app/` (the SDK 57 template default). Expo Router uses
   `src/app/` if it exists, so never create that folder (ADR-014).
 - **Line endings:** `.gitattributes` forces LF. Git may warn "CRLF will be replaced by LF" once per file;

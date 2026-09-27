@@ -1,0 +1,34 @@
+# Back lever and rings strength (straight-arm: every node here must have straight_arm: true)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: back_lever
+nodes:
+  - id: german_hang
+    name: German hang
+    order: 10
+    og_level: 1
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 } # research: comfortable for 30-60 s before the back lever
+    prerequisites:
+      - node: dead_hang
+        level: 5
+    straight_arm: true
+    patterns: [straight_arm_pull, mobility]
+    equipment:
+      - rings
+      - bar
+    cues:
+      - Go slowly; tuck the knees and rotate backwards from a tuck hang.
+      - Stop at a gentle stretch in the front of the shoulders, never at pain.
+      - Keep the arms straight and leave the same way you came in.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://antranik.org/connective-tissue-basics/
+    review:
+      status: draft
+      notes: ""

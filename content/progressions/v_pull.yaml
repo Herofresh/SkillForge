@@ -1,0 +1,30 @@
+# Vertical pull (pull-ups)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: v_pull
+nodes:
+  - id: dead_hang
+    name: Dead hang
+    order: 10
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    patterns: [vertical_pull]
+    equipment:
+      - bar
+      - rings
+    cues:
+      - Full grip with the thumb wrapped around the bar.
+      - Arms straight; keep the shoulders gently engaged, not fully shrugged.
+      - Ribs down, legs together, no swinging.
+    sources:
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: Not levelled in the OG2 chart (0 assumed); the 3 x 30 s gate follows the RR hold rule.
+    review:
+      status: draft
+      notes: ""

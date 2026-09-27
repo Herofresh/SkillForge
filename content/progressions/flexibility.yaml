@@ -1,0 +1,31 @@
+# Flexibility and mobility (our own synthesis: no single source gives a levelled chain)
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: flexibility
+nodes:
+  - id: wrist_prep
+    name: Wrist prep routine
+    order: 10
+    og_level: 0
+    metric: reps
+    working_range: { min: 8, max: 12 }
+    trial: { sets: 3, target: 12 } # reps per position
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - On hands and knees, rock gently through each position (fingers forward, sideways, back).
+      - Palm and back-of-hand positions, then fist and fingertip support.
+      - Never push into sharp pain; the goal is warm, not strained.
+    sources:
+      - https://themovementathlete.com/planche-requirements/
+      - https://redditbwf.github.io/wiki/recommended_routine.html
+    verify: >-
+      No sourced rep standard; the planche gate is 4-6 weeks of wrist prep (Movement Athlete).
+      The trial is a placeholder.
+    review:
+      status: draft
+      notes: ""
