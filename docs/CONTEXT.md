@@ -137,7 +137,8 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Working sets** | At least `MIN_WORKING_SETS` (2) sets of one node in one session. Only they count for pattern recency, last performance and stagnation; the 1-set warm-up items don't. |
 | **Workout plan** | The generator's output: blocks (`warm_up`, `skill`, `strength` pairs, `core`, `cool_down`) of `PlannedExercise`s (`sets`, `target`, `restSec`, `isTrial?`, `substitutedFrom?`), an estimate in minutes, advisory warnings and notes. A suggestion the user can edit. |
 | **Equipment profile** | A named set of equipment tags, e.g. Home or Park, chosen at session start (ADR-005). |
-| **Straight-arm budget** | About 60 s total of straight-arm holds per session is recommended (ADR-010). Going over it gives a warning, not a block (ADR-023). |
+| **Straight-arm budget** | About 60 s total of straight-arm holds per session is recommended (ADR-010). Going over it gives a warning, not a block (ADR-023). The sets of one straight-arm Trial don't count (Trial-day exception, ADR-025). |
+| **Trial day** | A session whose straight-arm work is one due straight-arm Trial and nothing else; the generator suggests it when that Trial is due (ADR-025). |
 | **Test-out** | Passing a Trial on any node without training it first, including straight-arm nodes and locked nodes (ADR-023). Sets the node to level 5 / proficient and unlocks successors. |
 | **Self-unlock** | The user unlocks a locked node themselves (`UserAction` kind `self_unlock`, stored in history). The node is no longer `locked` and can be trained; its unmet prerequisites stay listed (ADR-023). |
 | **Advisory safeguard** | A safety rule (ADR-010 tendon rules, prerequisites) that the engine computes and the UI shows as a `SafeguardWarning` with an acknowledge step, but that never blocks the user. The generator's suggestions always respect it (ADR-023). |
@@ -176,7 +177,10 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
   `trial.reps` lowerings/reps where used), on any node whose Trial isn't passed yet. Never blocked.
 - **Safeguards** (`safeguards.ts`, advisory): a straight-arm Trial is recommended 6 weeks after the
   node's first logged set (never trained = not yet); ≤ 60 s straight-arm hold time per session
-  (non-hold sets 2 s per unit); ≥ 48 h between straight-arm sessions (session start times).
+  (non-hold sets 2 s per unit; `straightArmSecondsUsed` is the one measure) not counting the
+  Trial-day exception (`budgetExemptTrialSets`: the Trial sets of the first straight-arm node with
+  any, at most its `trial.sets`; ADR-025); ≥ 48 h between straight-arm sessions (session start
+  times, a Trial session included).
   Violations are `warning` `SafeguardWarning`s; a locked node trained or tested, or a self-unlock
   with unmet hard prerequisites, gives an `info` `prerequisites_unmet`.
 - **Character level** (`character.ts`): 100 XP to level 2, ×1.1 per level, max 99.
@@ -222,8 +226,11 @@ order of `recentSessions`). Pass the merged tree and `EngineState.progress`.
    else skipped when it doesn't fit the minutes left. Then up to `WARM_UP_MAX_RAMP` 2 ramp sets
    (`regressionId` of the main exercises, never straight-arm).
 6. **Safeguards:** straight-arm exercises are fitted to the `STRAIGHT_ARM_SESSION_BUDGET_S` 60 s
-   left (fewer sets or none); a straight-arm Trial only after `isTrialOpenBySafeguards` and only
-   if it fits the budget (3 × 30 s Trials never do; a note says the user may still attempt them).
+   left (fewer sets or none); a straight-arm Trial only after `isTrialOpenBySafeguards`.
+   **Trial day** (ADR-025): if the best-ranked straight-arm candidate's prescription is its Trial,
+   all other straight-arm candidates are dropped, so the session has that one Trial (exempt from
+   the budget) and no other straight-arm work; a note says so. A Trial trimmed for time becomes
+   working sets that count against the budget again.
    `warnings` carries the advisory warnings that still apply (a self-unlocked or substituted node's
    `prerequisites_unmet`); the suggestion never triggers a `warning`-severity safeguard.
 7. **Prescription** (`prescribe`, double progression): no history → 3 × range min. After a

@@ -95,7 +95,7 @@ Template:
   UI code must not put logic in components.
 
 ## ADR-010: Tendon safeguards for straight-arm skills
-- Date: 2026-09-27 · Status: Accepted, amended by ADR-023 (the safeguards are advisory warnings)
+- Date: 2026-09-27 · Status: Accepted, amended by ADR-023 (the safeguards are advisory warnings) and ADR-025 (Trial-day exception to the budget)
 - Context: Connective tissue adapts about 7–10× slower than muscle (Low, Antranik). Gamification could
   push users to advance too fast.
 - Decision: Straight-arm nodes (`straightArm: true`) get a minimum of 6 weeks at level before their Trial
@@ -424,7 +424,7 @@ Template:
   Recompute is needed after this change for any stored caches (none exist yet).
 
 ## ADR-024: Workout generator: frontier, scoring, slots and prescription (Phase 2.5)
-- Date: 2026-09-27 · Status: Accepted
+- Date: 2026-09-27 · Status: Accepted, amended by ADR-025 (straight-arm Trials are suggested on a Trial day)
 - Context: ADR-005 and ADR-006 fixed the idea (on-demand session from goals, progress, history,
   equipment and time) and `docs/CONTEXT.md` sketched the steps. PLAN 2.5 needed concrete rules and
   numbers, and ADR-023 requires the generator's own suggestions to keep respecting the advisory
@@ -483,3 +483,37 @@ Template:
   users reach them by their own choice (with the warning). The coach review (PLAN 1.10) should
   decide whether those Trial standards or the budget should change (backlog). All numbers are a
   first pass; tune them in `generator.ts` only.
+
+## ADR-025: Trial-day exception to the straight-arm budget
+- Date: 2026-09-27 · Status: Accepted
+- Amends ADR-010 (the budget) and ADR-024 (the generator's straight-arm rules); their other rules stay.
+- Context: Ten straight-arm nodes (tuck, advanced tuck and one-leg front lever, tuck and advanced
+  tuck back lever, German hang, planche lean, straight-arm frog stand, tuck and advanced tuck
+  planche) have 3 × 30 s Trials, i.e. 90 s, above the ~60 s per-session straight-arm budget. So the
+  generator (ADR-024) never suggested them, and a user attempting one always got a budget warning.
+  The user's decision (2026-09-27): a "Trial-day exception" instead of changing the standards or
+  the budget.
+- Decision:
+  - **Budget:** the sets of one straight-arm Trial in a session don't count against the ~60 s
+    budget. Exactly which sets: the Trial sets (`isTrial`) of the first straight-arm node in the
+    session that has any, at most its `trial.sets` of them in logged order
+    (`budgetExemptTrialSets` in `safeguards.ts`). A second straight-arm Trial, extra Trial sets and
+    all non-Trial straight-arm sets still count. This lives in `straightArmSecondsUsed`, the one
+    place the budget is measured, so the advisory warnings (`sessionSafeguardWarnings`, engine and
+    UI) and the generator agree.
+  - **Warnings:** a Trial session only gets `straight_arm_budget` when the extra straight-arm work
+    besides the Trial goes over ~60 s (the message says "besides the Trial"). The 6-week Trial
+    recommendation and the 48 h rest are unchanged; a Trial session is a straight-arm session for
+    the 48 h rule.
+  - **Generator (Trial day):** after ranking, the best-ranked straight-arm candidate whose
+    prescription is its Trial (top of the range reached, Trial not passed,
+    `isTrialOpenBySafeguards`, and rested, since straight-arm candidates are skipped within 48 h)
+    is the session's only straight-arm work: every other straight-arm candidate is dropped, so at
+    most one straight-arm Trial is suggested and nothing else straight-arm is added. A note says
+    so. If the time budget trims the Trial to working sets, those count against the budget again.
+    If the Trial doesn't fit the minutes at all, that session has no straight-arm work.
+  - The Trial standards stay as sourced; the coach review (PLAN 1.10) can still change them.
+- Consequences: Due straight-arm Trials are now suggested, and a Trial day costs the other
+  straight-arm work of that session. On a Trial day a session can hold up to 90 s of Trial holds
+  (plus what the user adds, with the warning above 60 s of extra work). Tune or reverse only with
+  a new ADR and a user decision (AGENT.md §5).

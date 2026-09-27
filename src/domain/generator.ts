@@ -14,11 +14,13 @@
  *    straight-arm work when the last straight-arm session is less than 48 h ago (ADR-010).
  * 3. **Scoring** (`scoreCandidate`): goal-path weight (critical path first) + days since the
  *    pattern was trained + push/pull deficit + stagnation bonus + a little for harder nodes.
- * 4. **Slots**: fixed prep, then skill, paired strength, core and cool-down slots, filled greedily
+ * 4. **Trial day** (ADR-025): when the best-ranked straight-arm candidate with a due Trial exists,
+ *    that Trial is the session's only straight-arm work; its sets don't count against the budget.
+ * 5. **Slots**: fixed prep, then skill, paired strength, core and cool-down slots, filled greedily
  *    best score first while they fit the time and the straight-arm budget; warm-up ramp sets last.
- * 5. **Prescription** (`prescribe`): double progression inside the working range from the last
+ * 6. **Prescription** (`prescribe`): double progression inside the working range from the last
  *    performance; the Trial once the top of the range is reached (for straight-arm nodes only
- *    after `MIN_WEEKS_AT_LEVEL` weeks and when it fits the budget).
+ *    after `MIN_WEEKS_AT_LEVEL` weeks).
  *
  * The generator's suggestions always respect the advisory safeguards (AGENT.md §5); the warnings
  * that still apply (e.g. a self-unlocked node's prerequisites) are attached to the plan.
@@ -42,6 +44,7 @@ import {
   isTrialOpenBySafeguards,
   MIN_WEEKS_AT_LEVEL,
   prerequisitesWarning,
+  remainingStraightArmBudget,
   sessionSafeguardWarnings,
   STRAIGHT_ARM_REST_HOURS,
   STRAIGHT_ARM_SESSION_BUDGET_S,
@@ -515,20 +518,28 @@ interface Builder {
 const allExercises = (builder: Builder): PlannedExercise[] =>
   [...builder.blocks.values()].flatMap((block) => block.exercises);
 
-function straightArmSecondsLeft(builder: Builder): number {
-  const used = straightArmSecondsUsed(
+/** Budgeted straight-arm seconds of `exercises` (a straight-arm Trial is exempt, ADR-025). */
+const budgetedSeconds = (builder: Builder, exercises: readonly PlannedExercise[]): number =>
+  straightArmSecondsUsed(plannedSets(exercises, builder.request.now), builder.lookup);
+
+const straightArmSecondsLeft = (builder: Builder): number =>
+  remainingStraightArmBudget(
     plannedSets(allExercises(builder), builder.request.now),
     builder.lookup,
   );
-  return STRAIGHT_ARM_SESSION_BUDGET_S - used;
-}
 
 /** Straight-arm seconds of one set of `exercise` (0 for bent-arm nodes). */
 function straightArmSecondsPerSet(builder: Builder, exercise: PlannedExercise): number {
-  return straightArmSecondsUsed(
-    plannedSets([{ ...exercise, sets: 1 }], builder.request.now),
-    builder.lookup,
-  );
+  return budgetedSeconds(builder, [{ ...exercise, sets: 1 }]);
+}
+
+/** `prescribe` for `node` from the request's progress and the node's last performance. */
+function prescribeFrom(
+  node: ExerciseNode,
+  request: WorkoutRequest,
+  history: WorkingHistory,
+): Prescription {
+  return prescribe(node, request.progress[node.id], lastPerformance(node, history), request.now);
 }
 
 function toExercise(
@@ -548,8 +559,8 @@ function toExercise(
 }
 
 /**
- * The prescribed exercise for `candidate`, fitted to the straight-arm budget left (fewer sets, or the
- * top of the range instead of a Trial that does not fit). `undefined` when not even one set fits.
+ * The prescribed exercise for `candidate`, fitted to the straight-arm budget left (fewer sets; a
+ * straight-arm Trial is exempt, ADR-025). `undefined` when not even one set fits.
  */
 function fitExercise(
   builder: Builder,
@@ -558,27 +569,12 @@ function fitExercise(
   saLeft: number,
 ): { exercise: PlannedExercise; notes: string[] } | undefined {
   const { node } = candidate;
-  const progress = builder.request.progress[node.id];
   const notes: string[] = [];
-  let prescription = prescribe(
-    node,
-    progress,
-    lastPerformance(node, builder.history),
-    builder.request.now,
-  );
+  const prescription = prescribeFrom(node, builder.request, builder.history);
   let exercise = toExercise(candidate, prescription, restSec);
   const perSet = straightArmSecondsPerSet(builder, exercise);
   if (perSet > 0 && exercise.sets * perSet > saLeft) {
-    if (prescription.isTrial) {
-      notes.push(
-        `${node.name}: the Trial (${node.trial.sets} sets) is more straight-arm work than the ` +
-          `~${STRAIGHT_ARM_SESSION_BUDGET_S} s per session recommended, so it is not suggested. ` +
-          'You can still attempt it; the app will show the budget warning.',
-      );
-      prescription = topOfRange(node);
-      exercise = toExercise(candidate, prescription, restSec);
-    }
-    const maxSets = Math.floor(saLeft / straightArmSecondsPerSet(builder, exercise));
+    const maxSets = Math.floor(saLeft / perSet);
     if (maxSets < 1) return undefined;
     exercise = { ...exercise, sets: Math.min(exercise.sets, maxSets) };
   }
@@ -614,7 +610,10 @@ function reduced(builder: Builder, exercise: PlannedExercise): PlannedExercise {
   };
 }
 
-/** Adds `exercises` as one block if they fit the time left (else trimmed to fewer sets). */
+/**
+ * Adds `exercises` as one block if they fit the time left (else trimmed to fewer sets). A trimmed
+ * straight-arm Trial becomes budgeted working sets, so the budget is checked again.
+ */
 function tryAddBlock(
   builder: Builder,
   slotIndex: number,
@@ -628,6 +627,12 @@ function tryAddBlock(
   if (builder.seconds + seconds(chosen) > budget) {
     chosen = exercises.map((exercise) => reduced(builder, exercise));
     if (builder.seconds + seconds(chosen) > budget) return false;
+    if (
+      budgetedSeconds(builder, [...allExercises(builder), ...chosen]) >
+      STRAIGHT_ARM_SESSION_BUDGET_S
+    ) {
+      return false;
+    }
   }
   builder.blocks.set(slotIndex, { kind, exercises: chosen });
   builder.seconds += seconds(chosen);
@@ -794,7 +799,13 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
     const existing = candidates.get(node.id);
     if (!existing || compareCandidates(candidate, existing) < 0) candidates.set(node.id, candidate);
   }
-  const ranked = [...candidates.values()].sort(compareCandidates);
+  const sorted = [...candidates.values()].sort(compareCandidates);
+  // Trial day (ADR-025): the best-ranked straight-arm candidate whose Trial is due (top of the range,
+  // `isTrialOpenBySafeguards`, rested) is the session's only straight-arm work.
+  const trialDay = sorted.find(
+    (c) => c.node.straightArm && prescribeFrom(c.node, request, history).isTrial,
+  );
+  const ranked = trialDay ? sorted.filter((c) => !c.node.straightArm || c === trialDay) : sorted;
 
   const builder: Builder = {
     request,
@@ -872,6 +883,17 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
   if (recovering.size > 0) {
     const list = [...recovering].map(patternLabel).join(', ');
     notes.push(`Resting ${list}: trained less than ${PATTERN_REST_HOURS} h ago.`);
+  }
+  const trialDayExercise = exercises.find(
+    (exercise) => exercise.isTrial && lookup.get(exercise.nodeId)?.straightArm,
+  );
+  if (trialDayExercise) {
+    const name = lookup.get(trialDayExercise.nodeId)?.name ?? trialDayExercise.nodeId;
+    notes.push(
+      `Trial day: ${name}'s Trial is today's only straight-arm work. Its sets don't count against ` +
+        `the ~${STRAIGHT_ARM_SESSION_BUDGET_S} s straight-arm budget; extra straight-arm work on ` +
+        'top of it is not recommended.',
+    );
   }
   if (skippedStraightArm) {
     notes.push(

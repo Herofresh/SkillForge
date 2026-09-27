@@ -1,5 +1,6 @@
 import { makeNode, makeSession, makeSet } from '@/data/testFixtures';
 import {
+  budgetExemptTrialSets,
   isStraightArmRested,
   isTrialOpenBySafeguards,
   lastStraightArmSessionAt,
@@ -26,7 +27,18 @@ const lever = makeNode({
 });
 const row = makeNode({ id: 'incline_row', branch: 'h_pull', patterns: ['horizontal_pull'] });
 const skinTheCat = makeNode({ id: 'skin_the_cat', straightArm: true });
-const nodes = new Map([lever, row, skinTheCat].map((node) => [node.id, node]));
+const planche = makeNode({
+  id: 'tuck_planche',
+  branch: 'planche',
+  metric: 'hold_s',
+  workingRange: { min: 10, max: 30 },
+  trial: { sets: 3, target: 30 },
+  straightArm: true,
+  patterns: ['straight_arm_push'],
+});
+const nodes = new Map([lever, row, skinTheCat, planche].map((node) => [node.id, node]));
+const trialHold = (nodeId: string, value: number) =>
+  makeSet({ nodeId, metric: 'hold_s', actual: { value }, isTrial: true });
 
 describe('straight-arm Trial clock (advisory since ADR-023)', () => {
   it('does not gate bent-arm nodes', () => {
@@ -65,6 +77,34 @@ describe('straight-arm session budget', () => {
       makeSet({ nodeId: 'tuck_front_lever', metric: 'hold_s', actual: { value: 20 } }),
     );
     expect(remainingStraightArmBudget(sets, nodes)).toBe(0);
+  });
+
+  describe('Trial-day exception (ADR-025)', () => {
+    const plancheTrial = [1, 2, 3].map(() => trialHold('tuck_planche', 30));
+
+    it("does not count one straight-arm Trial's sets", () => {
+      expect(budgetExemptTrialSets(plancheTrial, nodes).size).toBe(3);
+      expect(straightArmSecondsUsed(plancheTrial, nodes)).toBe(0);
+      expect(remainingStraightArmBudget(plancheTrial, nodes)).toBe(STRAIGHT_ARM_SESSION_BUDGET_S);
+    });
+
+    it('still counts other straight-arm work, a second Trial and extra Trial sets', () => {
+      const extra = makeSet({
+        nodeId: 'tuck_front_lever',
+        metric: 'hold_s',
+        actual: { value: 10 },
+      });
+      expect(straightArmSecondsUsed([...plancheTrial, extra], nodes)).toBe(10);
+      const secondTrial = [trialHold('tuck_front_lever', 10), trialHold('tuck_front_lever', 10)];
+      expect(straightArmSecondsUsed([...plancheTrial, ...secondTrial], nodes)).toBe(20);
+      const fourth = trialHold('tuck_planche', 30);
+      expect(straightArmSecondsUsed([...plancheTrial, fourth], nodes)).toBe(30);
+    });
+
+    it('ignores bent-arm Trials', () => {
+      const rowTrial = makeSet({ nodeId: 'incline_row', isTrial: true });
+      expect(budgetExemptTrialSets([rowTrial], nodes).size).toBe(0);
+    });
   });
 });
 
@@ -114,6 +154,23 @@ describe('advisory warnings', () => {
     const over = [...within, hold(1)];
     expect(sessionSafeguardWarnings(over, nodes, undefined, 0)).toEqual([
       expect.objectContaining({ code: 'straight_arm_budget', severity: 'warning' }),
+    ]);
+  });
+
+  it('ignores the Trial sets but warns about extra straight-arm work in a Trial session', () => {
+    const trial = [1, 2, 3].map(() => trialHold('tuck_planche', 30));
+    expect(sessionSafeguardWarnings(trial, nodes, undefined, 0)).toEqual([]);
+    const withinBudget = [...trial, hold(30), hold(30)];
+    expect(sessionSafeguardWarnings(withinBudget, nodes, undefined, 0)).toEqual([]);
+    const [over] = sessionSafeguardWarnings([...withinBudget, hold(5)], nodes, undefined, 0);
+    expect(over).toMatchObject({ code: 'straight_arm_budget', severity: 'warning' });
+    expect(over.message).toContain('65 s of straight-arm work besides the Trial');
+  });
+
+  it('keeps the 48 h rule for a Trial session', () => {
+    const trial = [trialHold('tuck_planche', 30)];
+    expect(sessionSafeguardWarnings(trial, nodes, 0, 1).map((w) => w.code)).toEqual([
+      'straight_arm_rest',
     ]);
   });
 

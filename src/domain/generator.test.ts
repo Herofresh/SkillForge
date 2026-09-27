@@ -303,7 +303,52 @@ describe('generateWorkout', () => {
       selfUnlock('tuck_planche', daysAgo(57)),
     ];
 
-    it('keeps straight-arm work within the ~60 s budget', () => {
+    const straightArmOf = (plan: WorkoutPlan) =>
+      planExercises(plan).filter((exercise) => node(exercise.nodeId).straightArm);
+
+    it('keeps straight-arm working sets within the ~60 s budget', () => {
+      const building = [
+        workSession('fl1', daysAgo(56), 'tuck_front_lever', 10),
+        workSession('pl1', daysAgo(54), 'tuck_planche', 10),
+        workSession('fl2', daysAgo(10), 'tuck_front_lever', 20),
+        workSession('pl2', daysAgo(8), 'tuck_planche', 20),
+      ];
+      const plan = generateWorkout(
+        request({
+          goals: ['tuck_front_lever', 'tuck_planche'],
+          recentSessions: building,
+          actions: unlocks,
+        }),
+      );
+      const straight = straightArmOf(plan);
+      expect(straight.length).toBeGreaterThan(0);
+      expect(straight.some((exercise) => exercise.isTrial)).toBe(false);
+      expect(straightArmSeconds(plan)).toBeGreaterThan(0);
+      expect(straightArmSeconds(plan)).toBeLessThanOrEqual(STRAIGHT_ARM_SESSION_BUDGET_S);
+      expect(plan.warnings.filter((warning) => warning.severity === 'warning')).toEqual([]);
+    });
+
+    it('suggests a due 3 × 30 s tuck planche Trial as the only straight-arm work (Trial day)', () => {
+      const plan = generateWorkout(
+        request({ goals: ['tuck_planche'], recentSessions: levers, actions: unlocks }),
+      );
+      const straight = straightArmOf(plan);
+      expect(straight).toEqual([
+        expect.objectContaining({
+          nodeId: 'tuck_planche',
+          isTrial: true,
+          sets: 3,
+          target: { value: 30 },
+        }),
+      ]);
+      // tuck_front_lever is trainable and rested too, but not added on top of the Trial.
+      expect(ids(plan)).not.toContain('tuck_front_lever');
+      expect(straightArmSeconds(plan)).toBe(0); // the Trial's sets are exempt (ADR-025)
+      expect(plan.notes.join(' ')).toContain('Trial day: Tuck planche');
+      expect(plan.warnings.filter((warning) => warning.severity === 'warning')).toEqual([]);
+    });
+
+    it('suggests at most one straight-arm Trial per session', () => {
       const plan = generateWorkout(
         request({
           goals: ['tuck_front_lever', 'tuck_planche'],
@@ -311,12 +356,10 @@ describe('generateWorkout', () => {
           actions: unlocks,
         }),
       );
-      const straight = planExercises(plan).filter((exercise) => node(exercise.nodeId).straightArm);
-      expect(straight.length).toBeGreaterThan(0);
-      expect(straightArmSeconds(plan)).toBeLessThanOrEqual(STRAIGHT_ARM_SESSION_BUDGET_S);
-      // 3 × 30 s Trials don't fit the budget, so they are not suggested (the user may still try).
-      expect(straight.some((exercise) => exercise.isTrial)).toBe(false);
-      expect(plan.notes.join(' ')).toContain('more straight-arm work than');
+      const straight = straightArmOf(plan);
+      expect(straight).toHaveLength(1);
+      expect(straight[0]).toMatchObject({ isTrial: true, sets: 3, target: { value: 30 } });
+      expect(plan.notes.join(' ')).toContain('Trial day');
       expect(plan.warnings.filter((warning) => warning.severity === 'warning')).toEqual([]);
     });
 
@@ -354,7 +397,7 @@ describe('generateWorkout', () => {
       const later = make(50);
       const trial = planExercises(later).find((e) => e.nodeId === 'straddle_front_lever');
       expect(trial).toMatchObject({ isTrial: true, sets: 3, target: { value: 15 } });
-      expect(straightArmSeconds(later)).toBeLessThanOrEqual(STRAIGHT_ARM_SESSION_BUDGET_S);
+      expect(straightArmOf(later)).toHaveLength(1);
       expect(later.warnings.filter((warning) => warning.severity === 'warning')).toEqual([]);
     });
   });
