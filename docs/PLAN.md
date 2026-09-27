@@ -34,7 +34,7 @@
   Home and Park profiles, repositories in `src/db/` and the Zustand store in `src/store/`
   (`loadAll` → `recompute`, `logSession`, `selfUnlock`, goals, equipment CRUD,
   `generateWorkout`). Settings shows the stored profile names as the only UI proof.
-- Stored overlay and backups (3.3–3.4, ADR-028, PR_LINK): the user's overlay lives in
+- Stored overlay and backups (3.3–3.4, ADR-028, [PR #12](https://github.com/Herofresh/SkillForge/pull/12)): the user's overlay lives in
   `progression_overlay` and the store's tree is `applyOverlay(ALL_NODES, overlay).nodes` (used by
   recompute, logging and the generator); `saveOverlay` refuses a broken overlay. All user data
   exports to one JSON backup (`schemaVersion` 1) and imports with full validation first, a safety
@@ -238,8 +238,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 ### Phase 3: Persistence
 - [x] 3.1 Drizzle schema and migrations (profile, goals, node_progress, equipment_profiles, sessions, session_sets, user_actions, settings, meta), run on start with a loading/error gate; Home/Park seeded (ADR-026) ([PR #11](https://github.com/Herofresh/SkillForge/pull/11))
 - [x] 3.2 Repositories plus the Zustand store that wires the domain to the database; tests on `node:sqlite` through the real driver (ADR-027) ([PR #11](https://github.com/Herofresh/SkillForge/pull/11))
-- [x] 3.3 JSON export/import of all user data with a `schemaVersion`, validated before writing, safety copy + one-transaction replace; expo-file-system/sharing/document-picker (ADR-028) (PR_LINK)
-- [x] 3.4 Store the user progression overlay (ADR-016) in SQLite, apply it with `applyOverlay` when loading the tree, and include it in export/import (ADR-028) (PR_LINK)
+- [x] 3.3 JSON export/import of all user data with a `schemaVersion`, validated before writing, safety copy + one-transaction replace; expo-file-system/sharing/document-picker (ADR-028) ([PR #12](https://github.com/Herofresh/SkillForge/pull/12))
+- [x] 3.4 Store the user progression overlay (ADR-016) in SQLite, apply it with `applyOverlay` when loading the tree, and include it in export/import (ADR-028) ([PR #12](https://github.com/Herofresh/SkillForge/pull/12))
 
 ### Phase 4: Core UI
 - [ ] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown
