@@ -126,3 +126,44 @@ Template:
   - Faster flow with less user overhead.
   - Review quality depends on independence, so the author must never merge their own PR.
   - The rules live in AGENT.md §4a.
+
+## ADR-013: Tooling: ESLint (eslint-config-expo) + Prettier, Jest with jest-expo
+- Date: 2026-09-27 · Status: Accepted
+- Context: Phase 0 needs a typecheck/lint/test baseline that the reviewer agent and CI can run with
+  one command each, without extra infrastructure.
+- Decision:
+  - ESLint 9 flat config (`eslint.config.js`) = `eslint-config-expo/flat` + `eslint-config-prettier/flat`.
+    Prettier runs on its own (`npm run format`, `format:check` in CI), not as an ESLint rule
+    (no `eslint-plugin-prettier`), so lint stays fast and style errors don't hide real ones.
+  - Prettier config: single quotes, width 100, trailing commas, `bracketSameLine` (matches the Expo
+    template style). Markdown and `docs/` are excluded to keep the hand-written docs untouched.
+  - Jest 29 with the `jest-expo` preset for everything, including pure `src/domain` and `src/data`
+    tests. One runner is simpler than a separate `ts-jest`/Node project; the domain stays pure by rule
+    (ADR-009), not by runner.
+  - `@types/jest` is added and listed in `tsconfig.json` `types`, because TypeScript 6 no longer loads
+    all `@types` automatically.
+  - Dev tools are installed at the versions `npx expo install` resolves for SDK 57.
+- Consequences: `npm run typecheck && npm run lint && npm test` is the whole local gate. If the domain
+  test suite gets slow under `jest-expo`, a Node-only Jest project can be added later.
+
+## ADR-014: Root `app/` routes, `@/*` → `src/*` alias, template trimmed
+- Date: 2026-09-27 · Status: Accepted
+- Context: The SDK 57 `create-expo-app` template puts routes in `src/app/` and ships demo screens,
+  native tabs, a `reset-project` script and its own `AGENTS.md`/`CLAUDE.md`. The approved layout
+  (CONTEXT.md) puts routes in root `app/` and keeps `src/` for non-route code.
+- Decision:
+  - Routes live in root `app/`, with tabs in `app/(tabs)/`. `src/` holds `domain`, `data`, `db`,
+    `components`, `lib` only. This keeps every file under `src/` importable without becoming a route.
+  - Keep the template's `@/*` → `./src/*` alias (plus `@/assets/*`). Jest mirrors it via
+    `moduleNameMapper` in `package.json`.
+  - Tabs use JS bottom tabs (`expo-router/js-tabs`) with `expo-symbols` icons, not the template's
+    `unstable-native-tabs`, so the tab bar can be themed and stays on a stable API.
+  - Removed: demo screens/components/hooks, `scripts/reset-project.js`, unused `expo-device`,
+    `expo-image`, `expo-web-browser`, the template's `AGENTS.md`/`CLAUDE.md`/`.claude`/`.vscode` and
+    LICENSE (the repo's licence is a separate product decision). Kept `@expo/ui`, `expo-glass-effect`,
+    `expo-symbols` because `expo-router` depends on them, and web support (`react-native-web`) for
+    quick previews.
+  - App identity: name `SkillForge`, slug and scheme `skillforge`, Android package `at.skillforge.app`,
+    `userInterfaceStyle: dark`.
+- Consequences: Expo docs that assume `src/app/` need translating to `app/`. Don't create `src/app/`,
+  because Expo Router would switch to it.
