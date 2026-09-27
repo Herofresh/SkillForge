@@ -369,3 +369,22 @@ export interface WorkoutPlan {
   /** Plain-language explanations: substitutions, skipped patterns, deferred Trials, balance. */
   notes: string[];
 }
+
+// ---------------------------------------------------------------------------------------------
+// Stored user data (Phase 3). Persisted in SQLite by `src/db/`; the domain only sees these shapes.
+// ---------------------------------------------------------------------------------------------
+
+/** A named set of equipment tags, chosen at session start (ADR-005), e.g. Home or Park. */
+export interface EquipmentProfile {
+  /** Stable id. The seeded defaults use `home` and `park`; user profiles get generated ids. */
+  id: string;
+  name: string;
+  tags: EquipmentTag[];
+}
+
+/** The user's hero. `heroName` is unset until onboarding (4.1). */
+export interface HeroProfile {
+  heroName?: string;
+  /** When the profile was first created (first app start), in ms since the Unix epoch. */
+  createdAt: number;
+}

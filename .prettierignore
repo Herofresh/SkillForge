@@ -8,3 +8,4 @@ docs/
 .claude/
 src/data/skills/progressions.generated.ts
 content/
+src/db/migrations/

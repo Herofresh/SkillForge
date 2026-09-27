@@ -3,10 +3,8 @@
  * the straight-arm flags (ADR-010) and a Home-profile path through every major pattern (ADR-005).
  */
 import { ALL_NODES, NODE_BY_ID } from '@/data/skills';
+import { HOME_EQUIPMENT as HOME } from '@/domain/equipment';
 import type { EquipmentTag, ExerciseNode, Pattern, PrerequisiteKind } from '@/domain/types';
-
-/** Default Home profile from the node manifest (Park = Home + dip bars). */
-const HOME: readonly EquipmentTag[] = ['floor', 'wall', 'bar', 'parallettes', 'bands'];
 
 function node(id: string): ExerciseNode {
   const found = NODE_BY_ID.get(id);

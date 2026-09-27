@@ -517,3 +517,68 @@ Template:
   straight-arm work of that session. On a Trial day a session can hold up to 90 s of Trial holds
   (plus what the user adds, with the warning above 60 s of extra work). Tune or reverse only with
   a new ADR and a user decision (AGENT.md §5).
+
+## ADR-026: Persistence with Drizzle on expo-sqlite: schema, bundled migrations, store (Phase 3.1–3.2)
+- Date: 2026-09-27 · Status: Accepted
+- Context: ADR-002 chose on-device SQLite with Drizzle. Phase 3 needs the concrete schema, a safe
+  migration path for user data, and the wiring from the UI to the pure domain (ADR-009).
+- Decision:
+  - **Libraries:** `expo-sqlite` (SDK 57, works in Expo Go), `drizzle-orm` with its
+    `expo-sqlite` driver (synchronous mode), `drizzle-kit` (dev) to generate migrations, `zustand`
+    for the store, `babel-plugin-inline-import` (dev) to bundle `.sql` files.
+  - **Migrations** follow the Drizzle + Expo setup: `drizzle.config.ts` (`dialect: 'sqlite'`,
+    `driver: 'expo'`) writes numbered SQL files, a journal and `migrations.js` into
+    `src/db/migrations/` (`npm run db:generate`); `babel.config.js` inlines `.sql` imports as
+    strings and `metro.config.js` adds `sql` to `sourceExts`. Migrations are generated from
+    `src/db/schema.ts`, never hand-edited, and only added (never rewritten). Drizzle records applied
+    ones in `__drizzle_migrations` and runs a pending batch in one transaction.
+  - **Start-up** (`startApp`): open `skillforge.db`, `PRAGMA foreign_keys = ON`, migrate, seed,
+    create the store, `loadAll`; `DataGate` shows a loading state until then and an error screen on
+    failure. Nothing on any path deletes or resets data. `meta.schema_version` (number of bundled
+    migrations) is written after every run; a database with a higher version (written by a newer
+    app) is refused unchanged instead of being migrated.
+  - **First run** seeds the hero `profile` row and the Home / Park equipment profiles
+    (`DEFAULT_EQUIPMENT_PROFILES` in `src/domain/equipment.ts`) once, marked by
+    `meta.defaults_seeded_at`, so a default the user deletes is not re-created.
+  - **Schema:** `session_sets` maps 1:1 to `LoggedSet` (ADR-021) with `SetPerformance` flattened
+    into `*_value` / `*_reps` columns (queryable, no JSON parsing), primary key
+    `(session_id, set_index)`, cascade on its session. `sessions` stores only `id`, `started_at`,
+    `ended_at`, `equipment_profile_id`; the planned `outcome`/`xpEarned` columns are left out
+    because they are derived (ADR-008). `user_actions` stores `UserAction`s. `node_progress` stores
+    `NodeProgress` without the derived `state` column (node states depend on the tree and are
+    resolved by `resolveTree`). `goals(node_id, position)`, `equipment_profiles(id, name, tags JSON,
+    position)`, `profile` (one row), `settings(key, JSON value)`, `meta(key, value)`.
+  - **Layers:** repositories in `src/db/*Repository.ts` are small synchronous functions that take the
+    database (or a transaction) and map rows ↔ domain types, checking enum columns on read
+    (`rowGuards.ts`). The store (`src/store/appStore.ts`, `createAppStore(deps)`) calls domain
+    functions and repositories: `loadAll` = read history → `recompute` → rewrite the
+    `node_progress` cache; `logSession` / `selfUnlock` persist first, then apply incrementally (or
+    recompute for an entry in the past) and rewrite the cache; `generateWorkout(profileId, minutes)`
+    passes the stored goals, progress, profile tags and the last `GENERATOR_HISTORY_DAYS` (28) of
+    sessions to the domain generator. `src/domain` stays free of database code.
+  - The history is always recomputed on load (cheap for ~90 nodes); the cache is kept for later
+    fast paths and export, and may be deleted at any time.
+- Consequences: Schema changes need `npm run db:generate` and a committed migration in the same PR;
+  a destructive change (drop/rename) needs a user decision (AGENT.md §4a). Synchronous queries run
+  on the JS thread; fine at this size, revisit if history grows large. Changing a `.sql` file can
+  leave a stale Jest/Metro cache (`npx jest --clearCache`, `npx expo start -c`).
+
+## ADR-027: Database tests run the real Drizzle driver on Node's `node:sqlite`
+- Date: 2026-09-27 · Status: Accepted
+- Context: Repositories, migrations and the store must be tested in Jest on Node (CI on Ubuntu),
+  where the native expo-sqlite module doesn't exist. Options: mock the repositories (tests nothing
+  real), `better-sqlite3` with Drizzle's own driver (a native build dependency and a different
+  driver/dialect path than the app), or an adapter.
+- Decision: `src/db/testing/nodeSqliteClient.ts` implements the few synchronous expo-sqlite
+  methods the Drizzle expo driver calls (`execSync`, `prepareSync` → `executeSync`,
+  `executeForRawResultSync`, `getAllSync`, `getFirstSync`) on Node 24's built-in `node:sqlite`
+  (`DatabaseSync`). Tests pass it to the same `createDatabase` and `migrateDatabase` the app uses,
+  so the real schema, generated migrations (inlined by the same Babel config), Drizzle driver and
+  repositories run against real SQLite. `openTestDatabase(path?)` opens in memory or a temp file
+  (reopening the file simulates an app restart). The adapter is test-only and imported only by
+  tests.
+- Consequences: No new dependency and no native build. Node prints an "SQLite is experimental"
+  warning in test runs. If a Drizzle upgrade starts using other expo-sqlite methods, the adapter
+  fails loudly (missing method) and must be extended. Native-only behaviour (the on-device file,
+  Expo Go) is covered by the Maestro smoke flow, which checks that the seeded Home and Park
+  profiles are shown on Settings.
