@@ -62,7 +62,7 @@
   the unmet-prerequisites note to acknowledge), prerequisites ✓/✗ with alternatives, attributes,
   standards, cues, history, review status. Maestro `tree.yaml`; screenshots
   `docs/screenshots/4.2-tree.png`, `4.3-*.png`.
-- Train flow (4.4 + the session part of 4.x, ADR-034, PR link below): the Train tab plans a session
+- Train flow (4.4 + the session part of 4.x, ADR-034, [PR #18](https://github.com/Herofresh/SkillForge/pull/18)): the Train tab plans a session
   (equipment profile chips, 30/45/60 min) → `app/train/preview` (blocks with sets × target, rest,
   Trial / straight-arm / "Swapped from X" / equipment-substitution markers, pairs, notes, advisory
   warnings to acknowledge; swap, remove, add) → `app/train/session` (current exercise with a stepper
@@ -382,8 +382,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown (ADR-031) ([PR #15](https://github.com/Herofresh/SkillForge/pull/15))
 - [x] 4.2 Tree tab, column view: branch tabs, state-framed tiles in chain order with pixel chains and linked cross-branch chips, goal markers, legend (ADR-033) ([PR #17](https://github.com/Herofresh/SkillForge/pull/17))
 - [x] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗ with alternatives, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history, review status (ADR-033) ([PR #17](https://github.com/Herofresh/SkillForge/pull/17))
-- [x] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove/add) → live logging (persisted draft, resume after restart) → summary with XP, level-ups and unlocks (ADR-034) (PR pending)
-- [x] 4.x Safeguard warnings in the UI (ADR-023): every `SafeguardWarning` (before a Trial, test-out or self-unlock, during a live session and in the summary) is shown with its message and an acknowledge step; straight-arm ones explain why. Never a hard block. Part of 4.1, 4.3 and 4.4 (the Train part: ADR-034) (PR pending)
+- [x] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove/add) → live logging (persisted draft, resume after restart) → summary with XP, level-ups and unlocks (ADR-034) ([PR #18](https://github.com/Herofresh/SkillForge/pull/18))
+- [x] 4.x Safeguard warnings in the UI (ADR-023): every `SafeguardWarning` (before a Trial, test-out or self-unlock, during a live session and in the summary) is shown with its message and an acknowledge step; straight-arm ones explain why. Never a hard block. Part of 4.1, 4.3 and 4.4 (the Train part: ADR-034) ([PR #18](https://github.com/Herofresh/SkillForge/pull/18))
 - [ ] 4.5 Character tab: level, rank, attribute radar, streak, recent sessions
 - [ ] 4.6 Settings: equipment profiles, export/import
 - [ ] 4.7 In-app node editor: add a `user_` node, edit a node's standards/prerequisites, hide a node; show `applyOverlay` issues inline and never save a broken tree
