@@ -306,3 +306,66 @@ export interface SafeguardWarning {
   message: string;
   severity: SafeguardSeverity;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Workout generator (Phase 2.5, ADR-005, ADR-006, ADR-024). Built by `generateWorkout` in
+// `src/domain/generator.ts`; the plan is a suggestion the user can change (ADR-023).
+// ---------------------------------------------------------------------------------------------
+
+/** What the generator needs to suggest one session ("Train now"). */
+export interface WorkoutRequest {
+  /** The user's merged tree (`applyOverlay(ALL_NODES, overlay).nodes`), like the engine takes. */
+  nodes: readonly ExerciseNode[];
+  /** Goal node ids, most important first (the order is only a tie-break). */
+  goals: readonly string[];
+  /** Node progress by id (`EngineState.progress` from `recompute`). */
+  progress: Readonly<Record<string, NodeProgress>>;
+  /** Tags of the equipment profile chosen for this session (ADR-005). */
+  equipment: readonly EquipmentTag[];
+  /** Time for the session in minutes, typically 30, 45 or 60. */
+  availableMinutes: number;
+  /**
+   * Recent logged sessions (at least the last two weeks): pattern recency, the 48 h rules and the
+   * last performance per node for the prescription.
+   */
+  recentSessions: readonly LoggedSession[];
+  /** Session start in ms since the Unix epoch (the generator never reads the clock). */
+  now: number;
+  /** Seed for tie-breaks between equally good exercises; same inputs + seed = same plan. */
+  seed: number;
+}
+
+/** Plan sections in session order (docs/research/progressions.md → Session order). */
+export const WORKOUT_BLOCK_KINDS = ['warm_up', 'skill', 'strength', 'core', 'cool_down'] as const;
+export type WorkoutBlockKind = (typeof WORKOUT_BLOCK_KINDS)[number];
+
+/** One exercise of a plan: `sets` sets of `target`, each followed by `restSec` of rest. */
+export interface PlannedExercise {
+  nodeId: string;
+  sets: number;
+  /** Per set, in the node's metric (`SetPerformance`, like the logged `prescribed` value). */
+  target: SetPerformance;
+  metric: Metric;
+  /** Rest after each set in seconds (for the rest timer): 90 s inside a pair, else ~180 s. */
+  restSec: number;
+  /** The sets are a Trial attempt (log them with `isTrial`). */
+  isTrial?: boolean;
+  /** Id of the node this exercise replaces because the equipment profile can't do it (ADR-005). */
+  substitutedFrom?: string;
+}
+
+/** A section of the plan. A `strength` block with two exercises is a pair (alternate the sets). */
+export interface WorkoutBlock {
+  kind: WorkoutBlockKind;
+  exercises: PlannedExercise[];
+}
+
+export interface WorkoutPlan {
+  blocks: WorkoutBlock[];
+  /** Estimated duration in whole minutes (never above the request's `availableMinutes`). */
+  estimatedMinutes: number;
+  /** Advisory warnings that apply to the plan (ADR-023), e.g. a self-unlocked node's prerequisites. */
+  warnings: SafeguardWarning[];
+  /** Plain-language explanations: substitutions, skipped patterns, deferred Trials, balance. */
+  notes: string[];
+}
