@@ -1,5 +1,12 @@
-import { makeSession, makeSet } from '@/data/testFixtures';
-import type { LoggedSession, NodeProgress, UserAction } from '@/domain/types';
+import { makeNode, makeSession, makeSet } from '@/data/testFixtures';
+import { EMPTY_OVERLAY } from '@/domain/overlay';
+import type {
+  LoggedSession,
+  NodeProgress,
+  ProgressionOverlay,
+  UserAction,
+  UserData,
+} from '@/domain/types';
 
 import {
   deleteEquipmentProfile,
@@ -9,11 +16,13 @@ import {
 } from './equipmentProfileRepository';
 import { listGoals, replaceGoals } from './goalRepository';
 import { clearNodeProgress, readNodeProgress, replaceNodeProgress } from './nodeProgressRepository';
+import { clearOverlay, getOverlay, saveOverlay } from './overlayRepository';
 import { getProfile, setHeroName } from './profileRepository';
-import { insertSession, listSessions } from './sessionRepository';
-import { getSetting, setSetting } from './settingsRepository';
+import { insertSession, listSessions, listStoredSessions } from './sessionRepository';
+import { getSetting, listSettings, setSetting } from './settingsRepository';
 import { openTestDatabase, TEST_SEED_TIME, type TestDatabase } from './testing/testDatabase';
 import { insertUserAction, listUserActions } from './userActionRepository';
+import { readUserData, replaceUserData } from './userDataRepository';
 
 let test: TestDatabase;
 beforeEach(async () => {
@@ -53,6 +62,10 @@ describe('session repository', () => {
     insertSession(test.db, later, { endedAt: 9_999, equipmentProfileId: 'home' });
     insertSession(test.db, eccentricSession);
     expect(listSessions(test.db)).toEqual([eccentricSession, later]);
+    expect(listStoredSessions(test.db)).toEqual([
+      eccentricSession,
+      { ...later, endedAt: 9_999, equipmentProfileId: 'home' },
+    ]);
   });
 
   it('stores nothing when a set index repeats (one transaction)', () => {
@@ -165,5 +178,76 @@ describe('profile and settings', () => {
     setSetting(test.db, 'units', { weight: 'kg' });
     setSetting(test.db, 'units', { weight: 'lb' });
     expect(getSetting(test.db, 'units')).toEqual({ weight: 'lb' });
+    setSetting(test.db, 'haptics', false);
+    expect(listSettings(test.db)).toEqual({ haptics: false, units: { weight: 'lb' } });
+  });
+});
+
+const userNode = makeNode({
+  id: 'user_ring_row',
+  source: 'user',
+  branch: 'h_pull',
+  chainOrder: 1,
+  ogLevel: 0,
+  sourceUrls: [],
+  equipment: [['rings']],
+  patterns: ['horizontal_pull'],
+});
+const overlay: ProgressionOverlay = {
+  added: [userNode],
+  edited: { pull_up: { trial: { sets: 3, target: 10 } } },
+  hidden: ['band_row'],
+};
+
+describe('overlay repository', () => {
+  it('stores one current overlay, counts revisions and survives a clear', () => {
+    expect(getOverlay(test.db)).toBeUndefined();
+    saveOverlay(test.db, overlay, 100);
+    expect(getOverlay(test.db)).toEqual({ overlay, revision: 1, savedAt: 100 });
+    saveOverlay(test.db, EMPTY_OVERLAY, 200);
+    expect(getOverlay(test.db)).toEqual({ overlay: EMPTY_OVERLAY, revision: 2, savedAt: 200 });
+    clearOverlay(test.db);
+    expect(getOverlay(test.db)).toBeUndefined();
+  });
+
+  it('refuses to read a corrupt row instead of guessing', () => {
+    saveOverlay(test.db, overlay, 100);
+    test.sqlite.raw.exec(`UPDATE progression_overlay SET body = '{"format":"nope"}'`);
+    expect(() => getOverlay(test.db)).toThrow(/stored overlay cannot be read/);
+  });
+});
+
+describe('user data repository', () => {
+  const imported: UserData = {
+    profile: { heroName: 'Grace', createdAt: 42 },
+    goals: ['pull_up'],
+    equipmentProfiles: [{ id: 'rings', name: 'Rings', tags: ['rings', 'bar'] }],
+    sessions: [{ ...eccentricSession, endedAt: 6_000, equipmentProfileId: 'rings' }],
+    userActions: [{ id: 'a1', kind: 'self_unlock', nodeId: 'pull_up', at: 10 }],
+    overlay,
+    settings: { units: 'metric' },
+  };
+
+  it('replaces everything and reads it back identically', () => {
+    insertSession(test.db, makeSession('old', 1, [{ nodeId: 'dead_hang', count: 1 }]));
+    replaceGoals(test.db, ['l_sit']);
+    setSetting(test.db, 'stale', 1);
+    replaceNodeProgress(test.db, {
+      dead_hang: { nodeId: 'dead_hang', xp: 5, level: 1, trialPassed: false },
+    });
+
+    replaceUserData(test.db, imported, 500);
+    expect(readUserData(test.db)).toEqual(imported);
+    expect(readNodeProgress(test.db)).toEqual({}); // the cache is rebuilt by the store
+  });
+
+  it('writes nothing when one row fails (one transaction)', () => {
+    const before = readUserData(test.db);
+    const broken: UserData = {
+      ...imported,
+      sessions: [...imported.sessions, imported.sessions[0]], // duplicate primary key
+    };
+    expect(() => replaceUserData(test.db, broken, 500)).toThrow();
+    expect(readUserData(test.db)).toEqual(before);
   });
 });

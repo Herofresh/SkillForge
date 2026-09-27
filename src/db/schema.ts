@@ -95,3 +95,14 @@ export const settings = sqliteTable('settings', {
   key: text('key').primaryKey(),
   value: text('value', { mode: 'json' }).notNull(),
 });
+
+/**
+ * The user's current progression overlay (ADR-016, PLAN 3.4): one row (id 1). `body` is the
+ * `overlayToRaw` shape as JSON, which carries its own format `version`; `revision` counts the saves.
+ */
+export const progressionOverlay = sqliteTable('progression_overlay', {
+  id: integer('id').primaryKey(),
+  revision: integer('revision').notNull(),
+  savedAt: integer('saved_at').notNull(),
+  body: text('body', { mode: 'json' }).notNull(),
+});

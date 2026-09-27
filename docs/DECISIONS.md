@@ -582,3 +582,52 @@ Template:
   fails loudly (missing method) and must be extended. Native-only behaviour (the on-device file,
   Expo Go) is covered by the Maestro smoke flow, which checks that the seeded Home and Park
   profiles are shown on Settings.
+
+## ADR-028: Stored overlay, backup file format and replace-only import (Phase 3.3–3.4)
+- Date: 2026-09-27 · Status: Accepted
+- Context: The user's progression overlay (ADR-016) has to survive restarts and shape the tree the
+  engine uses, and all user data needs a JSON export/import (PLAN 3.3). An import must never leave
+  the database half-written or silently drop the user's current data, and a file from a newer app
+  version must not be misread.
+- Decision:
+  - **Stored overlay:** a one-row table `progression_overlay(id = 1, revision, saved_at, body)`
+    (migration `0001_progression_overlay`). `body` is the `overlayToRaw` shape (the same YAML field
+    format with `format`/`version` header as a shared overlay file) stored as JSON and read back
+    through `overlayFromRaw`, so the database, shared files and backups use one parser.
+    `revision` counts saves; there is one current overlay, no history (YAGNI).
+  - **Tree:** the store's `nodes` = `applyOverlay(ALL_NODES, overlay).nodes`; `recompute`,
+    `applySession`, `applyUserAction`, `generateWorkout` and the goal/unlock checks all use it.
+    `saveOverlay` runs `applyOverlay` first and returns its issues without writing anything when the
+    merged tree is broken (cycles, dangling ids, …); on success it stores and runs `loadAll` (full
+    recompute). A stored overlay that no longer applies (e.g. an app update removed a node it edits)
+    is kept, the built-in tree is used and the issues are exposed as `overlayIssues` for the UI.
+  - **Backup format** (`src/domain/backup.ts`, pure): one JSON document
+    `{ format: 'skillforge-backup', schemaVersion: 1, exportedAt, profile | null, goals,
+    equipmentProfiles, sessions (with endedAt?, equipmentProfileId?, sets without the implied
+    sessionId), userActions, overlay (overlayToRaw), settings }`. Derived data (`node_progress`,
+    character stats) and `meta` are not exported; they are recomputed (ADR-008) or belong to the
+    install. `schemaVersion` is the backup layout version, independent of the database schema
+    version; bumping it needs a new ADR and a reader for the old versions.
+  - **Validation before writing:** `parseBackup(text, ALL_NODES)` checks everything first: JSON
+    syntax, header (an overlay file gets its own hint), a newer `schemaVersion` is refused with
+    "update the app", unknown or missing fields, types and enums with a path (e.g.
+    `sessions[2].sets[0].metric`), unique ids and set indexes, the overlay (field checks and
+    `applyOverlay`) and that goals exist in the merged tree. Hand-written readers in the style of
+    `progressionFormat.ts` (no schema library such as zod: none is in the project and the checks are
+    small). History on nodes that are not in the tree is kept (the engine ignores it, like hidden
+    nodes).
+  - **Import = replace, never merge or partial:** `importBackup(text)` → validate (issues → nothing
+    written) → serialize the current data as a **safety copy** and write it to
+    `documents/backups/skillforge-before-import-<UTC>.json` (if that write fails, the import stops
+    before any change) → `replaceUserData` deletes all user tables and inserts the backup in ONE
+    transaction → `loadAll`. The result returns the safety copy (text and location) so the UI can
+    offer "undo" by importing it. Merge is not offered (conflicting ids and histories; YAGNI).
+  - **Files:** `src/store/backupFiles.ts` is the only module with file I/O: expo-file-system
+    (`File`/`Directory`/`Paths`), expo-sharing (share sheet for export) and expo-document-picker
+    (pick any file type, because Android providers often mislabel JSON; the parser rejects the
+    rest). The store gets it as the `files` dependency (`BackupFiles`), so tests use a fake. Store
+    actions: `exportBackup`, `importBackup`, `shareBackup`, `importBackupFromFile`, `saveOverlay`.
+- Consequences: Three Expo modules added (all in Expo Go, MIT). Safety copies accumulate in the
+  app's documents folder; a later task can list or prune them in Settings (4.6). A backup can only
+  be imported by an app that has every node its goals point at; history on unknown nodes survives
+  but earns nothing until the node is back. The Settings buttons come with Phase 4.6.

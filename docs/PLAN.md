@@ -34,18 +34,42 @@
   Home and Park profiles, repositories in `src/db/` and the Zustand store in `src/store/`
   (`loadAll` → `recompute`, `logSession`, `selfUnlock`, goals, equipment CRUD,
   `generateWorkout`). Settings shows the stored profile names as the only UI proof.
+- Stored overlay and backups (3.3–3.4, ADR-028, [PR #12](https://github.com/Herofresh/SkillForge/pull/12)): the user's overlay lives in
+  `progression_overlay` and the store's tree is `applyOverlay(ALL_NODES, overlay).nodes` (used by
+  recompute, logging and the generator); `saveOverlay` refuses a broken overlay. All user data
+  exports to one JSON backup (`schemaVersion` 1) and imports with full validation first, a safety
+  copy of the current data, and a one-transaction replace. Store actions are ready; the buttons come
+  in 4.6. **Phase 3 is complete.**
 
 ## Next up
-1. Phase 3.3–3.4: export/import and the stored overlay (build on `src/db/` repositories and the
-   store; see the handoff notes).
-2. Phase 4 UI on top of the store (`useAppStore`).
-3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+1. Phase 4 UI on top of the store (`useAppStore`), starting with 4.1 onboarding and 4.2 the tree
+   column view (see the handoff notes).
+2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
 ## Blockers
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Stored overlay and backups (Phase 3.3–3.4, ADR-028):**
+  - Overlay: `useAppStore((s) => s.saveOverlay)(overlay)` returns `ValidationIssue[]`; empty =
+    saved and reloaded. The node editor (4.7) shows the issues inline (`formatIssue`) and keeps
+    the draft. `state.overlay` is the stored one; `state.overlayIssues` is non-empty when a stored
+    overlay stopped applying after an app update (then the built-in tree is used; show a notice).
+  - Backups: `shareBackup()` (export + share sheet) and `importBackupFromFile()` →
+    `{ status: 'imported', safetyCopy } | { status: 'rejected', issues } | { status: 'canceled' }`.
+    Settings (4.6) must confirm "replace all data" before calling it, show `issues` on
+    rejection, and can offer "undo" by importing `safetyCopy.text` (`importBackup(text)`).
+    Safety copies are written to `documents/backups/` and never pruned yet.
+  - The format is in `src/domain/backup.ts`. Any change to the layout needs
+    `BACKUP_SCHEMA_VERSION` + 1, a reader for the old version and a new ADR. `meta` and
+    `node_progress` are not exported (recomputed on `loadAll`).
+  - `replaceUserData` deletes every user table; add new user tables to `USER_TABLES`,
+    `readUserData`, `UserData` and the backup format together.
+  - `backupFiles.ts` (native I/O) is not unit-tested; the flows are tested with a fake
+    `BackupFiles`. Manual device check of share/pick is part of 4.6.
+  - Lockfile: `npx expo install` dropped `@emnapi/core` / `@emnapi/runtime` again; restored from
+    main's lockfile with jq.
 - **Persistence core (Phase 3.1–3.2, ADR-026, ADR-027):**
   - Start-up: `app/_layout.tsx` wraps the Stack in `DataGate` → `startApp()`
     (`src/store/bootstrap.ts`): open `skillforge.db`, `migrateDatabase` (version guard,
@@ -62,11 +86,8 @@
     Train flow (4.4) builds the `LoggedSession` (ids via `createId` in `src/lib/id.ts`).
   - `generateWorkout(profileId, minutes, seed?)` defaults the seed to the number of logged sessions
     (stable until the next session); pass another seed for "shuffle".
-  - The store takes `nodes` = `ALL_NODES` today. 3.4 must pass the merged tree
-    (`applyOverlay(ALL_NODES, overlay).nodes`) and `loadAll` again after an overlay edit.
-  - 3.3 export/import: read with `listSessions` / `listUserActions` / `listGoals` /
-    `listEquipmentProfiles`; an import must validate at the boundary and then `loadAll`
-    (history in the past needs the full recompute, which `loadAll` does).
+  - The store takes `baseNodes` (= `ALL_NODES`) and applies the stored overlay itself (3.4);
+    read the user's tree from `state.nodes`, never from `ALL_NODES` in the UI.
   - Tests: `openTestDatabase(path?)` (`src/db/testing/testDatabase.ts`) gives a migrated database
     on `node:sqlite` through the real driver; use a temp file to simulate a restart.
   - The Maestro smoke flow now also asserts "Home" and "Park" on Settings.
@@ -95,7 +116,7 @@
     `generator.ts` only.
 - **Game engine (Phase 2.1–2.4, 2.6; ADR-018…021):**
   - Everything takes the node list as a parameter. Pass the user's merged tree
-    (`applyOverlay(ALL_NODES, overlay).nodes`), not `ALL_NODES`, once the overlay is persisted (3.4),
+    (`applyOverlay(ALL_NODES, overlay).nodes`, the store's `state.nodes` since 3.4), not `ALL_NODES`,
     so user-added or edited progressions (and later coach changes) flow through the same rules.
   - `applySession` is the only reducer step; `recompute` folds it over the sorted history. Use
     `canApplyIncrementally` before an incremental apply; an older session (import) needs a recompute.
@@ -168,7 +189,7 @@
   optional peers needed on Linux (here `@emnapi/core`/`@emnapi/runtime` for `@napi-rs/wasm-runtime`),
   and then CI's `npm ci` fails with "Missing: … from lock file". Fix it by adding the missing entries
   (see PR #3), not by switching `npm ci` to `npm install`. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…027). The
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…028). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
@@ -217,8 +238,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 ### Phase 3: Persistence
 - [x] 3.1 Drizzle schema and migrations (profile, goals, node_progress, equipment_profiles, sessions, session_sets, user_actions, settings, meta), run on start with a loading/error gate; Home/Park seeded (ADR-026) ([PR #11](https://github.com/Herofresh/SkillForge/pull/11))
 - [x] 3.2 Repositories plus the Zustand store that wires the domain to the database; tests on `node:sqlite` through the real driver (ADR-027) ([PR #11](https://github.com/Herofresh/SkillForge/pull/11))
-- [ ] 3.3 JSON export/import with validation
-- [ ] 3.4 Store the user progression overlay (ADR-016) in SQLite, apply it with `applyOverlay` when loading the tree, and include it in export/import
+- [x] 3.3 JSON export/import of all user data with a `schemaVersion`, validated before writing, safety copy + one-transaction replace; expo-file-system/sharing/document-picker (ADR-028) ([PR #12](https://github.com/Herofresh/SkillForge/pull/12))
+- [x] 3.4 Store the user progression overlay (ADR-016) in SQLite, apply it with `applyOverlay` when loading the tree, and include it in export/import (ADR-028) ([PR #12](https://github.com/Herofresh/SkillForge/pull/12))
 
 ### Phase 4: Core UI
 - [ ] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown

@@ -8,6 +8,13 @@
       "when": 1790523387605,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1790525076857,
+      "tag": "0001_progression_overlay",
+      "breakpoints": true
     }
   ]
 }

@@ -8,6 +8,7 @@ import { migrateDatabase } from '@/db/migrate';
 import { openAppDatabase } from '@/db/openAppDatabase';
 
 import { createAppStore, type AppStore } from './appStore';
+import { deviceBackupFiles } from './backupFiles';
 import { setAppStore } from './useAppStore';
 
 let started: Promise<AppStore> | undefined;
@@ -21,7 +22,7 @@ export function startApp(): Promise<AppStore> {
 async function boot(): Promise<AppStore> {
   const db = openAppDatabase();
   await migrateDatabase(db, Date.now());
-  const store = createAppStore({ db, nodes: ALL_NODES });
+  const store = createAppStore({ db, baseNodes: ALL_NODES, files: deviceBackupFiles });
   store.getState().loadAll();
   setAppStore(store);
   return store;

@@ -4,19 +4,20 @@
  */
 import { asc } from 'drizzle-orm';
 
-import { METRICS, type LoggedSession, type LoggedSet, type SetPerformance } from '@/domain/types';
+import {
+  METRICS,
+  type LoggedSession,
+  type LoggedSet,
+  type SessionDetails,
+  type SetPerformance,
+  type StoredSession,
+} from '@/domain/types';
 
 import type { AppDb } from './database';
 import { oneOf, optional } from './rowGuards';
 import { sessionSets, sessions } from './schema';
 
 type SetRow = typeof sessionSets.$inferSelect;
-
-/** What a session row stores beyond the domain `LoggedSession`. */
-export interface SessionDetails {
-  endedAt?: number;
-  equipmentProfileId?: string;
-}
 
 function toPerformance(value: number, reps: number | null): SetPerformance {
   const optionalReps = optional(reps);
@@ -81,8 +82,8 @@ export function insertSession(
   });
 }
 
-/** Every logged session with its sets (in set order), oldest first. */
-export function listSessions(db: AppDb): LoggedSession[] {
+/** Every logged session with its sets (in set order) and stored details, oldest first. */
+export function listStoredSessions(db: AppDb): StoredSession[] {
   const setsBySession = new Map<string, LoggedSet[]>();
   const setRows = db
     .select()
@@ -99,9 +100,20 @@ export function listSessions(db: AppDb): LoggedSession[] {
     .from(sessions)
     .orderBy(asc(sessions.startedAt), asc(sessions.id))
     .all()
-    .map((row) => ({
-      id: row.id,
-      startedAt: row.startedAt,
-      sets: setsBySession.get(row.id) ?? [],
-    }));
+    .map((row) => {
+      const endedAt = optional(row.endedAt);
+      const equipmentProfileId = optional(row.equipmentProfileId);
+      return {
+        id: row.id,
+        startedAt: row.startedAt,
+        sets: setsBySession.get(row.id) ?? [],
+        ...(endedAt !== undefined ? { endedAt } : {}),
+        ...(equipmentProfileId !== undefined ? { equipmentProfileId } : {}),
+      };
+    });
+}
+
+/** Every logged session with its sets (in set order), oldest first: the engine's history. */
+export function listSessions(db: AppDb): LoggedSession[] {
+  return listStoredSessions(db).map(({ id, startedAt, sets }) => ({ id, startedAt, sets }));
 }

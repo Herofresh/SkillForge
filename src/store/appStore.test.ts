@@ -27,7 +27,7 @@ let ids = 0;
 function storeFor(test: TestDatabase, now = NOW): AppStore {
   const store = createAppStore({
     db: test.db,
-    nodes: ALL_NODES,
+    baseNodes: ALL_NODES,
     now: () => now,
     newId: () => `id-${++ids}`,
   });
