@@ -53,11 +53,20 @@
   `onboarding_completed_at` setting; until then the tabs redirect to onboarding. Maestro
   `onboarding.yaml` covers it from a fresh install; smoke/styleguide finish it first. Screenshots in
   `docs/screenshots/4.1-*.png` (Pixel 8 Pro).
+- Tree tab and node detail (4.2–4.3, ADR-033, [PR #17](https://github.com/Herofresh/SkillForge/pull/17)): the Tree tab shows one branch at a
+  time (pixel branch tabs, opens on the first goal's branch) as a column of state-framed tiles
+  (locked / ready glow / training XP bar / proficient gold / mastered star / legendary silhouette,
+  goal markers) with pixel chains to the node above and linked chips for other prerequisites.
+  Tapping a tile opens `app/node/[nodeId]`: level + XP (cap and banked XP), set/remove goal,
+  Attempt Trial (`app/node/[nodeId]/trial`, warnings acknowledged first), Unlock anyway (sheet with
+  the unmet-prerequisites note to acknowledge), prerequisites ✓/✗ with alternatives, attributes,
+  standards, cues, history, review status. Maestro `tree.yaml`; screenshots
+  `docs/screenshots/4.2-tree.png`, `4.3-*.png`.
 
 ## Next up
 1. Phase 4 UI on top of the store (`useAppStore`) built from the design system (4.0,
-   `docs/DESIGN.md`): next 4.2 the tree column view (reuse `NodeRow` and `nodesInBranch`), then 4.3
-   node detail (see the handoff notes).
+   `docs/DESIGN.md`): next 4.4 the Train flow, then 4.5 Character and 4.6 Settings (see the handoff
+   notes).
 2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -65,6 +74,25 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Tree tab and node detail (tasks 4.2–4.3, ADR-033):**
+  - View models are pure in `src/domain/treeView.ts`; screens `useMemo` them over `state.nodes`,
+    `state.engine.progress`, `state.goals`, `state.sessions`. `nodeLevelProgress` (node XP bar) and
+    `prerequisiteSatisfiedBy` are in `progression.ts`; `LevelProgress` moved to `types.ts`.
+  - Open a node from anywhere with `router.push({ pathname: '/node/[nodeId]', params: { nodeId } })`
+    (Train summary and Character history can link to it). Pushed screens use
+    `stackHeaderOptions(title)`; the header height looked normal on the Pixel 8 Pro (the Style Guide
+    uses it now too).
+  - The Trial logic is shared: `useTrialAttempt(node)` + `TrialSetsPanel` / `TrialOutcome`
+    (`src/components/trial/`), and `SafeguardWarningList` + `useAcknowledgements` for any
+    acknowledge step. 4.4 should reuse them for session warnings.
+  - `UnlockSheet` is mounted to open it (warnings frozen in a `useState` initializer). The store's
+    `selfUnlockWarnings(nodeId)` is empty for nodes that aren't locked.
+  - Tiles are one accessible button; the prerequisite chips inside are touch-only duplicates of the
+    detail's prerequisite links. Recommended prerequisites show only in the detail.
+  - The detail's history lists the last `NODE_HISTORY_LIMIT` (5) sessions with the node's actual
+    sets; a full log belongs to the Character tab (4.5).
+  - Maestro `tree.yaml` starts with `clearState` (like onboarding) so the node states are known;
+    all four flows took ~5.5 min. Its `takeScreenshot` steps produce the committed screenshots.
 - **Onboarding (task 4.1, ADR-031):**
   - Gate: `state.onboardingCompletedAt` (setting `onboarding_completed_at`). `app/(tabs)/_layout.tsx`
     and `app/index.tsx` redirect to `/onboarding` while it is unset; `app/onboarding/_layout.tsx`
@@ -317,8 +345,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 ### Phase 4: Core UI
 - [x] 4.0 Design system (pixel-art × dark fantasy, ADR-030): `docs/DESIGN.md`, tokens in `theme.ts` (contrast-tested), OFL pixel/body fonts with the splash kept until fonts + DB are ready, UI kit in `src/components/ui/` (frames, text, buttons, grid-defined pixel icons, XP/stat bars, level badge, tier chip, warning banner, modal, empty state, level-up burst), restyled tab bar and placeholder tabs, dev-only Style Guide (`/styleguide`), component tests (RNTL), Maestro `styleguide.yaml` ([PR #14](https://github.com/Herofresh/SkillForge/pull/14))
 - [x] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown (ADR-031) ([PR #15](https://github.com/Herofresh/SkillForge/pull/15))
-- [ ] 4.2 Tree tab, column view
-- [ ] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history
+- [x] 4.2 Tree tab, column view: branch tabs, state-framed tiles in chain order with pixel chains and linked cross-branch chips, goal markers, legend (ADR-033) ([PR #17](https://github.com/Herofresh/SkillForge/pull/17))
+- [x] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗ with alternatives, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history, review status (ADR-033) ([PR #17](https://github.com/Herofresh/SkillForge/pull/17))
 - [ ] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove) → live logging → summary with XP, level-ups and unlocks
 - [ ] 4.x Safeguard warnings in the UI (ADR-023): every `SafeguardWarning` (before a Trial, test-out or self-unlock, during a live session and in the summary) is shown with its message and an acknowledge step; straight-arm ones explain why. Never a hard block. Part of 4.1, 4.3 and 4.4
 - [ ] 4.5 Character tab: level, rank, attribute radar, streak, recent sessions

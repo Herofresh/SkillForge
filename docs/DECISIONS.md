@@ -757,3 +757,40 @@ Template:
   - Cold boot in about 80 s with hardware rendering and no ANR dialogs.
   - Screenshots now match the user's real device size.
   - A fresh AVD needs Expo Go installed once (see the CONTEXT.md runbook).
+
+## ADR-033: Tree tab as one branch column, node detail as a stack screen (PLAN 4.2, 4.3)
+- Date: 2026-09-27 · Status: Accepted
+- Context: The Tree tab must show 89+ nodes as a skill tree with prerequisites, states and goals,
+  stay fast on a phone, and lead to a node detail with the ADR-023 actions (set goal, attempt the
+  Trial, "unlock anyway"). The graph view is Phase 5.1, so 4.2 is the column view.
+- Decision:
+  - **One branch at a time:** the 12 branches are horizontal pixel tabs (`BranchTabs`, shared with
+    the onboarding goal picker); the chosen branch is a `FlatList` of memoized `NodeTile`s in
+    `chainOrder`. It opens on the first goal's branch (`defaultBranch`), else Horizontal push.
+  - **Prerequisites in a column:** when a node has a hard prerequisite on the node right above it,
+    the column draws a pixel chain between the two tiles (gold once met, steel before). Every other
+    hard prerequisite (another branch, or further up the column) is a small linked chip (✓/✗ +
+    name, 48 dp hit area) that opens that node. Recommended prerequisites appear only in the detail.
+  - **Tile states** (`TileState` = the engine's `NodeState` + `legendary`): locked tiles sink into
+    the night background with a lock and muted text; available ones glow (rune double line); training
+    ones are raised with "LV n" and a segmented XP bar; proficient ones are gold-framed with a shield;
+    mastered ones bright gold with a star; a locked `legendary` node is an ink silhouette with a
+    flame. Goals get a gold "GOAL" star marker. A Legend sheet explains them. Frames are
+    `TileFrames` in `theme.ts` (contrast-tested).
+  - **Node detail** is a root stack route `app/node/[nodeId]` (so Train/Character can open it later),
+    not a bottom sheet: it is long (header with level/XP, actions, prerequisites with alternatives and
+    what met them, attributes, standards, cues, history of the last 5 sessions, review status and
+    `verify:` note). "Attempt Trial" opens `app/node/[nodeId]/trial` (same `useTrialAttempt` hook and
+    Trial parts as onboarding). "Unlock anyway" shows only for locked nodes and opens a sheet with
+    `selfUnlockWarnings` (unmet prerequisites, `info`) to acknowledge before `selfUnlock`; afterwards
+    the detail plays an "UNLOCKED!" burst and says the user unlocked it. Once the Trial is passed the
+    button is replaced by "Trial passed on <date>" (the engine ignores later Trials on that node).
+  - **View models are pure:** `src/domain/treeView.ts` (`branchColumn`, `treeTile`,
+    `prerequisiteViews`, `branchSummary`, `defaultBranch`, `nodeHistory`, `nodeDetail`),
+    `nodeLevelProgress` and `prerequisiteSatisfiedBy` in `progression.ts`, and the text in
+    `format.ts` (`formatWorkingRange`, `formatLevelProgress`, `formatShortDate`). Screens call them in
+    `useMemo` over store state (`state.nodes`, the overlay-applied tree).
+- Consequences: Tiles are one accessible button each; the linked chips inside a tile are reachable
+  by touch, while screen-reader users get the same prerequisites as links in the detail. The 5.1
+  graph view can reuse `treeTile`/`prerequisiteViews` for its nodes and edges. A second route to the
+  detail from Train/Character only needs `router.push('/node/<id>')`.

@@ -9,8 +9,10 @@ import {
   MAX_NODE_LEVEL,
   newlyUnlocked,
   nodeLevel,
+  nodeLevelProgress,
   nodeUseWarnings,
   passTrial,
+  prerequisiteSatisfiedBy,
   PROFICIENT_LEVEL,
   resolveNode,
   resolveTree,
@@ -160,6 +162,10 @@ describe('prerequisites and node states', () => {
     const prereq = { nodeId: 'parallel_bar_dip', minLevel: 5, kind: 'hard' as const };
     const progress = { straight_bar_dip: progressAt('straight_bar_dip', 5, true) };
     expect(isPrerequisiteMet(prereq, progress, altLookup)).toBe(true);
+    expect(prerequisiteSatisfiedBy(prereq, progress, altLookup)).toBe('straight_bar_dip');
+    const both = { ...progress, parallel_bar_dip: progressAt('parallel_bar_dip', 5, true) };
+    expect(prerequisiteSatisfiedBy(prereq, both, altLookup)).toBe('parallel_bar_dip');
+    expect(prerequisiteSatisfiedBy(prereq, {}, altLookup)).toBeUndefined();
   });
 
   it('derives locked → available → training → proficient → mastered', () => {
@@ -272,5 +278,54 @@ describe('nodeUseWarnings (advisory, never blocking)', () => {
     const passed = { ...progressAt('tuck_front_lever', 5, true) };
     const status = resolveNode(lever, { tuck_front_lever: passed }, lookup);
     expect(nodeUseWarnings(lever, status, passed, lookup, 0)).toEqual([]);
+  });
+});
+
+describe('nodeLevelProgress', () => {
+  const node = makeNode({ id: 'push_up', ogLevel: 0 });
+
+  it('is level 1 with an empty bar without progress', () => {
+    expect(nodeLevelProgress(node, undefined)).toEqual({
+      level: 1,
+      xpIntoLevel: 0,
+      xpForLevel: xpForLevel(2, 0),
+      fraction: 0,
+      capped: false,
+      banked: 0,
+    });
+  });
+
+  it('shows the XP inside the current level', () => {
+    const floor = xpForLevel(3, 0);
+    const span = xpForLevel(4, 0) - floor;
+    const progress = { ...progressAt('push_up', 3, false), xp: floor + span / 2 };
+    expect(nodeLevelProgress(node, progress)).toMatchObject({
+      level: 3,
+      xpIntoLevel: span / 2,
+      xpForLevel: span,
+      fraction: 0.5,
+      capped: false,
+    });
+  });
+
+  it('is full and capped at level 5 until the Trial, with the banked XP', () => {
+    const t5 = xpForLevel(PROFICIENT_LEVEL, 0);
+    const capped = { ...progressAt('push_up', PROFICIENT_LEVEL, false), xp: t5 + 500 };
+    const view = nodeLevelProgress(node, capped);
+    expect(view).toMatchObject({ level: PROFICIENT_LEVEL, fraction: 1, capped: true, banked: 500 });
+    expect(view.xpIntoLevel).toBe(view.xpForLevel);
+    const passed = nodeLevelProgress(node, progressAt('push_up', PROFICIENT_LEVEL, true));
+    expect(passed).toMatchObject({ capped: false, fraction: 0, banked: 0 });
+  });
+
+  it('is full at the max level', () => {
+    expect(nodeLevelProgress(node, progressAt('push_up', MAX_NODE_LEVEL, true))).toEqual({
+      level: MAX_NODE_LEVEL,
+      xpIntoLevel: 0,
+      xpForLevel: 0,
+      fraction: 1,
+      capped: false,
+      banked: 0,
+    });
   });
 });

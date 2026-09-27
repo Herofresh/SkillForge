@@ -143,6 +143,18 @@ level, ember "Straight-arm" tag, caps status; `selected` uses `Frames.selected`)
 `onboarding/OnboardingScaffold` (rune step bar, title with a 48 dp icon, scrolling body, footer with
 Back / Skip / Next pinned above the content). Onboarding screenshots: `docs/screenshots/4.1-*.png`.
 
+**Tree (PLAN 4.2, ADR-033)** in `src/components/tree/`: `NodeTile` frames each node by its tile
+state (`TileFrames` in `theme.ts`): locked = night fill, stone line, lock icon, muted name ·
+available = rune double line ("glow"), rune icon, READY · training = raised with gold-dark line, sword,
+"LV n · Training" XP bar · proficient = gold + gold-dark lines, shield, gold name · mastered = gold-light
++ gold lines, star · legendary (locked) = ink silhouette with a gold-dark flame. `GoalMarker` is a
+gold "GOAL" star tag. `ChainLink` draws the prerequisite chain between tiles (`ChainColors`: gold met,
+steel unmet); `PrereqChip` is a ✓/✗ + name chip for other prerequisites (36 dp, hit slop to 48 dp).
+`TreeLegend` explains it all. The `cross` icon is the ✗. The node detail (`src/components/node/`) is
+built from `DetailSection` panels (caps heading + icon); its header reuses the tile frame.
+Screenshots: `docs/screenshots/4.2-tree.png`, `4.3-node-detail.png`, `4.3-unlock.png`,
+`4.3-trial.png`.
+
 Bar math: `litSegments(fraction, count)` (`src/lib/segments.ts`) lights ≥ 1 segment for any gain and
 never shows full before 100 %. The fraction itself comes from the domain (e.g. XP thresholds in
 `progression.ts` / `character.ts`); components never compute game numbers.
@@ -152,13 +164,13 @@ never shows full before 100 %. The fraction itself comes from the domain (e.g. X
 12×12 character grids in `src/components/ui/icons.ts`, rendered by `PixelIcon` as SVG rects (one
 per horizontal run, `src/lib/pixelGrid.ts`). Roles: `#` main, `+` accent, `*` highlight, `o` shade,
 `.` empty; each icon maps roles to theme colors. The set: `sword`, `shield`, `flame`, `star`,
-`lock`, `chain`, `scroll`, `potion`, `bar`, `heart`, `rune`, `alert`, `check`, and the tab icons
+`lock`, `chain`, `scroll`, `potion`, `bar`, `heart`, `rune`, `alert`, `check`, `cross`, and the tab icons
 `tree`, `bar` (Train), `helmet` (Character), `gear` (Settings).
 
 Suggested meanings: sword = train/attempt · shield = safeguard · flame = streak · star = mastered /
 goal · lock = locked · chain = prerequisite · scroll = log, info, notes · potion = recovery, errors ·
 bar = equipment / strength · heart = health · rune = skill node / magic · alert = warning ·
-check = done.
+check = done / met · cross = not met.
 
 Adding an icon: add a grid (exactly 12 rows of 12 characters, ≤ 4 roles, keep one role for icons
 that must tint), map its roles to `Colors`, and `icons.test.ts` checks it. Keep silhouettes readable

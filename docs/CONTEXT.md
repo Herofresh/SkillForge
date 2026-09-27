@@ -22,7 +22,9 @@ Phase 1 progression pipeline (`content/progressions/`, `scripts/`, `src/domain/t
 `safeguards.ts`, `character.ts`, `recompute.ts`, `generator.ts`, `src/lib/curve.ts`, `median.ts`,
 `time.ts`, `hash.ts`), and the Phase 3 persistence (`src/db/`, `src/store/`, `DataGate`, the stored
 overlay and backups), the Phase 4.0 design system (`docs/DESIGN.md`, `src/components/ui/`,
-`app/styleguide.tsx`) and the 4.1 onboarding (`app/onboarding/`, ADR-031). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
+`app/styleguide.tsx`), the 4.1 onboarding (`app/onboarding/`, ADR-031) and the 4.2/4.3 Tree tab and
+node detail (`app/(tabs)/tree.tsx`, `app/node/`, `src/components/tree/`, `src/components/node/`,
+ADR-033). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
@@ -31,7 +33,12 @@ app/                    expo-router screens (UI only, no game logic)
   index.tsx             redirects "/" to /tree, or to /onboarding until onboarding is completed
   (tabs)/_layout.tsx    bottom tabs: Tree · Train · Character · Settings (pixel icons, ink/gold rules);
                         redirects to /onboarding while `onboardingCompletedAt` is unset
-  (tabs)/tree.tsx       skill tree: column view ⇄ graph view
+  (tabs)/tree.tsx       skill tree (PLAN 4.2, ADR-033): branch tabs + one FlatList column of NodeTiles
+                        with chains/linked chips, Legend sheet; graph view later (5.1)
+  node/[nodeId]/        node detail stack screens (PLAN 4.3, ADR-033)
+    index.tsx           header (state, level, XP), actions (goal, Attempt Trial, Unlock anyway sheet),
+                        prerequisites ✓/✗ + alternatives, trains, standards, cues, history, review
+    trial.tsx           Trial attempt: warnings to acknowledge, steppers, logTrial, outcome + burst
   (tabs)/train.tsx      Train now → plan preview → live session → summary
   (tabs)/character.tsx  level, rank, attributes, history
   (tabs)/settings.tsx   equipment profiles, export/import (today: placeholder + the stored
@@ -74,6 +81,9 @@ src/
                         trialSession (a Trial as a session), testOutWarnings, unlockedByTrial
     format.ts           formatPerformance / formatTrial ("3 sets of 8 reps"), METRIC_UNITS
     branch.ts           nodesInBranch (column order)
+    treeView.ts         Tree/detail view models: TileState, branchColumn, treeTile (chainAbove, links),
+                        prerequisiteViews (alternatives, satisfiedBy), branchSummary, defaultBranch,
+                        nodeHistory, nodeDetail
   data/
     progressionFormat.ts  THE YAML <-> ExerciseNode parser/normalizer (build, tests, overlay)
     validate.ts         graph/content rules: validateNodes, formatIssue
@@ -101,7 +111,7 @@ src/
                         profile CRUD, generateWorkout(profileId, minutes, seed?), saveOverlay,
                         exportBackup, importBackup, shareBackup, importBackupFromFile; onboarding:
                         onboardingCompletedAt, setHeroName, toggleGoal, logTrial, testOutWarnings,
-                        completeOnboarding
+                        completeOnboarding; node detail: selfUnlockWarnings
     backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker)
     bootstrap.ts        startApp(): open, migrate, create store, loadAll (once)
     useAppStore.ts      useAppStore(selector) hook for components below DataGate
@@ -113,6 +123,16 @@ src/
     PlaceholderScreen.tsx  temporary tab body (EmptyState + "COMING SOON") until the real tab UI
     NodeRow.tsx         a node as a list row: icon, name, tier chip, OG level, straight-arm tag, status
     onboarding/OnboardingScaffold.tsx  step bar "STEP n / 5", title, scrolling body, Back/Skip/Next footer
+    BranchTabs.tsx      the 12 branches as horizontal pixel tabs (goal picker, Tree tab)
+    SafeguardWarningList.tsx  WarningBanner per SafeguardWarning + useAcknowledgements (ADR-023)
+    stackHeader.ts      stackHeaderOptions(title) for pushed stack screens
+    trial/              useTrialAttempt (warnings, results, log) + TrialSetsPanel / TrialOutcome,
+                        shared by the onboarding and node-detail Trial screens
+    tree/               NodeTile (+ GoalMarker), ChainLink, PrereqChip, TreeLegend, tileLook (state →
+                        icon, label, tone, description)
+    node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
+                        NodeHistoryList, AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
+    tree.test.tsx       component tests: tiles, chains, prerequisite list, unlock sheet (real store)
     DataGate.tsx        keeps the splash until fonts + startApp are done; error screen on failure
     ui/                 the UI kit; import from '@/components/ui'
       *.tsx             Screen, PixelFrame, PixelText, PixelButton, PixelIcon, SegmentedBar, XPBar,
@@ -136,7 +156,8 @@ babel.config.js         babel-preset-expo + inline-import for .sql (also used by
 metro.config.js         Expo default + `sql` source extension
 jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
 .maestro/               E2E flows: onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
-                        proof), styleguide.yaml (UI kit); subflows/finish-onboarding.yaml (not run
+                        proof), styleguide.yaml (UI kit), tree.yaml (clearState; branch, detail, goal,
+                        Trial, unlock anyway; takes the 4.2/4.3 screenshots); subflows/finish-onboarding.yaml (not run
                         on its own) finishes onboarding from any step
 ```
 
@@ -232,6 +253,9 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Assessment** | Onboarding's optional step: log a Trial for anchor nodes on the goal paths (or any searched node); a passed one is a test-out. Stored as ordinary Trial sessions. |
 | **Anchor node** | One of up to 6 nodes spread evenly (by ogLevel) over the goals and their transitive hard prerequisites (`assessmentAnchors`). |
 | **Legendary node** | An elite node shown as a locked silhouette, there for motivation. |
+| **Tile state** | How the tree shows a node: the engine's node state, or `legendary` for a locked legendary node (`tileState`, ADR-033). |
+| **Chain / linked chip** | In the column view, a hard prerequisite on the node right above is drawn as a pixel chain (gold when met); any other hard prerequisite is a chip under the tile that opens that node. |
+| **Unlock anyway** | The node detail's self-unlock for a locked node: acknowledge `selfUnlockWarnings`, then `selfUnlock` (ADR-023, ADR-033). |
 
 ## Node states
 `locked` → (all hard prerequisites met) → `available` → (first logged set) → `training` →
@@ -440,6 +464,10 @@ build is needed.
   then stayed on the launcher). Give `scrollUntilVisible` a long `timeout` on long pages.
 - Screenshots: `adb exec-out screencap -p > docs/screenshots/<phase>-<screen>.png`, or Maestro
   `takeScreenshot: name` (saved under `%USERPROFILE%\.maestro\tests\<run>\<flow>\takeScreenshot\`).
+- Screenshots from a flow (e.g. `takeScreenshot: 4.2-tree` in `tree.yaml`) must be copied from
+  that folder to `docs/screenshots/`.
+- Decorative views (`ChainLink`) are hidden from accessibility; RNTL queries need
+  `{ includeHiddenElements: true }` to find them.
 - Onboarding (4.1): a fresh app starts in onboarding, so smoke/styleguide wait for
   `Tree|Style Guide|Step . / 5|Continue` and run `subflows/finish-onboarding.yaml`.
   `onboarding.yaml` starts with `clearState` (wipes Expo Go and the app database); after that Expo Go

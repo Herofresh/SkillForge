@@ -240,6 +240,23 @@ export const ICONS = {
     ],
     colors: { '#': Colors.success },
   },
+  cross: {
+    rows: [
+      '............',
+      '.##......##.',
+      '.###....###.',
+      '..###..###..',
+      '...######...',
+      '....####....',
+      '....####....',
+      '...######...',
+      '..###..###..',
+      '.###....###.',
+      '.##......##.',
+      '............',
+    ],
+    colors: { '#': Colors.danger },
+  },
   // Tab bar icons: one role each, so a tint recolors them cleanly.
   tree: {
     rows: [

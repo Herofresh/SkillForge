@@ -5,6 +5,7 @@
  */
 import { DarkTheme, type Theme } from 'expo-router';
 
+import type { TileState } from '@/domain/treeView';
 import type { Attribute, Tier } from '@/domain/types';
 
 /** Raw palette. Contrast pairs are pinned in theme.test.ts and listed in docs/DESIGN.md. */
@@ -23,6 +24,8 @@ export const Palette = {
   goldDark: '#9A7328',
   bronze: '#7A5424',
   rune: '#62E3F0',
+  /** Dim rune: the inner glow line of an available tile (decoration only). */
+  runeShade: '#2A7C86',
   arcane: '#A58BFF',
   ember: '#F2893B',
   blood: '#EC6B73',
@@ -153,6 +156,26 @@ export const Frames = {
 } as const satisfies Record<string, FrameStyle>;
 
 export type FrameVariant = keyof typeof Frames;
+
+/**
+ * Skill-tree tiles by state (PLAN 4.2, docs/DESIGN.md → Tree): locked tiles sink into the night,
+ * available ones glow rune-blue, trained ones are raised, proficient ones gold, mastered ones bright
+ * gold; a legendary teaser is an ink silhouette.
+ */
+export const TileFrames: Readonly<Record<TileState, FrameStyle>> = {
+  legendary: { lines: [Colors.ink, Colors.goldDark], fill: Colors.ink },
+  locked: { lines: [Colors.ink, Colors.border], fill: Colors.background },
+  available: { lines: [Colors.ink, Colors.rune, Palette.runeShade], fill: Colors.surface },
+  training: { lines: [Colors.ink, Colors.goldDark], fill: Colors.surfaceRaised },
+  proficient: { lines: [Colors.ink, Colors.gold, Colors.goldDark], fill: Colors.surface },
+  mastered: { lines: [Colors.ink, Colors.goldLight, Colors.gold], fill: Colors.surfaceRaised },
+};
+
+/** The pixel chain between two tiles: lit gold once the prerequisite is met, dull steel before. */
+export const ChainColors = {
+  met: Colors.gold,
+  unmet: Colors.steelDark,
+} as const;
 
 /** Button looks: frame + text color. */
 export const ButtonStyles = {
