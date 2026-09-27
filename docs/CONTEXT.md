@@ -367,7 +367,19 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 - **Android:**
   - The Android SDK and Android Studio are installed at `%LOCALAPPDATA%\Android\Sdk`, but
     `ANDROID_HOME` and PATH aren't set. Call `adb` and `emulator` by their full paths.
-  - There's an AVD called `Pixel_6_Pro_API_34`.
+  - **SDK versions:** Android Emulator 37.1.11, platform-tools 37.0.1, platform `android-35`, and
+    system image `system-images;android-35;google_apis;x86_64`. The emulator was updated on 2026-09-27
+    (ADR-032).
+  - **Default AVD: `Pixel_8_Pro_API_35`**. It matches the user's phone (Pixel 8 Pro, 1344×2992, Android
+    15) and has 4 GB RAM and `hw.gpu.mode=host`.
+  - The old `Pixel_6_Pro_API_34` AVD still exists as a fallback.
+  - **Command-line tools:** use `cmdline-tools\19.0\bin\sdkmanager.bat` / `avdmanager.bat`.
+    - The newer `cmdline-tools\latest` (23.0) only ships the new `android.exe` CLI. It **crashes on
+      this Windows 10** (exit 0xC0000409), and its `sdkmanager.bat` wrapper fails silently.
+    - `sdkmanager.bat` runs through `cmd`, which splits arguments at `;`. Pass package names with
+      `--package_file=<file>`.
+    - Stop the adb server (`adb kill-server`) before updating platform-tools, because a running
+      `adb.exe` is locked.
   - Build APKs with EAS cloud (5.3).
 - **Maestro** 2.10 is installed at `%USERPROFILE%\.maestro\maestro\bin`. It isn't on PATH yet.
 
@@ -375,17 +387,26 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 Flows live in `.maestro/*.yaml` and run against **Expo Go** (`appId: host.exp.exponent`), so no native
 build is needed.
 
-1. **Start the emulator.** Use software rendering; the GPU mode hangs on this machine (AMD + WHPX):
-   `& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd Pixel_6_Pro_API_34 -no-snapshot -gpu swiftshader_indirect`
-   It takes about 90 s to boot. Wait until `adb shell getprop sys.boot_completed` prints `1`.
+1. **Start the emulator.** Use the Pixel 8 Pro AVD with hardware GPU rendering:
+   `& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd Pixel_8_Pro_API_35 -gpu host -no-boot-anim -no-snapshot-save`
+   - A cold boot takes about 80 s. Wait until `adb shell getprop sys.boot_completed` prints `1`.
+   - Only if `-gpu host` fails, fall back to the old setup:
+     `-avd Pixel_6_Pro_API_34 -gpu swiftshader_indirect`. It is slow, and its first bundle takes about
+     2 min.
 2. **Start Metro:** `npx expo start --android`. The first time, this installs Expo Go on the emulator.
+   - A fresh AVD has no Expo Go, and every flow then fails within seconds.
+   - If Metro is already running on 8081, you can install Expo Go without disturbing it: run a
+     throwaway `npx expo start --android --port 8082` with `CI=1`, wait until
+     `adb shell pm list packages host.exp.exponent` lists it, then stop that server.
 3. **Forward the port:** `adb reverse tcp:8081 tcp:8081` (use the full `adb.exe` path under
    `platform-tools`, since it isn't on PATH)
 4. **Run the flows:** `npm run e2e` (Maestro must be on PATH).
 
 **Gotchas:**
-- The first cold bundle takes about 2 minutes on the emulator. The smoke flow waits up to 3 minutes.
-- If Android shows "System UI isn't responding" while it loads, tap *Wait*.
+- With `-gpu host` the first bundle is much faster than the old swiftshader setup, but it can still
+  take about a minute. The smoke flow waits up to 3 minutes.
+- Only on the swiftshader fallback: if Android shows "System UI isn't responding" while it loads, tap
+  *Wait*.
 - If the first run after a cold boot times out on a white Expo Go loading screen, run
   `adb shell am force-stop host.exp.exponent` and run the flows again (the bundle is cached by then).
 - The flows aren't in CI yet (see the backlog).
