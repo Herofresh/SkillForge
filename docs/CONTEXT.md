@@ -199,7 +199,8 @@ build is needed.
    `& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd Pixel_6_Pro_API_34 -no-snapshot -gpu swiftshader_indirect`
    It takes about 90 s to boot. Wait until `adb shell getprop sys.boot_completed` prints `1`.
 2. **Start Metro:** `npx expo start --android`. The first time, this installs Expo Go on the emulator.
-3. **Forward the port:** `adb reverse tcp:8081 tcp:8081`
+3. **Forward the port:** `adb reverse tcp:8081 tcp:8081` (use the full `adb.exe` path under
+   `platform-tools`, since it isn't on PATH)
 4. **Run the flows:** `npm run e2e` (Maestro must be on PATH).
 
 **Gotchas:**

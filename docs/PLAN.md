@@ -7,8 +7,9 @@
 - Repo: https://github.com/Herofresh/SkillForge (public).
 - Phase 0 is done: docs (PR #1), the Expo SDK 57 scaffold with tooling (PR #2), and GitHub Actions
   CI (PR #3).
-- The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. The
-  Android bundle exports cleanly, but it hasn't been opened on a phone in Expo Go yet.
+- The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. It runs
+  in Expo Go on the `Pixel_6_Pro_API_34` emulator, and a Maestro smoke flow checks that every tab
+  renders (task 0.6, ADR-022).
 - Phase 1 is in review on branch `feat/progression-matrix` ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)): shared types, the YAML
   progression format with build/check/review scripts, the validator, the user overlay and the full
   dataset of **89 nodes** in 12 branches (all `review.status: draft`, 52 with a `verify:` note).
@@ -80,7 +81,10 @@
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
-- Local tooling: Node 24, npm 11, Java 17, jq. There's no Android SDK, so test with Expo Go on the phone.
+- Local tooling: Node 24, npm 11, Java 17, jq, the Android SDK (emulator) and Maestro; paths are in
+  `docs/CONTEXT.md`.
+- E2E (task 0.6, ADR-022): the runbook is in `docs/CONTEXT.md` "E2E tests". Flows in `.maestro/`
+  match visible text, so a UI task that changes copy must update them. They don't run in CI yet.
 
 ---
 
