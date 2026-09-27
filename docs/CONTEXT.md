@@ -464,8 +464,8 @@ build is needed.
   then stayed on the launcher). Give `scrollUntilVisible` a long `timeout` on long pages.
 - Screenshots: `adb exec-out screencap -p > docs/screenshots/<phase>-<screen>.png`, or Maestro
   `takeScreenshot: name` (saved under `%USERPROFILE%\.maestro\tests\<run>\<flow>\takeScreenshot\`).
-- Screenshots from a flow: `takeScreenshot: 4.2-tree` saves under
-  `%USERPROFILE%\.maestro	ests\<run>\<flow name>	akeScreenshot\`; copy them to `docs/screenshots/`.
+- Screenshots from a flow (e.g. `takeScreenshot: 4.2-tree` in `tree.yaml`) must be copied from
+  that folder to `docs/screenshots/`.
 - Decorative views (`ChainLink`) are hidden from accessibility; RNTL queries need
   `{ includeHiddenElements: true }` to find them.
 - Onboarding (4.1): a fresh app starts in onboarding, so smoke/styleguide wait for
