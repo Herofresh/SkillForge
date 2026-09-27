@@ -5,8 +5,8 @@
 
 ## Current state
 - Repo: https://github.com/Herofresh/SkillForge (public).
-- Phase 0 is nearly done: docs (PR #1) and the Expo SDK 57 scaffold with tooling (tasks 0.2, 0.3,
-  0.5). CI (0.4) is written but not pushed yet, see Blockers.
+- Phase 0 is done: docs (PR #1), the Expo SDK 57 scaffold with tooling (PR #2), and GitHub Actions
+  CI (PR #3).
 - The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. The
   Android bundle exports cleanly, but it hasn't been opened on a phone in Expo Go yet.
 - There's no game logic, data or persistence yet.
@@ -17,11 +17,7 @@
 3. Phase 1.5: `src/data/validate.ts` with tests.
 
 ## Blockers
-- **0.4 CI can't be pushed by agents.** GitHub rejects pushes that add `.github/workflows/*` because
-  the `gh`/git OAuth token has scopes `gist, read:org, repo` but not `workflow`. The workflow is
-  committed on the local branch `chore/ci-workflow` and is also quoted in the description of [PR #2](https://github.com/Herofresh/SkillForge/pull/2).
-  **User action:** run `gh auth refresh -h github.com -s workflow` (browser login), then
-  `git push -u origin chore/ci-workflow` and open a PR (or tell an agent to).
+- None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
 - Scaffold (tasks 0.2–0.5): routes are in root `app/` (not the template's `src/app/`, see ADR-014).
@@ -32,8 +28,11 @@
   real file.
 - Add dependencies with `npx expo install <pkg>` so versions match SDK 57. `npx expo-doctor` passed
   21/21 checks at scaffold time.
-- CI (`.github/workflows/ci.yml`, on branch `chore/ci-workflow` until the token blocker is fixed) runs
-  on Node 22: npm ci, typecheck, lint, format:check, test. Until it lands, reviewers verify locally only.
+- CI (`.github/workflows/ci.yml`) runs on Node 24 for every PR and on every push to `main`: npm ci,
+  typecheck, lint, format:check, test. Gotcha: npm on Windows can write a lockfile that leaves out
+  optional peers needed on Linux (here `@emnapi/core`/`@emnapi/runtime` for `@napi-rs/wasm-runtime`),
+  and then CI's `npm ci` fails with "Missing: … from lock file". Fix it by adding the missing entries
+  (see PR #3), not by switching `npm ci` to `npm install`. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
 - The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…014). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
@@ -48,7 +47,7 @@
 - [x] 0.1 Documentation set: AGENT.md, CLAUDE.md, PLAN.md, DECISIONS.md, CONTEXT.md, research doc ([PR #1](https://github.com/Herofresh/SkillForge/pull/1))
 - [x] 0.2 `create-expo-app` (TypeScript, expo-router, tabs: Tree · Train · Character · Settings) ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
 - [x] 0.3 TypeScript strict, ESLint, Prettier, Jest (`jest-expo`); scripts `typecheck`, `lint`, `test` ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
-- [~] 0.4 GitHub Actions CI: typecheck, lint and test on every PR (blocked: needs `workflow` token scope, see Blockers; file ready on local branch `chore/ci-workflow`)
+- [x] 0.4 GitHub Actions CI: typecheck, lint and test on every PR ([PR #3](https://github.com/Herofresh/SkillForge/pull/3))
 - [x] 0.5 Folder layout (`src/domain`, `src/data/skills`, `src/db`, `src/components`, `src/lib`) and README update ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
 
 ### Phase 1: Progression matrix
