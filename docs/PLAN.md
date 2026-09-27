@@ -29,11 +29,16 @@
 - Trial-day exception (2.8, ADR-025, [PR #10](https://github.com/Herofresh/SkillForge/pull/10)): one straight-arm Trial's sets are exempt from the
   ~60 s budget, and the generator now suggests a due straight-arm Trial (e.g. tuck planche 3 × 30 s)
   as the session's only straight-arm work.
+- Persistence core (3.1–3.2, ADR-026/027, [PR #11](https://github.com/Herofresh/SkillForge/pull/11)): expo-sqlite + Drizzle schema with bundled,
+  additive migrations run on app start (`DataGate` loading / error screen), first-run seed of the
+  Home and Park profiles, repositories in `src/db/` and the Zustand store in `src/store/`
+  (`loadAll` → `recompute`, `logSession`, `selfUnlock`, goals, equipment CRUD,
+  `generateWorkout`). Settings shows the stored profile names as the only UI proof.
 
 ## Next up
-1. Phase 3.1–3.2: persistence; `session_sets` rows map 1:1 to `LoggedSet` (ADR-021), self-unlocks
-   go to `user_actions`, goals and equipment profiles feed `generateWorkout` (`WorkoutRequest`).
-2. Phase 3.3–3.4: export/import and the stored overlay.
+1. Phase 3.3–3.4: export/import and the stored overlay (build on `src/db/` repositories and the
+   store; see the handoff notes).
+2. Phase 4 UI on top of the store (`useAppStore`).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -41,6 +46,32 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Persistence core (Phase 3.1–3.2, ADR-026, ADR-027):**
+  - Start-up: `app/_layout.tsx` wraps the Stack in `DataGate` → `startApp()`
+    (`src/store/bootstrap.ts`): open `skillforge.db`, `migrateDatabase` (version guard,
+    Drizzle migrations, `meta.schema_version`, one-time seed), `createAppStore`, `loadAll`.
+    Components read with `useAppStore(selector)`; actions are `useAppStore((s) => s.logSession)`.
+  - Schema changes: edit `src/db/schema.ts`, run `npm run db:generate -- --name <slug>`, commit the
+    new files in `src/db/migrations/` (Prettier-ignored). Never edit or delete a generated
+    migration; destructive changes need a user decision.
+  - Repositories are synchronous (Drizzle's expo driver runs in sync mode): keep
+    `db.transaction` callbacks synchronous.
+  - The store always recomputes on `loadAll` and rewrites `node_progress` after every change; the
+    cache is never read back yet (export or a fast start can use `readNodeProgress`).
+  - `logSession(session, { endedAt, equipmentProfileId })` stores the session exactly as given; the
+    Train flow (4.4) builds the `LoggedSession` (ids via `createId` in `src/lib/id.ts`).
+  - `generateWorkout(profileId, minutes, seed?)` defaults the seed to the number of logged sessions
+    (stable until the next session); pass another seed for "shuffle".
+  - The store takes `nodes` = `ALL_NODES` today. 3.4 must pass the merged tree
+    (`applyOverlay(ALL_NODES, overlay).nodes`) and `loadAll` again after an overlay edit.
+  - 3.3 export/import: read with `listSessions` / `listUserActions` / `listGoals` /
+    `listEquipmentProfiles`; an import must validate at the boundary and then `loadAll`
+    (history in the past needs the full recompute, which `loadAll` does).
+  - Tests: `openTestDatabase(path?)` (`src/db/testing/testDatabase.ts`) gives a migrated database
+    on `node:sqlite` through the real driver; use a temp file to simulate a restart.
+  - The Maestro smoke flow now also asserts "Home" and "Park" on Settings.
+  - Lockfile: `npm install` on Windows dropped `@emnapi/core` / `@emnapi/runtime` again; they were
+    restored from main's lockfile (check after every install).
 - **Workout generator (Phase 2.5, ADR-024):**
   - `generateWorkout(request)` is pure; pass `now` and a `seed` (e.g. the session id hash or a
     counter). Same request + seed = same plan, so the plan preview can be regenerated safely.
@@ -51,8 +82,9 @@
     `isTrial` from the plan. When the user edits the plan, re-check it with
     `sessionSafeguardWarnings(plannedSets(planExercises(plan), now), …)` and show the warnings
     with an acknowledge step (ADR-023); never block.
-  - Default profiles are not stored anywhere yet: Home = floor, wall, bar, parallettes, bands;
-    Park = Home + dip_bars (`docs/CONTEXT.md` → Equipment tags). 3.1/4.1 should seed them.
+  - Default profiles are seeded on first run from `DEFAULT_EQUIPMENT_PROFILES`
+    (`src/domain/equipment.ts`; Home = floor, wall, bar, parallettes, bands; Park = Home +
+    dip_bars). 4.1 onboarding can edit them through the store.
   - Straight-arm Trials of 3 × 30 s are suggested on a **Trial day** (2.8, ADR-025): one
     straight-arm Trial's sets are exempt from the budget (`budgetExemptTrialSets`, used inside
     `straightArmSecondsUsed`), and the generator then drops all other straight-arm candidates.
@@ -129,7 +161,6 @@
   Tooling choices are in ADR-013. Folder layout, alias and commands are in `docs/CONTEXT.md`.
 - UI colors live only in `src/components/theme.ts`. Tab screens use `PlaceholderScreen`; replace them
   in Phase 4.
-- `src/db` only contains `.gitkeep`. Delete it when you add the first real file.
 - Add dependencies with `npx expo install <pkg>` so versions match SDK 57. `npx expo-doctor` passed
   21/21 checks at scaffold time.
 - CI (`.github/workflows/ci.yml`) runs on Node 24 for every PR and on every push to `main`: npm ci,
@@ -137,7 +168,7 @@
   optional peers needed on Linux (here `@emnapi/core`/`@emnapi/runtime` for `@napi-rs/wasm-runtime`),
   and then CI's `npm ci` fails with "Missing: … from lock file". Fix it by adding the missing entries
   (see PR #3), not by switching `npm ci` to `npm install`. Reviewers must wait for it to be green (`gh pr checks <n> --watch`).
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…025). The
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…027). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
@@ -184,8 +215,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 2.8 Trial-day exception (user decision 2026-09-27): one straight-arm Trial's sets don't count against the ~60 s budget; the generator suggests at most one due straight-arm Trial per session and then no other straight-arm work; budget warnings only for extra non-Trial volume (ADR-025) ([PR #10](https://github.com/Herofresh/SkillForge/pull/10))
 
 ### Phase 3: Persistence
-- [ ] 3.1 Drizzle schema and migrations (profile, goals, node_progress, equipment_profiles, sessions, session_sets, user_actions, settings)
-- [ ] 3.2 Repositories plus the Zustand stores that wire the domain to the database
+- [x] 3.1 Drizzle schema and migrations (profile, goals, node_progress, equipment_profiles, sessions, session_sets, user_actions, settings, meta), run on start with a loading/error gate; Home/Park seeded (ADR-026) ([PR #11](https://github.com/Herofresh/SkillForge/pull/11))
+- [x] 3.2 Repositories plus the Zustand store that wires the domain to the database; tests on `node:sqlite` through the real driver (ADR-027) ([PR #11](https://github.com/Herofresh/SkillForge/pull/11))
 - [ ] 3.3 JSON export/import with validation
 - [ ] 3.4 Store the user progression overlay (ADR-016) in SQLite, apply it with `applyOverlay` when loading the tree, and include it in export/import
 

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Colors, Spacing } from '@/components/theme';
@@ -5,10 +6,12 @@ import { Colors, Spacing } from '@/components/theme';
 type Props = {
   title: string;
   subtitle: string;
+  /** Optional content below the card (e.g. a small proof that stored data loads). */
+  children?: ReactNode;
 };
 
 /** Temporary themed screen body used by tabs until their real UI lands (Phase 4). */
-export function PlaceholderScreen({ title, subtitle }: Props) {
+export function PlaceholderScreen({ title, subtitle, children }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -16,6 +19,7 @@ export function PlaceholderScreen({ title, subtitle }: Props) {
         <Text style={styles.subtitle}>{subtitle}</Text>
         <Text style={styles.hint}>Coming soon</Text>
       </View>
+      {children}
     </View>
   );
 }

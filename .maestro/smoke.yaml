@@ -1,4 +1,4 @@
-# Smoke test: the app starts in Expo Go and every tab renders.
+# Smoke test: the app starts in Expo Go, the database migrates and every tab renders.
 #
 # Prerequisites (see docs/CONTEXT.md "E2E tests"):
 #   1. An Android emulator (or phone) is running and visible to `adb devices`.
@@ -24,5 +24,8 @@ name: Smoke - app opens and all tabs render
 - assertVisible: 'COMING SOON'
 - tapOn: 'Settings'
 - assertVisible: 'COMING SOON'
+# The seeded equipment profiles come from SQLite (PLAN 3.1): proof that migrations and loading work.
+- assertVisible: 'Home'
+- assertVisible: 'Park'
 - tapOn: 'Tree'
 - assertVisible: 'Skill Tree'
