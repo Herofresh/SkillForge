@@ -19,7 +19,7 @@
 ## Blockers
 - **0.4 CI can't be pushed by agents.** GitHub rejects pushes that add `.github/workflows/*` because
   the `gh`/git OAuth token has scopes `gist, read:org, repo` but not `workflow`. The workflow is
-  committed on the local branch `chore/ci-workflow` and is also quoted in the scaffold PR description.
+  committed on the local branch `chore/ci-workflow` and is also quoted in the description of [PR #2](https://github.com/Herofresh/SkillForge/pull/2).
   **User action:** run `gh auth refresh -h github.com -s workflow` (browser login), then
   `git push -u origin chore/ci-workflow` and open a PR (or tell an agent to).
 
@@ -46,10 +46,10 @@
 
 ### Phase 0: Docs and scaffold
 - [x] 0.1 Documentation set: AGENT.md, CLAUDE.md, PLAN.md, DECISIONS.md, CONTEXT.md, research doc ([PR #1](https://github.com/Herofresh/SkillForge/pull/1))
-- [x] 0.2 `create-expo-app` (TypeScript, expo-router, tabs: Tree · Train · Character · Settings) (PR_LINK)
-- [x] 0.3 TypeScript strict, ESLint, Prettier, Jest (`jest-expo`); scripts `typecheck`, `lint`, `test` (PR_LINK)
+- [x] 0.2 `create-expo-app` (TypeScript, expo-router, tabs: Tree · Train · Character · Settings) ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
+- [x] 0.3 TypeScript strict, ESLint, Prettier, Jest (`jest-expo`); scripts `typecheck`, `lint`, `test` ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
 - [~] 0.4 GitHub Actions CI: typecheck, lint and test on every PR (blocked: needs `workflow` token scope, see Blockers; file ready on local branch `chore/ci-workflow`)
-- [x] 0.5 Folder layout (`src/domain`, `src/data/skills`, `src/db`, `src/components`, `src/lib`) and README update (PR_LINK)
+- [x] 0.5 Folder layout (`src/domain`, `src/data/skills`, `src/db`, `src/components`, `src/lib`) and README update ([PR #2](https://github.com/Herofresh/SkillForge/pull/2))
 
 ### Phase 1: Progression matrix
 - [ ] 1.1 `src/domain/types.ts`: `ExerciseNode`, `Branch`, `Metric`, `Prerequisite`, `Trial`, `EquipmentTag`
