@@ -1,6 +1,9 @@
 import { Redirect } from 'expo-router';
 
-/** The app opens on the skill tree. */
+import { useAppStore } from '@/store/useAppStore';
+
+/** The app opens on the skill tree, or on the first-run flow until onboarding is done (PLAN 4.1). */
 export default function Index() {
-  return <Redirect href="/tree" />;
+  const onboarded = useAppStore((state) => state.onboardingCompletedAt !== undefined);
+  return <Redirect href={onboarded ? '/tree' : '/onboarding'} />;
 }

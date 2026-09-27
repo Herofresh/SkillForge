@@ -1,8 +1,10 @@
+import { Redirect } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
 import { StyleSheet, View } from 'react-native';
 
 import { Border, Colors, FontFamily, TypeScale } from '@/components/theme';
 import { PixelIcon, type IconName } from '@/components/ui';
+import { useAppStore } from '@/store/useAppStore';
 
 type TabDef = {
   name: string;
@@ -31,6 +33,9 @@ function Rule({ edge }: { edge: 'top' | 'bottom' }) {
 }
 
 export default function TabLayout() {
+  // First run (PLAN 4.1): the tabs wait until onboarding is completed.
+  const onboarded = useAppStore((state) => state.onboardingCompletedAt !== undefined);
+  if (!onboarded) return <Redirect href="/onboarding" />;
   return (
     <Tabs
       screenOptions={{

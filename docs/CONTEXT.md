@@ -21,21 +21,29 @@ Phase 1 progression pipeline (`content/progressions/`, `scripts/`, `src/domain/t
 `tier.ts`, `overlay.ts`, `src/data/*`) and the Phase 2 game engine (`xp.ts`, `progression.ts`,
 `safeguards.ts`, `character.ts`, `recompute.ts`, `generator.ts`, `src/lib/curve.ts`, `median.ts`,
 `time.ts`, `hash.ts`), and the Phase 3 persistence (`src/db/`, `src/store/`, `DataGate`, the stored
-overlay and backups), and the Phase 4.0 design system (`docs/DESIGN.md`, `src/components/ui/`,
-`app/styleguide.tsx`). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
+overlay and backups), the Phase 4.0 design system (`docs/DESIGN.md`, `src/components/ui/`,
+`app/styleguide.tsx`) and the 4.1 onboarding (`app/onboarding/`, ADR-031). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
   _layout.tsx           root Stack + dark navigation theme, loads the fonts, wrapped in DataGate
   styleguide.tsx        DEV ONLY: catalogue of tokens, components and icons (Settings → Style Guide)
-  index.tsx             redirects "/" to /tree
-  (tabs)/_layout.tsx    bottom tabs: Tree · Train · Character · Settings (pixel icons, ink/gold rules)
+  index.tsx             redirects "/" to /tree, or to /onboarding until onboarding is completed
+  (tabs)/_layout.tsx    bottom tabs: Tree · Train · Character · Settings (pixel icons, ink/gold rules);
+                        redirects to /onboarding while `onboardingCompletedAt` is unset
   (tabs)/tree.tsx       skill tree: column view ⇄ graph view
   (tabs)/train.tsx      Train now → plan preview → live session → summary
   (tabs)/character.tsx  level, rank, attributes, history
   (tabs)/settings.tsx   equipment profiles, export/import (today: placeholder + the stored
                         profile names as a DB proof)
-  onboarding/           first-run flow
+  onboarding/           first-run flow (PLAN 4.1, ADR-031), a Stack; every step saves through the store
+    _layout.tsx         Stack; redirects to /tree once onboarding is completed
+    index.tsx           1 welcome + "Name your hero" (setHeroName)
+    equipment.tsx       2 Home/Park tag chips, add/remove profiles (equipment CRUD)
+    goals.tsx           3 branch tabs + node rows, 1–5 goals (toggleGoal)
+    assessment.tsx      4 optional: anchors on the goal paths + search → trial/[nodeId]
+    trial/[nodeId].tsx  Trial form: warnings to acknowledge, a stepper per set, logTrial, result + burst
+    summary.tsx         5 "Your journey begins": hero, level, goals, tested out → completeOnboarding
 content/progressions/   SOURCE OF TRUTH for skill content (ADR-016)
   <branch>.yaml         one file per branch, one block per node (human-editable)
   README.md             field guide for coaches and contributors
@@ -59,7 +67,13 @@ src/
                         slots, double progression (ADR-024)
     recompute.ts        applySession / applyUserAction (reducer steps) + recompute (fold over
                         sessions and user actions), ADR-008/021/023
-    equipment.ts        HOME_EQUIPMENT, PARK_EQUIPMENT, DEFAULT_EQUIPMENT_PROFILES (seeded)
+    equipment.ts        HOME_EQUIPMENT, PARK_EQUIPMENT, DEFAULT_EQUIPMENT_PROFILES (seeded),
+                        EQUIPMENT_TAG_LABELS, toggleEquipmentTag
+    onboarding.ts       normalizeHeroName, toggleGoal (MAX_GOALS 5), ONBOARDING_STEPS, onboardingSummary
+    assessment.ts       goalPathNodes, assessmentAnchors (≤ 6), searchNodes, trial results +
+                        trialSession (a Trial as a session), testOutWarnings, unlockedByTrial
+    format.ts           formatPerformance / formatTrial ("3 sets of 8 reps"), METRIC_UNITS
+    branch.ts           nodesInBranch (column order)
   data/
     progressionFormat.ts  THE YAML <-> ExerciseNode parser/normalizer (build, tests, overlay)
     validate.ts         graph/content rules: validateNodes, formatIssue
@@ -85,7 +99,9 @@ src/
   store/                Zustand store: UI actions -> domain -> repositories
     appStore.ts         createAppStore(deps): loadAll, logSession, selfUnlock, setGoals, equipment
                         profile CRUD, generateWorkout(profileId, minutes, seed?), saveOverlay,
-                        exportBackup, importBackup, shareBackup, importBackupFromFile
+                        exportBackup, importBackup, shareBackup, importBackupFromFile; onboarding:
+                        onboardingCompletedAt, setHeroName, toggleGoal, logTrial, testOutWarnings,
+                        completeOnboarding
     backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker)
     bootstrap.ts        startApp(): open, migrate, create store, loadAll (once)
     useAppStore.ts      useAppStore(selector) hook for components below DataGate
@@ -95,11 +111,13 @@ src/
     theme.test.ts       contrast of every text/fill pair (>= 4.5:1, bars >= 3:1)
     fonts.ts            FONT_ASSETS for useFonts (keys = FontFamily names)
     PlaceholderScreen.tsx  temporary tab body (EmptyState + "COMING SOON") until the real tab UI
+    NodeRow.tsx         a node as a list row: icon, name, tier chip, OG level, straight-arm tag, status
+    onboarding/OnboardingScaffold.tsx  step bar "STEP n / 5", title, scrolling body, Back/Skip/Next footer
     DataGate.tsx        keeps the splash until fonts + startApp are done; error screen on failure
     ui/                 the UI kit; import from '@/components/ui'
       *.tsx             Screen, PixelFrame, PixelText, PixelButton, PixelIcon, SegmentedBar, XPBar,
                         StatBar, LevelBadge, TierChip, WarningBanner, PixelModal, EmptyState,
-                        LevelUpBurst
+                        LevelUpBurst, PixelTextInput, PixelChip, NumberStepper
       icons.ts          12x12 pixel icon grids + role colors (ICONS, ICON_NAMES, iconGrid)
       frameGeometry.ts  notched-corner rects for PixelFrame
       ui.test.tsx       component render tests (RNTL); icons.test.ts, frameGeometry.test.ts
@@ -117,7 +135,9 @@ drizzle.config.ts       drizzle-kit config (sqlite, expo driver, schema -> src/d
 babel.config.js         babel-preset-expo + inline-import for .sql (also used by Jest)
 metro.config.js         Expo default + `sql` source extension
 jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
-.maestro/               E2E flows: smoke.yaml (tabs + DB proof), styleguide.yaml (UI kit)
+.maestro/               E2E flows: onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
+                        proof), styleguide.yaml (UI kit); subflows/finish-onboarding.yaml (not run
+                        on its own) finishes onboarding from any step
 ```
 
 **Path alias:** `@/*` → `src/*` (and `@/assets/*` → `assets/*`). It's defined in `tsconfig.json`
@@ -208,6 +228,9 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Outcome** | How an exercise went vs. its prescription: `success`, `partial` (≥ 50 % of prescribed units), `failed`. |
 | **Streak** | Consecutive sessions at most 72 h apart. Adds a character-XP bonus. |
 | **Engine state** | Derived state rebuilt from history (sessions and user actions): node progress, total XP, streak, last straight-arm session, last applied position (`src/domain/recompute.ts`). |
+| **Onboarding** | The first-run flow (hero name, equipment, goals, optional assessment, summary). Shown until the setting `onboarding_completed_at` exists (ADR-031). |
+| **Assessment** | Onboarding's optional step: log a Trial for anchor nodes on the goal paths (or any searched node); a passed one is a test-out. Stored as ordinary Trial sessions. |
+| **Anchor node** | One of up to 6 nodes spread evenly (by ogLevel) over the goals and their transitive hard prerequisites (`assessmentAnchors`). |
 | **Legendary node** | An elite node shown as a locked silhouette, there for motivation. |
 
 ## Node states
@@ -415,7 +438,13 @@ build is needed.
 - Flows must not assume a fresh app: Expo Go keeps the last screen. They wait for `Tree|Style Guide`,
   go back from the Style Guide and tap Tree first. Don't put `stopApp` before `openLink` (Expo Go
   then stayed on the launcher). Give `scrollUntilVisible` a long `timeout` on long pages.
-- Screenshots: `adb exec-out screencap -p > docs/screenshots/<phase>-<screen>.png`.
+- Screenshots: `adb exec-out screencap -p > docs/screenshots/<phase>-<screen>.png`, or Maestro
+  `takeScreenshot: name` (saved under `%USERPROFILE%\.maestro\tests\<run>\<flow>\takeScreenshot\`).
+- Onboarding (4.1): a fresh app starts in onboarding, so smoke/styleguide wait for
+  `Tree|Style Guide|Step . / 5|Continue` and run `subflows/finish-onboarding.yaml`.
+  `onboarding.yaml` starts with `clearState` (wipes Expo Go and the app database); after that Expo Go
+  shows its intro ("Continue") and then leaves its dev menu open: the flows close it with `back`.
+  Text inside a scrolled-away panel isn't "visible": assert on a `testID` near the action instead.
 
 ## Gotchas
 - Skill node IDs are permanent, because saved progress references them.

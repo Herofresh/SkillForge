@@ -46,11 +46,18 @@
   `@expo-google-fonts` behind the splash, pixel icons from code grids, and a dev-only Style Guide
   (Settings → Style Guide). The four tabs are restyled placeholders. Screenshots in
   `docs/screenshots/4.0-*.png`.
+- Onboarding (4.1, ADR-031, [PR #15](https://github.com/Herofresh/SkillForge/pull/15)): a fresh app opens a five-step first-run flow
+  (`app/onboarding/`): hero name, equipment (Home/Park tags, add/remove), 1–5 goals by branch, an
+  optional assessment (anchors on the goal paths + search → log a Trial → test-out, with the
+  ADR-023 warnings acknowledged first), and "Your journey begins". Completion is the
+  `onboarding_completed_at` setting; until then the tabs redirect to onboarding. Maestro
+  `onboarding.yaml` covers it from a fresh install; smoke/styleguide finish it first. Screenshots in
+  `docs/screenshots/4.1-*.png` (Pixel 8 Pro).
 
 ## Next up
 1. Phase 4 UI on top of the store (`useAppStore`) built from the design system (4.0,
-   `docs/DESIGN.md`), starting with 4.1 onboarding and 4.2 the tree column view (see the handoff
-   notes).
+   `docs/DESIGN.md`): next 4.2 the tree column view (reuse `NodeRow` and `nodesInBranch`), then 4.3
+   node detail (see the handoff notes).
 2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -58,6 +65,30 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Onboarding (task 4.1, ADR-031):**
+  - Gate: `state.onboardingCompletedAt` (setting `onboarding_completed_at`). `app/(tabs)/_layout.tsx`
+    and `app/index.tsx` redirect to `/onboarding` while it is unset; `app/onboarding/_layout.tsx`
+    redirects to `/tree` once `completeOnboarding()` ran. Settings (4.6) could add "replay
+    onboarding" (delete the setting + `loadAll`); not built.
+  - Reuse for 4.3/4.4: `logTrial(nodeId, results)` (any node, returns `SessionResult`),
+    `testOutWarnings(nodeId)` (pre-attempt warnings; the node detail's "attempt Trial / test out"
+    should use it the same way: `WarningBanner` per warning, action enabled once all are
+    acknowledged), `trialSession`, `defaultTrialResults`, `stepTrialResult`, `formatTrial`,
+    `formatPerformance`, `unlockedByTrial`, and the kit's `NumberStepper`.
+  - Show OG levels with `formatOgLevel` / `spokenOgLevel` (`format.ts`): level 0 reads
+    "Foundation" (below the OG2 chart), never "OG 0". The `rune` icon is a gem-rune (diamond) so
+    it no longer reads as the letter K in node rows.
+  - `characterLevelProgress(totalXp)` now exists (`character.ts`) for the Character tab XP bar; a
+    node-level equivalent still doesn't.
+  - The trial screen freezes its warnings on mount (`useState` initializer) so they don't change
+    under the user after logging. The eccentric/load steppers change the per-set value only; the
+    lowerings/reps stay at the Trial's `reps`.
+  - `NodeRow` uses the `rune` icon for ordinary nodes, `star` for goals, `flame` for legendary
+    ones in the goal picker; 4.2 may want state icons (lock for locked).
+  - Expo Go's floating dev-tools bubble overlaps the top-right of every screen in the screenshots;
+    it isn't part of the app.
+  - Maestro: `onboarding.yaml` uses `clearState` (wipes Expo Go's data, then Expo Go's intro and dev
+    menu have to be dismissed; see CONTEXT.md E2E gotchas). The flows now take ~4.5 min in total.
 - **Design system (task 4.0, ADR-030):**
   - Read `docs/DESIGN.md` before any screen. Build from `@/components/ui` (`Screen`,
     `PixelFrame`, `PixelText`, `PixelButton`, …); never hard-code colors, font names or sizes.
@@ -285,7 +316,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 
 ### Phase 4: Core UI
 - [x] 4.0 Design system (pixel-art × dark fantasy, ADR-030): `docs/DESIGN.md`, tokens in `theme.ts` (contrast-tested), OFL pixel/body fonts with the splash kept until fonts + DB are ready, UI kit in `src/components/ui/` (frames, text, buttons, grid-defined pixel icons, XP/stat bars, level badge, tier chip, warning banner, modal, empty state, level-up burst), restyled tab bar and placeholder tabs, dev-only Style Guide (`/styleguide`), component tests (RNTL), Maestro `styleguide.yaml` ([PR #14](https://github.com/Herofresh/SkillForge/pull/14))
-- [ ] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown
+- [x] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown (ADR-031) ([PR #15](https://github.com/Herofresh/SkillForge/pull/15))
 - [ ] 4.2 Tree tab, column view
 - [ ] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history
 - [ ] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove) → live logging → summary with XP, level-ups and unlocks

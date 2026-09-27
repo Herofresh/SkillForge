@@ -1,0 +1,40 @@
+# Subflow (not run on its own): if the app shows the first-run flow (PLAN 4.1), finish it with the
+# least input (a hero name, keep the equipment, goals "Later", no assessment) so the other flows can
+# test the tabs. Works from any onboarding step, since Expo Go keeps the last screen.
+appId: host.exp.exponent
+---
+- repeat:
+    times: 10 # safety net; onboarding has 5 steps
+    while:
+      notVisible: 'Tree'
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: 'trial-form'
+          commands:
+            - back
+      - runFlow:
+          when:
+            visible:
+              id: 'onboarding-hero'
+          commands:
+            - tapOn:
+                id: 'hero-name-input'
+            - eraseText: 30
+            - inputText: 'Smoke'
+            - hideKeyboard
+      - runFlow:
+          when:
+            visible:
+              id: 'onboarding-goals'
+          commands:
+            - tapOn:
+                id: 'onboarding-skip'
+      - runFlow:
+          when:
+            visible:
+              id: 'onboarding-next'
+          commands:
+            - tapOn:
+                id: 'onboarding-next'

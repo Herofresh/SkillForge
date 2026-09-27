@@ -4,6 +4,8 @@ import {
   attributePeakOgLevels,
   CHARACTER_LEVEL_THRESHOLDS,
   characterLevel,
+  characterLevelProgress,
+  CHARACTER_MAX_LEVEL,
   computeAttributes,
   computeCharacter,
   hasPushPullImbalance,
@@ -202,5 +204,32 @@ describe('computeCharacter', () => {
     expect(character.peakOgLevels.pull).toBe(2);
     expect(character.pushPullWarning).toBe(true);
     expect(character.level).toBe(characterLevel(500));
+  });
+});
+
+describe('characterLevelProgress', () => {
+  it('starts at level 1 with an empty bar', () => {
+    expect(characterLevelProgress(0)).toEqual({
+      level: 1,
+      xpIntoLevel: 0,
+      xpForLevel: 100,
+      fraction: 0,
+    });
+  });
+
+  it('measures the progress inside the current level', () => {
+    const floor = CHARACTER_LEVEL_THRESHOLDS[1];
+    const step = CHARACTER_LEVEL_THRESHOLDS[2] - floor;
+    const progress = characterLevelProgress(floor + step / 2);
+    expect(progress.level).toBe(2);
+    expect(progress.fraction).toBeCloseTo(0.5);
+  });
+
+  it('is full at the max level', () => {
+    const top = CHARACTER_LEVEL_THRESHOLDS[CHARACTER_MAX_LEVEL - 1];
+    expect(characterLevelProgress(top + 1)).toMatchObject({
+      level: CHARACTER_MAX_LEVEL,
+      fraction: 1,
+    });
   });
 });

@@ -21,3 +21,24 @@ export const DEFAULT_EQUIPMENT_PROFILES: readonly EquipmentProfile[] = [
   { id: 'home', name: 'Home', tags: [...HOME_EQUIPMENT] },
   { id: 'park', name: 'Park', tags: [...PARK_EQUIPMENT] },
 ];
+
+/** Display names of the equipment tags (onboarding, settings). */
+export const EQUIPMENT_TAG_LABELS: Readonly<Record<EquipmentTag, string>> = {
+  floor: 'Floor',
+  wall: 'Wall',
+  bar: 'Pull-up bar',
+  dip_bars: 'Dip bars',
+  parallettes: 'Parallettes',
+  bands: 'Bands',
+  rings: 'Rings',
+  pole: 'Pole',
+  box: 'Box or bench',
+};
+
+/** `tags` with `tag` added (at the end) or removed. */
+export function toggleEquipmentTag(
+  tags: readonly EquipmentTag[],
+  tag: EquipmentTag,
+): EquipmentTag[] {
+  return tags.includes(tag) ? tags.filter((entry) => entry !== tag) : [...tags, tag];
+}
