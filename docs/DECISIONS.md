@@ -738,3 +738,22 @@ Template:
   components `PixelTextInput`, `PixelChip`, `NumberStepper` plus `NodeRow` and
   `OnboardingScaffold`. Settings (4.6) should offer "Replay onboarding" by clearing the setting if
   the user asks for it (not built). Maestro flows finish onboarding first (`subflows/`).
+
+## ADR-032: Pixel 8 Pro API 35 emulator with host GPU as the default E2E device
+- Date: 2026-09-27 · Status: Accepted
+- Numbering: ADR-031 is reserved by the onboarding PR #15, which was open when this was written.
+- Context:
+  - E2E runs were very slow. Emulator 32.1.15 (2023) hung in GPU mode on this AMD + WHPX machine, so
+    ADR-022's runbook used `swiftshader_indirect` software rendering. That meant about a 2-minute first
+    bundle and "System UI isn't responding" dialogs, which made every Phase 4 PR slow to verify.
+  - The user's phone is a Pixel 8 Pro and they asked for a newer, better emulator.
+- Decision:
+  - Update to Android Emulator 37.1.11, platform-tools 37.0.1 and the API 35 Google APIs x86_64 image.
+  - Create the AVD `Pixel_8_Pro_API_35` (device profile `pixel_8_pro`, 1344×2992, 4 GB RAM,
+    `hw.gpu.mode=host`) and make it the default for E2E runs and screenshots.
+  - Keep `Pixel_6_Pro_API_34` + swiftshader only as a fallback.
+  - Manage the SDK with cmdline-tools 19.0, because the 23.0 `android.exe` CLI crashes on Windows 10.
+- Consequences:
+  - Cold boot in about 80 s with hardware rendering and no ANR dialogs.
+  - Screenshots now match the user's real device size.
+  - A fresh AVD needs Expo Go installed once (see the CONTEXT.md runbook).
