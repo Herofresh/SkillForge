@@ -176,6 +176,7 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 | `npm run progressions:check` | Validate `content/progressions/*.yaml` and report stale generated files. Writes nothing. |
 | `npm run progressions:build` | Validate, then write `src/data/skills/progressions.generated.ts` and `docs/review/progression-matrix.md`. Run after every YAML edit. |
 | `npm run progressions:review` | Validate, then write only the coach review sheet. |
+| `npm run e2e` | Maestro E2E flows in `.maestro/` against Expo Go on a running emulator (see "E2E tests") |
 | `npx expo-doctor` | Checks dependency versions and config against the SDK |
 | `npx expo install <pkg>` | Add a dependency at the SDK-compatible version (prefer it over `npm install`) |
 
@@ -183,7 +184,31 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 - **OS:** Windows 10 with PowerShell 5.1 (no `&&`; use `; if ($?) {}`) and Git Bash.
 - **GitHub CLI:** `C:\Program Files\GitHub CLI\gh.exe`, logged in as `Herofresh`.
 - **Tooling:** Node 24, npm 11, Java 17, jq 1.8.
-- **Android:** no Android SDK. Test with Expo Go and build APKs with EAS cloud.
+- **Android:**
+  - The Android SDK and Android Studio are installed at `%LOCALAPPDATA%\Android\Sdk`, but
+    `ANDROID_HOME` and PATH aren't set. Call `adb` and `emulator` by their full paths.
+  - There's an AVD called `Pixel_6_Pro_API_34`.
+  - Build APKs with EAS cloud (5.3).
+- **Maestro** 2.10 is installed at `%USERPROFILE%\.maestro\maestro\bin`. It isn't on PATH yet.
+
+## E2E tests (Maestro, ADR-022)
+Flows live in `.maestro/*.yaml` and run against **Expo Go** (`appId: host.exp.exponent`), so no native
+build is needed.
+
+1. **Start the emulator.** Use software rendering; the GPU mode hangs on this machine (AMD + WHPX):
+   `& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd Pixel_6_Pro_API_34 -no-snapshot -gpu swiftshader_indirect`
+   It takes about 90 s to boot. Wait until `adb shell getprop sys.boot_completed` prints `1`.
+2. **Start Metro:** `npx expo start --android`. The first time, this installs Expo Go on the emulator.
+3. **Forward the port:** `adb reverse tcp:8081 tcp:8081` (use the full `adb.exe` path under
+   `platform-tools`, since it isn't on PATH)
+4. **Run the flows:** `npm run e2e` (Maestro must be on PATH).
+
+**Gotchas:**
+- The first cold bundle takes about 2 minutes on the emulator. The smoke flow waits up to 3 minutes.
+- If Android shows "System UI isn't responding" while it loads, tap *Wait*.
+- The flows aren't in CI yet (see the backlog).
+- Match on visible text. When the real UI replaces the placeholders, update or extend the flows in
+  the same PR.
 
 ## Gotchas
 - Skill node IDs are permanent, because saved progress references them.
