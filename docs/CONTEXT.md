@@ -13,7 +13,8 @@ Jest 29 with `jest-expo`, ESLint 9 (flat config) with `eslint-config-expo`, and 
 What exists today: the root and tabs layouts, four placeholder tab screens,
 `src/components/theme.ts`, `src/components/PlaceholderScreen.tsx`, `src/lib/clamp.ts`, and the
 Phase 1 progression pipeline (`content/progressions/`, `scripts/`, `src/domain/types.ts`,
-`tier.ts`, `overlay.ts`, `src/data/*`). Files marked *(planned)* don't exist yet. Empty folders hold a
+`tier.ts`, `overlay.ts`, `src/data/*`) and the Phase 2 game engine (`xp.ts`, `progression.ts`,
+`safeguards.ts`, `character.ts`, `recompute.ts`, `src/lib/curve.ts`, `median.ts`, `time.ts`). Files marked *(planned)* don't exist yet. Empty folders hold a
 `.gitkeep`.
 
 ```
@@ -34,14 +35,15 @@ scripts/
   progressionSources.ts Node-only file access shared by the CLI and the dataset test
 src/
   domain/               PURE TS game rules. No React/Expo/DB imports (ADR-009)
-    types.ts            single source of shared types (nodes, issues, overlay)
+    types.ts            single source of shared types (nodes, issues, overlay, logged sets, progress)
     tier.ts             tierForOgLevel (tier is derived, never stored)
     overlay.ts          user overlay: applyOverlay, exportOverlay, importOverlay
-    xp.ts               XP calculation (planned)
-    progression.ts      levels, Trials, node states, unlocks (planned)
-    character.ts        character level, attributes, rank (planned)
+    xp.ts               units, difficulty/outcome multipliers, exercise and session XP, streak
+    progression.ts      node XP curve, level-5 cap, Trials, test-out, node states, unlocks
+    safeguards.ts       ADR-010 tendon rules: straight-arm Trial clock, 60 s budget, 48 h rest
+    character.ts        character level, attributes (ATTRIBUTE_BRANCHES), rank, balance warning
     generator.ts        on-demand workout generator (planned)
-    recompute.ts        rebuild progress from session_sets, ADR-008 (planned)
+    recompute.ts        applySession (one reducer step) + recompute (fold over history), ADR-008/021
   data/
     progressionFormat.ts  THE YAML <-> ExerciseNode parser/normalizer (build, tests, overlay)
     validate.ts         graph/content rules: validateNodes, formatIssue
@@ -57,7 +59,8 @@ src/
   components/           reusable UI components
     theme.ts            UI colors, spacing, navigation theme (single source of UI colors)
     PlaceholderScreen.tsx  temporary tab body until Phase 4
-  lib/                  generic helpers (dates, ids, math), e.g. clamp.ts
+  lib/                  generic helpers: clamp.ts, curve.ts (geometric level curves), median.ts,
+                        time.ts (MS_PER_HOUR/DAY/WEEK)
 assets/                 app icon, adaptive icon, splash, favicon
 docs/                   PLAN, DECISIONS, CONTEXT, research
   research/node-manifest.md  planned MVP nodes (ids, order, OG level, prerequisites)
@@ -89,6 +92,13 @@ The 88 manifest nodes plus `straight_bar_dip` (Home dip, ADR-017). Content check
 **Data flow:** UI → store action → domain function (pure) → repository persists `session_sets` → caches
 (`node_progress`) updated → UI re-renders.
 
+**Engine flow:** a finished `LoggedSession` goes through `applySession(state, session, tree)` →
+new `EngineState` (progress per node, total XP, streak, last straight-arm session) + a
+`SessionResult` (exercise outcomes and XP, bonuses, level-ups, Trials, unlocks) for the summary
+screen. `computeCharacter(tree, state.progress, state.totalXp)` gives the character sheet. After a
+formula change, an import or an overlay edit, `recompute(tree, allSessions)` rebuilds the state with
+the same step. `tree` is `applyOverlay(ALL_NODES, overlay).nodes`.
+
 ## Glossary
 
 | Term | Meaning |
@@ -112,29 +122,46 @@ The 88 manifest nodes plus `straight_bar_dip` (Home dip, ADR-017). Content check
 | **Frontier** | The available or training nodes on the paths toward the user's goals. This is what the generator picks from. |
 | **Equipment profile** | A named set of equipment tags, e.g. Home or Park, chosen at session start (ADR-005). |
 | **Straight-arm budget** | About 60 s total of straight-arm holds per session (ADR-010). |
+| **Test-out** | Passing a Trial on an available node without training it first. Sets the node to level 5. Not possible on straight-arm nodes (ADR-020). |
+| **Outcome** | How an exercise went vs. its prescription: `success`, `partial` (≥ 50 % of prescribed units), `failed`. |
+| **Streak** | Consecutive sessions at most 72 h apart. Adds a character-XP bonus. |
+| **Engine state** | Derived state rebuilt from history: node progress, total XP, streak, last straight-arm session (`src/domain/recompute.ts`). |
 | **Legendary node** | An elite node shown as a locked silhouette, there for motivation. |
 
 ## Node states
 `locked` → (all hard prerequisites met) → `available` → (first logged set) → `training` →
-(level 5 and Trial passed) → `proficient` → (level 10) → `mastered`.
+(level 5 and Trial passed) → `proficient` → (level 10) → `mastered`. A passed Trial (including a
+test-out from `available`) goes straight to `proficient`. A hard prerequisite with `minLevel` ≥ 5
+needs that node proficient; a node's `alternatives` also satisfy prerequisites on it (ADR-019).
 
-## Formulas *(planned, Phase 2; tune the constants in the owning module only)*
+## Formulas *(Phase 2, ADR-018…020; tune the constants in the owning module only)*
 
-- **Set units:**
-  - `reps` → reps
-  - `hold_s` → seconds / 2
-  - `eccentric_s` → seconds / 3
-- **XP per set** = `units × difficultyMult(ogLevel) × outcomeMult`.
-  - `difficultyMult` grows with ogLevel.
-  - `outcomeMult`: success 1.0, partial 0.6, failed 0.3.
-- **Session XP** = sum of set XP + a completion bonus + a streak bonus.
-- **Node level:** levels 1–10 on a rising XP curve. There's a hard cap at level 5 until the Trial is
-  passed, and XP beyond the cap is banked.
-- **Character level** comes from total XP.
-- **Attributes** (Push, Pull, Core, Legs, Balance, Mobility) come from the highest proficient ogLevel in
-  each branch group.
-- **Rank** comes from the median branch ogLevel.
-- **Balance warning:** fires when push and pull attributes differ by more than 2.
+- **Set units** (`xp.ts`): `reps` → reps · `hold_s` → s / 2 · `eccentric_s` → lowerings × s / 3 ·
+  `load_xbw` → reps × load (1 rep at 1×BW = 1 unit). A missing rep count is 1.
+- **difficultyMult(ogLevel)** = 1 + 0.25 × ogLevel.
+- **Outcome** of an exercise (all sets of one node in a session): `success` if every set met its
+  prescription; `partial` if achieved units (each set capped at its prescription) ≥ 50 % of
+  prescribed units; else `failed`. `outcomeMult` = 1.0 / 0.6 / 0.3.
+- **Exercise XP** = round(units done × difficultyMult × outcomeMult). This is also the node XP.
+- **Session XP** = Σ exercise XP + completion bonus (10 % if no set skipped) + streak bonus
+  (5 % per consecutive session after the first, max 25 %; sessions ≤ 72 h apart). Bonuses are
+  character XP only.
+- **Node level** (`progression.ts`): cumulative XP per level 0, 20, 47, 83, 133, 199, 289, 410, 573, 794
+  (20 XP, ×1.35 per step), times the node's difficultyMult. Capped at level 5 until the Trial is
+  passed; XP above the level-5 threshold is banked and counts once the Trial passes. A passed Trial
+  lifts XP to at least the level-5 threshold (test-out).
+- **Trial passed** = at least `trial.sets` Trial sets in one session, each ≥ `trial.target` (and ≥
+  `trial.reps` lowerings/reps where used), on an unlocked node that clears the safeguards.
+- **Safeguards** (`safeguards.ts`): straight-arm Trial opens 6 weeks after the node's first logged
+  set; ≤ 60 s straight-arm hold time per session (non-hold sets 2 s per unit); ≥ 48 h between
+  straight-arm sessions.
+- **Character level** (`character.ts`): 100 XP to level 2, ×1.1 per level, max 99.
+- **Attributes:** highest proficient ogLevel per group. Push = h_push, v_push, planche · Pull = v_pull,
+  h_pull, front_lever, back_lever · Core = core · Legs = legs · Balance = handstand, dynamic ·
+  Mobility = flexibility.
+- **Rank** from the median over the 12 branches of each branch's highest proficient ogLevel:
+  Novice < 2 ≤ Apprentice < 6 ≤ Adept < 9 ≤ Master < 13 ≤ Legend.
+- **Balance warning:** |Push − Pull| > 2.
 
 ## Generator summary *(planned, Phase 2.5)*
 
@@ -155,7 +182,8 @@ The generator is deterministic for the same inputs.
   - `node_progress(nodeId, xp, level, state, proficientAt, trialPassedAt)`, a cache
   - `equipment_profiles(id, name, tags[])`
   - `sessions(id, startedAt, endedAt, profileId, outcome, xpEarned)`
-  - `session_sets(sessionId, nodeId, setIndex, prescribed, actual, metric, isTrial)`, the source of truth
+  - `session_sets(sessionId, nodeId, setIndex, prescribed, actual, metric, isTrial, timestamp)`, the source
+    of truth; `prescribed`/`actual` are `SetPerformance { value, reps? }` (`LoggedSet` in `types.ts`)
   - `settings`
 
 ## Equipment tags
