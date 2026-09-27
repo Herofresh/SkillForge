@@ -41,9 +41,16 @@
   copy of the current data, and a one-transaction replace. Store actions are ready; the buttons come
   in 4.6. **Phase 3 is complete.**
 
+- Design system (4.0, ADR-030): `docs/DESIGN.md` is the visual language (pixel-art × dark
+  fantasy); tokens in `src/components/theme.ts`, the UI kit in `src/components/ui/`, fonts via
+  `@expo-google-fonts` behind the splash, pixel icons from code grids, and a dev-only Style Guide
+  (Settings → Style Guide). The four tabs are restyled placeholders. Screenshots in
+  `docs/screenshots/4.0-*.png`.
+
 ## Next up
-1. Phase 4 UI on top of the store (`useAppStore`), starting with 4.1 onboarding and 4.2 the tree
-   column view (see the handoff notes).
+1. Phase 4 UI on top of the store (`useAppStore`) built from the design system (4.0,
+   `docs/DESIGN.md`), starting with 4.1 onboarding and 4.2 the tree column view (see the handoff
+   notes).
 2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -51,6 +58,31 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Design system (task 4.0, ADR-030):**
+  - Read `docs/DESIGN.md` before any screen. Build from `@/components/ui` (`Screen`,
+    `PixelFrame`, `PixelText`, `PixelButton`, …); never hard-code colors, font names or sizes.
+    A new color goes into `theme.ts` and, if it is text or a fill, into `theme.test.ts`.
+  - Bars take a `fraction`; compute it from the domain thresholds (`xpForLevel`,
+    `CHARACTER_LEVEL_THRESHOLDS`) in the store or a pure domain helper, not in the component. A
+    `nodeLevelProgress` / `characterLevelProgress` helper doesn't exist yet: add it to
+    `src/domain/` with tests when 4.3/4.5 need it.
+  - `WarningBanner` is controlled: keep the acknowledged set in screen state and pass
+    `SafeguardWarning.message` / `severity`. Acknowledging only enables the action; never block.
+  - Icons: add 12×12 grids to `src/components/ui/icons.ts` (icons.test.ts checks them); use sizes
+    24/48. Icons on gold or blood fills should be tinted (PixelButton does this for its variants).
+  - `LevelUpBurst` replays when `playKey` changes. Its particles start a little above the title's
+    centre; 5.2 (animations and polish) can tune it.
+  - Component tests: `@testing-library/react-native` 14 is async (`await render(...)`,
+    `userEvent.setup()`); `jest.setup.ts` mocks Reanimated/Worklets. Mock
+    `react-native-safe-area-context` in tests that render `PixelModal`.
+  - Maestro: the flows no longer assume a fresh start (they wait for `Tree|Style Guide`, leave the
+    Style Guide with back, then tap Tree). `stopApp` before `openLink` left Expo Go on the Android
+    launcher, so don't add it. Long pages need `scrollUntilVisible` with `timeout: 90000` on the
+    software-rendered emulator. Prefer `testID` selectors.
+  - Typed routes: after adding a route, start Metro once (`npx expo start`) to regenerate
+    `.expo/types`, or `npm run typecheck` rejects the new href locally (CI has no generated types).
+  - The Style Guide header is taller than the tab headers (status bar inset counted twice by the root
+    Stack in Expo Go); harmless for a dev screen, check again with real stack screens (4.3).
 - **Lockfile guard (task 0.7, ADR-029):** root cause of the recurring `@emnapi/*` drops was npm
   version skew (local 11.6.2 writes the lockfile without them; CI's 11.19.0 requires them), not the
   OS. `npm run lockfile:fix` re-resolves with the pinned npm through `npx`, so it works whatever npm
@@ -251,6 +283,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 3.4 Store the user progression overlay (ADR-016) in SQLite, apply it with `applyOverlay` when loading the tree, and include it in export/import (ADR-028) ([PR #12](https://github.com/Herofresh/SkillForge/pull/12))
 
 ### Phase 4: Core UI
+- [x] 4.0 Design system (pixel-art × dark fantasy, ADR-030): `docs/DESIGN.md`, tokens in `theme.ts` (contrast-tested), OFL pixel/body fonts with the splash kept until fonts + DB are ready, UI kit in `src/components/ui/` (frames, text, buttons, grid-defined pixel icons, XP/stat bars, level badge, tier chip, warning banner, modal, empty state, level-up burst), restyled tab bar and placeholder tabs, dev-only Style Guide (`/styleguide`), component tests (RNTL), Maestro `styleguide.yaml`
 - [ ] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown
 - [ ] 4.2 Tree tab, column view
 - [ ] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history

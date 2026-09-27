@@ -9,6 +9,9 @@ Expo SDK 57 (`expo` 57.0.x), React Native 0.86, React 19.2, expo-router 57, Type
 Jest 29 with `jest-expo`, ESLint 9 (flat config) with `eslint-config-expo`, and Prettier 3.
 Persistence: `expo-sqlite` 57, `drizzle-orm` 0.45 (expo-sqlite driver), `drizzle-kit` 0.31,
 `zustand` 5 (ADR-026). Backups: `expo-file-system`, `expo-sharing`, `expo-document-picker` 57 (ADR-028).
+UI (ADR-030): `react-native-svg` 15, `@expo-google-fonts/pixelify-sans`, `silkscreen`,
+`alegreya-sans`, `react-native-reanimated` 4; component tests with `@testing-library/react-native`
+14 + `test-renderer`.
 
 ## Architecture map
 
@@ -18,13 +21,15 @@ Phase 1 progression pipeline (`content/progressions/`, `scripts/`, `src/domain/t
 `tier.ts`, `overlay.ts`, `src/data/*`) and the Phase 2 game engine (`xp.ts`, `progression.ts`,
 `safeguards.ts`, `character.ts`, `recompute.ts`, `generator.ts`, `src/lib/curve.ts`, `median.ts`,
 `time.ts`, `hash.ts`), and the Phase 3 persistence (`src/db/`, `src/store/`, `DataGate`, the stored
-overlay and backups). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
+overlay and backups), and the Phase 4.0 design system (`docs/DESIGN.md`, `src/components/ui/`,
+`app/styleguide.tsx`). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
-  _layout.tsx           root Stack + dark navigation theme, wrapped in DataGate
+  _layout.tsx           root Stack + dark navigation theme, loads the fonts, wrapped in DataGate
+  styleguide.tsx        DEV ONLY: catalogue of tokens, components and icons (Settings → Style Guide)
   index.tsx             redirects "/" to /tree
-  (tabs)/_layout.tsx    bottom tabs: Tree · Train · Character · Settings
+  (tabs)/_layout.tsx    bottom tabs: Tree · Train · Character · Settings (pixel icons, ink/gold rules)
   (tabs)/tree.tsx       skill tree: column view ⇄ graph view
   (tabs)/train.tsx      Train now → plan preview → live session → summary
   (tabs)/character.tsx  level, rank, attributes, history
@@ -84,21 +89,35 @@ src/
     backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker)
     bootstrap.ts        startApp(): open, migrate, create store, loadAll (once)
     useAppStore.ts      useAppStore(selector) hook for components below DataGate
-  components/           reusable UI components
-    theme.ts            UI colors, spacing, navigation theme (single source of UI colors)
-    PlaceholderScreen.tsx  temporary tab body until Phase 4
-    DataGate.tsx        runs startApp; loading state, error screen on failure, then children
+  components/           reusable UI components (visual language: docs/DESIGN.md, ADR-030)
+    theme.ts            THE design tokens: Palette, Colors, TierColors, AttributeColors, FontFamily,
+                        TypeScale, PIXEL, Spacing, Border, Frames, ButtonStyles, Motion, nav theme
+    theme.test.ts       contrast of every text/fill pair (>= 4.5:1, bars >= 3:1)
+    fonts.ts            FONT_ASSETS for useFonts (keys = FontFamily names)
+    PlaceholderScreen.tsx  temporary tab body (EmptyState + "COMING SOON") until the real tab UI
+    DataGate.tsx        keeps the splash until fonts + startApp are done; error screen on failure
+    ui/                 the UI kit; import from '@/components/ui'
+      *.tsx             Screen, PixelFrame, PixelText, PixelButton, PixelIcon, SegmentedBar, XPBar,
+                        StatBar, LevelBadge, TierChip, WarningBanner, PixelModal, EmptyState,
+                        LevelUpBurst
+      icons.ts          12x12 pixel icon grids + role colors (ICONS, ICON_NAMES, iconGrid)
+      frameGeometry.ts  notched-corner rects for PixelFrame
+      ui.test.tsx       component render tests (RNTL); icons.test.ts, frameGeometry.test.ts
   lib/                  generic helpers: clamp.ts, curve.ts (geometric level curves), median.ts,
                         time.ts (MS_PER_HOUR/DAY/WEEK), hash.ts (FNV-1a, seeded tie-breaks),
-                        id.ts (createId for local records)
+                        id.ts (createId for local records), contrast.ts (WCAG ratio),
+                        pixelGrid.ts (icon grid → runs), segments.ts (litSegments for bars)
 assets/                 app icon, adaptive icon, splash, favicon
-docs/                   PLAN, DECISIONS, CONTEXT, research
+docs/                   PLAN, DECISIONS, CONTEXT, DESIGN (visual language), research
+  screenshots/          emulator screenshots per UI task (<phase>-<screen>.png)
   research/node-manifest.md  planned MVP nodes (ids, order, OG level, prerequisites)
   review/progression-matrix.md  GENERATED coach review sheet
 .github/workflows/ci.yml  CI (Node 24): typecheck, lint, format:check, test, progressions:check
 drizzle.config.ts       drizzle-kit config (sqlite, expo driver, schema -> src/db/migrations)
 babel.config.js         babel-preset-expo + inline-import for .sql (also used by Jest)
 metro.config.js         Expo default + `sql` source extension
+jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
+.maestro/               E2E flows: smoke.yaml (tabs + DB proof), styleguide.yaml (UI kit)
 ```
 
 **Path alias:** `@/*` → `src/*` (and `@/assets/*` → `assets/*`). It's defined in `tsconfig.json`
@@ -329,7 +348,7 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 | `npm start` / `npx expo start` | Dev server. Scan the QR code with Expo Go on Android. |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint (`eslint .`, flat config in `eslint.config.js`) |
-| `npm test` | Jest (`jest-expo` preset). Tests live next to the code as `*.test.ts`. |
+| `npm test` | Jest (`jest-expo` preset). Tests live next to the code as `*.test.ts` (components: `*.test.tsx` with RNTL). |
 | `npm run format` / `npm run format:check` | Prettier write / check (config in `.prettierrc.json`) |
 | `npm run progressions:check` | Validate `content/progressions/*.yaml` and report stale generated files. Writes nothing. |
 | `npm run progressions:build` | Validate, then write `src/data/skills/progressions.generated.ts` and `docs/review/progression-matrix.md`. Run after every YAML edit. |
@@ -370,8 +389,12 @@ build is needed.
 - If the first run after a cold boot times out on a white Expo Go loading screen, run
   `adb shell am force-stop host.exp.exponent` and run the flows again (the bundle is cached by then).
 - The flows aren't in CI yet (see the backlog).
-- Match on visible text. When the real UI replaces the placeholders, update or extend the flows in
-  the same PR.
+- Match on visible text or `testID` (`id:`). When the real UI replaces the placeholders, update or
+  extend the flows in the same PR.
+- Flows must not assume a fresh app: Expo Go keeps the last screen. They wait for `Tree|Style Guide`,
+  go back from the Style Guide and tap Tree first. Don't put `stopApp` before `openLink` (Expo Go
+  then stayed on the launcher). Give `scrollUntilVisible` a long `timeout` on long pages.
+- Screenshots: `adb exec-out screencap -p > docs/screenshots/<phase>-<screen>.png`.
 
 ## Gotchas
 - Skill node IDs are permanent, because saved progress references them.

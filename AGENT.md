@@ -15,6 +15,8 @@ It uses Expo (React Native + TypeScript), runs on Android first, and stores data
    relevant to your task.
 5. **[`docs/research/progressions.md`](docs/research/progressions.md)**: exercise and progression
    source material. Read it when you touch skill data.
+6. **[`docs/DESIGN.md`](docs/DESIGN.md)**: the visual language and UI kit. Read it before you touch
+   any screen or component.
 
 If these documents disagree with the code, the code is the truth. Fix the document in the same PR.
 

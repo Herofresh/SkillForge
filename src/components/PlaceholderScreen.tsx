@@ -1,63 +1,21 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Spacing } from '@/components/theme';
+import { EmptyState, Screen, type IconName } from './ui';
 
 type Props = {
   title: string;
   subtitle: string;
-  /** Optional content below the card (e.g. a small proof that stored data loads). */
+  icon: IconName;
+  /** Optional content below the panel (e.g. a small proof that stored data loads). */
   children?: ReactNode;
 };
 
-/** Temporary themed screen body used by tabs until their real UI lands (Phase 4). */
-export function PlaceholderScreen({ title, subtitle, children }: Props) {
+/** Temporary tab body until the tab's real UI lands (Phase 4): a pixel empty state. */
+export function PlaceholderScreen({ title, subtitle, icon, children }: Props) {
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
-        <Text style={styles.hint}>Coming soon</Text>
-      </View>
+    <Screen centered>
+      <EmptyState icon={icon} title={title} message={subtitle} note="COMING SOON" />
       {children}
-    </View>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.lg,
-    backgroundColor: Colors.background,
-  },
-  card: {
-    width: '100%',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    padding: Spacing.xl,
-    borderRadius: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.surface,
-  },
-  title: {
-    color: Colors.gold,
-    fontSize: 28,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  subtitle: {
-    color: Colors.text,
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  hint: {
-    color: Colors.arcane,
-    fontSize: 12,
-    marginTop: Spacing.sm,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-  },
-});
