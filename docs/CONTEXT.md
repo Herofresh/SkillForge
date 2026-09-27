@@ -4,10 +4,21 @@ This is the quick reference for agents: architecture, glossary, formulas, comman
 Keep it current (see AGENT.md §4). Sections marked *(planned)* describe the approved design but haven't
 been implemented yet.
 
-## Architecture map *(planned, Phase 0.5)*
+## Stack versions
+Expo SDK 57 (`expo` 57.0.x), React Native 0.86, React 19.2, expo-router 57, TypeScript 6.0 (`strict`),
+Jest 29 with `jest-expo`, ESLint 9 (flat config) with `eslint-config-expo`, and Prettier 3.
+
+## Architecture map
+
+What exists today (Phase 0): the root and tabs layouts, four placeholder tab screens,
+`src/components/theme.ts`, `src/components/PlaceholderScreen.tsx` and `src/lib/clamp.ts`. Everything
+else below is *(planned)*. Empty folders hold a `.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
+  _layout.tsx           root Stack + dark navigation theme
+  index.tsx             redirects "/" to /tree
+  (tabs)/_layout.tsx    bottom tabs: Tree · Train · Character · Settings
   (tabs)/tree.tsx       skill tree: column view ⇄ graph view
   (tabs)/train.tsx      Train now → plan preview → live session → summary
   (tabs)/character.tsx  level, rank, attributes, history
@@ -26,9 +37,16 @@ src/
     validate.ts         dataset integrity checks
   db/                   Drizzle schema, migrations, repositories
   components/           reusable UI components
-  lib/                  generic helpers (dates, ids, math)
+    theme.ts            UI colors, spacing, navigation theme (single source of UI colors)
+    PlaceholderScreen.tsx  temporary tab body until Phase 4
+  lib/                  generic helpers (dates, ids, math), e.g. clamp.ts
+assets/                 app icon, adaptive icon, splash, favicon
 docs/                   PLAN, DECISIONS, CONTEXT, research
+.github/workflows/ci.yml  CI: typecheck, lint, format:check, test (pending, see PLAN Blockers)
 ```
+
+**Path alias:** `@/*` → `src/*` (and `@/assets/*` → `assets/*`). It's defined in `tsconfig.json`
+(Metro reads it) and mirrored in `package.json` → `jest.moduleNameMapper`. Change both together.
 
 **Data flow:** UI → store action → domain function (pure) → repository persists `session_sets` → caches
 (`node_progress`) updated → UI re-renders.
@@ -102,14 +120,17 @@ The generator is deterministic for the same inputs.
 `floor`, `wall`, `bar` (pull-up bar), `dip_bars`, `parallettes`, `bands`, `rings`, `pole`.
 - **Default profiles:** Home = floor, wall, bar, parallettes, bands. Park = Home + dip_bars.
 
-## Commands *(available once Phase 0 is done)*
+## Commands
 
 | Command | Purpose |
 |---|---|
 | `npm start` / `npx expo start` | Dev server. Scan the QR code with Expo Go on Android. |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | ESLint |
-| `npm test` | Jest unit tests (domain and data) |
+| `npm run lint` | ESLint (`eslint .`, flat config in `eslint.config.js`) |
+| `npm test` | Jest (`jest-expo` preset). Tests live next to the code as `*.test.ts`. |
+| `npm run format` / `npm run format:check` | Prettier write / check (config in `.prettierrc.json`) |
+| `npx expo-doctor` | Checks dependency versions and config against the SDK |
+| `npx expo install <pkg>` | Add a dependency at the SDK-compatible version (prefer it over `npm install`) |
 
 ## Environment notes
 - **OS:** Windows 10 with PowerShell 5.1 (no `&&`; use `; if ($?) {}`) and Git Bash.
@@ -125,3 +146,9 @@ The generator is deterministic for the same inputs.
   - Don't edit them with Windows PowerShell 5.1 `Get-Content`/`Set-Content`. They read and write the ANSI
     codepage and corrupt the text into mojibake like `â€”`.
   - Use a proper file-editing tool, or Git Bash tools.
+- **TypeScript 6 `types`:** TS 6 no longer auto-includes every `@types/*` package. `tsconfig.json` sets
+  `"types": ["jest"]`. If you need other global types (e.g. `node`), add them there.
+- **Routes live in root `app/`,** not `src/app/` (the SDK 57 template default). Expo Router uses
+  `src/app/` if it exists, so never create that folder (ADR-014).
+- **Line endings:** `.gitattributes` forces LF. Git may warn "CRLF will be replaced by LF" once per file;
+  that's expected.

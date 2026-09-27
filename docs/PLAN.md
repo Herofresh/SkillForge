@@ -4,20 +4,37 @@
 > Status legend: `[ ]` todo · `[~]` in progress (owner) · `[x]` done (PR link)
 
 ## Current state
-- Repo created: https://github.com/Herofresh/SkillForge (public). Branch `main` has the initial README.
-- Phase 0 is in progress: the documentation set is done (PR #1). The Expo scaffold hasn't been started yet.
-- No app code exists yet.
+- Repo: https://github.com/Herofresh/SkillForge (public).
+- Phase 0 is nearly done: docs (PR #1) and the Expo SDK 57 scaffold with tooling (tasks 0.2, 0.3,
+  0.5). CI (0.4) is written but not pushed yet, see Blockers.
+- The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. The
+  Android bundle exports cleanly, but it hasn't been opened on a phone in Expo Go yet.
+- There's no game logic, data or persistence yet.
 
 ## Next up
-1. Phase 0: scaffold the Expo app (see task 0.2).
-2. Phase 0: tooling and CI (tasks 0.3–0.4).
-3. Phase 1: domain types and the progression dataset.
+1. Phase 1.1: `src/domain/types.ts`.
+2. Phase 1.2–1.4: the progression dataset in `src/data/skills/`.
+3. Phase 1.5: `src/data/validate.ts` with tests.
 
 ## Blockers
-- None.
+- **0.4 CI can't be pushed by agents.** GitHub rejects pushes that add `.github/workflows/*` because
+  the `gh`/git OAuth token has scopes `gist, read:org, repo` but not `workflow`. The workflow is
+  committed on the local branch `chore/ci-workflow` and is also quoted in the scaffold PR description.
+  **User action:** run `gh auth refresh -h github.com -s workflow` (browser login), then
+  `git push -u origin chore/ci-workflow` and open a PR (or tell an agent to).
 
 ## Handoff notes
-- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…012). The
+- Scaffold (tasks 0.2–0.5): routes are in root `app/` (not the template's `src/app/`, see ADR-014).
+  Tooling choices are in ADR-013. Folder layout, alias and commands are in `docs/CONTEXT.md`.
+- UI colors live only in `src/components/theme.ts`. Tab screens use `PlaceholderScreen`; replace them
+  in Phase 4.
+- `src/domain`, `src/data/skills` and `src/db` only contain `.gitkeep`. Delete it when you add the first
+  real file.
+- Add dependencies with `npx expo install <pkg>` so versions match SDK 57. `npx expo-doctor` passed
+  21/21 checks at scaffold time.
+- CI (`.github/workflows/ci.yml`, on branch `chore/ci-workflow` until the token blocker is fixed) runs
+  on Node 22: npm ci, typecheck, lint, format:check, test. Until it lands, reviewers verify locally only.
+- The approved design is summarized in this file and in `docs/DECISIONS.md` (ADR-001…014). The
   exercise research is in `docs/research/progressions.md`.
 - `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe` and logged in as `Herofresh`. If `gh`
   isn't on PATH in an old shell, use the full path.
@@ -29,10 +46,10 @@
 
 ### Phase 0: Docs and scaffold
 - [x] 0.1 Documentation set: AGENT.md, CLAUDE.md, PLAN.md, DECISIONS.md, CONTEXT.md, research doc ([PR #1](https://github.com/Herofresh/SkillForge/pull/1))
-- [ ] 0.2 `create-expo-app` (TypeScript, expo-router, tabs: Tree · Train · Character · Settings)
-- [ ] 0.3 TypeScript strict, ESLint, Prettier, Jest (`jest-expo`); scripts `typecheck`, `lint`, `test`
-- [ ] 0.4 GitHub Actions CI: typecheck, lint and test on every PR
-- [ ] 0.5 Folder layout (`src/domain`, `src/data/skills`, `src/db`, `src/components`, `src/lib`) and README update
+- [x] 0.2 `create-expo-app` (TypeScript, expo-router, tabs: Tree · Train · Character · Settings) (PR_LINK)
+- [x] 0.3 TypeScript strict, ESLint, Prettier, Jest (`jest-expo`); scripts `typecheck`, `lint`, `test` (PR_LINK)
+- [~] 0.4 GitHub Actions CI: typecheck, lint and test on every PR (blocked: needs `workflow` token scope, see Blockers; file ready on local branch `chore/ci-workflow`)
+- [x] 0.5 Folder layout (`src/domain`, `src/data/skills`, `src/db`, `src/components`, `src/lib`) and README update (PR_LINK)
 
 ### Phase 1: Progression matrix
 - [ ] 1.1 `src/domain/types.ts`: `ExerciseNode`, `Branch`, `Metric`, `Prerequisite`, `Trial`, `EquipmentTag`
