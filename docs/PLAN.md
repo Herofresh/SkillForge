@@ -41,7 +41,7 @@
   copy of the current data, and a one-transaction replace. Store actions are ready; the buttons come
   in 4.6. **Phase 3 is complete.**
 
-- Design system (4.0, ADR-030): `docs/DESIGN.md` is the visual language (pixel-art × dark
+- Design system (4.0, ADR-030, [PR #14](https://github.com/Herofresh/SkillForge/pull/14)): `docs/DESIGN.md` is the visual language (pixel-art × dark
   fantasy); tokens in `src/components/theme.ts`, the UI kit in `src/components/ui/`, fonts via
   `@expo-google-fonts` behind the splash, pixel icons from code grids, and a dev-only Style Guide
   (Settings → Style Guide). The four tabs are restyled placeholders. Screenshots in
@@ -283,7 +283,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 3.4 Store the user progression overlay (ADR-016) in SQLite, apply it with `applyOverlay` when loading the tree, and include it in export/import (ADR-028) ([PR #12](https://github.com/Herofresh/SkillForge/pull/12))
 
 ### Phase 4: Core UI
-- [x] 4.0 Design system (pixel-art × dark fantasy, ADR-030): `docs/DESIGN.md`, tokens in `theme.ts` (contrast-tested), OFL pixel/body fonts with the splash kept until fonts + DB are ready, UI kit in `src/components/ui/` (frames, text, buttons, grid-defined pixel icons, XP/stat bars, level badge, tier chip, warning banner, modal, empty state, level-up burst), restyled tab bar and placeholder tabs, dev-only Style Guide (`/styleguide`), component tests (RNTL), Maestro `styleguide.yaml`
+- [x] 4.0 Design system (pixel-art × dark fantasy, ADR-030): `docs/DESIGN.md`, tokens in `theme.ts` (contrast-tested), OFL pixel/body fonts with the splash kept until fonts + DB are ready, UI kit in `src/components/ui/` (frames, text, buttons, grid-defined pixel icons, XP/stat bars, level badge, tier chip, warning banner, modal, empty state, level-up burst), restyled tab bar and placeholder tabs, dev-only Style Guide (`/styleguide`), component tests (RNTL), Maestro `styleguide.yaml` ([PR #14](https://github.com/Herofresh/SkillForge/pull/14))
 - [ ] 4.1 Onboarding: hero name, equipment profiles, goal picking, optional assessment Trials. The assessment may offer any node, including straight-arm ones (ADR-023), with their safeguard warnings shown
 - [ ] 4.2 Tree tab, column view
 - [ ] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history
