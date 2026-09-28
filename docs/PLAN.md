@@ -128,7 +128,7 @@
   `schemaVersion` 2, version 1 still imports). Logged sets read "8 reps · 0:42"; the header shows the
   session clock; summary / past session show the session time and the time per exercise. Hold
   Trials have a timer per set.
-- Timer extras (5.8, ADR-044, PR_LINK): the set timer has Pause / Resume (stored in the draft
+- Timer extras (5.8, ADR-044, [PR #30](https://github.com/Herofresh/SkillForge/pull/30)): the set timer has Pause / Resume (stored in the draft
   as `pausedAt` / `pausedMs`, so a paused timer survives an app kill; the paused time is not
   measured), and the phone buzzes at "go" (one short), at the hold target (two long, as before) and
   when the rest countdown reaches zero (three short), only while the app is open.
@@ -625,7 +625,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [ ] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub
 
 #### v0.3.0
-- [x] 5.8 Timer extras: pause/resume, buzz at go and at rest end (ADR-044, PR_LINK)
+- [x] 5.8 Timer extras: pause/resume, buzz at go and at rest end (ADR-044, [PR #30](https://github.com/Herofresh/SkillForge/pull/30))
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
