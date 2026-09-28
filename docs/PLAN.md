@@ -94,10 +94,17 @@
   YAML via the share sheet, imports a shared one (paste or file) with a preview and merge, and
   explains "Suggest to project" with a link to the contributor guide. Maestro `editor.yaml`;
   screenshots `docs/screenshots/4.7-*.png`, `4.8-*.png`. **Phase 4 is complete.**
+- Tree map (5.1, ADR-037, [PR #21](https://github.com/Herofresh/SkillForge/pull/21)): the Tree tab has **Columns | Map** tabs (remembered in the
+  `tree_view_mode` setting). Map shows the whole overlay-applied tree as a pan / pinch-zoom /
+  double-tap graph: layers (longest hard-prerequisite chain) left to right, one stone lane per
+  branch in its color, nodes in the column tiles' state frames (goal star, legendary silhouette,
+  "LV n"), hard prerequisites as pixel lines that glow gold once met. Tap a node → its detail;
+  Focus (goals, else what's trainable), − / +, and "List" (Switch to list). Maestro `map.yaml`;
+  screenshots `docs/screenshots/5.1-*.png`.
 
 ## Next up
-1. Phase 5: 5.1 graph view (dagre layout, SVG, pan/zoom, glowing unlocked edges, legendary
-   silhouettes), then 5.2 animations and polish, then 5.3 EAS build profile and Android APK.
+1. Phase 5: 5.2 animations and polish (level-up and unlock reveal; the map could animate a newly
+   lit edge), then 5.3 EAS build profile and Android APK.
 2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -105,6 +112,26 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Tree map (task 5.1, ADR-037):**
+  - Domain: `src/domain/treeMap.ts` (`TREE_MODES`, `parseTreeMode`, `nodeLayers`, `mapLayout`
+    with `MAP_DIMS`, `mapTiles`, `edgeKey`, `boundsOf`, `mapFocus`, `routeRects`); camera math in
+    `src/lib/viewport.ts` (worklets). Store: `treeMode` + `setTreeMode` (setting
+    `TREE_MODE_SETTING` = `tree_view_mode`), test `src/store/treeMode.test.ts`.
+  - UI: `src/components/tree/map/` (`TreeMap`, `MapCanvas`, `MapNode`), `tree/TreeModeTabs`;
+    `tileLook.ts` now has `tileAccessibilityLabel` / `tileStateLabel`, shared with `NodeTile`.
+    Tokens `BranchColors`, `MapStyle` in `theme.ts` (branch colors contrast-tested).
+  - Gotcha: don't draw the map as one `Svg`: Android rasterizes it at full size and Expo Go
+    crashed ("Canvas: trying to draw too large bitmap"). Lanes/edges are Views; see CONTEXT.md.
+  - `GestureHandlerRootView` wraps only the map (the app root has none). Pan cancels node
+    `Pressable`s (checked on the emulator: a swipe that starts on a node doesn't open it).
+  - Not built (backlog): culling off-screen nodes (all 89 render; smooth on the Pixel 8 Pro
+    emulator), channel routing for long edges (they pass behind nodes in the target's row),
+    remembering the camera between visits, recommended prerequisites on the map, a map legend
+    (the column Legend explains the same frames), a Maestro pinch (Maestro has no pinch; the flow
+    uses − / +, swipes and a double tap).
+  - Maestro `map.yaml` (no clearState): switch to Map, − − +, two swipes, double tap, Focus, tap
+    the first visible `map-node-.*`, back, List → Columns. It must end in Columns: smoke.yaml
+    expects "Skill Tree".
 - **Node editor and shared progressions (tasks 4.7–4.8, ADR-036):**
   - Domain: `src/domain/nodeEditor.ts` (pure draft functions: `newCustomNode`, `placeAfter`,
     `customNodeId`, steppers, prerequisite/equipment/cue/trains edits, `prerequisiteOptions`,
@@ -465,7 +492,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 4.8 "Suggest to project": share the overlay as YAML (`exportOverlay`) and import someone else's (`importOverlay`) with a preview and merge; link to the contributor guide (ADR-036) ([PR #20](https://github.com/Herofresh/SkillForge/pull/20))
 
 ### Phase 5: Graph view and release
-- [ ] 5.1 Graph view: dagre layout, SVG, pan/zoom, glowing unlocked edges, legendary silhouettes
+- [x] 5.1 Graph view: dagre layout, SVG, pan/zoom, glowing unlocked edges, legendary silhouettes
+  (own layered layout instead of dagre, View-drawn edges; ADR-037, [PR #21](https://github.com/Herofresh/SkillForge/pull/21))
 - [ ] 5.2 Animations and polish (level-up and unlock reveal)
 - [ ] 5.3 EAS build profile and Android APK
 

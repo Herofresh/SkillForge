@@ -29,7 +29,8 @@ ADR-033) and the 4.4 Train flow (`app/(tabs)/train.tsx`, `app/train/`, `src/comp
 (`app/(tabs)/character.tsx`, `settings.tsx`, `app/session/`, `src/components/character/`,
 `settings/`, `equipment/`, `src/domain/characterView.ts`, `src/lib/radar.ts`, ADR-035) and the
 4.7/4.8 node editor and shared progressions (`app/node/[nodeId]/edit.tsx`, `app/progressions/`,
-`src/components/editor/`, `src/domain/nodeEditor.ts`, `overlayEdit.ts`, ADR-036). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
+`src/components/editor/`, `src/domain/nodeEditor.ts`, `overlayEdit.ts`, ADR-036) and the 5.1 tree map
+(`src/components/tree/map/`, `src/domain/treeMap.ts`, `src/lib/viewport.ts`, ADR-037). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
@@ -39,8 +40,9 @@ app/                    expo-router screens (UI only, no game logic)
                         /onboarding until onboarding is completed
   (tabs)/_layout.tsx    bottom tabs: Tree · Train · Character · Settings (pixel icons, ink/gold rules);
                         redirects to /onboarding while `onboardingCompletedAt` is unset
-  (tabs)/tree.tsx       skill tree (PLAN 4.2, ADR-033): branch tabs + one FlatList column of NodeTiles
-                        with chains/linked chips, Legend sheet; graph view later (5.1)
+  (tabs)/tree.tsx       skill tree (PLAN 4.2, ADR-033): Columns | Map tabs (TreeModeTabs, the `treeMode`
+                        setting); Columns = branch tabs + one FlatList column of NodeTiles with
+                        chains/linked chips, Legend sheet; Map = TreeMap of the whole tree (5.1, ADR-037)
   node/[nodeId]/        node detail stack screens (PLAN 4.3, ADR-033)
     index.tsx           header (state, level, XP), actions (goal, Attempt Trial, Unlock anyway sheet),
                         prerequisites ✓/✗ + alternatives, trains, standards, cues, history, review
@@ -113,6 +115,9 @@ src/
     treeView.ts         Tree/detail view models: TileState, branchColumn, treeTile (chainAbove, links),
                         prerequisiteViews (alternatives, satisfiedBy), branchSummary, defaultBranch,
                         nodeHistory, nodeDetail
+    treeMap.ts          Tree map (PLAN 5.1, ADR-037): TreeMode / parseTreeMode, nodeLayers, mapLayout
+                        (layers left → right, branch lanes, elbow edges; once per tree), mapTiles
+                        (treeTile per node + met edges), boundsOf, mapFocus, routeRects
     train.ts            Train session model (ADR-034): SessionPlan / ActiveSession, sessionPlan,
                         swapOptions / addOptions, replace/remove/addExercise, startSession,
                         logSessionSet (pairs alternate), markedPerformance, skip, rest,
@@ -174,8 +179,12 @@ src/
     stackHeader.ts      stackHeaderOptions(title) for pushed stack screens
     trial/              useTrialAttempt (warnings, results, log) + TrialSetsPanel / TrialOutcome,
                         shared by the onboarding and node-detail Trial screens
-    tree/               NodeTile (+ GoalMarker), ChainLink, PrereqChip, TreeLegend, tileLook (state →
-                        icon, label, tone, description)
+    tree/               NodeTile (+ GoalMarker), ChainLink, PrereqChip, TreeLegend, TreeModeTabs,
+                        tileLook (state → icon, label, tone, description; tileAccessibilityLabel,
+                        tileStateLabel shared by tiles and map nodes)
+      map/              TreeMap (pan/pinch/double-tap on a GestureHandlerRootView, Reanimated
+                        transform; Focus, zoom −/+, "Switch to list"), MapCanvas (lane bands, edge
+                        lines as Views), MapNode (fixed-size state-framed node button)
     node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
                         NodeHistoryList, AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
     train/              Train flow parts: ExerciseCard (prescription, rest, markers), SetLogger
@@ -209,7 +218,8 @@ src/
                         time.ts (MS_PER_HOUR/DAY/WEEK), hash.ts (FNV-1a, seeded tie-breaks),
                         id.ts (createId for local records), contrast.ts (WCAG ratio),
                         pixelGrid.ts (icon grid → runs), segments.ts (litSegments for bars),
-                        radar.ts (spoke points, polygon rasterized into cells)
+                        radar.ts (spoke points, polygon rasterized into cells), viewport.ts
+                        (pan/zoom worklets: zoomAround, clampPan, fitBox)
 assets/                 app icon, adaptive icon, splash, favicon
 docs/                   PLAN, DECISIONS, CONTEXT, DESIGN (visual language), research
   screenshots/          emulator screenshots per UI task (<phase>-<screen>.png)
@@ -224,7 +234,8 @@ jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
                         cycle error, reset, My progressions share/import/delete; 4.7/4.8
                         screenshots), character.yaml (clearState; level/XP after a session, history →
                         past session; 4.5 screenshots), settings.yaml (profile add/remove, export share
-                        sheet, import cancel; 4.6 screenshots), onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
+                        sheet, import cancel; 4.6 screenshots), map.yaml (Tree Map: zoom, pan, double tap,
+                        focus, open a node, back to Columns; 5.1 screenshots), onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
                         proof), styleguide.yaml (UI kit), train.yaml (clearState; plan, live session,
                         kill + resume, summary; takes the 4.4 screenshots), tree.yaml (clearState; branch, detail, goal,
                         Trial, unlock anyway; takes the 4.2/4.3 screenshots); subflows/finish-onboarding.yaml (not run
@@ -325,6 +336,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Outcome** | How an exercise went vs. its prescription: `success`, `partial` (≥ 50 % of prescribed units), `failed`. |
 | **Streak** | Consecutive sessions at most 72 h apart. Adds a character-XP bonus. |
 | **Engine state** | Derived state rebuilt from history (sessions and user actions): node progress, total XP, streak, last straight-arm session, last applied position (`src/domain/recompute.ts`). |
+| **Tree map** | The Tree tab's Map mode: the whole tree as a pan/zoom graph, layers (longest hard-prerequisite chain) left to right, one lane per branch, hard prerequisites as lines lit gold once met (ADR-037). |
 | **Onboarding** | The first-run flow (hero name, equipment, goals, optional assessment, summary). Shown until the setting `onboarding_completed_at` exists (ADR-031). |
 | **Assessment** | Onboarding's optional step: log a Trial for anchor nodes on the goal paths (or any searched node); a passed one is a test-out. Stored as ordinary Trial sessions. |
 | **Anchor node** | One of up to 6 nodes spread evenly (by ogLevel) over the goals and their transitive hard prerequisites (`assessmentAnchors`). |
@@ -451,7 +463,8 @@ Schema in `src/db/schema.ts`; timestamps are integers in ms since the Unix epoch
   - `node_progress(node_id, xp, level, trial_passed, trial_passed_at?, first_trained_at?,
     last_trained_at?, self_unlocked_at?)`: CACHE of `NodeProgress`, rewritten after every
     recompute/apply; safe to delete (`loadAll` rebuilds it identically)
-  - `settings(key, value JSON)`: user settings (none used yet)
+  - `settings(key, value JSON)`: user settings: `onboarding_completed_at` (ADR-031),
+    `tree_view_mode` (`columns` | `map`, PLAN 5.1)
   - `progression_overlay(id = 1, revision, saved_at, body JSON)`: the current overlay in the
     `overlayToRaw` shape (ADR-028); `revision` counts saves
   - `active_session(id = 1, updated_at, body JSON)`: the Train flow's session in progress
@@ -555,6 +568,10 @@ build is needed.
   `onboarding.yaml` starts with `clearState` (wipes Expo Go and the app database); after that Expo Go
   shows its intro ("Continue") and then leaves its dev menu open: the flows close it with `back`.
   Text inside a scrolled-away panel isn't "visible": assert on a `testID` near the action instead.
+- The tree map (5.1) must not be one big `react-native-svg` `Svg`: Android rasterizes an SVG into a
+  bitmap of its full size, and the whole map (~1.9k × 3.3k dp at 3.5× density) crashed Expo Go with
+  "Canvas: trying to draw too large bitmap". Edges and lanes are plain Views. Maestro can tap map
+  nodes by `testID` while the map is zoomed (`map-node-<id>`; `map-node-.*` for "any visible node").
 - `hideKeyboard` presses back when no keyboard is open, which leaves a tab (4.6). Tabs keep their
   scroll position between flows; scroll up to a known element first.
 

@@ -1,6 +1,14 @@
 import { contrastRatio, MIN_TEXT_CONTRAST } from '@/lib/contrast';
 
-import { AttributeColors, ButtonStyles, Colors, RankColors, TierColors, TileFrames } from './theme';
+import {
+  AttributeColors,
+  BranchColors,
+  ButtonStyles,
+  Colors,
+  RankColors,
+  TierColors,
+  TileFrames,
+} from './theme';
 
 /** Every text color on every surface it is used on (docs/DESIGN.md → Palette). */
 const TEXT_PAIRS: readonly [string, string, string][] = [
@@ -37,6 +45,11 @@ const TEXT_PAIRS: readonly [string, string, string][] = [
   ...Object.entries(TierColors).map(
     ([tier, color]) => [`tier ${tier}`, color, Colors.surface] as [string, string, string],
   ),
+  // Tree map lane titles (PLAN 5.1) sit on the lane band and, zoomed, next to the night sky.
+  ...Object.entries(BranchColors).flatMap(([branch, color]) => [
+    [`branch ${branch} on surface`, color, Colors.surface] as [string, string, string],
+    [`branch ${branch} on background`, color, Colors.background] as [string, string, string],
+  ]),
   ...Object.entries(RankColors).map(
     ([rank, color]) => [`rank ${rank}`, color, Colors.surfaceRaised] as [string, string, string],
   ),

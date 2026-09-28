@@ -2,7 +2,8 @@
  * How each tile state looks and reads (PLAN 4.2, docs/DESIGN.md → Tree). The domain names the
  * states (`TileState`); this file words them for the UI. Frames are `TileFrames` in theme.ts.
  */
-import type { TileState } from '@/domain/treeView';
+import { spokenOgLevel } from '@/domain/format';
+import type { TileState, TreeTile } from '@/domain/treeView';
 
 import type { ColorToken } from '../theme';
 import type { IconName } from '../ui';
@@ -65,3 +66,30 @@ export const TILE_LOOKS: Readonly<Record<TileState, TileLook>> = {
 
 /** Tiles that show a level and an XP bar. */
 export const TRAINED_TILE_STATES: readonly TileState[] = ['training', 'proficient', 'mastered'];
+
+/**
+ * What a screen reader says for a node tile, in the column (NodeTile) and on the map (MapNode):
+ * name, state, level once trained, OG level, and the straight-arm / goal / custom / self-unlock notes.
+ */
+export function tileAccessibilityLabel(tile: TreeTile, custom: boolean): string {
+  const { node, state, level, isGoal, status } = tile;
+  return [
+    node.name,
+    TILE_LOOKS[state].label,
+    TRAINED_TILE_STATES.includes(state) ? `level ${level.level}` : undefined,
+    spokenOgLevel(node.ogLevel),
+    node.straightArm ? 'straight-arm' : undefined,
+    isGoal ? 'goal' : undefined,
+    custom ? 'custom' : undefined,
+    status.selfUnlocked && status.unmetHard.length > 0 ? 'unlocked by you' : undefined,
+  ]
+    .filter(Boolean)
+    .join(', ');
+}
+
+/** The caps state line of an untrained tile ("Ready · Unlocked by you" after a self-unlock). */
+export function tileStateLabel(tile: TreeTile): string {
+  return tile.status.selfUnlocked && tile.state === 'available'
+    ? 'Ready · Unlocked by you'
+    : TILE_LOOKS[tile.state].label;
+}
