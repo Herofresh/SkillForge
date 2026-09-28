@@ -172,3 +172,62 @@ export function appVersion(appJson: unknown): { version: string; versionCode: nu
   }
   return { version, versionCode };
 }
+
+/**
+ * SHA-256 of the certificate every published SkillForge APK is signed with (the React Native debug
+ * keystore that prebuild writes to android/app/debug.keystore; v0.1.0-preview1 onwards, ADR-043).
+ * Android installs an update over an existing app only when the signer matches; a different key
+ * forces an uninstall, which deletes the user's data. Changing it is a release decision (PLAN 5.3b).
+ */
+export const RELEASE_SIGNER_SHA256 =
+  'fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c';
+
+/** The signer digests from `apksigner verify --print-certs` output (lower case, in order). */
+export function parseSignerDigests(output: string): string[] {
+  return [...output.matchAll(/certificate SHA-256 digest:\s*([0-9a-fA-F]{64})/g)].map((match) =>
+    (match[1] ?? '').toLowerCase(),
+  );
+}
+
+/** `undefined` when the APK is signed with the release signer only, else what is wrong. */
+export function signerProblem(digests: readonly string[]): string | undefined {
+  if (digests.length === 0) return 'apksigner printed no signer certificate';
+  const others = digests.filter((digest) => digest !== RELEASE_SIGNER_SHA256);
+  if (others.length === 0) return undefined;
+  return (
+    `the APK is signed with ${others.join(', ')}, not the release signer ` +
+    `${RELEASE_SIGNER_SHA256}. Phones with an earlier SkillForge can't update to it without ` +
+    `uninstalling, which deletes their data (ADR-043).`
+  );
+}
+
+/**
+ * `apksigner` from the newest installed build-tools (folder names like "36.0.0"), or undefined.
+ * `.bat` on Windows.
+ */
+export function apksignerPath(
+  sdkDir: string,
+  buildToolsVersions: readonly string[],
+  platform: NodeJS.Platform,
+): string | undefined {
+  const numeric = (version: string) => version.split(/[.-]/).map((part) => Number(part) || 0);
+  const newest = [...buildToolsVersions]
+    .filter((version) => /^\d/.test(version))
+    .sort((a, b) => {
+      const [left, right] = [numeric(a), numeric(b)];
+      for (let i = 0; i < Math.max(left.length, right.length); i += 1) {
+        const diff = (left[i] ?? 0) - (right[i] ?? 0);
+        if (diff !== 0) return diff;
+      }
+      return 0;
+    })
+    .at(-1);
+  if (!newest) return undefined;
+  const path = platform === 'win32' ? win32 : posix;
+  return path.join(
+    sdkDir,
+    'build-tools',
+    newest,
+    platform === 'win32' ? 'apksigner.bat' : 'apksigner',
+  );
+}

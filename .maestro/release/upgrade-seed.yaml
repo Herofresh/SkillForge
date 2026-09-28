@@ -1,0 +1,86 @@
+# Release upgrade check, step 1 of 2 (PLAN 5.7, ADR-043): run on the PREVIOUS release's APK
+# (package at.skillforge.app). A fresh install walks through onboarding with a Pull-up test-out,
+# so the database holds a hero, a goal and a logged Trial session.
+# Then install the new APK over it (`adb install -r`) and run upgrade-verify.yaml.
+# Runbook: docs/CONTEXT.md "Release upgrade check". Not part of `npm run e2e` (a subfolder).
+appId: at.skillforge.app
+name: Upgrade check 1 - seed data on the previous release
+---
+- clearState
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: 'onboarding-hero'
+    timeout: 60000
+- tapOn:
+    id: 'hero-name-input'
+- inputText: 'Aria'
+- hideKeyboard
+- tapOn:
+    id: 'onboarding-next'
+- extendedWaitUntil:
+    visible: 'Your armory'
+    timeout: 20000
+- tapOn:
+    id: 'onboarding-next'
+- extendedWaitUntil:
+    visible: 'Choose your quests'
+    timeout: 20000
+- tapOn:
+    id: 'branch-v_pull'
+- scrollUntilVisible:
+    element:
+      id: 'goal-pull_up'
+    direction: DOWN
+    timeout: 90000
+- tapOn:
+    id: 'goal-pull_up'
+- tapOn:
+    id: 'onboarding-next'
+- extendedWaitUntil:
+    visible: 'Prove your might'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'anchor-pull_up'
+    direction: DOWN
+    timeout: 90000
+- tapOn:
+    id: 'anchor-pull_up'
+- extendedWaitUntil:
+    visible: 'The Trial'
+    timeout: 20000
+- tapOn:
+    id: 'trial-warning-0-acknowledge'
+- tapOn:
+    id: 'onboarding-next' # Log Trial
+- extendedWaitUntil:
+    visible: 'TESTED OUT!'
+    timeout: 20000
+- tapOn:
+    id: 'onboarding-next' # Done
+- extendedWaitUntil:
+    visible: 'Prove your might'
+    timeout: 20000
+- tapOn:
+    id: 'onboarding-next' # Continue
+- extendedWaitUntil:
+    visible: 'Your journey begins'
+    timeout: 20000
+- tapOn:
+    id: 'onboarding-next' # Begin
+- extendedWaitUntil:
+    visible: 'Skill Tree'
+    timeout: 20000
+- tapOn: 'Character'
+- extendedWaitUntil:
+    visible:
+      id: 'character-screen'
+    timeout: 20000
+- assertVisible:
+    id: 'hero-name'
+    text: 'Aria'
+- assertNotVisible:
+    id: 'character-total-xp'
+    text: '0 XP earned in total'
+- takeScreenshot: 5.7-upgrade-before
