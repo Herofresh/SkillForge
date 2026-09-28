@@ -128,6 +128,13 @@
   `schemaVersion` 2, version 1 still imports). Logged sets read "8 reps · 0:42"; the header shows the
   session clock; summary / past session show the session time and the time per exercise. Hold
   Trials have a timer per set.
+- Release v0.2.0 (5.7, ADR-043, PR link below): version 0.2.0 / versionCode 2, published as the
+  GitHub pre-release `v0.2.0` (arm64 + universal). **Checked upgrade-safe** on the emulator: the
+  v0.1.0-preview1 APK with seeded data (`.maestro/release/upgrade-seed.yaml`), then `adb install -r`
+  of 0.2.0 → hero, goal, session and the 40 XP still there, no onboarding
+  (`upgrade-verify.yaml`); screenshots `docs/screenshots/5.7-*.png` (also the launcher icon and
+  the Acrobatics tab in the APK). `npm run build:apk` now fails unless the APK's signer is
+  `RELEASE_SIGNER_SHA256` (the key every published APK uses).
 
 ## Next up
 1. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
@@ -140,6 +147,17 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Release v0.2.0 (task 5.7, ADR-043):**
+  - Release routine: bump `expo.version` + `expo.android.versionCode` (+1) in app.json, build
+    both APKs (`-- --clean` after icon/plugin/native changes), run the "Release upgrade check" in
+    CONTEXT.md against the previous release's APK, then `gh release create` with both APKs and
+    their SHA-256.
+  - `RELEASE_SIGNER_SHA256` in `scripts/buildApkConfig.ts` is the debug keystore's certificate.
+    Don't change it without the user (5.3b): installs from earlier releases couldn't update.
+  - The first preview's APK reports versionName "1.0.0" (built before ADR-039); the user calls it
+    "version 1.0". Only the versionCode matters for updates.
+  - `.maestro/release/` flows target the installed app (`at.skillforge.app`), not Expo Go, and
+    aren't run by `npm run e2e` (subfolder).
 - **Exercise timer (task 5.4, ADR-040):**
   - Domain: `src/domain/setTimer.ts` (`timerModeFor`, `readTimer`, `measuredSeconds`,
     `reachedTarget`, `formatTimerClock`, `timerCaption`, `spokenTimer`, `timedPerformance`,
@@ -602,7 +620,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.4 Exercise timer (user request 2026-09-28): hold countdown with get-ready, vibration at the target and overtime, stopwatch for other metrics, per-set `durationSec` (additive column, backup version 2), session clock and times in the summary, hold Trials too (ADR-040, [PR #26](https://github.com/Herofresh/SkillForge/pull/26))
 - [x] 5.5 Acrobatics branch: rolls, judo breakfalls (ukemi) and the cartwheel path to a legendary aerial, gated on the wall handstand; left out of the rank median (ADR-041, [PR #25](https://github.com/Herofresh/SkillForge/pull/25))
 - [x] 5.6 App icon: original pixel-art icon from a code grid (`scripts/appIcon.ts`, `npm run icon:build`): icon, adaptive foreground / background / monochrome, splash, favicon (ADR-042, [PR #24](https://github.com/Herofresh/SkillForge/pull/24))
-- [ ] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub
+- [x] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub; pinned signer check in `build:apk`, release upgrade flows (ADR-043, PR link below)
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.

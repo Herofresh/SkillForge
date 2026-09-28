@@ -88,7 +88,8 @@ scripts/
                         MAESTRO_CLI_NO_ANALYTICS, runs .maestro/ or the flows passed after `--`
   buildApk.ts           npm run build:apk[:universal] (tsx, ADR-039): prebuild, restore package.json,
                         local.properties, gradlew assembleRelease, copy to builds/ + SHA-256
-  buildApkConfig.ts     its pure parts (args, ABIs, SDK path, APK name, commands), Jest-tested
+  buildApkConfig.ts     its pure parts (args, ABIs, SDK path, APK name, commands, the pinned
+                        release signer RELEASE_SIGNER_SHA256 and its apksigner check), Jest-tested
   appIcon.ts            the app icon as a 32×32 pixel grid (roles → Palette keys), the asset list
                         (paths, sizes, cell size per layer) and the preview sheet (PLAN 5.6, ADR-042)
   iconBuild.ts          npm run icon:build: renders appIcon.ts to assets/images/*.png + the preview
@@ -631,6 +632,22 @@ build is needed.
   nodes by `testID` while the map is zoomed (`map-node-<id>`; `map-node-.*` for "any visible node").
 - `hideKeyboard` presses back when no keyboard is open, which leaves a tab (4.6). Tabs keep their
   scroll position between flows; scroll up to a known element first.
+
+## Release upgrade check (PLAN 5.7, ADR-043)
+Before publishing a release, check that it installs over the previous one with the data intact.
+1. Build the new APK: `npm run build:apk:universal` (runs on the x86_64 emulator; pass `-- --clean`
+   after plugin, icon or native dependency changes). The script fails if the APK isn't signed with
+   `RELEASE_SIGNER_SHA256` (`scripts/buildApkConfig.ts`): another key can't update existing installs.
+2. Download the previous release's universal APK: `gh release download <tag> -p "*universal*"`.
+3. Start the emulator (see "E2E tests", step 1), then `adb uninstall at.skillforge.app` and
+   `adb install <previous>.apk`.
+4. `npm run e2e -- .maestro/release/upgrade-seed.yaml`: fresh onboarding with a Pull-up test-out.
+5. `adb install -r builds/<new>.apk` (an update: no uninstall, no clearState). It must print
+   `Success`; `INSTALL_FAILED_UPDATE_INCOMPATIBLE` means the signer changed,
+   `INSTALL_FAILED_VERSION_DOWNGRADE` a versionCode that isn't higher.
+6. `npm run e2e -- .maestro/release/upgrade-verify.yaml`: the hero, goal, session and XP are still
+   there and onboarding isn't shown again. The flows take the screenshots `5.7-upgrade-before` /
+   `5.7-upgrade-after` (copy them from Maestro's test folder to `docs/screenshots/`).
 
 ## Gotchas
 - Skill node IDs are permanent, because saved progress references them.
