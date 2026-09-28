@@ -7,6 +7,8 @@ import { PixelButton } from './PixelButton';
 import { PixelFrame } from './PixelFrame';
 import { PixelIcon } from './PixelIcon';
 import { PixelText } from './PixelText';
+import type { ButtonVariant } from '../theme';
+
 import type { IconName } from './icons';
 
 type Props = {
@@ -15,7 +17,13 @@ type Props = {
   message: string;
   /** A short caps note under the message, e.g. "Coming soon". */
   note?: string;
-  action?: { label: string; onPress: () => void; testID?: string };
+  action?: {
+    label: string;
+    onPress: () => void;
+    icon?: IconName;
+    variant?: ButtonVariant;
+    testID?: string;
+  };
   children?: ReactNode;
   testID?: string;
 };
@@ -36,7 +44,13 @@ export function EmptyState({ icon, title, message, note, action, children, testI
       )}
       {action && (
         <View style={styles.action}>
-          <PixelButton label={action.label} onPress={action.onPress} testID={action.testID} />
+          <PixelButton
+            label={action.label}
+            onPress={action.onPress}
+            icon={action.icon}
+            variant={action.variant}
+            testID={action.testID}
+          />
         </View>
       )}
       {children}

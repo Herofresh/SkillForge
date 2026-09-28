@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AttributeRadar } from '@/components/character/AttributeRadar';
@@ -10,8 +10,10 @@ import { ATTRIBUTE_LABELS } from '@/components/node/AttributeChips';
 import { AttributeColors, Colors, PIXEL, Spacing } from '@/components/theme';
 import {
   LevelBadge,
+  BURST_TITLES,
+  EmptyState,
   LevelUpBurst,
-  PixelButton,
+  useLevelUpKey,
   PixelFrame,
   PixelIcon,
   PixelText,
@@ -56,16 +58,6 @@ export default function CharacterScreen() {
 }
 
 /** Plays LEVEL UP! when the character level rose while the tab was mounted (e.g. after a session). */
-function useLevelUpKey(level: number): number | undefined {
-  const seen = useRef(level);
-  const [key, setKey] = useState<number | undefined>();
-  useEffect(() => {
-    if (level > seen.current) setKey(level);
-    seen.current = level;
-  }, [level]);
-  return key;
-}
-
 function Stat({
   icon,
   label,
@@ -120,7 +112,11 @@ function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
           <LevelBadge level={sheet.level.level} size="lg" testID="character-level" />
         </View>
         {levelUpKey !== undefined && (
-          <LevelUpBurst title="LEVEL UP!" subtitle={`Level ${levelUpKey}`} playKey={levelUpKey} />
+          <LevelUpBurst
+            title={BURST_TITLES.levelUp}
+            subtitle={`Level ${levelUpKey}`}
+            playKey={levelUpKey}
+          />
         )}
         <XPBar
           label={`To level ${sheet.level.level + 1}`}
@@ -194,15 +190,18 @@ function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
           Goals
         </PixelText>
         {sheet.goals.length === 0 ? (
-          <PixelFrame contentStyle={styles.gap}>
-            <PixelText tone="textMuted">No goals yet. Pick up to five in the Tree.</PixelText>
-            <PixelButton
-              label="Open the Tree"
-              icon="tree"
-              variant="secondary"
-              onPress={() => router.navigate('/tree')}
-            />
-          </PixelFrame>
+          <EmptyState
+            icon="star"
+            title="No goals yet"
+            message="Pick up to five in the Tree."
+            action={{
+              label: 'Open the Tree',
+              icon: 'tree',
+              variant: 'secondary',
+              onPress: () => router.navigate('/tree'),
+            }}
+            testID="goals-empty"
+          />
         ) : (
           sheet.goals.map((goal) => (
             <PixelFrame key={goal.nodeId}>
@@ -217,12 +216,13 @@ function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
           Recent sessions
         </PixelText>
         {sheet.recent.length === 0 ? (
-          <PixelFrame contentStyle={styles.gap} testID="recent-empty">
-            <PixelText tone="textMuted">
-              No sessions yet. Your quest log starts with the first one.
-            </PixelText>
-            <PixelButton label="Train now" icon="sword" onPress={() => router.navigate('/train')} />
-          </PixelFrame>
+          <EmptyState
+            icon="scroll"
+            title="No sessions yet"
+            message="Your quest log starts with the first one."
+            action={{ label: 'Train now', icon: 'sword', onPress: () => router.navigate('/train') }}
+            testID="recent-empty"
+          />
         ) : (
           <PixelFrame variant="parchment" contentStyle={styles.list} testID="recent-sessions">
             {sheet.recent.map((item, index) => (

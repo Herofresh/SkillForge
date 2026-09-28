@@ -8,7 +8,7 @@ import type { ExerciseNode, SetPerformance } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
 
 import { Spacing } from '../theme';
-import { LevelUpBurst, NumberStepper, PixelFrame, PixelText } from '../ui';
+import { BURST_TITLES, LevelUpBurst, NumberStepper, PixelFrame, PixelText } from '../ui';
 
 type SetsProps = {
   node: ExerciseNode;
@@ -62,7 +62,7 @@ export function TrialOutcome({ node, outcome, standard }: OutcomeProps) {
     <>
       {passed ? (
         <PixelFrame variant="rune" testID="trial-passed">
-          <LevelUpBurst title="TESTED OUT!" subtitle={node.name} />
+          <LevelUpBurst title={BURST_TITLES.testedOut} subtitle={node.name} />
           <PixelText align="center">
             {`${node.name} is now proficient (level ${PROFICIENT_LEVEL}). Its successors are open to train.`}
           </PixelText>

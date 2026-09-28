@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 
 import { ALL_NODES } from '@/data/skills';
 import { openTestDatabase, type TestDatabase } from '@/db/testing/testDatabase';
@@ -15,11 +15,31 @@ import { NodeTile } from './tree/NodeTile';
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 }));
+type BeforeRemove = (event: { preventDefault: () => void; data: { action: unknown } }) => void;
+/** The editor's 'beforeRemove' listener and what it dispatched (the unsaved-changes guard). */
+const mockNavigation = {
+  listener: undefined as BeforeRemove | undefined,
+  addListener: jest.fn((_: string, listener: BeforeRemove) => {
+    mockNavigation.listener = listener;
+    return () => undefined;
+  }),
+  dispatch: jest.fn(),
+};
 jest.mock('expo-router', () => ({
   ...jest.requireActual('expo-router'),
   Stack: { Screen: () => null },
   useRouter: () => ({ back: jest.fn(), push: jest.fn(), replace: jest.fn() }),
+  useNavigation: () => mockNavigation,
 }));
+
+/** Simulates back / Cancel: returns whether the editor stopped the navigation. */
+async function leave(): Promise<boolean> {
+  const preventDefault = jest.fn();
+  await act(async () => {
+    mockNavigation.listener?.({ preventDefault, data: { action: { type: 'GO_BACK' } } });
+  });
+  return preventDefault.mock.calls.length > 0;
+}
 
 const NOW = 1_790_000_000_000;
 
@@ -44,6 +64,26 @@ function saveTowelHang(): void {
 }
 
 describe('NodeEditorBody', () => {
+  it('asks before leaving with unsaved changes, and leaves when discarded', async () => {
+    mockNavigation.dispatch.mockClear();
+    const user = userEvent.setup();
+    await render(
+      <NodeEditorBody
+        initial={store.getState().nodeDraft('dead_hang')!}
+        title="Edit Dead hang"
+        saveLabel="Save changes"
+        onSaved={jest.fn()}
+        onCancel={jest.fn()}
+      />,
+    );
+    expect(await leave()).toBe(false); // nothing changed yet
+    await user.press(screen.getByTestId('editor-trial-target-plus'));
+    expect(await leave()).toBe(true);
+    expect(screen.getByTestId('editor-discard-dialog')).toBeTruthy();
+    await user.press(screen.getByTestId('editor-discard'));
+    expect(mockNavigation.dispatch).toHaveBeenCalledWith({ type: 'GO_BACK' });
+  });
+
   it('adds a custom exercise with a prerequisite', async () => {
     const onSaved = jest.fn();
     const user = userEvent.setup();

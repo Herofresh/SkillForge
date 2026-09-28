@@ -5,6 +5,7 @@ import {
   addPrerequisite,
   clearTrains,
   customNodeId,
+  draftChanged,
   editorIssueText,
   issueSection,
   issuesBySection,
@@ -211,5 +212,19 @@ describe('issues in the editor', () => {
     expect(editorIssueText({ nodeId: 'dead_hang', message: 'cycle' }, 'x', named)).toBe(
       'Dead hang: cycle',
     );
+  });
+});
+
+describe('draftChanged', () => {
+  const initial: ExerciseNode = { ...chain[2], cues: ['Lock the elbows'] };
+
+  it('is false for the untouched draft and for an edit undone by hand', () => {
+    expect(draftChanged(initial, initial)).toBe(false);
+    expect(draftChanged(initial, removeCue(addCue(initial, 'Squeeze'), 1))).toBe(false);
+  });
+
+  it('is true once anything differs', () => {
+    expect(draftChanged(initial, setName(initial, 'Renamed'))).toBe(true);
+    expect(draftChanged(initial, addCue(initial, 'Squeeze'))).toBe(true);
   });
 });

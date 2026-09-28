@@ -2,7 +2,8 @@
 # "Towel hang" after Dead hang with Dead hang as its prerequisite, see it with its Custom tag in the
 # tree, try to make Dead hang need it (a cycle: the inline error shows and Save stays off), save a
 # valid edit instead and reset it to the default, then open My progressions (share sheet, import
-# screen) and delete the custom exercise. Takes the 4.7/4.8 screenshots. Prerequisites and run: see
+# screen) and delete the custom exercise. Leaving the new form with changes asks first (5.2).
+# Takes the 4.7/4.8/5.2-discard screenshots. Prerequisites and run: see
 # smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Editor - custom exercise, cycle error, reset, share
@@ -62,6 +63,23 @@ name: Editor - custom exercise, cycle error, reset, share
     id: 'editor-position'
     text: 'Dead hang'
 - takeScreenshot: 4.7-new-exercise
+# 5.2: leaving with unsaved changes asks first; "Keep editing" stays on the form
+- back
+- extendedWaitUntil:
+    visible:
+      id: 'editor-discard-dialog'
+    timeout: 20000
+- assertVisible:
+    id: 'editor-discard'
+- takeScreenshot: 5.2-discard-changes
+- tapOn: 'Keep editing'
+- extendedWaitUntil:
+    notVisible:
+      id: 'editor-discard-dialog'
+    timeout: 20000
+- assertVisible:
+    id: 'editor-position'
+    text: 'Dead hang'
 - scrollUntilVisible:
     element:
       id: 'editor-add-prerequisite'

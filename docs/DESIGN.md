@@ -225,7 +225,9 @@ check = done / met · cross = not met · quill = edit / the user's own changes.
 
 Adding an icon: add a grid (exactly 12 rows of 12 characters, ≤ 4 roles, keep one role for icons
 that must tint), map its roles to `Colors`, and `icons.test.ts` checks it. Keep silhouettes readable
-at 24 dp: 1-cell details disappear on a phone.
+at 24 dp: 1-cell details disappear on a phone. A tint paints every role in one color, so an icon with
+a large fill (scroll, shield) lists that fill role in `knockout`: tinted, those cells stay empty and
+the outline and details remain (PLAN 5.2; before, the tinted scroll was a solid block on buttons).
 
 ## 7. Motion
 
@@ -234,6 +236,13 @@ at 24 dp: 1-cell details disappear on a phone.
 - **Reduce motion:** every animation checks `useReducedMotion()` (Reanimated). With it on, show the
   end state immediately (the burst shows only the title; sheets appear without sliding).
 - Buttons animate by position only (the press drop), no fades.
+- **Reveal moments (PLAN 5.2, ADR-038):** every celebration is a `LevelUpBurst` with a title from
+  `BURST_TITLES` (LEVEL UP!, UNLOCKED!, TESTED OUT!, QUEST COMPLETE). The ring bursts from the
+  title's centre. Where they play: Train summary (quest complete, first level-up, first unlock),
+  Trial outcome (tested out; node detail and onboarding share `TrialOutcome`), onboarding summary
+  (hero name + rank), node detail (UNLOCKED! after unlock anyway, else LEVEL UP! when the node's
+  level rose while it was open), Character tab (LEVEL UP! when the character level rose). Level-ups
+  use `useLevelUpKey(level)`: it plays only for a rise seen while mounted, never on every visit.
 
 ## 8. Accessibility
 

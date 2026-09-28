@@ -84,6 +84,7 @@ export function BackupPanel() {
       </PixelText>
       <PixelButton
         label="Export backup"
+        icon="scroll"
         onPress={exportData}
         disabled={busy}
         testID="export-backup"

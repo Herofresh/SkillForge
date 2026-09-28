@@ -80,6 +80,9 @@ content/progressions/   SOURCE OF TRUTH for skill content (ADR-016)
 scripts/
   progressions.ts       CLI behind npm run progressions:check|build|review (runs via tsx)
   progressionSources.ts Node-only file access shared by the CLI and the dataset test
+  lockfile.ts           npm run lockfile:check|fix (plain Node, ADR-029)
+  e2e.ts                npm run e2e: finds Maestro (MAESTRO_BIN, ~/.maestro install, PATH), sets
+                        MAESTRO_CLI_NO_ANALYTICS, runs .maestro/ or the flows passed after `--`
 src/
   domain/               PURE TS game rules. No React/Expo/DB imports (ADR-009)
     types.ts            single source of shared types (nodes, issues, overlay, logged sets, progress)
@@ -199,9 +202,11 @@ src/
                         ProgressionsPanel (count of tree changes → My progressions)
     editor/             node editor (PLAN 4.7–4.8, ADR-036): NodeEditorBody (screen body: live
                         issues, Save/Cancel), NodeEditorForm (sections with inline IssueNotes),
-                        PositionSheet, IssueNotes, CustomBadge, OverlayEntryRow, SharePanel
+                        PositionSheet, IssueNotes, CustomBadge, OverlayEntryRow, SharePanel;
+                        leaving with a changed draft opens a "Discard changes?" sheet (5.2)
     node/CustomizeSection.tsx  "Your tree" on the node detail: edit, add after, reset, hide/delete
-    editor.test.tsx     component tests: editor add/cycle/save (real store), custom tag, entry row
+    editor.test.tsx     component tests: editor add/cycle/save, unsaved-changes guard (real store),
+                        custom tag, entry row
     character.test.tsx  component tests: radar, crest, goal card, history row, profile editor,
                         backup panel (real store, fake files)
     train.test.tsx      component tests of the Train parts
@@ -210,11 +215,13 @@ src/
     ui/                 the UI kit; import from '@/components/ui'
       *.tsx             Screen, PixelFrame, PixelText, PixelButton, PixelIcon, SegmentedBar, XPBar,
                         StatBar, LevelBadge, TierChip, WarningBanner, PixelModal, EmptyState,
-                        LevelUpBurst, PixelTextInput, PixelChip, NumberStepper
-      icons.ts          12x12 pixel icon grids + role colors (ICONS, ICON_NAMES, iconGrid)
+                        LevelUpBurst (+ BURST_TITLES), PixelTextInput, PixelChip, NumberStepper
+      useLevelUpKey.ts  replay key for a LEVEL UP! burst when a level rises while mounted (5.2)
+      icons.ts          12x12 pixel icon grids + role colors (ICONS, ICON_NAMES, iconGrid,
+                        iconCellColor: tint with `knockout` roles left empty, 5.2)
       frameGeometry.ts  notched-corner rects for PixelFrame
       ui.test.tsx       component render tests (RNTL); icons.test.ts, frameGeometry.test.ts
-  lib/                  generic helpers: clamp.ts, curve.ts (geometric level curves), median.ts,
+  lib/                  generic helpers: clamp.ts, deepEqual.ts, curve.ts (geometric level curves), median.ts,
                         time.ts (MS_PER_HOUR/DAY/WEEK), hash.ts (FNV-1a, seeded tie-breaks),
                         id.ts (createId for local records), contrast.ts (WCAG ratio),
                         pixelGrid.ts (icon grid → runs), segments.ts (litSegments for bars),
@@ -231,8 +238,8 @@ babel.config.js         babel-preset-expo + inline-import for .sql (also used by
 metro.config.js         Expo default + `sql` source extension
 jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
 .maestro/               E2E flows: editor.yaml (clearState; custom exercise with a prerequisite,
-                        cycle error, reset, My progressions share/import/delete; 4.7/4.8
-                        screenshots), character.yaml (clearState; level/XP after a session, history →
+                        cycle error, reset, My progressions share/import/delete, discard-changes
+                        sheet; 4.7/4.8/5.2 screenshots), character.yaml (clearState; level/XP after a session, history →
                         past session; 4.5 screenshots), settings.yaml (profile add/remove, export share
                         sheet, import cancel; 4.6 screenshots), map.yaml (Tree Map: zoom, pan, double tap,
                         focus, open a node, back to Columns; 5.1 screenshots), onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
@@ -498,7 +505,7 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 | `npm run db:generate` | `drizzle-kit generate`: write a new migration in `src/db/migrations/` after editing `src/db/schema.ts` (add `-- --name <slug>` to name it). Commit the generated files. |
 | `npm run lockfile:check` | `npm ci --dry-run` with the pinned npm on a clean copy of package.json + package-lock.json: fails if CI's `npm ci` would reject the lockfile (ADR-029). Also runs in CI. |
 | `npm run lockfile:fix` | Re-resolve package-lock.json with the pinned npm (`install --package-lock-only`), then run the check. Run after every `npx expo install` / `npm install`. |
-| `npm run e2e` | Maestro E2E flows in `.maestro/` against Expo Go on a running emulator (see "E2E tests") |
+| `npm run e2e` | Maestro E2E flows in `.maestro/` against Expo Go on a running emulator (see "E2E tests"); `npm run e2e -- .maestro/tree.yaml` runs one flow |
 | `npx expo-doctor` | Checks dependency versions and config against the SDK |
 | `npx expo install <pkg>` | Add a dependency at the SDK-compatible version (prefer it over `npm install`) |
 
@@ -523,7 +530,8 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
     - Stop the adb server (`adb kill-server`) before updating platform-tools, because a running
       `adb.exe` is locked.
   - Build APKs with EAS cloud (5.3).
-- **Maestro** 2.10 is installed at `%USERPROFILE%\.maestro\maestro\bin`. It isn't on PATH yet.
+- **Maestro** 2.10 is installed at `%USERPROFILE%\.maestro\maestro\bin`. It isn't on PATH;
+  `npm run e2e` finds it there (5.2).
 
 ## E2E tests (Maestro, ADR-022)
 Flows live in `.maestro/*.yaml` and run against **Expo Go** (`appId: host.exp.exponent`), so no native
@@ -542,7 +550,10 @@ build is needed.
      `adb shell pm list packages host.exp.exponent` lists it, then stop that server.
 3. **Forward the port:** `adb reverse tcp:8081 tcp:8081` (use the full `adb.exe` path under
    `platform-tools`, since it isn't on PATH)
-4. **Run the flows:** `npm run e2e` (Maestro must be on PATH).
+4. **Run the flows:** `npm run e2e`. Maestro doesn't need to be on PATH: `scripts/e2e.ts` uses
+   `MAESTRO_BIN` if set, else the default install (`%USERPROFILE%\.maestro\maestro\bin\maestro.bat`
+   on Windows, `~/.maestro/bin/maestro` elsewhere), else `maestro` on PATH, and sets
+   `MAESTRO_CLI_NO_ANALYTICS=1`. One flow: `npm run e2e -- .maestro/editor.yaml`.
 
 **Gotchas:**
 - With `-gpu host` the first bundle is much faster than the old swiftshader setup, but it can still
