@@ -1,0 +1,155 @@
+# Settings (PLAN 4.6): add and remove an equipment profile, export a backup (the share sheet opens
+# and is closed with back; skipped when none shows), and the import's cancel paths (the
+# confirmation, then the file picker). Takes the 4.6 screenshots. Prerequisites and run: see
+# smoke.yaml / docs/CONTEXT.md.
+appId: host.exp.exponent
+name: Settings - equipment profile, export, import cancel
+---
+- openLink: exp://127.0.0.1:8081
+# Wait for the app. It may still be open where an earlier flow left it.
+- extendedWaitUntil:
+    visible: 'Tree|Style Guide|Step . / 5|Continue|Settings'
+    timeout: 180000
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+- runFlow:
+    when:
+      visible: 'Toggle performance monitor'
+    commands:
+      - back
+- runFlow:
+    when:
+      visible:
+        id: 'styleguide'
+    commands:
+      - back
+- runFlow:
+    when:
+      visible:
+        id: 'past-session'
+    commands:
+      - back
+- runFlow: subflows/finish-onboarding.yaml
+- tapOn: 'Settings'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-screen'
+    timeout: 20000
+# The tab keeps its scroll position from an earlier run: go back to the top.
+- scrollUntilVisible:
+    element:
+      id: 'settings-hero-name'
+    direction: UP
+    timeout: 60000
+- assertVisible: 'Home'
+- takeScreenshot: 4.6-settings
+# Add a profile, then remove it (with the confirmation)
+- scrollUntilVisible:
+    element:
+      id: 'new-profile-input'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'new-profile-input'
+- inputText: 'Gym'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'add-profile'
+    direction: DOWN
+    timeout: 60000
+# Adding dismisses the keyboard (no hideKeyboard here: its back press would leave the tab).
+- tapOn:
+    id: 'add-profile'
+- scrollUntilVisible:
+    element: 'Gym'
+    direction: UP
+    timeout: 60000
+- assertVisible: 'Gym'
+- scrollUntilVisible:
+    element:
+      id: 'remove-(?!home|park).*'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'remove-(?!home|park).*'
+- extendedWaitUntil:
+    visible:
+      id: 'remove-dialog'
+    timeout: 20000
+- tapOn:
+    id: 'remove-confirm'
+- extendedWaitUntil:
+    notVisible: 'Gym'
+    timeout: 20000
+# Export: the Android share sheet opens; close it with back
+- scrollUntilVisible:
+    element:
+      id: 'export-backup'
+    direction: DOWN
+    timeout: 60000
+- takeScreenshot: 4.6-backup
+- tapOn:
+    id: 'export-backup'
+- extendedWaitUntil:
+    notVisible:
+      id: 'settings-screen'
+    timeout: 10000
+    optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: 'settings-screen'
+    commands:
+      - takeScreenshot: 4.6-share-sheet
+      - back
+- extendedWaitUntil:
+    visible:
+      id: 'settings-screen'
+    timeout: 20000
+# Import: the confirmation says it replaces all data; cancel it
+- scrollUntilVisible:
+    element:
+      id: 'import-backup'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'import-backup'
+- extendedWaitUntil:
+    visible:
+      id: 'import-dialog'
+    timeout: 20000
+- assertVisible: 'Replace all data?'
+- takeScreenshot: 4.6-import-confirm
+- tapOn: 'Cancel'
+- extendedWaitUntil:
+    notVisible:
+      id: 'import-dialog'
+    timeout: 20000
+# Import again, confirm, and back out of the file picker: nothing changes
+- tapOn:
+    id: 'import-backup'
+- extendedWaitUntil:
+    visible:
+      id: 'import-dialog'
+    timeout: 20000
+- tapOn:
+    id: 'import-confirm'
+- extendedWaitUntil:
+    notVisible:
+      id: 'settings-screen'
+    timeout: 10000
+    optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: 'settings-screen'
+    commands:
+      - back
+- extendedWaitUntil:
+    visible:
+      id: 'backup-canceled'
+    timeout: 20000

@@ -63,6 +63,11 @@ describe('app store', () => {
     expect(store.getState().engine).toEqual(pure.state);
     expect(results).toEqual(pure.results);
     expect(readNodeProgress(test.db)).toEqual(pure.state.progress);
+    expect(store.getState().sessionResults).toEqual({
+      s1: pure.results[0],
+      s2: pure.results[1],
+      s3: pure.results[2],
+    });
     test.close();
   });
 
@@ -77,6 +82,8 @@ describe('app store', () => {
     expect(store.getState().sessions.map((entry) => entry.id)).toEqual(['early', 'late']);
     expect(store.getState().engine).toEqual(pure.state);
     expect(result).toEqual(pure.results[0]);
+    expect(store.getState().sessionResults.late).toEqual(pure.results[1]);
+    expect(storeFor(test).getState().sessionResults.early).toEqual(pure.results[0]); // after a restart
     test.close();
   });
 

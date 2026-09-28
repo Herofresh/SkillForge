@@ -15,8 +15,8 @@ UI (ADR-030): `react-native-svg` 15, `@expo-google-fonts/pixelify-sans`, `silksc
 
 ## Architecture map
 
-What exists today: the root and tabs layouts, four placeholder tab screens,
-`src/components/theme.ts`, `src/components/PlaceholderScreen.tsx`, `src/lib/clamp.ts`, and the
+What exists today: the root and tabs layouts, the four tab screens,
+`src/components/theme.ts`, `src/lib/clamp.ts`, and the
 Phase 1 progression pipeline (`content/progressions/`, `scripts/`, `src/domain/types.ts`,
 `tier.ts`, `overlay.ts`, `src/data/*`) and the Phase 2 game engine (`xp.ts`, `progression.ts`,
 `safeguards.ts`, `character.ts`, `recompute.ts`, `generator.ts`, `src/lib/curve.ts`, `median.ts`,
@@ -25,7 +25,9 @@ overlay and backups), the Phase 4.0 design system (`docs/DESIGN.md`, `src/compon
 `app/styleguide.tsx`), the 4.1 onboarding (`app/onboarding/`, ADR-031) and the 4.2/4.3 Tree tab and
 node detail (`app/(tabs)/tree.tsx`, `app/node/`, `src/components/tree/`, `src/components/node/`,
 ADR-033) and the 4.4 Train flow (`app/(tabs)/train.tsx`, `app/train/`, `src/components/train/`,
-`src/domain/train.ts`, `trainView.ts`, ADR-034). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
+`src/domain/train.ts`, `trainView.ts`, ADR-034) and the 4.5/4.6 Character tab and Settings
+(`app/(tabs)/character.tsx`, `settings.tsx`, `app/session/`, `src/components/character/`,
+`settings/`, `equipment/`, `src/domain/characterView.ts`, `src/lib/radar.ts`, ADR-035). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
@@ -49,9 +51,11 @@ app/                    expo-router screens (UI only, no game logic)
                         add, finish / abandon (confirm dialogs)
     summary.tsx         total XP + bonuses, per-exercise outcome/XP, level-up and unlock bursts,
                         streak, SessionResult warnings acknowledged before Done
-  (tabs)/character.tsx  level, rank, attributes, history
-  (tabs)/settings.tsx   equipment profiles, export/import (today: placeholder + the stored
-                        profile names as a DB proof)
+  (tabs)/character.tsx  character sheet (PLAN 4.5, ADR-035): hero, level + XP, rank crest, pixel
+                        radar + stat bars, balance note, streak/totals, goals, recent sessions
+  session/[sessionId].tsx  a past session's summary (SessionResultPanels), from the history
+  (tabs)/settings.tsx   Settings (PLAN 4.6, ADR-035): hero name, equipment profiles (rename,
+                        confirmed remove), backup export/import/undo, about/credits, Style Guide
   onboarding/           first-run flow (PLAN 4.1, ADR-031), a Stack; every step saves through the store
     _layout.tsx         Stack; redirects to /tree once onboarding is completed
     index.tsx           1 welcome + "Name your hero" (setHeroName)
@@ -99,10 +103,14 @@ src/
                         projectedSets, finishedSession, warningKey, parseActiveSession
     trainView.ts        Train view models: blockViews, exerciseView, liveView, summaryView,
                         BLOCK_LABELS, OUTCOME_LABELS
+    characterView.ts    Character tab view model (ADR-035): characterSheet, radarAxes, nextRank,
+                        rankHint, activeStreak, characterTotals, balanceNote, recentSessions,
+                        goalProgress
   data/
     progressionFormat.ts  THE YAML <-> ExerciseNode parser/normalizer (build, tests, overlay)
     validate.ts         graph/content rules: validateNodes, formatIssue
     progressionBuild.ts buildMatrix, renderGeneratedModule, renderReviewSheet (pure)
+    credits.ts          About screen content: CONTENT_SOURCES, FONT_CREDITS, OFL_CREDIT
     testFixtures.ts     synthetic nodes for unit tests
     skills/
       index.ts          ALL_NODES, NODE_BY_ID (what the app imports)
@@ -130,7 +138,8 @@ src/
                         completeOnboarding; node detail: selfUnlockWarnings; Train (ADR-034):
                         trainPlan / activeSession / trainSummary, planTraining, swap/remove/add,
                         trainWarnings, acknowledgeTrainWarning, startTraining, logTrainingSet,
-                        skip/select/rest, finishTraining, abandonTraining
+                        skip/select/rest, finishTraining, abandonTraining; sessionResults (per
+                        session, PLAN 4.5); lastImport + undoLastImport (PLAN 4.6)
     backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker)
     bootstrap.ts        startApp(): open, migrate, create store, loadAll (once)
     useAppStore.ts      useAppStore(selector) hook for components below DataGate
@@ -139,7 +148,6 @@ src/
                         TypeScale, PIXEL, Spacing, Border, Frames, ButtonStyles, Motion, nav theme
     theme.test.ts       contrast of every text/fill pair (>= 4.5:1, bars >= 3:1)
     fonts.ts            FONT_ASSETS for useFonts (keys = FontFamily names)
-    PlaceholderScreen.tsx  temporary tab body (EmptyState + "COMING SOON") until the real tab UI
     NodeRow.tsx         a node as a list row: icon, name, tier chip, OG level, straight-arm tag, status
     onboarding/OnboardingScaffold.tsx  step bar "STEP n / 5", title, scrolling body, Back/Skip/Next footer
     BranchTabs.tsx      the 12 branches as horizontal pixel tabs (goal picker, Tree tab)
@@ -154,6 +162,14 @@ src/
     train/              Train flow parts: ExerciseCard (prescription, rest, markers), SetLogger
                         (stepper + Log / Partial / Failed), RestPanel (countdown), NodeOptionSheet
                         (swap/add picker), TrainWarningList (warnings acknowledged by key)
+    train/SessionResultPanels.tsx  XP, streak, level-ups, unlocks, exercises of a SessionResult
+                        (Train summary and past session)
+    character/          AttributeRadar (rasterized pixel radar), RankCrest (RANK_ICONS),
+                        SessionHistoryRow, GoalProgressCard
+    equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form (onboarding, Settings)
+    settings/           BackupPanel (export, import confirm, rejection issues, undo), AboutPanel
+    character.test.tsx  component tests: radar, crest, goal card, history row, profile editor,
+                        backup panel (real store, fake files)
     train.test.tsx      component tests of the Train parts
     tree.test.tsx       component tests: tiles, chains, prerequisite list, unlock sheet (real store)
     DataGate.tsx        keeps the splash until fonts + startApp are done; error screen on failure
@@ -167,7 +183,8 @@ src/
   lib/                  generic helpers: clamp.ts, curve.ts (geometric level curves), median.ts,
                         time.ts (MS_PER_HOUR/DAY/WEEK), hash.ts (FNV-1a, seeded tie-breaks),
                         id.ts (createId for local records), contrast.ts (WCAG ratio),
-                        pixelGrid.ts (icon grid → runs), segments.ts (litSegments for bars)
+                        pixelGrid.ts (icon grid → runs), segments.ts (litSegments for bars),
+                        radar.ts (spoke points, polygon rasterized into cells)
 assets/                 app icon, adaptive icon, splash, favicon
 docs/                   PLAN, DECISIONS, CONTEXT, DESIGN (visual language), research
   screenshots/          emulator screenshots per UI task (<phase>-<screen>.png)
@@ -178,7 +195,9 @@ drizzle.config.ts       drizzle-kit config (sqlite, expo driver, schema -> src/d
 babel.config.js         babel-preset-expo + inline-import for .sql (also used by Jest)
 metro.config.js         Expo default + `sql` source extension
 jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
-.maestro/               E2E flows: onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
+.maestro/               E2E flows: character.yaml (clearState; level/XP after a session, history →
+                        past session; 4.5 screenshots), settings.yaml (profile add/remove, export share
+                        sheet, import cancel; 4.6 screenshots), onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
                         proof), styleguide.yaml (UI kit), train.yaml (clearState; plan, live session,
                         kill + resume, summary; takes the 4.4 screenshots), tree.yaml (clearState; branch, detail, goal,
                         Trial, unlock anyway; takes the 4.2/4.3 screenshots); subflows/finish-onboarding.yaml (not run
@@ -280,6 +299,9 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Legendary node** | An elite node shown as a locked silhouette, there for motivation. |
 | **Tile state** | How the tree shows a node: the engine's node state, or `legendary` for a locked legendary node (`tileState`, ADR-033). |
 | **Chain / linked chip** | In the column view, a hard prerequisite on the node right above is drawn as a pixel chain (gold when met); any other hard prerequisite is a chip under the tile that opens that node. |
+| **Character sheet** | The Character tab's view model (`characterSheet`): level, rank, radar axes (attributes normalised to the largest), balance note, streak now, totals, goal progress, recent sessions (ADR-035). |
+| **Goal progress** | Proficient nodes on a goal's path (the goal + its transitive hard prerequisites) / path length, plus the next open, not-locked path node. |
+| **Undo last import** | Re-importing the safety copy of the last import in this app run (`undoLastImport`); kept in memory only (ADR-035). |
 | **Unlock anyway** | The node detail's self-unlock for a locked node: acknowledge `selfUnlockWarnings`, then `selfUnlock` (ADR-023, ADR-033). |
 
 ## Node states
@@ -501,6 +523,8 @@ build is needed.
   `onboarding.yaml` starts with `clearState` (wipes Expo Go and the app database); after that Expo Go
   shows its intro ("Continue") and then leaves its dev menu open: the flows close it with `back`.
   Text inside a scrolled-away panel isn't "visible": assert on a `testID` near the action instead.
+- `hideKeyboard` presses back when no keyboard is open, which leaves a tab (4.6). Tabs keep their
+  scroll position between flows; scroll up to a known element first.
 
 ## Gotchas
 - Skill node IDs are permanent, because saved progress references them.

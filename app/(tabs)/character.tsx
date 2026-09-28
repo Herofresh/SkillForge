@@ -1,5 +1,278 @@
-import { PlaceholderScreen } from '@/components/PlaceholderScreen';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
+import { AttributeRadar } from '@/components/character/AttributeRadar';
+import { GoalProgressCard } from '@/components/character/GoalProgressCard';
+import { RankCrest } from '@/components/character/RankCrest';
+import { SessionHistoryRow } from '@/components/character/SessionHistoryRow';
+import { ATTRIBUTE_LABELS } from '@/components/node/AttributeChips';
+import { AttributeColors, Colors, PIXEL, Spacing } from '@/components/theme';
+import {
+  LevelBadge,
+  LevelUpBurst,
+  PixelButton,
+  PixelFrame,
+  PixelIcon,
+  PixelText,
+  Screen,
+  StatBar,
+  WarningBanner,
+  XPBar,
+  type IconName,
+} from '@/components/ui';
+import { characterSheet, type CharacterSheet } from '@/domain/characterView';
+import { useAppStore } from '@/store/useAppStore';
+
+/**
+ * The character sheet (PLAN 4.5): hero, level and XP, rank crest, the attribute radar with the
+ * push/pull balance note, streak and totals, goals along their paths and the recent sessions (each
+ * opens its summary). Everything comes from `characterSheet` over the store's state.
+ */
 export default function CharacterScreen() {
-  return <PlaceholderScreen icon="helmet" title="Hero" subtitle="Level, rank and attributes." />;
+  const nodes = useAppStore((state) => state.nodes);
+  const engine = useAppStore((state) => state.engine);
+  const sessions = useAppStore((state) => state.sessions);
+  const sessionResults = useAppStore((state) => state.sessionResults);
+  const goals = useAppStore((state) => state.goals);
+  const heroName = useAppStore((state) => state.profile?.heroName);
+  // The streak depends on the time: read the clock whenever the tab comes into view.
+  const [now, setNow] = useState(() => Date.now());
+  useFocusEffect(useCallback(() => setNow(Date.now()), []));
+  const sheet = useMemo(
+    () =>
+      characterSheet({
+        nodes,
+        engine,
+        sessions,
+        sessionResults,
+        goals,
+        now,
+        ...(heroName !== undefined ? { heroName } : {}),
+      }),
+    [nodes, engine, sessions, sessionResults, goals, heroName, now],
+  );
+  return <CharacterBody sheet={sheet} />;
 }
+
+/** Plays LEVEL UP! when the character level rose while the tab was mounted (e.g. after a session). */
+function useLevelUpKey(level: number): number | undefined {
+  const seen = useRef(level);
+  const [key, setKey] = useState<number | undefined>();
+  useEffect(() => {
+    if (level > seen.current) setKey(level);
+    seen.current = level;
+  }, [level]);
+  return key;
+}
+
+function Stat({
+  icon,
+  label,
+  value,
+  testID,
+}: {
+  icon: IconName;
+  label: string;
+  value: number;
+  testID: string;
+}) {
+  return (
+    <View
+      style={styles.stat}
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={`${label}: ${value}`}
+      testID={testID}>
+      <PixelIcon name={icon} />
+      <PixelText variant="title">{String(value)}</PixelText>
+      <PixelText variant="label" tone="textMuted" align="center">
+        {label}
+      </PixelText>
+    </View>
+  );
+}
+
+function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
+  const router = useRouter();
+  const [balanceAcknowledged, setBalanceAcknowledged] = useState(false);
+  const levelUpKey = useLevelUpKey(sheet.level.level);
+  const largest = Math.max(1, ...sheet.radar.map((axis) => axis.value));
+  const openNode = (nodeId: string) =>
+    router.push({ pathname: '/node/[nodeId]', params: { nodeId } });
+  const xpText =
+    sheet.level.xpForLevel === 0
+      ? 'MAX'
+      : `${sheet.level.xpIntoLevel} / ${sheet.level.xpForLevel} XP`;
+
+  return (
+    <Screen testID="character-screen">
+      <PixelFrame variant="gold" contentStyle={styles.gap}>
+        <View style={styles.hero}>
+          <View style={styles.flex}>
+            <PixelText variant="label" tone="textMuted">
+              Hero
+            </PixelText>
+            <PixelText variant="display" testID="hero-name">
+              {sheet.heroName ?? 'Nameless hero'}
+            </PixelText>
+          </View>
+          <LevelBadge level={sheet.level.level} size="lg" testID="character-level" />
+        </View>
+        {levelUpKey !== undefined && (
+          <LevelUpBurst title="LEVEL UP!" subtitle={`Level ${levelUpKey}`} playKey={levelUpKey} />
+        )}
+        <XPBar
+          label={`To level ${sheet.level.level + 1}`}
+          fraction={sheet.level.fraction}
+          valueText={xpText}
+          testID="character-xp"
+        />
+        <PixelText variant="small" tone="textMuted" testID="character-total-xp">
+          {`${sheet.totalXp} XP earned in total`}
+        </PixelText>
+      </PixelFrame>
+
+      <PixelFrame contentStyle={styles.gap}>
+        <RankCrest rank={sheet.rank} hint={sheet.rankHint} testID="character-rank" />
+      </PixelFrame>
+
+      <PixelFrame contentStyle={styles.gap} testID="character-attributes">
+        <PixelText variant="label" tone="rune" accessibilityRole="header">
+          Attributes
+        </PixelText>
+        <AttributeRadar axes={sheet.radar} testID="attribute-radar" />
+        {sheet.radar.every((axis) => axis.value === 0) && (
+          <PixelText variant="small" tone="textMuted">
+            Train or pass a Trial to grow your attributes. The radar shows their balance.
+          </PixelText>
+        )}
+        {sheet.radar.map((axis) => (
+          <StatBar
+            key={axis.attribute}
+            label={ATTRIBUTE_LABELS[axis.attribute]}
+            value={axis.value}
+            max={largest}
+            color={AttributeColors[axis.attribute]}
+            testID={`stat-${axis.attribute}`}
+          />
+        ))}
+      </PixelFrame>
+
+      {sheet.balance && (
+        <WarningBanner
+          title="Push and pull out of balance"
+          message={sheet.balance.message}
+          severity="info"
+          acknowledged={balanceAcknowledged}
+          onAcknowledge={() => setBalanceAcknowledged(true)}
+          testID="balance-warning"
+        />
+      )}
+
+      <PixelFrame variant="raised">
+        <View style={styles.stats}>
+          <Stat icon="flame" label="Streak" value={sheet.streak} testID="stat-streak" />
+          <Stat
+            icon="scroll"
+            label="Sessions"
+            value={sheet.totals.sessions}
+            testID="stat-sessions"
+          />
+          <Stat icon="bar" label="Sets" value={sheet.totals.sets} testID="stat-sets" />
+          <Stat
+            icon="shield"
+            label="Trials"
+            value={sheet.totals.trialsPassed}
+            testID="stat-trials"
+          />
+        </View>
+      </PixelFrame>
+
+      <View style={styles.gap}>
+        <PixelText variant="label" tone="rune" accessibilityRole="header">
+          Goals
+        </PixelText>
+        {sheet.goals.length === 0 ? (
+          <PixelFrame contentStyle={styles.gap}>
+            <PixelText tone="textMuted">No goals yet. Pick up to five in the Tree.</PixelText>
+            <PixelButton
+              label="Open the Tree"
+              icon="tree"
+              variant="secondary"
+              onPress={() => router.navigate('/tree')}
+            />
+          </PixelFrame>
+        ) : (
+          sheet.goals.map((goal) => (
+            <PixelFrame key={goal.nodeId}>
+              <GoalProgressCard goal={goal} onOpen={openNode} testID={`goal-${goal.nodeId}`} />
+            </PixelFrame>
+          ))
+        )}
+      </View>
+
+      <View style={styles.gap}>
+        <PixelText variant="label" tone="rune" accessibilityRole="header">
+          Recent sessions
+        </PixelText>
+        {sheet.recent.length === 0 ? (
+          <PixelFrame contentStyle={styles.gap} testID="recent-empty">
+            <PixelText tone="textMuted">
+              No sessions yet. Your quest log starts with the first one.
+            </PixelText>
+            <PixelButton label="Train now" icon="sword" onPress={() => router.navigate('/train')} />
+          </PixelFrame>
+        ) : (
+          <PixelFrame variant="parchment" contentStyle={styles.list} testID="recent-sessions">
+            {sheet.recent.map((item, index) => (
+              <View key={item.sessionId} style={index > 0 && styles.divider}>
+                <SessionHistoryRow
+                  item={item}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/session/[sessionId]',
+                      params: { sessionId: item.sessionId },
+                    })
+                  }
+                  testID={`recent-session-${index}`}
+                />
+              </View>
+            ))}
+          </PixelFrame>
+        )}
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  gap: {
+    gap: Spacing.sm,
+  },
+  flex: {
+    flex: 1,
+  },
+  hero: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  stats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  stat: {
+    flex: 1,
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  list: {
+    gap: Spacing.xs,
+  },
+  divider: {
+    paddingTop: Spacing.xs,
+    borderTopWidth: PIXEL,
+    borderTopColor: Colors.bronze,
+  },
+});

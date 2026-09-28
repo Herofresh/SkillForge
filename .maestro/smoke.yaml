@@ -40,11 +40,25 @@ name: Smoke - app opens and all tabs render
 - assertVisible:
     id: 'train-screen'
 - tapOn: 'Character'
-- assertVisible: 'COMING SOON'
+- assertVisible:
+    id: 'character-screen'
 - tapOn: 'Settings'
-- assertVisible: 'COMING SOON'
+- assertVisible:
+    id: 'settings-screen'
 # The seeded equipment profiles come from SQLite (PLAN 3.1): proof that migrations and loading work.
-- assertVisible: 'Home'
-- assertVisible: 'Park'
+# (The tab keeps its scroll position from earlier flows: scroll up to the profiles first.)
+- scrollUntilVisible:
+    element:
+      id: 'settings-hero-name'
+    direction: UP
+    timeout: 60000
+- scrollUntilVisible:
+    element: 'Home'
+    direction: DOWN
+    timeout: 60000
+- scrollUntilVisible:
+    element: 'Park'
+    direction: DOWN
+    timeout: 60000
 - tapOn: 'Tree'
 - assertVisible: 'Skill Tree'

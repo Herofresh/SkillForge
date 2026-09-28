@@ -11,6 +11,8 @@
  *
  * Pure TypeScript: no React/Expo/DB (ADR-009). Files and the database live in `src/store/` and `src/db/`.
  */
+import { formatIssue } from '@/data/validate';
+
 import {
   applyOverlay,
   OVERLAY_FORMAT,
@@ -457,4 +459,21 @@ export function parseBackup(text: string, baseNodes: readonly ExerciseNode[]): B
     issues,
     ...exported,
   };
+}
+
+/** How many issues of a rejected import the Settings screen lists (PLAN 4.6). */
+export const BACKUP_ISSUES_SHOWN = 5;
+
+/**
+ * A rejected import's issues as readable lines (without the `backup` file label, which is the
+ * same for all of them), at most `limit`, and how many more there are.
+ */
+export function backupIssueLines(
+  issues: readonly ValidationIssue[],
+  limit: number = BACKUP_ISSUES_SHOWN,
+): { lines: string[]; more: number } {
+  const lines = issues
+    .slice(0, limit)
+    .map(({ file, ...rest }) => formatIssue(file === BACKUP_FILE ? rest : { file, ...rest }));
+  return { lines, more: Math.max(0, issues.length - limit) };
 }

@@ -1,28 +1,48 @@
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { PlaceholderScreen } from '@/components/PlaceholderScreen';
-import { Colors, Spacing } from '@/components/theme';
-import { PixelButton, PixelFrame, PixelIcon, PixelText } from '@/components/ui';
+import { EquipmentProfileEditor } from '@/components/equipment/EquipmentProfileEditor';
+import { DetailSection } from '@/components/node/DetailSection';
+import { AboutPanel } from '@/components/settings/AboutPanel';
+import { BackupPanel } from '@/components/settings/BackupPanel';
+import { Spacing } from '@/components/theme';
+import { PixelButton, PixelModal, PixelText, PixelTextInput, Screen } from '@/components/ui';
+import { HERO_NAME_MAX_LENGTH, normalizeHeroName } from '@/domain/onboarding';
+import type { EquipmentProfile } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
 
+/**
+ * Settings (PLAN 4.6): the hero's name, equipment profiles (add, edit tags, rename, remove with a
+ * confirmation), backups (export, import with a "replaces all your data" confirmation, undo the last
+ * import), about and credits, and the dev-only Style Guide. There are no units or other preferences
+ * yet.
+ */
 export default function SettingsScreen() {
-  const profiles = useAppStore((state) => state.equipmentProfiles);
   const router = useRouter();
+  const deleteProfile = useAppStore((state) => state.deleteEquipmentProfile);
+  // Re-mounts the name field when the stored name changes elsewhere (e.g. an import).
+  const heroName = useAppStore((state) => state.profile?.heroName ?? '');
+  const [renaming, setRenaming] = useState<EquipmentProfile | undefined>();
+  const [removing, setRemoving] = useState<EquipmentProfile | undefined>();
+
   return (
-    <PlaceholderScreen icon="gear" title="Settings" subtitle="Equipment profiles and backups.">
-      {/* Minimal proof that the database loads (PLAN 3.1); the real screen is 4.6. */}
-      <PixelFrame variant="parchment" contentStyle={styles.list}>
-        <PixelText variant="heading" tone="textOnParchment" accessibilityRole="header">
+    <Screen testID="settings-screen">
+      <HeroNamePanel key={heroName} />
+
+      <View style={styles.gap} testID="settings-equipment">
+        <PixelText variant="label" tone="rune" accessibilityRole="header">
           Equipment profiles
         </PixelText>
-        {profiles.map((profile) => (
-          <View key={profile.id} style={styles.item}>
-            <PixelIcon name="bar" tint={Colors.bronze} />
-            <PixelText tone="textOnParchment">{profile.name}</PixelText>
-          </View>
-        ))}
-      </PixelFrame>
+        <PixelText variant="small" tone="textMuted">
+          Workouts only use the equipment of the place you pick on the Train tab.
+        </PixelText>
+        <EquipmentProfileEditor onRename={setRenaming} onRemove={setRemoving} />
+      </View>
+
+      <BackupPanel />
+      <AboutPanel />
+
       {__DEV__ && (
         <PixelButton
           label="Style Guide"
@@ -32,17 +52,98 @@ export default function SettingsScreen() {
           testID="open-styleguide"
         />
       )}
-    </PlaceholderScreen>
+
+      {renaming && <RenameSheet profile={renaming} onClose={() => setRenaming(undefined)} />}
+      <PixelModal
+        visible={removing !== undefined}
+        title={`Remove ${removing?.name ?? ''}?`}
+        onClose={() => setRemoving(undefined)}
+        closeLabel="Keep it"
+        testID="remove-dialog">
+        <PixelText>
+          The profile and its equipment list are removed. Sessions you logged with it stay in your
+          history.
+        </PixelText>
+        <PixelButton
+          label="Remove"
+          variant="danger"
+          onPress={() => {
+            if (removing) deleteProfile(removing.id);
+            setRemoving(undefined);
+          }}
+          testID="remove-confirm"
+        />
+      </PixelModal>
+    </Screen>
+  );
+}
+
+/** The hero's name, editable (the same rules as onboarding: `normalizeHeroName`). */
+function HeroNamePanel() {
+  const storedName = useAppStore((state) => state.profile?.heroName ?? '');
+  const setHeroName = useAppStore((state) => state.setHeroName);
+  const [name, setName] = useState(storedName);
+  const normalized = normalizeHeroName(name);
+  const changed = normalized !== undefined && normalized !== storedName;
+  const save = () => {
+    if (changed) setHeroName(name);
+  };
+  return (
+    <DetailSection title="Hero" icon="helmet" testID="settings-hero">
+      <PixelTextInput
+        label="Hero name"
+        value={name}
+        onChangeText={setName}
+        maxLength={HERO_NAME_MAX_LENGTH}
+        autoCapitalize="words"
+        returnKeyType="done"
+        onSubmitEditing={save}
+        testID="settings-hero-name"
+      />
+      <PixelButton
+        label="Save name"
+        variant="secondary"
+        onPress={save}
+        disabled={!changed}
+        testID="save-hero-name"
+      />
+    </DetailSection>
+  );
+}
+
+/** Rename one equipment profile. Mounted to open, so it starts from the current name. */
+function RenameSheet({ profile, onClose }: { profile: EquipmentProfile; onClose: () => void }) {
+  const updateProfile = useAppStore((state) => state.updateEquipmentProfile);
+  const [name, setName] = useState(profile.name);
+  const valid = name.trim().length > 0;
+  const save = () => {
+    if (!valid) return;
+    updateProfile(profile.id, { name });
+    onClose();
+  };
+  return (
+    <PixelModal
+      visible
+      title="Rename profile"
+      onClose={onClose}
+      closeLabel="Cancel"
+      testID="rename-sheet">
+      <PixelTextInput
+        label="Name"
+        value={name}
+        onChangeText={setName}
+        autoFocus
+        returnKeyType="done"
+        onSubmitEditing={save}
+        testID="rename-input"
+      />
+      <PixelButton label="Save" onPress={save} disabled={!valid} testID="rename-save" />
+    </PixelModal>
   );
 }
 
 const styles = StyleSheet.create({
-  list: {
-    gap: Spacing.sm,
-  },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
+  gap: {
+    gap: Spacing.md,
   },
 });

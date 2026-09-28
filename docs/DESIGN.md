@@ -46,6 +46,9 @@ Raw colors are in `Palette`; components use the semantic `Colors` (and `TierColo
 **Tier colors** (`TierColors`, tiers from ADR-007): beginner `#6BD17A` green · intermediate
 `#58A6FF` blue · advanced `#B07CFF` purple · elite `#F5A524` legendary orange-gold.
 
+**Rank colors** (`RankColors`, the crest frame and rank title): Novice steel · Apprentice green ·
+Adept blue · Master purple · Legend orange-gold.
+
 **Attribute colors** (`AttributeColors`): push ember · pull blue · core gold · legs green ·
 balance rune · mobility arcane.
 
@@ -165,6 +168,19 @@ lines), `SetLogger` (the kit's `NumberStepper` + primary "Log set" and secondary
 color; the summary opens with a "QUEST COMPLETE" `LevelUpBurst`, then LEVEL UP! / UNLOCKED! bursts,
 a gold streak panel with the flame and a parchment list of exercises. Screenshots:
 `docs/screenshots/4.4-*.png`.
+
+**Character and Settings (PLAN 4.5–4.6, ADR-035)** in `src/components/character/`, `settings/`,
+`equipment/`: the Character tab opens with a gold hero panel (display-font name, `LevelBadge` lg,
+XP bar "To level n"), then `RankCrest` (the rank emblem, shield → sword → rune → star → flame, at
+48 dp in a double frame of its `RankColors`: steel, then the tier colors), the `AttributeRadar`
+(hexagon rings and spokes in `border`, the value area as 6 dp cells in gold at 40 % with a solid
+gold outline, a marker per attribute in its `AttributeColors`; caps labels around it; one
+accessible image) over six `StatBar`s, the balance `WarningBanner` (info), a raised stats row
+(streak, sessions, sets, Trials), goal cards (tier chip, path `SegmentedBar`, rune "Next: …" link)
+and a parchment list of `SessionHistoryRow`s. Settings stacks `DetailSection` panels (Hero, Backup,
+About) and the shared `EquipmentProfileEditor`; destructive steps (remove a profile, import, undo)
+confirm in a `PixelModal` with a danger button. Screenshots: `docs/screenshots/4.5-*.png`,
+`4.6-*.png`.
 
 Bar math: `litSegments(fraction, count)` (`src/lib/segments.ts`) lights ≥ 1 segment for any gain and
 never shows full before 100 %. The fraction itself comes from the domain (e.g. XP thresholds in
