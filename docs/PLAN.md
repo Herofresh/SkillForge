@@ -107,7 +107,7 @@
   leaving the progression editor with a changed draft asks "Discard changes?"; the Character
   tab's empty goals / sessions use `EmptyState`; `npm run e2e` finds Maestro itself
   (`scripts/e2e.ts`). Screenshot `docs/screenshots/5.2-*.png`.
-- Build config (5.3a, ADR-039, PR_LINK): a first preview APK is published as the GitHub
+- Build config (5.3a, ADR-039, [PR #23](https://github.com/Herofresh/SkillForge/pull/23)): a first preview APK is published as the GitHub
   pre-release `v0.1.0-preview1` (arm64 + universal, debug-signed). `eas.json` has the development /
   preview / production profiles (version source `local`, not used yet), app.json is version 0.1.0 /
   versionCode 1, and `npm run build:apk` (arm64) / `npm run build:apk:universal` (+ x86_64) build a
@@ -532,7 +532,7 @@ compiled into a typed module for the app; users can layer their own changes on t
   (own layered layout instead of dagre, View-drawn edges; ADR-037, [PR #21](https://github.com/Herofresh/SkillForge/pull/21))
 - [x] 5.2 Animations and polish: one reveal vocabulary (`BURST_TITLES`, `useLevelUpKey`, node-detail LEVEL UP!), tinted icons keep their outline (`knockout`; Export icon back), "Discard changes?" when leaving the editor with a changed draft, consistent empty states, `npm run e2e` without Maestro on PATH (ADR-038, [PR #22](https://github.com/Herofresh/SkillForge/pull/22))
 - 5.3 EAS build profile and Android APK, split in two:
-  - [x] 5.3a Build config + local APK script: `eas.json` (development / preview / production, version source local), app.json version 0.1.0 / versionCode 1, `npm run build:apk[:universal]` (ADR-039, PR_LINK)
+  - [x] 5.3a Build config + local APK script: `eas.json` (development / preview / production, version source local), app.json version 0.1.0 / versionCode 1, `npm run build:apk[:universal]` (ADR-039, [PR #23](https://github.com/Herofresh/SkillForge/pull/23))
   - [ ] 5.3b EAS cloud build + proper release signing (needs the user: Expo account login, keystore decision)
 
 ### Later / Backlog
