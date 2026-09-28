@@ -1028,3 +1028,44 @@ Template:
   place by a later release-key APK (uninstall first, which deletes the app's data; export a backup
   first). The `development` profile needs `expo-dev-client` installed before it is used (5.3b).
   No dependency added.
+
+## ADR-042: App icon as a code-defined pixel grid rendered by a script (PLAN 5.6)
+- Date: 2026-09-28 · Status: Accepted (extends ADR-030)
+- Context: the app still shipped the Expo template icons (icon, adaptive layers, monochrome,
+  splash, favicon, and an iOS Icon Composer bundle `assets/expo.icon`). The icon should match the
+  pixel-art × dark-fantasy look, stay editable and reproducible like the UI icons (12×12 grids in
+  `icons.ts`), and use only palette colors. Android is the target.
+- Decision:
+  - **Motif:** a gold hero in a straddle handstand on a bronze floor, two gold-light sparkles,
+    inside a two-cell rune ring with a rune-shade inner line around a stone disc, on the night
+    background. 32 × 32 cells, authored as a character grid (`MOTIF_ROWS` in `scripts/appIcon.ts`)
+    with roles mapped to `Palette` keys (`MOTIF_COLORS`); the silhouette is mirror-symmetric
+    (tested). A straddle reads as a person at 48 px; a straight handstand read as a rocket.
+  - **Rendering:** `npm run icon:build` (`scripts/iconBuild.ts`, tsx) draws the grid with
+    nearest-neighbour cells (integer pixels per cell) through `parsePixelGrid`
+    (`src/lib/pixelGrid.ts`, shared with the UI icons) into RGBA buffers (`scripts/raster.ts`) and
+    writes PNGs with a ~70-line encoder on `node:zlib` (`scripts/png.ts`). No image dependency:
+    `pngjs` is only a transitive dependency of the Expo tooling, so relying on it would break
+    silently.
+  - **Assets (`ICON_ASSETS`):** `icon.png` 1024 full bleed, 28 px cells (motif 87.5 %, a circular
+    mask never cuts the ring); adaptive foreground and monochrome 1024 transparent, 18 px cells =
+    576 px (~61 dp of the 108 dp layer); the ring's outermost pixel corners sit 32.7 dp from the
+    centre, inside the 66 dp safe-zone circle (tested against the radius, not the square side); adaptive background 1024 solid
+    night; `splash-icon.png` 1024 transparent, 32 px cells (app.json scales it to `imageWidth`
+    76); `favicon.png` 48, 1 px cells. The monochrome (themed icon) layer knocks the disc out
+    (`MONOCHROME_KNOCKOUT`) so the hero and ring stay separate shapes in the alpha mask.
+  - **Palette in Node:** the raw `Palette` moved to `src/components/palette.ts` (no React Native
+    imports) so the script can import it; `theme.ts` re-exports it and stays the one place the app
+    takes tokens from. app.json's adaptive and splash `backgroundColor` changed from the
+    off-palette `#12101A` to `Palette.night` (`#0D0B14`, `Colors.background`), pinned by a test.
+  - **iOS:** `ios.icon` now points at `assets/images/icon.png`; the template `assets/expo.icon`
+    bundle is deleted (an Icon Composer file can't be generated from a grid without Apple tools,
+    and iOS isn't a target yet).
+  - **Preview:** the build also writes `docs/screenshots/5.6-app-icon.png`: icon.png, the adaptive
+    icon in circle and squircle masks, the themed icon, the splash, and the circle icon at 96 and
+    48 px (area-averaged like a launcher), also blown up ×4.
+- Consequences: changing the icon is a grid edit plus `npm run icon:build`; the PNGs are committed
+  generated files (like the progression module). There is no `icon:check` for stale PNGs: zlib
+  output can differ between Node versions, so a byte comparison would be flaky; the tests check
+  sizes on disk instead. If iOS becomes a target, an Icon Composer bundle (liquid-glass layers)
+  may be worth adding by hand.
