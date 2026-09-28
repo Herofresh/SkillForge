@@ -102,6 +102,25 @@ describe('Train view models', () => {
     expect(view.blocks[0].exercises[0].setsLogged).toBe(1);
   });
 
+  it('gives each logged set its session position and where the edit stepper starts', () => {
+    let session = startSession(sessionPlan(WORKOUT, 'home', 30), 's', 0);
+    session = logSessionSet(session, 'e1', { value: 6 }, 1);
+    session = logSessionSet(session, 'e2', { value: 0 }, 2);
+    const view = liveView({ ...session, currentKey: 'e2' }, LOOKUP);
+    expect(view.current?.sets).toEqual([
+      { index: 0, setIndex: 1, text: '0 reps', outcome: 'failed', editStart: { value: 8 } },
+    ]);
+  });
+
+  it('says where each exercise can move, a pair as one (PLAN 5.9)', () => {
+    const session = startSession(sessionPlan(WORKOUT, 'home', 30), 's', 0);
+    expect(liveView(session, LOOKUP).moves).toEqual({
+      e0: { up: false, down: true },
+      e1: { up: true, down: false },
+      e2: { up: true, down: false },
+    });
+  });
+
   it('suggests the target before the first set and has no current when all is done', () => {
     const session = startSession(sessionPlan(WORKOUT, 'home', 30), 's', 0);
     expect(liveView(session, LOOKUP).current?.suggested).toEqual({ value: 20 });

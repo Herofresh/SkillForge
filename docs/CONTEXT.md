@@ -136,14 +136,17 @@ src/
                         swapOptions / addOptions, replace/remove/addExercise, startSession,
                         logSessionSet (pairs alternate; takes the timer's durationSec),
                         markedPerformance, skip, rest, start/stop/clearSetTimer (5.4),
-                        projectedSets, finishedSession, warningKey, parseActiveSession
+                        moveExercise / canMoveExercise (pairs move as one), editSessionSet,
+                        deleteSessionSet (dense setIndex) (5.9, ADR-045), projectedSets,
+                        finishedSession, warningKey, parseActiveSession
     setTimer.ts         exercise timer (PLAN 5.4, ADR-040): timerModeFor (hold countdown with
                         GET_READY_SECONDS, else stopwatch), readTimer (phase, clock, measured
                         seconds from timestamps), measuredSeconds, reachedTarget, formatTimerClock,
                         timerCaption, spokenTimer, timedPerformance, elapsedSeconds, totalDurationSec
     trainView.ts        Train view models: blockViews, exerciseView, liveView, summaryView (with the
                         stored session: time per exercise, session time), loggedSetText
-                        ("8 reps · 0:42"), sessionDurationSec, BLOCK_LABELS, OUTCOME_LABELS
+                        ("8 reps · 0:42"), sessionDurationSec, BLOCK_LABELS, OUTCOME_LABELS;
+                        liveView's logged sets carry setIndex + editStart, and moves per exercise
     characterView.ts    Character tab view model (ADR-035): characterSheet, radarAxes, nextRank,
                         rankHint, activeStreak, characterTotals, balanceNote, recentSessions,
                         goalProgress
@@ -179,6 +182,7 @@ src/
                         completeOnboarding; node detail: selfUnlockWarnings; Train (ADR-034):
                         trainPlan / activeSession / trainSummary, planTraining, swap/remove/add,
                         trainWarnings, acknowledgeTrainWarning, startTraining, logTrainingSet,
+                        editTrainingSet / deleteTrainingSet / moveTrainingExercise (5.9),
                         skip/select/rest, finishTraining, abandonTraining; sessionResults (per
                         session, PLAN 4.5); lastImport + undoLastImport (PLAN 4.6); editor (ADR-036):
                         baseNodes, nodeDraft, newNodeDraft, nodeDraftIssues, saveNodeDraft,
@@ -210,8 +214,9 @@ src/
     node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
                         NodeHistoryList, AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
     train/              Train flow parts: ExerciseCard (prescription, rest, markers), SetLogger
-                        (timer + stepper + Log / Partial / Failed), RestPanel (countdown),
-                        SessionClock (elapsed session time), NodeOptionSheet (swap/add picker),
+                        (timer + stepper + Log / Partial / Failed; logged-set lines open the
+                        edit sheet), EditSetSheet (edit / delete a logged set, 5.9), RestPanel
+                        (countdown), SessionClock (elapsed session time), NodeOptionSheet (swap/add picker),
                         TrainWarningList (warnings acknowledged by key)
     timer/SetTimerPanel.tsx  the exercise timer of one set (PLAN 5.4): Start hold / Start set →
                         clock, Stop / Done, Cancel / Reset; vibrates at a hold's target, keeps the
@@ -235,6 +240,8 @@ src/
                         backup panel (real store, fake files)
     train.test.tsx      component tests of the Train parts (SetLogger timer, SetTimerPanel with
                         fake timers, summary times)
+    liveSession.test.tsx  the live session screen with a real store: edit / delete a logged set,
+                        reorder (PLAN 5.9)
     trial.test.tsx      component tests: TrialSetsPanel timers per hold set
     tree.test.tsx       component tests: tiles, chains, prerequisite list, unlock sheet (real store)
     DataGate.tsx        keeps the splash until fonts + startApp are done; error screen on failure
@@ -276,7 +283,7 @@ jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
                         sheet, import cancel; 4.6 screenshots), map.yaml (Tree Map: zoom, pan, double tap,
                         focus, open a node, back to Columns; 5.1 screenshots), onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
                         proof), styleguide.yaml (UI kit), train.yaml (clearState; plan, live session,
-                        kill + resume, summary; takes the 4.4 screenshots), tree.yaml (clearState; branch, detail, goal,
+                        kill + resume, edit a logged set, reorder, summary; takes the 4.4 / 5.9 screenshots), tree.yaml (clearState; branch, detail, goal,
                         Trial, unlock anyway; takes the 4.2/4.3 screenshots); subflows/finish-onboarding.yaml (not run
                         on its own) finishes onboarding from any step
 ```
@@ -347,6 +354,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
 | **Session plan / active session** | The Train flow's editable plan preview (`SessionPlan`, in memory) and the started session (`ActiveSession`, the `active_session` draft) with its logged sets; `finishedSession` turns it into a `LoggedSession` (ADR-034). |
+| **Edit / reorder in the live session** | Tap a logged set's line to change its result (stepper, Save / Partial / Failed against its own prescription; its time stays) or delete it (confirmed; later sets move up, so `setIndex` stays the dense logging position). "Reorder" shows Up / Down per exercise; a strength pair moves as one (PLAN 5.9, ADR-045). |
 | **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics get a stopwatch. Stored as timestamps (`ActiveSession.timer`), so it survives an app kill; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
 | **Custom node / custom tag** | A node the user added (`user_` id) or edited through the node editor; shown with a "Custom" tag. "Reset to default" removes the edit; a custom node is deleted instead. Overlays can't clear `straightArm` on, or move, a built-in straight-arm node (ADR-036). |
 | **Shared progressions** | The overlay as YAML (`exportOverlay`), shared from My progressions. Importing one merges it into the user's overlay after a preview (`mergeOverlays`, ADR-036). |

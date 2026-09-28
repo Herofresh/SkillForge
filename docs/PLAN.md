@@ -128,6 +128,11 @@
   `schemaVersion` 2, version 1 still imports). Logged sets read "8 reps · 0:42"; the header shows the
   session clock; summary / past session show the session time and the time per exercise. Hold
   Trials have a timer per set.
+- Live-session edits (5.9, ADR-045, [PR #PRNUM](https://github.com/Herofresh/SkillForge/pull/PRNUM)): tap a logged set's line to change it
+  (stepper, Save / Partial / Failed against its own prescription, its time kept) or delete it
+  (confirmed; later sets move up, `setIndex` stays dense). "Reorder" on the session list shows
+  Up / Down per exercise; a strength pair moves as one. Pure functions in `train.ts`, the draft is
+  saved after each change, old drafts load unchanged.
 
 ## Next up
 1. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
@@ -140,6 +145,18 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Live-session edits (task 5.9, ADR-045):**
+  - Domain: `moveExercise` / `canMoveExercise` (units = single or adjacent pair partners),
+    `editSessionSet`, `deleteSessionSet` in `src/domain/train.ts`; `liveView` adds `setIndex` and
+    `editStart` per logged set and `moves` per exercise key.
+  - Store: `editTrainingSet(setIndex, entered, mark?)`, `deleteTrainingSet(setIndex)`,
+    `moveTrainingExercise(key, direction)`.
+  - UI: `src/components/train/EditSetSheet.tsx`; `SetLogger` takes `onEditSet`; the session
+    list's "Reorder" toggle (`session-reorder`, `move-up-<key>` / `move-down-<key>`) in
+    `app/train/session.tsx`. Screen test `src/components/liveSession.test.tsx` (real store).
+  - E2E: `train.yaml` gained an edit + reorder step (screenshots `5.9-edit-set`, `5.9-reorder`),
+    **not run yet** (no emulator in the implementing agent's environment); run it once on the
+    Pixel 8 Pro AVD.
 - **Exercise timer (task 5.4, ADR-040):**
   - Domain: `src/domain/setTimer.ts` (`timerModeFor`, `readTimer`, `measuredSeconds`,
     `reachedTarget`, `formatTimerClock`, `timerCaption`, `spokenTimer`, `timedPerformance`,
@@ -604,6 +621,9 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.6 App icon: original pixel-art icon from a code grid (`scripts/appIcon.ts`, `npm run icon:build`): icon, adaptive foreground / background / monochrome, splash, favicon (ADR-042, [PR #24](https://github.com/Herofresh/SkillForge/pull/24))
 - [ ] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub
 
+#### v0.3.0
+- [x] 5.9 Edit/delete a logged set, reorder exercises in the live session (ADR-045, [PR #PRNUM](https://github.com/Herofresh/SkillForge/pull/PRNUM))
+
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
@@ -619,7 +639,8 @@ compiled into a typed module for the app; users can layer their own changes on t
   target passes while the app is in the background, timers for rep Trials, pausing the rest countdown
 - Exercise demo animations: pixel-art animations per exercise, possibly generated/created with
   different AI tools (user idea 2026-09-28, not now)
-- Train flow extras: reorder exercises, shuffle the plan (seed), edit or delete a logged set
+- Train flow extras: shuffle the plan (seed); reorder in the plan preview too (`moveExercise` is
+  generic over `SessionPlan`, ADR-045); edit a logged set of another exercise without selecting it
 - Weekly plans and scheduling
 - Notifications and reminders
 - More content: advanced/elite nodes, full flexibility branch

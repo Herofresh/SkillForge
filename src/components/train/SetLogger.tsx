@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { stepTrialResult } from '@/domain/assessment';
 import { formatPerformance } from '@/domain/format';
 import { measuredSeconds, timedPerformance, timerModeFor, type SetTimer } from '@/domain/setTimer';
 import type { SetMark } from '@/domain/train';
-import type { CurrentExerciseView } from '@/domain/trainView';
+import type { CurrentExerciseView, LoggedSetView } from '@/domain/trainView';
 import type { ExerciseNode, SetPerformance } from '@/domain/types';
 
-import { Spacing } from '../theme';
+import { Colors, Spacing, TOUCH_TARGET } from '../theme';
 import { SetTimerPanel } from '../timer/SetTimerPanel';
 import { NumberStepper, PixelButton, PixelIcon, PixelText } from '../ui';
 
@@ -24,6 +24,8 @@ type Props = {
   /** Stops the timer and returns what it measured (whole seconds). */
   onStopTimer: () => number | undefined;
   onResetTimer: () => void;
+  /** Opens the edit sheet of a logged set (PLAN 5.9); without it the lines are plain text. */
+  onEditSet?: (set: LoggedSetView) => void;
 };
 
 const OUTCOME_ICONS = { success: 'check', partial: 'alert', failed: 'cross' } as const;
@@ -31,7 +33,8 @@ const OUTCOME_ICONS = { success: 'check', partial: 'alert', failed: 'cross' } as
 /**
  * Logging one set of the current exercise: the optional exercise timer, a stepper that starts at the
  * suggestion (last result or the target; for a hold stopped by the timer, the seconds held), then
- * "Log set", or mark it partial / failed. Mount it with a key per set so the stepper starts fresh.
+ * "Log set", or mark it partial / failed. Tapping a logged set's line edits it (`onEditSet`). Mount
+ * it with a key per set so the stepper starts fresh.
  */
 export function SetLogger({
   node,
@@ -42,6 +45,7 @@ export function SetLogger({
   onStartTimer,
   onStopTimer,
   onResetTimer,
+  onEditSet,
 }: Props) {
   const [entered, setEntered] = useState<SetPerformance>(() =>
     timer?.stoppedAt !== undefined
@@ -64,12 +68,37 @@ export function SetLogger({
       : `Set ${current.setNumber} of ${current.plannedSets}`;
   return (
     <View style={styles.gap}>
-      {current.sets.map((set) => (
-        <View key={set.index} style={styles.logged} testID={`logged-set-${set.index}`}>
-          <PixelIcon name={OUTCOME_ICONS[set.outcome]} label={set.outcome} />
-          <PixelText variant="small">{`Set ${set.index + 1}: ${set.text}`}</PixelText>
-        </View>
-      ))}
+      {current.sets.map((set) => {
+        const text = `Set ${set.index + 1}: ${set.text}`;
+        const line = (
+          <>
+            <PixelIcon name={OUTCOME_ICONS[set.outcome]} label={set.outcome} />
+            <PixelText variant="small" style={styles.lineText}>
+              {text}
+            </PixelText>
+          </>
+        );
+        if (!onEditSet) {
+          return (
+            <View key={set.index} style={styles.logged} testID={`logged-set-${set.index}`}>
+              {line}
+            </View>
+          );
+        }
+        return (
+          <Pressable
+            key={set.index}
+            onPress={() => onEditSet(set)}
+            accessibilityRole="button"
+            accessibilityLabel={`${text}, ${set.outcome}`}
+            accessibilityHint="Edit or delete this set"
+            testID={`logged-set-${set.index}`}
+            style={({ pressed }) => [styles.logged, styles.editable, pressed && styles.pressed]}>
+            {line}
+            <PixelIcon name="quill" />
+          </Pressable>
+        );
+      })}
       <PixelText variant="label" tone="rune" testID="set-label">
         {setLabel}
       </PixelText>
@@ -138,6 +167,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
+  },
+  editable: {
+    minHeight: TOUCH_TARGET,
+  },
+  pressed: {
+    backgroundColor: Colors.surfaceRaised,
+  },
+  lineText: {
+    flex: 1,
   },
   row: {
     flexDirection: 'row',

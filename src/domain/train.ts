@@ -1,8 +1,9 @@
 /**
  * The Train flow's session model (PLAN 4.4, ADR-034): the plan the user edits before starting (swap,
- * remove), and the live session that logs sets one by one (skip, add, rest countdown) until it is
- * finished into an ordinary `LoggedSession`. Pure: the store persists an `ActiveSession` after every
- * change so an app kill loses nothing, and `finishedSession` hands the history entry to `logSession`.
+ * remove), and the live session that logs sets one by one (skip, add, reorder, rest countdown, edit
+ * or delete a logged set) until it is finished into an ordinary `LoggedSession`. Pure: the store
+ * persists an `ActiveSession` after every change so an app kill loses nothing, and
+ * `finishedSession` hands the history entry to `logSession`.
  *
  * The generator's plan is only a suggestion (ADR-023): the user may swap in any trainable node of the
  * same movement pattern, add any node (even a locked one) and skip anything. Whatever that raises
@@ -412,6 +413,81 @@ export function selectExercise(session: ActiveSession, key: string): ActiveSessi
   const kept =
     session.timer && session.timer.exerciseKey !== key ? clearSetTimer(session) : session;
   return { ...kept, currentKey: key };
+}
+
+// --- Order and logged sets (PLAN 5.9, ADR-045) -----------------------------------------------
+
+/** One place up (`-1`, earlier in the session) or down (`1`, later). */
+export type MoveDirection = -1 | 1;
+
+/** The list as the units that move together: a strength pair (adjacent partners) or one exercise. */
+function moveUnits(exercises: readonly SessionExercise[]): SessionExercise[][] {
+  const units: SessionExercise[][] = [];
+  for (const exercise of exercises) {
+    const last = units[units.length - 1];
+    const pairsWithLast =
+      last?.length === 1 && last[0].pairKey === exercise.key && exercise.pairKey === last[0].key;
+    if (pairsWithLast) last.push(exercise);
+    else units.push([exercise]);
+  }
+  return units;
+}
+
+/**
+ * Moves exercise `key` one place up or down, past the neighbouring exercise (or pair). A strength
+ * pair moves as one, so its sets keep alternating. It may cross into another block: the user
+ * decides the order. Returns `plan` itself when nothing moves (first / last, unknown key).
+ */
+export function moveExercise<T extends SessionPlan>(
+  plan: T,
+  key: string,
+  direction: MoveDirection,
+): T {
+  const units = moveUnits(plan.exercises);
+  const from = units.findIndex((unit) => unit.some((exercise) => exercise.key === key));
+  const to = from + direction;
+  if (from < 0 || to < 0 || to >= units.length) return plan;
+  const reordered = [...units];
+  [reordered[from], reordered[to]] = [reordered[to], reordered[from]];
+  return { ...plan, exercises: reordered.flat() };
+}
+
+/** Whether `moveExercise` would move exercise `key` in `direction`. */
+export function canMoveExercise(plan: SessionPlan, key: string, direction: MoveDirection): boolean {
+  return moveExercise(plan, key, direction) !== plan;
+}
+
+/**
+ * Replaces the result of the logged set `setIndex` with `actual` (already marked, see
+ * `markedPerformance` against the set's `prescribed`). Its prescription, time stamp and measured
+ * `durationSec` stay. Unknown index: `session` itself.
+ */
+export function editSessionSet(
+  session: ActiveSession,
+  setIndex: number,
+  actual: SetPerformance,
+): ActiveSession {
+  if (!session.sets.some((set) => set.setIndex === setIndex)) return session;
+  return {
+    ...session,
+    sets: session.sets.map((set) => (set.setIndex === setIndex ? { ...set, actual } : set)),
+  };
+}
+
+/**
+ * Deletes the logged set `setIndex`. The later sets move up, so `setIndex` stays the dense position
+ * in logging order. Its exercise may be open again: with no current exercise (all were done), the
+ * open one becomes current. Rest, timer and the current exercise otherwise stay.
+ */
+export function deleteSessionSet(session: ActiveSession, setIndex: number): ActiveSession {
+  if (!session.sets.some((set) => set.setIndex === setIndex)) return session;
+  const next: ActiveSession = {
+    ...session,
+    sets: session.sets
+      .filter((set) => set.setIndex !== setIndex)
+      .map((set, index) => ({ ...set, setIndex: index })),
+  };
+  return next.currentKey !== undefined ? next : { ...next, currentKey: nextOpenExercise(next) };
 }
 
 /**

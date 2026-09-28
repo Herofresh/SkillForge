@@ -171,6 +171,14 @@ color; the summary opens with a "QUEST COMPLETE" `LevelUpBurst`, then LEVEL UP! 
 a gold streak panel with the flame and a parchment list of exercises. Screenshots:
 `docs/screenshots/4.4-*.png`.
 
+**Live-session edits (PLAN 5.9, ADR-045):** a logged-set line in `SetLogger` is a 48 dp row
+(outcome icon, "Set 2: 8 reps · 0:42", a quill at the end) that shows `surfaceRaised` while
+pressed and opens `EditSetSheet`, a `PixelModal` ("Edit set 2", Cancel) with the logged / target
+line, the "Did" stepper, primary Save (check), secondary Partial / Failed and a danger "Delete
+set" that swaps the sheet's body for the confirm (danger Delete set, secondary Keep set). The
+session list's header has a secondary Reorder / Done button; while reordering, each row is a plain
+frame with name, block ("Strength · pair") and secondary Up / Down buttons, disabled at the ends.
+
 **Exercise timer (PLAN 5.4, ADR-040)** in `src/components/timer/SetTimerPanel.tsx`: idle, a
 secondary button with the hourglass ("Start hold" / "Start set") between the target line and the
 "Did" stepper. Running, a rune-framed panel like the rest countdown: hourglass, caps caption (GET

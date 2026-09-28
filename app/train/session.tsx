@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { Colors, Frames, Spacing, TOUCH_TARGET } from '@/components/theme';
+import { EditSetSheet } from '@/components/train/EditSetSheet';
 import { ExerciseCard } from '@/components/train/ExerciseCard';
 import { NodeOptionSheet } from '@/components/train/NodeOptionSheet';
 import { RestPanel } from '@/components/train/RestPanel';
@@ -20,8 +21,8 @@ import {
   Screen,
   XPBar,
 } from '@/components/ui';
-import { allAcknowledged, type ActiveSession } from '@/domain/train';
-import { liveView, type ExerciseView } from '@/domain/trainView';
+import { allAcknowledged, type ActiveSession, type MoveDirection } from '@/domain/train';
+import { liveView, type ExerciseMoves, type ExerciseView } from '@/domain/trainView';
 import { useAppStore } from '@/store/useAppStore';
 
 type Dialog = 'finish' | 'abandon' | 'add';
@@ -30,8 +31,9 @@ const ACKNOWLEDGE_TO_LOG_NOTE = 'Read and acknowledge the notes above to log. It
 
 /**
  * The live session (PLAN 4.4): the current exercise with per-set logging (stepper, log / partial /
- * failed), the rest countdown, the whole session as a list to jump around, skip, add, finish or
- * abandon. Every action goes through the store, which saves the session after each change.
+ * failed; tap a logged set to edit or delete it, PLAN 5.9), the rest countdown, the whole session
+ * as a list to jump around or reorder, skip, add, finish or abandon. Every action goes through the
+ * store, which saves the session after each change.
  */
 export default function LiveSessionScreen() {
   const session = useAppStore((state) => state.activeSession);
@@ -52,6 +54,9 @@ function LiveSession({ session }: { session: ActiveSession }) {
   const trainWarnings = useAppStore((state) => state.trainWarnings);
   const acknowledge = useAppStore((state) => state.acknowledgeTrainWarning);
   const logSet = useAppStore((state) => state.logTrainingSet);
+  const editSet = useAppStore((state) => state.editTrainingSet);
+  const deleteSet = useAppStore((state) => state.deleteTrainingSet);
+  const moveExercise = useAppStore((state) => state.moveTrainingExercise);
   const skipExercise = useAppStore((state) => state.skipTrainingExercise);
   const selectExercise = useAppStore((state) => state.selectTrainingExercise);
   const skipRest = useAppStore((state) => state.skipTrainingRest);
@@ -63,6 +68,9 @@ function LiveSession({ session }: { session: ActiveSession }) {
   const finish = useAppStore((state) => state.finishTraining);
   const abandon = useAppStore((state) => state.abandonTraining);
   const [dialog, setDialog] = useState<Dialog | undefined>();
+  /** The `setIndex` of the logged set being edited. */
+  const [editing, setEditing] = useState<number | undefined>();
+  const [reordering, setReordering] = useState(false);
 
   const lookup = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
   const view = useMemo(() => liveView(session, lookup), [session, lookup]);
@@ -71,6 +79,7 @@ function LiveSession({ session }: { session: ActiveSession }) {
   const pending = !allAcknowledged(warnings, session.acknowledged);
   const { current, counts } = view;
   const currentNode = current && lookup.get(current.exercise.nodeId);
+  const editedSet = current?.sets.find((set) => set.setIndex === editing);
 
   const leave = () => (router.canGoBack() ? router.back() : router.replace('/train'));
   const onFinish = () => {
@@ -128,6 +137,7 @@ function LiveSession({ session }: { session: ActiveSession }) {
               onStartTimer={() => startTimer(current.exercise.key)}
               onStopTimer={stopTimer}
               onResetTimer={resetTimer}
+              onEditSet={(set) => setEditing(set.setIndex)}
             />
             <PixelButton
               label="Skip exercise"
@@ -146,9 +156,22 @@ function LiveSession({ session }: { session: ActiveSession }) {
         )}
 
         <View style={styles.gap}>
-          <PixelText variant="label" tone="gold" accessibilityRole="header">
-            This session
-          </PixelText>
+          <View style={styles.row}>
+            <PixelText
+              variant="label"
+              tone="gold"
+              accessibilityRole="header"
+              style={styles.rowText}>
+              This session
+            </PixelText>
+            <PixelButton
+              label={reordering ? 'Done' : 'Reorder'}
+              variant="secondary"
+              onPress={() => setReordering((value) => !value)}
+              accessibilityLabel={reordering ? 'Done reordering' : 'Reorder exercises'}
+              testID="session-reorder"
+            />
+          </View>
           {view.blocks.flatMap((block) =>
             block.exercises.map((exercise) => (
               <SessionRow
@@ -157,6 +180,8 @@ function LiveSession({ session }: { session: ActiveSession }) {
                 blockLabel={block.label}
                 current={exercise.key === session.currentKey}
                 onPress={() => selectExercise(exercise.key)}
+                moves={reordering ? view.moves[exercise.key] : undefined}
+                onMove={(direction) => moveExercise(exercise.key, direction)}
               />
             )),
           )}
@@ -212,6 +237,25 @@ function LiveSession({ session }: { session: ActiveSession }) {
         />
       </PixelModal>
 
+      {editedSet && current && currentNode && (
+        <EditSetSheet
+          key={editedSet.setIndex}
+          node={currentNode}
+          metric={current.metric}
+          target={current.target}
+          set={editedSet}
+          onSave={(entered, mark) => {
+            editSet(editedSet.setIndex, entered, mark);
+            setEditing(undefined);
+          }}
+          onDelete={() => {
+            deleteSet(editedSet.setIndex);
+            setEditing(undefined);
+          }}
+          onClose={() => setEditing(undefined)}
+        />
+      )}
+
       {dialog === 'add' && (
         <NodeOptionSheet
           title="Add exercise"
@@ -236,11 +280,46 @@ type RowProps = {
   blockLabel: string;
   current: boolean;
   onPress: () => void;
+  /** Set while reordering: the row shows Up / Down instead of being a button. */
+  moves?: ExerciseMoves;
+  onMove: (direction: MoveDirection) => void;
 };
 
-/** One exercise in the session list: tap to train it now. */
-function SessionRow({ exercise, blockLabel, current, onPress }: RowProps) {
+/** One exercise in the session list: tap to train it now, or move it while reordering. */
+function SessionRow({ exercise, blockLabel, current, onPress, moves, onMove }: RowProps) {
   const status = exercise.skipped ? 'Skipped' : `${exercise.setsLogged} / ${exercise.sets}`;
+  if (moves) {
+    return (
+      <View testID={`session-row-${exercise.key}`}>
+        <PixelFrame frame={current ? Frames.selected : Frames.stone} padding={Spacing.sm}>
+          <View style={styles.row}>
+            <View style={styles.rowText}>
+              <PixelText tone={current ? 'gold' : 'text'}>{exercise.name}</PixelText>
+              <PixelText variant="small" tone="textMuted">
+                {exercise.pairedWithName ? `${blockLabel} · pair` : blockLabel}
+              </PixelText>
+            </View>
+            <PixelButton
+              label="Up"
+              variant="secondary"
+              onPress={() => onMove(-1)}
+              disabled={!moves.up}
+              accessibilityLabel={`Move ${exercise.name} up`}
+              testID={`move-up-${exercise.key}`}
+            />
+            <PixelButton
+              label="Down"
+              variant="secondary"
+              onPress={() => onMove(1)}
+              disabled={!moves.down}
+              accessibilityLabel={`Move ${exercise.name} down`}
+              testID={`move-down-${exercise.key}`}
+            />
+          </View>
+        </PixelFrame>
+      </View>
+    );
+  }
   return (
     <Pressable
       onPress={onPress}

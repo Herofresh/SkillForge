@@ -16,11 +16,16 @@ import {
   addOptions,
   addSessionExercise,
   allAcknowledged,
+  canMoveExercise,
   clearSetTimer,
+  deleteSessionSet,
+  editSessionSet,
   exerciseSets,
   finishedSession,
+  isExerciseDone,
   logSessionSet,
   markedPerformance,
+  moveExercise,
   nextOpenExercise,
   parseActiveSession,
   planMinutes,
@@ -359,6 +364,116 @@ describe('exercise timer (PLAN 5.4)', () => {
   it('keeps the timer in the stored draft', () => {
     const running = startSetTimer(started(), 'e0', NOW);
     expect(parseActiveSession(JSON.parse(JSON.stringify(running)))).toEqual(running);
+  });
+});
+
+describe('reorder exercises (PLAN 5.9)', () => {
+  const keys = (session: SessionPlan) => session.exercises.map((entry) => entry.key);
+
+  it('moves a single exercise past its neighbour and a strength pair as one', () => {
+    // e0 warm-up · [e1 e2] strength pair · e3 core
+    const session = started();
+    expect(keys(moveExercise(session, 'e3', -1))).toEqual(['e0', 'e3', 'e1', 'e2']);
+    expect(keys(moveExercise(session, 'e0', 1))).toEqual(['e1', 'e2', 'e0', 'e3']);
+    expect(keys(moveExercise(session, 'e2', -1))).toEqual(['e1', 'e2', 'e0', 'e3']);
+    expect(keys(moveExercise(session, 'e1', 1))).toEqual(['e0', 'e3', 'e1', 'e2']);
+  });
+
+  it('keeps the pair links, the logged sets and the current exercise', () => {
+    const session = logSessionSet(started(), 'e0', { value: 8 }, NOW);
+    const moved = moveExercise(session, 'e1', 1);
+    expect(moved.exercises.find((entry) => entry.key === 'e1')?.pairKey).toBe('e2');
+    expect(moved.sets).toBe(session.sets);
+    expect(moved.currentKey).toBe(session.currentKey);
+  });
+
+  it('does nothing at the ends or for an unknown key', () => {
+    const session = started();
+    expect(moveExercise(session, 'e0', -1)).toBe(session);
+    expect(moveExercise(session, 'e3', 1)).toBe(session);
+    expect(moveExercise(session, 'e2', 1)).not.toBe(session);
+    expect(moveExercise(session, 'nope', 1)).toBe(session);
+    expect(canMoveExercise(session, 'e1', -1)).toBe(true);
+    expect(canMoveExercise(session, 'e3', 1)).toBe(false);
+  });
+
+  it('moves the former partner alone once the pair is split', () => {
+    const unpaired = removeExercise(started(), 'e1');
+    expect(keys(moveExercise(unpaired, 'e2', -1))).toEqual(['e2', 'e0', 'e3']);
+  });
+
+  it('changes which exercise comes next', () => {
+    let session = moveExercise(started(), 'e3', -1);
+    session = logSessionSet(session, 'e0', { value: 8 }, NOW);
+    expect(session.currentKey).toBe('e3');
+  });
+});
+
+describe('edit and delete a logged set (PLAN 5.9)', () => {
+  /** e0 logged once, then a strength pair set each: setIndex 0 (e0), 1 (e1), 2 (e2). */
+  const logged = (): ActiveSession => {
+    let session = logSessionSet(started(), 'e0', { value: 8 }, NOW);
+    session = startSetTimer(session, 'e1', NOW);
+    session = logSessionSet(session, 'e1', { value: 7 }, NOW + 20 * MS_PER_SECOND);
+    return logSessionSet(session, 'e2', { value: 6 }, NOW + 40 * MS_PER_SECOND);
+  };
+
+  it('changes only the result and keeps the prescription, time stamp and duration', () => {
+    const session = logged();
+    const edited = editSessionSet(session, 1, { value: 9 });
+    expect(edited.sets[1]).toEqual({ ...session.sets[1], actual: { value: 9 } });
+    expect(edited.sets[1].durationSec).toBe(20);
+    expect(edited.sets[0]).toBe(session.sets[0]);
+    expect(edited.currentKey).toBe(session.currentKey);
+    expect(editSessionSet(session, 7, { value: 1 })).toBe(session);
+  });
+
+  it('keeps setIndex dense and in logging order after a delete', () => {
+    const session = deleteSessionSet(logged(), 1);
+    expect(session.sets.map((set) => [set.exerciseKey, set.setIndex])).toEqual([
+      ['e0', 0],
+      ['e2', 1],
+    ]);
+    expect(sessionCounts(session).setsLogged).toBe(2);
+    // e1 has no set left, so it is not trained; e2 gets its two missing sets as skipped.
+    expect(finishedSession(session, NOW).sets.map((set) => [set.nodeId, set.setIndex])).toEqual([
+      ['wrist_prep', 0],
+      ['squat', 1],
+      ['squat', 2],
+      ['squat', 3],
+    ]);
+    // Logging after the delete appends at the next position.
+    const next = logSessionSet(session, 'e1', { value: 8 }, NOW);
+    expect(next.sets.map((set) => set.setIndex)).toEqual([0, 1, 2]);
+    expect(deleteSessionSet(session, 5)).toBe(session);
+  });
+
+  it('opens a done exercise again and makes it current when nothing else is open', () => {
+    let session = started();
+    for (const key of ['e1', 'e2', 'e3']) session = skipExercise(session, key);
+    session = logSessionSet(session, 'e0', { value: 8 }, NOW);
+    expect(session.currentKey).toBeUndefined();
+    const reopened = deleteSessionSet(session, 0);
+    expect(reopened.currentKey).toBe('e0');
+    expect(isExerciseDone(reopened, reopened.exercises[0])).toBe(false);
+  });
+
+  it('keeps the current exercise, rest and timer of the ongoing set', () => {
+    const session = startSetTimer(logged(), 'e1', NOW + 50 * MS_PER_SECOND);
+    const deleted = deleteSessionSet(session, 0);
+    expect(deleted.currentKey).toBe(session.currentKey);
+    expect(deleted.timer).toEqual(session.timer);
+  });
+
+  it('works on a draft from before 5.9 (read back as stored)', () => {
+    const old = parseActiveSession(JSON.parse(JSON.stringify(logged())));
+    if (!old) throw new Error('expected a draft');
+    const changed = moveExercise(
+      deleteSessionSet(editSessionSet(old, 0, { value: 3 }), 2),
+      'e3',
+      -1,
+    );
+    expect(parseActiveSession(JSON.parse(JSON.stringify(changed)))).toEqual(changed);
   });
 });
 
