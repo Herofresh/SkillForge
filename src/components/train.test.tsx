@@ -1,11 +1,14 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import { Vibration } from 'react-native';
 
 import { ALL_NODES } from '@/data/skills';
 import { sessionPlan, startSession } from '@/domain/train';
-import { blockViews, liveView } from '@/domain/trainView';
+import { blockViews, liveView, type SummaryView } from '@/domain/trainView';
 import type { SafeguardWarning, WorkoutPlan } from '@/domain/types';
 
+import { SetTimerPanel } from './timer/SetTimerPanel';
 import { ExerciseCard } from './train/ExerciseCard';
+import { SessionResultPanels } from './train/SessionResultPanels';
 import { SetLogger } from './train/SetLogger';
 import { TrainWarningList } from './train/TrainWarningList';
 
@@ -48,13 +51,26 @@ describe('ExerciseCard', () => {
   });
 });
 
+const timerHandlers = () => ({
+  onStartTimer: jest.fn(),
+  onStopTimer: jest.fn(() => undefined),
+  onResetTimer: jest.fn(),
+});
+
 describe('SetLogger', () => {
   it('steps from the target and logs with a mark', async () => {
     const user = userEvent.setup();
     const session = startSession(sessionPlan(WORKOUT, 'home', 30), 's', 0);
     const current = liveView({ ...session, currentKey: 'e1' }, LOOKUP).current!;
     const onLog = jest.fn();
-    await render(<SetLogger node={LOOKUP.get('pull_up')!} current={current} onLog={onLog} />);
+    await render(
+      <SetLogger
+        node={LOOKUP.get('pull_up')!}
+        current={current}
+        onLog={onLog}
+        {...timerHandlers()}
+      />,
+    );
     expect(screen.getByTestId('set-label')).toHaveTextContent('Set 1 of 3');
     await user.press(screen.getByTestId('set-stepper-plus'));
     expect(screen.getByTestId('set-stepper-value')).toHaveTextContent('6 reps');
@@ -73,11 +89,185 @@ describe('SetLogger', () => {
         current={current}
         onLog={onLog}
         pendingNote="Acknowledge first"
+        {...timerHandlers()}
       />,
     );
     expect(screen.getByText('Acknowledge first')).toBeOnTheScreen();
     await user.press(screen.getByTestId('log-set'));
     expect(onLog).not.toHaveBeenCalled();
+  });
+  it('starts the timer, and a stopped hold fills the stepper with the seconds held', async () => {
+    const user = userEvent.setup();
+    const session = startSession(sessionPlan(WORKOUT, 'home', 30), 's', 0);
+    const current = liveView(session, LOOKUP).current!;
+    const handlers = { ...timerHandlers(), onStopTimer: jest.fn(() => 37) };
+    const props = { node: LOOKUP.get('tuck_planche')!, current, onLog: jest.fn(), ...handlers };
+    const view = await render(<SetLogger {...props} />);
+    expect(screen.getByTestId('set-timer-start')).toHaveTextContent('Start hold');
+    await user.press(screen.getByTestId('set-timer-start'));
+    expect(handlers.onStartTimer).toHaveBeenCalled();
+
+    // 3 s get ready + 30 s target + 12 s over.
+    const startedAt = Date.now() - 45_000;
+    await view.rerender(<SetLogger {...props} timer={{ startedAt }} />);
+    expect(screen.getByTestId('set-timer-clock')).toHaveTextContent('+12 s');
+    await user.press(screen.getByTestId('set-timer-stop'));
+    expect(handlers.onStopTimer).toHaveBeenCalled();
+    expect(screen.getByTestId('set-stepper-value')).toHaveTextContent('37 s');
+  });
+
+  it('shows the logged sets with their time', async () => {
+    const session = startSession(sessionPlan(WORKOUT, 'home', 30), 's', 0);
+    const withSet = {
+      ...session,
+      currentKey: 'e1',
+      sets: [
+        {
+          sessionId: 's',
+          nodeId: 'pull_up',
+          setIndex: 0,
+          metric: 'reps' as const,
+          prescribed: { value: 5 },
+          actual: { value: 8 },
+          isTrial: false,
+          timestamp: 1,
+          exerciseKey: 'e1',
+          durationSec: 42,
+        },
+      ],
+    };
+    const current = liveView(withSet, LOOKUP).current!;
+    await render(
+      <SetLogger
+        node={LOOKUP.get('pull_up')!}
+        current={current}
+        onLog={jest.fn()}
+        {...timerHandlers()}
+      />,
+    );
+    expect(screen.getByTestId('logged-set-0')).toHaveTextContent('Set 1: 8 reps · 0:42');
+    expect(screen.getByTestId('set-timer-start')).toHaveTextContent('Start set');
+  });
+});
+
+describe('SetTimerPanel', () => {
+  const NOW = 1_790_000_000_000;
+  const handlers = () => ({ onStart: jest.fn(), onStop: jest.fn(), onReset: jest.fn() });
+
+  beforeEach(() => jest.useFakeTimers({ now: NOW }));
+  afterEach(() => jest.useRealTimers());
+
+  it('gets ready, counts the hold down, vibrates at the target and counts on past it', async () => {
+    const vibrate = jest.spyOn(Vibration, 'vibrate').mockImplementation(() => {});
+    await render(
+      <SetTimerPanel
+        metric="hold_s"
+        targetSec={10}
+        timer={{ startedAt: NOW }}
+        testID="t"
+        {...handlers()}
+      />,
+    );
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('3');
+    expect(screen.getByText('Get ready')).toBeOnTheScreen();
+    expect(screen.queryByTestId('t-stop')).toBeNull();
+
+    await act(async () => {
+      jest.advanceTimersByTime(5_000);
+    });
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('0:08');
+    expect(screen.getByTestId('t-stop')).toHaveTextContent('Stop');
+    expect(vibrate).not.toHaveBeenCalled();
+
+    await act(async () => {
+      jest.advanceTimersByTime(8_000);
+    });
+    expect(screen.getByText('Target reached')).toBeOnTheScreen();
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('+0 s');
+    expect(vibrate).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      jest.advanceTimersByTime(7_000);
+    });
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('+7 s');
+    expect(vibrate).toHaveBeenCalledTimes(1);
+    vibrate.mockRestore();
+  });
+
+  it('runs a stopwatch with Done and Cancel', async () => {
+    const actions = handlers();
+    await render(
+      <SetTimerPanel
+        metric="reps"
+        targetSec={8}
+        timer={{ startedAt: NOW - 42_000 }}
+        testID="t"
+        {...actions}
+      />,
+    );
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('0:42');
+    await act(async () => {
+      jest.advanceTimersByTime(1_000);
+    });
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('0:43');
+    expect(screen.getByTestId('t-stop')).toHaveTextContent('Done');
+    expect(screen.getByTestId('t-reset')).toHaveTextContent('Cancel');
+    await fireEvent.press(screen.getByTestId('t-stop'));
+    expect(actions.onStop).toHaveBeenCalled();
+  });
+
+  it('shows what a stopped timer measured, with a reset', async () => {
+    await render(
+      <SetTimerPanel
+        metric="hold_s"
+        targetSec={30}
+        timer={{ startedAt: NOW - 60_000, stoppedAt: NOW - 20_000 }}
+        testID="t"
+        {...handlers()}
+      />,
+    );
+    expect(screen.getByText('Held')).toBeOnTheScreen();
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('0:37');
+    expect(screen.getByTestId('t-reset')).toHaveTextContent('Reset timer');
+  });
+});
+
+describe('SessionResultPanels', () => {
+  it('shows the session time and the time per exercise', async () => {
+    const view: SummaryView = {
+      totalXp: 10,
+      exerciseXp: 8,
+      completionBonus: 1,
+      streakBonus: 1,
+      streak: 1,
+      exercises: [
+        {
+          nodeId: 'pull_up',
+          name: 'Pull-up',
+          outcome: 'success',
+          outcomeLabel: 'Success',
+          xp: 8,
+          trialAttempted: false,
+          trialPassed: false,
+          time: '1:24',
+        },
+      ],
+      sessionTime: '32:05',
+      levelUps: [],
+      unlocked: [],
+      warnings: [],
+    };
+    await render(
+      <SessionResultPanels
+        view={view}
+        celebrate={false}
+        playKey="s"
+        subtitle="Session"
+        onOpenNode={jest.fn()}
+      />,
+    );
+    expect(screen.getByTestId('summary-session-time')).toHaveTextContent('Session time 32:05');
+    expect(screen.getByText('Success · 1:24')).toBeOnTheScreen();
   });
 });
 

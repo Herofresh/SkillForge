@@ -16,6 +16,7 @@ import {
   addOptions,
   addSessionExercise,
   allAcknowledged,
+  clearSetTimer,
   exerciseSets,
   finishedSession,
   logSessionSet,
@@ -34,6 +35,8 @@ import {
   skipExercise,
   skipRest,
   startSession,
+  startSetTimer,
+  stopSetTimer,
   swapOptions,
   warningKey,
   type ActiveSession,
@@ -302,6 +305,63 @@ describe('set marks', () => {
   });
 });
 
+describe('exercise timer (PLAN 5.4)', () => {
+  const S = MS_PER_SECOND;
+
+  it('starts for an exercise and ends the rest countdown', () => {
+    const resting = logSessionSet(started(), 'e0', { value: 8 }, NOW);
+    expect(resting.restEndsAt).toBeDefined();
+    const timed = startSetTimer(resting, 'e1', NOW + S);
+    expect(timed.restEndsAt).toBeUndefined();
+    expect(timed.timer).toEqual({ exerciseKey: 'e1', startedAt: NOW + S });
+    expect(startSetTimer(resting, 'nope', NOW)).toBe(resting);
+  });
+
+  it('gives the logged set the stopwatch time and clears the timer', () => {
+    const running = startSetTimer(started(), 'e0', NOW);
+    const stopped = stopSetTimer(running, NOW + 42.6 * S);
+    expect(stopped.timer?.stoppedAt).toBe(NOW + 42.6 * S);
+    expect(stopSetTimer(stopped, NOW + 99 * S)).toBe(stopped);
+    const logged = logSessionSet(stopped, 'e0', { value: 8 }, NOW + 50 * S);
+    expect(logged.sets[0].durationSec).toBe(42);
+    expect(logged.timer).toBeUndefined();
+  });
+
+  it('measures a still running timer until the set is logged', () => {
+    const running = startSetTimer(started(), 'e0', NOW);
+    expect(logSessionSet(running, 'e0', { value: 8 }, NOW + 20 * S).sets[0].durationSec).toBe(20);
+  });
+
+  it('measures a hold as the seconds held after the get-ready time', () => {
+    const session = selectExercise(started(), 'e3');
+    const stopped = stopSetTimer(startSetTimer(session, 'e3', NOW), NOW + 40 * S);
+    const logged = logSessionSet(stopped, 'e3', { value: 37 }, NOW + 41 * S);
+    expect(logged.sets[0]).toMatchObject({ metric: 'hold_s', durationSec: 37 });
+  });
+
+  it('logs untimed sets without a duration and drops another exercise timer', () => {
+    const plain = logSessionSet(started(), 'e0', { value: 8 }, NOW);
+    expect(plain.sets[0]).not.toHaveProperty('durationSec');
+    const other = logSessionSet(startSetTimer(started(), 'e1', NOW), 'e0', { value: 8 }, NOW);
+    expect(other.sets[0]).not.toHaveProperty('durationSec');
+    expect(other.timer).toBeUndefined();
+  });
+
+  it('is cleared by reset, by skipping its exercise and by switching to another one', () => {
+    const running = startSetTimer(started(), 'e0', NOW);
+    expect(clearSetTimer(running).timer).toBeUndefined();
+    expect(skipExercise(running, 'e0').timer).toBeUndefined();
+    expect(skipExercise(running, 'e2').timer).toBeDefined();
+    expect(selectExercise(running, 'e1').timer).toBeUndefined();
+    expect(selectExercise(running, 'e0').timer).toBeDefined();
+  });
+
+  it('keeps the timer in the stored draft', () => {
+    const running = startSetTimer(started(), 'e0', NOW);
+    expect(parseActiveSession(JSON.parse(JSON.stringify(running)))).toEqual(running);
+  });
+});
+
 describe('stored draft', () => {
   it('reads back what it wrote', () => {
     const session = logSessionSet(started(), 'e0', { value: 8 }, NOW);
@@ -316,6 +376,18 @@ describe('stored draft', () => {
     ).toBeUndefined();
     expect(parseActiveSession({ ...started(), sets: [{ nodeId: 'a' }] })).toBeUndefined();
     expect(parseActiveSession({ ...started(), restEndsAt: 'soon' })).toBeUndefined();
+    expect(parseActiveSession({ ...started(), timer: { exerciseKey: 'e0' } })).toBeUndefined();
+    const logged = logSessionSet(started(), 'e0', { value: 8 }, NOW);
+    expect(
+      parseActiveSession({ ...logged, sets: [{ ...logged.sets[0], durationSec: '1:00' }] }),
+    ).toBeUndefined();
+  });
+
+  it('reads a draft from before the exercise timer (no timer, no durations)', () => {
+    const old = JSON.parse(JSON.stringify(logSessionSet(started(), 'e0', { value: 8 }, NOW)));
+    expect(old).not.toHaveProperty('timer');
+    expect(old.sets[0]).not.toHaveProperty('durationSec');
+    expect(parseActiveSession(old)).toEqual(old);
   });
 });
 

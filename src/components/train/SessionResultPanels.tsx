@@ -18,7 +18,8 @@ type Props = {
 
 /**
  * What a session earned (PLAN 4.4, 4.5): total XP with its bonuses, the streak, level-ups, unlocks
- * and XP per exercise. Shared by the fresh Train summary and a past session opened from the
+ * and XP per exercise, with the session time and the time per exercise when known (PLAN 5.4).
+ * Shared by the fresh Train summary and a past session opened from the
  * Character tab.
  */
 export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpenNode }: Props) {
@@ -38,6 +39,14 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
         <PixelText variant="small" tone="textMuted" align="center">
           {`${view.exerciseXp} from exercises · +${view.completionBonus} completion · +${view.streakBonus} streak`}
         </PixelText>
+        {view.sessionTime !== undefined && (
+          <View style={styles.time} testID="summary-session-time">
+            <PixelIcon name="hourglass" />
+            <PixelText variant="label" tone="rune">
+              {`Session time ${view.sessionTime}`}
+            </PixelText>
+          </View>
+        )}
       </PixelFrame>
 
       <PixelFrame variant="gold" contentStyle={styles.gap} testID="summary-streak">
@@ -106,7 +115,7 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
             key={exercise.nodeId}
             onPress={() => onOpenNode(exercise.nodeId)}
             accessibilityRole="link"
-            accessibilityLabel={`${exercise.name}: ${exercise.outcomeLabel}, ${exercise.xp} XP`}
+            accessibilityLabel={`${exercise.name}: ${exercise.outcomeLabel}, ${exercise.xp} XP${exercise.time !== undefined ? `, time ${exercise.time}` : ''}`}
             style={styles.exercise}>
             <View style={styles.exerciseText}>
               <PixelText tone="textOnParchment">{exercise.name}</PixelText>
@@ -116,7 +125,8 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
                     ? ' · Trial passed'
                     : exercise.trialAttempted
                       ? ' · Trial not passed yet'
-                      : '')}
+                      : '') +
+                  (exercise.time !== undefined ? ` · ${exercise.time}` : '')}
               </PixelText>
             </View>
             <PixelText variant="heading" tone="textOnParchment">
@@ -137,6 +147,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
+  },
+  time: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    marginTop: Spacing.sm,
   },
   link: {
     minHeight: TOUCH_TARGET,

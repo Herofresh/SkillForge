@@ -171,6 +171,17 @@ color; the summary opens with a "QUEST COMPLETE" `LevelUpBurst`, then LEVEL UP! 
 a gold streak panel with the flame and a parchment list of exercises. Screenshots:
 `docs/screenshots/4.4-*.png`.
 
+**Exercise timer (PLAN 5.4, ADR-040)** in `src/components/timer/SetTimerPanel.tsx`: idle, a
+secondary button with the hourglass ("Start hold" / "Start set") between the target line and the
+"Did" stepper. Running, a rune-framed panel like the rest countdown: hourglass, caps caption (GET
+READY, HOLD, TIME) and the display-font clock ("3", "0:27", "1:05"), then a primary Stop / Done
+with the check and a secondary Cancel (a hold shows only Cancel while it gets ready). Past a hold's
+target the frame turns gold, the caption reads TARGET REACHED and the clock "+7 s"; the phone
+vibrates once. Stopped, the caption is HELD / TIME with the measured clock and a secondary "Reset
+timer". The live header shows the session clock (hourglass + rune caps time) next to the exercise
+count; logged sets read "8 reps · 0:42"; the summary's XP panel adds "Session time 32:05" and
+exercise rows "Success · 1:24". Hold Trials show the same panel under each set's stepper.
+
 **Character and Settings (PLAN 4.5–4.6, ADR-035)** in `src/components/character/`, `settings/`,
 `equipment/`: the Character tab opens with a gold hero panel (display-font name, `LevelBadge` lg,
 XP bar "To level n"), then `RankCrest` (the rank emblem, shield → sword → rune → star → flame, at
@@ -216,13 +227,14 @@ never shows full before 100 %. The fraction itself comes from the domain (e.g. X
 12×12 character grids in `src/components/ui/icons.ts`, rendered by `PixelIcon` as SVG rects (one
 per horizontal run, `src/lib/pixelGrid.ts`). Roles: `#` main, `+` accent, `*` highlight, `o` shade,
 `.` empty; each icon maps roles to theme colors. The set: `sword`, `shield`, `flame`, `star`,
-`lock`, `chain`, `scroll`, `potion`, `bar`, `heart`, `rune`, `alert`, `check`, `cross`, `quill`, and the tab icons
+`lock`, `chain`, `scroll`, `potion`, `bar`, `heart`, `rune`, `alert`, `check`, `cross`, `quill`, `hourglass`, and the tab icons
 `tree`, `bar` (Train), `helmet` (Character), `gear` (Settings).
 
 Suggested meanings: sword = train/attempt · shield = safeguard · flame = streak · star = mastered /
 goal · lock = locked · chain = prerequisite · scroll = log, info, notes · potion = recovery, errors ·
 bar = equipment / strength · heart = health · rune = skill node / magic · alert = warning ·
-check = done / met · cross = not met · quill = edit / the user's own changes.
+check = done / met · cross = not met · quill = edit / the user's own changes · hourglass = timer,
+time.
 
 Adding an icon: add a grid (exactly 12 rows of 12 characters, ≤ 4 roles, keep one role for icons
 that must tint), map its roles to `Colors`, and `icons.test.ts` checks it. Keep silhouettes readable

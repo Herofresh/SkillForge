@@ -120,6 +120,14 @@
   handstand inside a rune ring on the night background) replaces the Expo template icons. It is a
   32 × 32 grid in `scripts/appIcon.ts`; `npm run icon:build` renders icon, adaptive foreground /
   background / monochrome, splash and favicon. Preview `docs/screenshots/5.6-app-icon.png`.
+- Exercise timer (5.4, ADR-040, [PR #26](https://github.com/Herofresh/SkillForge/pull/26)): the live session's set logger has "Start hold"
+  (3 s get-ready → countdown from the target → vibration → "+7 s" overtime; Stop fills the stepper
+  with the seconds held) or "Start set" (stopwatch → Done). The timer is timestamps in the persisted
+  draft (survives an app kill), ends the rest, and keeps the screen awake while it runs. Each timed
+  set stores `durationSec` (column `session_sets.duration_sec`, migration 0003, additive; backups
+  `schemaVersion` 2, version 1 still imports). Logged sets read "8 reps · 0:42"; the header shows the
+  session clock; summary / past session show the session time and the time per exercise. Hold
+  Trials have a timer per set.
 
 ## Next up
 1. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
@@ -132,6 +140,30 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Exercise timer (task 5.4, ADR-040):**
+  - Domain: `src/domain/setTimer.ts` (`timerModeFor`, `readTimer`, `measuredSeconds`,
+    `reachedTarget`, `formatTimerClock`, `timerCaption`, `spokenTimer`, `timedPerformance`,
+    `elapsedSeconds`, `totalDurationSec`); `train.ts` has `ActiveSession.timer`, `startSetTimer`,
+    `stopSetTimer`, `clearSetTimer`, and `logSessionSet` writes `durationSec`. `formatClock` is in
+    `format.ts`; `loggedSetText`, `sessionDurationSec` and `summaryView(result, nodes, session?)` are
+    in `trainView.ts`.
+  - Store: `startTrainingTimer(key)`, `stopTrainingTimer()` (returns the measured seconds),
+    `resetTrainingTimer()`; `logTrial(nodeId, results, durations?)`. `state.sessions` are now
+    `StoredSession`s (with `endedAt`).
+  - UI: `src/components/timer/SetTimerPanel.tsx` (keyed per timer start so its clock is fresh;
+    `KeepAwake` only while running; vibrates on the holding → overtime step). `useNow` moved to the
+    UI kit (`@/components/ui`). `SessionClock` in the live header. New `hourglass` icon.
+    UI event handlers read the wall clock with `currentTime()` (`src/lib/time.ts`): the React
+    Compiler lint flags a bare `Date.now()` in a hook's handler.
+  - Data: never edit migration 0003; a later set field needs a new additive column and backup
+    `schemaVersion` 3 (keep reading 1 and 2).
+  - E2E: the reviewer ran `smoke`, `train` and `character` on the Pixel 8 Pro AVD (all green;
+    `train.yaml` covers the stopwatch, the rest ending on start, the timer surviving a kill, and
+    the summary's session / exercise times). `docs/screenshots/5.4-timer.png` is from that run.
+    The hold countdown and vibration are only covered by component tests (the first planned
+    exercise is a rep warm-up); keep-awake and vibration are untested on a real phone.
+  - Not built (backlog "Timer extras"): sound, pause, a buzz at "go", a background notification at
+    the target, timers for rep Trials.
 - **App icon (task 5.6, ADR-042):**
   - Edit `MOTIF_ROWS` in `scripts/appIcon.ts` (roles → `Palette` keys in `MOTIF_COLORS`), run
     `npm run icon:build`, look at `docs/screenshots/5.6-app-icon.png` (bottom row: 96 / 48 px),
@@ -565,8 +597,12 @@ compiled into a typed module for the app; users can layer their own changes on t
 - 5.3 EAS build profile and Android APK, split in two:
   - [x] 5.3a Build config + local APK script: `eas.json` (development / preview / production, version source local), app.json version 0.1.0 / versionCode 1, `npm run build:apk[:universal]` (ADR-039, [PR #23](https://github.com/Herofresh/SkillForge/pull/23))
   - [ ] 5.3b EAS cloud build + proper release signing (needs the user: Expo account login, keystore decision)
+
+#### v0.2.0
+- [x] 5.4 Exercise timer (user request 2026-09-28): hold countdown with get-ready, vibration at the target and overtime, stopwatch for other metrics, per-set `durationSec` (additive column, backup version 2), session clock and times in the summary, hold Trials too (ADR-040, [PR #26](https://github.com/Herofresh/SkillForge/pull/26))
 - [x] 5.5 Acrobatics branch: rolls, judo breakfalls (ukemi) and the cartwheel path to a legendary aerial, gated on the wall handstand; left out of the rank median (ADR-041, [PR #25](https://github.com/Herofresh/SkillForge/pull/25))
 - [x] 5.6 App icon: original pixel-art icon from a code grid (`scripts/appIcon.ts`, `npm run icon:build`): icon, adaptive foreground / background / monochrome, splash, favicon (ADR-042, [PR #24](https://github.com/Herofresh/SkillForge/pull/24))
+- [ ] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
@@ -579,7 +615,10 @@ compiled into a typed module for the app; users can layer their own changes on t
   prune old safety copies (4.6 keeps the last import's copy in memory only, ADR-035)
 - Settings extras: replay onboarding, units/preferences once there are any
 - Node detail history rows could open the past-session screen (`app/session/[sessionId]`)
-- Hold stopwatch and a full rest timer (4.4 has a basic countdown from `restEndsAt`; sound/vibration, pause)
+- Timer extras (after 5.4, ADR-040): sound, pause, a vibration at "go", a notification when a hold's
+  target passes while the app is in the background, timers for rep Trials, pausing the rest countdown
+- Exercise demo animations: pixel-art animations per exercise, possibly generated/created with
+  different AI tools (user idea 2026-09-28, not now)
 - Train flow extras: reorder exercises, shuffle the plan (seed), edit or delete a logged set
 - Weekly plans and scheduling
 - Notifications and reminders

@@ -115,6 +115,8 @@ export function trialSession(
   results: readonly SetPerformance[],
   sessionId: string,
   at: number,
+  /** Per set, the seconds the exercise timer measured (PLAN 5.4); unset for untimed sets. */
+  durations: readonly (number | undefined)[] = [],
 ): LoggedSession {
   const { target, reps } = node.trial;
   const prescribed: SetPerformance =
@@ -128,6 +130,7 @@ export function trialSession(
     actual,
     isTrial: true,
     timestamp: at + setIndex,
+    ...(durations[setIndex] !== undefined ? { durationSec: durations[setIndex] } : {}),
   }));
   return { id: sessionId, startedAt: at, sets };
 }

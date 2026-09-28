@@ -63,6 +63,10 @@ function NodeTrialForm({ node }: { node: ExerciseNode }) {
             node={node}
             results={attempt.results}
             onStep={attempt.step}
+            timers={attempt.timers}
+            onStartTimer={attempt.startTimer}
+            onStopTimer={attempt.stopTimer}
+            onResetTimer={attempt.resetTimer}
             pendingNote={attempt.allAcknowledged ? undefined : ACKNOWLEDGE_TO_LOG_NOTE}
           />
           <PixelButton

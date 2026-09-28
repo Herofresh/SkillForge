@@ -226,6 +226,11 @@ export interface LoggedSet {
   isTrial: boolean;
   /** When the set was logged, in ms since the Unix epoch. */
   timestamp: number;
+  /**
+   * How long the set took in whole seconds, when the exercise timer measured it (PLAN 5.4,
+   * ADR-040): the seconds held for a hold, the stopwatch time otherwise. Unset for untimed sets.
+   */
+  durationSec?: number;
 }
 
 export interface LoggedSession {

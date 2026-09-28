@@ -25,6 +25,7 @@ function toPerformance(value: number, reps: number | null): SetPerformance {
 }
 
 function toLoggedSet(row: SetRow): LoggedSet {
+  const durationSec = optional(row.durationSec);
   return {
     sessionId: row.sessionId,
     nodeId: row.nodeId,
@@ -34,6 +35,7 @@ function toLoggedSet(row: SetRow): LoggedSet {
     actual: toPerformance(row.actualValue, row.actualReps),
     isTrial: row.isTrial,
     timestamp: row.timestamp,
+    ...(durationSec !== undefined ? { durationSec } : {}),
   };
 }
 
@@ -49,6 +51,7 @@ function toSetRow(set: LoggedSet, sessionId: string): SetRow {
     actualReps: set.actual.reps ?? null,
     isTrial: set.isTrial,
     timestamp: set.timestamp,
+    durationSec: set.durationSec ?? null,
   };
 }
 

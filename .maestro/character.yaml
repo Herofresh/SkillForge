@@ -63,6 +63,11 @@ name: Character - level and XP after a logged session, history opens the session
     visible:
       id: 'live-session'
     timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'log-set'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'log-set'
 - extendedWaitUntil:

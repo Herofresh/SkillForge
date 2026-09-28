@@ -21,7 +21,10 @@ export default function PastSessionScreen() {
   const session = useAppStore((state) => state.sessions.find((entry) => entry.id === sessionId));
   const result = useAppStore((state) => state.sessionResults[sessionId]);
   const nodes = useAppStore((state) => state.nodes);
-  const view = useMemo(() => (result ? summaryView(result, nodes) : undefined), [result, nodes]);
+  const view = useMemo(
+    () => (result ? summaryView(result, nodes, session) : undefined),
+    [result, nodes, session],
+  );
 
   if (!session || !view) {
     return (

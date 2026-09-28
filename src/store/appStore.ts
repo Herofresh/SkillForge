@@ -53,7 +53,7 @@ import { listGoals, replaceGoals } from '@/db/goalRepository';
 import { replaceNodeProgress } from '@/db/nodeProgressRepository';
 import { getOverlay, saveOverlay } from '@/db/overlayRepository';
 import { getProfile, setHeroName } from '@/db/profileRepository';
-import { insertSession, listSessions } from '@/db/sessionRepository';
+import { insertSession, listStoredSessions } from '@/db/sessionRepository';
 import { getSetting, setSetting } from '@/db/settingsRepository';
 import { insertUserAction, listUserActions } from '@/db/userActionRepository';
 import { readUserData, replaceUserData } from '@/db/userDataRepository';
@@ -85,6 +85,7 @@ import {
   type OverlayImportPreview,
 } from '@/domain/overlayEdit';
 import { nodeUseWarnings, resolveNode } from '@/domain/progression';
+import { measuredSeconds, timerModeFor } from '@/domain/setTimer';
 import { DEFAULT_TREE_MODE, parseTreeMode, type TreeMode } from '@/domain/treeMap';
 import {
   applySession,
@@ -102,6 +103,7 @@ import {
   addExercise,
   addOptions,
   addSessionExercise,
+  clearSetTimer,
   finishedSession,
   logSessionSet,
   markedPerformance,
@@ -113,6 +115,8 @@ import {
   skipExercise,
   skipRest,
   startSession,
+  startSetTimer,
+  stopSetTimer,
   swapOptions,
   type ActiveSession,
   type SessionPlan,
@@ -130,6 +134,7 @@ import {
   type SafeguardWarning,
   type SessionDetails,
   type SetPerformance,
+  type StoredSession,
   type UserAction,
   type ValidationIssue,
   type WorkoutPlan,
@@ -229,8 +234,8 @@ export interface AppState {
    * the sessions applied since: the Character tab's history and the past-session summary (PLAN 4.5).
    */
   sessionResults: Readonly<Record<string, SessionResult>>;
-  /** Full history in replay order (source of truth, ADR-008). */
-  sessions: LoggedSession[];
+  /** Full history in replay order (source of truth, ADR-008), with the stored details (end time). */
+  sessions: StoredSession[];
   userActions: UserAction[];
   /** Goal node ids, most important first. */
   goals: string[];
@@ -267,7 +272,12 @@ export interface AppState {
    * Logs a Trial attempt on `nodeId` now, one set per result (the assessment's "I can already do
    * this"). A passed Trial is a test-out (ADR-023); warnings come back in the result, never a block.
    */
-  logTrial(nodeId: string, results: readonly SetPerformance[]): SessionResult;
+  logTrial(
+    nodeId: string,
+    results: readonly SetPerformance[],
+    /** Per set, the seconds the exercise timer measured (PLAN 5.4); unset for untimed sets. */
+    durations?: readonly (number | undefined)[],
+  ): SessionResult;
   /** What to show and acknowledge before `logTrial` on `nodeId` now (`testOutWarnings`). */
   testOutWarnings(nodeId: string): SafeguardWarning[];
   /**
@@ -337,6 +347,12 @@ export interface AppState {
   skipTrainingExercise(key: string): void;
   selectTrainingExercise(key: string): void;
   skipTrainingRest(): void;
+  /** Starts the exercise timer for the next set of `key` (ends the rest; PLAN 5.4, ADR-040). */
+  startTrainingTimer(key: string): void;
+  /** Stops the running timer; returns what it measured (whole seconds), `undefined` without one. */
+  stopTrainingTimer(): number | undefined;
+  /** Cancels or resets the timer; the set is then logged without a duration. */
+  resetTrainingTimer(): void;
   /** Nodes to add to the live session (or the plan): suggestions, or matches for `query`. */
   addTrainingOptions(query?: string): ExerciseNode[];
   /** Adds `nodeId`, prescribed from its history, to the live session (else the plan). */
@@ -407,7 +423,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
     };
 
     /** Applies a session that is already stored (incrementally, or by recomputing the past). */
-    const applyStoredSession = (session: LoggedSession): SessionResult => {
+    const applyStoredSession = (session: StoredSession): SessionResult => {
       const { engine, sessions, userActions, nodes, sessionResults } = get();
       const allSessions = [...sessions, session].sort(compareHistory);
       if (canApplyIncrementally(engine, session)) {
@@ -497,7 +513,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       loadAll() {
         const overlay = getOverlay(db)?.overlay ?? EMPTY_OVERLAY;
         const { nodes, issues: overlayIssues } = applyOverlay(baseNodes, overlay);
-        const sessions = listSessions(db);
+        const sessions = listStoredSessions(db);
         const userActions = listUserActions(db);
         const { state: engine, results } = recompute(nodes, sessions, userActions);
         const completedAt = getSetting(db, ONBOARDING_COMPLETED_SETTING);
@@ -520,7 +536,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
 
       logSession(session, details) {
         insertSession(db, session, details);
-        return applyStoredSession(session);
+        return applyStoredSession({ ...session, ...details });
       },
 
       selfUnlock(nodeId) {
@@ -565,10 +581,11 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         set({ profile: getProfile(db) });
       },
 
-      logTrial(nodeId, results) {
+      logTrial(nodeId, results, durations) {
         const node = requireNode(nodeId);
         const at = now();
-        return get().logSession(trialSession(node, results, newId(at), at), { endedAt: at });
+        const session = trialSession(node, results, newId(at), at, durations);
+        return get().logSession(session, { endedAt: at });
       },
 
       testOutWarnings(nodeId) {
@@ -729,6 +746,24 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         saveSession(skipRest(requireSession()));
       },
 
+      startTrainingTimer(key) {
+        saveSession(startSetTimer(requireSession(), key, now()));
+      },
+
+      stopTrainingTimer() {
+        const session = requireSession();
+        const { timer } = session;
+        const exercise = session.exercises.find((entry) => entry.key === timer?.exerciseKey);
+        if (!timer || !exercise) return undefined;
+        const at = now();
+        saveSession(stopSetTimer(session, at));
+        return measuredSeconds(timer, timerModeFor(exercise.metric), at);
+      },
+
+      resetTrainingTimer() {
+        saveSession(clearSetTimer(requireSession()));
+      },
+
       addTrainingOptions(query) {
         const { activeSession, trainPlan, nodes, engine } = get();
         const plan = activeSession ?? trainPlan;
@@ -763,7 +798,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           clearActiveSession(tx);
         });
         set({ activeSession: undefined });
-        const result = applyStoredSession(session);
+        const result = applyStoredSession({ ...session, endedAt: at });
         set({ trainSummary: { sessionId: session.id, result } });
         return result;
       },

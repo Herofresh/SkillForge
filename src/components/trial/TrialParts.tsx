@@ -1,13 +1,15 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { unlockedByTrial } from '@/domain/assessment';
 import { formatPerformance } from '@/domain/format';
 import { PROFICIENT_LEVEL } from '@/domain/progression';
 import type { SessionResult } from '@/domain/recompute';
+import { timerModeFor, type SetTimer } from '@/domain/setTimer';
 import type { ExerciseNode, SetPerformance } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
 
 import { Spacing } from '../theme';
+import { SetTimerPanel } from '../timer/SetTimerPanel';
 import { BURST_TITLES, LevelUpBurst, NumberStepper, PixelFrame, PixelText } from '../ui';
 
 type SetsProps = {
@@ -16,25 +18,59 @@ type SetsProps = {
   onStep: (index: number, steps: number) => void;
   /** Shown under the steppers while warnings still wait for their "I understand". */
   pendingNote?: string;
+  /** Hold Trials: the exercise timer per set (PLAN 5.4); the stopped time fills that set. */
+  timers?: readonly (SetTimer | undefined)[];
+  onStartTimer?: (index: number) => void;
+  onStopTimer?: (index: number) => void;
+  onResetTimer?: (index: number) => void;
 };
 
-/** "Your result": one stepper per Trial set (ids `trial-set-<n>`). */
-export function TrialSetsPanel({ node, results, onStep, pendingNote }: SetsProps) {
+/**
+ * "Your result": one stepper per Trial set (ids `trial-set-<n>`). A hold Trial gets a timer per set
+ * (ids `trial-timer-<n>`) when the timer handlers are given.
+ */
+export function TrialSetsPanel({
+  node,
+  results,
+  onStep,
+  pendingNote,
+  timers = [],
+  onStartTimer,
+  onStopTimer,
+  onResetTimer,
+}: SetsProps) {
+  const timed =
+    timerModeFor(node.metric) === 'hold' &&
+    onStartTimer !== undefined &&
+    onStopTimer !== undefined &&
+    onResetTimer !== undefined;
   return (
     <PixelFrame contentStyle={styles.gap}>
       <PixelText variant="label" tone="rune" accessibilityRole="header">
         Your result
       </PixelText>
       {results.map((result, index) => (
-        <NumberStepper
-          key={index}
-          label={`Set ${index + 1}`}
-          valueText={formatPerformance(node.metric, result)}
-          onDecrement={() => onStep(index, -1)}
-          onIncrement={() => onStep(index, 1)}
-          decrementDisabled={result.value <= 0}
-          testID={`trial-set-${index}`}
-        />
+        <View key={index} style={styles.gap}>
+          <NumberStepper
+            label={`Set ${index + 1}`}
+            valueText={formatPerformance(node.metric, result)}
+            onDecrement={() => onStep(index, -1)}
+            onIncrement={() => onStep(index, 1)}
+            decrementDisabled={result.value <= 0}
+            testID={`trial-set-${index}`}
+          />
+          {timed && (
+            <SetTimerPanel
+              metric={node.metric}
+              targetSec={node.trial.target}
+              timer={timers[index]}
+              onStart={() => onStartTimer(index)}
+              onStop={() => onStopTimer(index)}
+              onReset={() => onResetTimer(index)}
+              testID={`trial-timer-${index}`}
+            />
+          )}
+        </View>
       ))}
       {pendingNote !== undefined && (
         <PixelText variant="small" tone="textMuted">

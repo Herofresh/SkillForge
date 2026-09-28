@@ -1,4 +1,5 @@
 import {
+  formatClock,
   formatLevelProgress,
   formatOgLevel,
   formatPerformance,
@@ -71,5 +72,15 @@ describe('formatLevelProgress', () => {
     expect(formatLevelProgress(base)).toBe('12 / 36 XP');
     expect(formatLevelProgress({ ...base, level: 5, capped: true })).toBe('Trial ready');
     expect(formatLevelProgress({ ...base, level: 10, xpIntoLevel: 0, xpForLevel: 0 })).toBe('Max');
+  });
+});
+
+describe('formatClock', () => {
+  it('shows m:ss, and h:mm:ss from an hour on, rounded down', () => {
+    expect(formatClock(0)).toBe('0:00');
+    expect(formatClock(42.9)).toBe('0:42');
+    expect(formatClock(725)).toBe('12:05');
+    expect(formatClock(3_725)).toBe('1:02:05');
+    expect(formatClock(-4)).toBe('0:00');
   });
 });

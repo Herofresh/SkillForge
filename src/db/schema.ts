@@ -63,6 +63,8 @@ export const sessionSets = sqliteTable(
     actualReps: integer('actual_reps'),
     isTrial: integer('is_trial', { mode: 'boolean' }).notNull(),
     timestamp: integer('timestamp').notNull(),
+    /** How long the set took, in whole seconds, when a timer measured it (PLAN 5.4, ADR-040). */
+    durationSec: integer('duration_sec'),
   },
   (table) => [
     primaryKey({ columns: [table.sessionId, table.setIndex] }),

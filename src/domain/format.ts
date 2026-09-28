@@ -124,6 +124,22 @@ export function formatCountdown(seconds: number): string {
   return `${minutes}:${String(rest).padStart(2, '0')}`;
 }
 
+const MINUTES_PER_HOUR = 60;
+
+/**
+ * Elapsed or measured time as a clock, rounded down to whole seconds: "0:42", "12:05", and from an
+ * hour on "1:02:05" (set durations, the session clock, session times; PLAN 5.4).
+ */
+export function formatClock(seconds: number): string {
+  const whole = Math.max(0, Math.floor(seconds));
+  const totalMinutes = Math.floor(whole / SECONDS_PER_MINUTE);
+  const secs = String(whole % SECONDS_PER_MINUTE).padStart(2, '0');
+  if (totalMinutes < MINUTES_PER_HOUR) return `${totalMinutes}:${secs}`;
+  const hours = Math.floor(totalMinutes / MINUTES_PER_HOUR);
+  const minutes = String(totalMinutes % MINUTES_PER_HOUR).padStart(2, '0');
+  return `${hours}:${minutes}:${secs}`;
+}
+
 /** Rest after each set, e.g. "90 s rest" or "3 min rest" (whole minutes from 2 min on). */
 export function formatRest(seconds: number): string {
   if (seconds >= 2 * SECONDS_PER_MINUTE && seconds % SECONDS_PER_MINUTE === 0) {

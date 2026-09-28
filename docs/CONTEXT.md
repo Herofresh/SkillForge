@@ -11,7 +11,8 @@ Persistence: `expo-sqlite` 57, `drizzle-orm` 0.45 (expo-sqlite driver), `drizzle
 `zustand` 5 (ADR-026). Backups: `expo-file-system`, `expo-sharing`, `expo-document-picker` 57 (ADR-028).
 UI (ADR-030): `react-native-svg` 15, `@expo-google-fonts/pixelify-sans`, `silkscreen`,
 `alegreya-sans`, `react-native-reanimated` 4; component tests with `@testing-library/react-native`
-14 + `test-renderer`.
+14 + `test-renderer`. Exercise timer (ADR-040): `expo-keep-awake` 57 and React Native's `Vibration`
+(`android.permission.VIBRATE` in `app.json`).
 
 ## Architecture map
 
@@ -30,7 +31,8 @@ ADR-033) and the 4.4 Train flow (`app/(tabs)/train.tsx`, `app/train/`, `src/comp
 `settings/`, `equipment/`, `src/domain/characterView.ts`, `src/lib/radar.ts`, ADR-035) and the
 4.7/4.8 node editor and shared progressions (`app/node/[nodeId]/edit.tsx`, `app/progressions/`,
 `src/components/editor/`, `src/domain/nodeEditor.ts`, `overlayEdit.ts`, ADR-036) and the 5.1 tree map
-(`src/components/tree/map/`, `src/domain/treeMap.ts`, `src/lib/viewport.ts`, ADR-037). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
+(`src/components/tree/map/`, `src/domain/treeMap.ts`, `src/lib/viewport.ts`, ADR-037) and the 5.4
+exercise timer (`src/domain/setTimer.ts`, `src/components/timer/`, ADR-040). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
@@ -57,8 +59,9 @@ app/                    expo-router screens (UI only, no game logic)
   train/                Train flow stack screens (PLAN 4.4, ADR-034)
     preview.tsx         plan by block: sets × target, rest, markers, notes, warnings to acknowledge;
                         swap / remove / add → Start session
-    session.tsx         live session: current exercise + SetLogger, RestPanel, session list, skip,
-                        add, finish / abandon (confirm dialogs)
+    session.tsx         live session: header with the session clock (SessionClock), current exercise
+                        + SetLogger (with the exercise timer), RestPanel, session list, skip, add,
+                        finish / abandon (confirm dialogs)
     summary.tsx         total XP + bonuses, per-exercise outcome/XP, level-up and unlock bursts,
                         streak, SessionResult warnings acknowledged before Done
   (tabs)/character.tsx  character sheet (PLAN 4.5, ADR-035): hero, level + XP, rank crest, pixel
@@ -120,7 +123,8 @@ src/
     onboarding.ts       normalizeHeroName, toggleGoal (MAX_GOALS 5), ONBOARDING_STEPS, onboardingSummary
     assessment.ts       goalPathNodes, assessmentAnchors (≤ 6), searchNodes, trial results +
                         trialSession (a Trial as a session), testOutWarnings, unlockedByTrial
-    format.ts           formatPerformance / formatTrial ("3 sets of 8 reps"), METRIC_UNITS
+    format.ts           formatPerformance / formatTrial ("3 sets of 8 reps"), METRIC_UNITS,
+                        formatCountdown, formatClock ("0:42", "1:02:05")
     branch.ts           nodesInBranch (column order)
     treeView.ts         Tree/detail view models: TileState, branchColumn, treeTile (chainAbove, links),
                         prerequisiteViews (alternatives, satisfiedBy), branchSummary, defaultBranch,
@@ -130,10 +134,16 @@ src/
                         (treeTile per node + met edges), boundsOf, mapFocus, routeRects
     train.ts            Train session model (ADR-034): SessionPlan / ActiveSession, sessionPlan,
                         swapOptions / addOptions, replace/remove/addExercise, startSession,
-                        logSessionSet (pairs alternate), markedPerformance, skip, rest,
+                        logSessionSet (pairs alternate; takes the timer's durationSec),
+                        markedPerformance, skip, rest, start/stop/clearSetTimer (5.4),
                         projectedSets, finishedSession, warningKey, parseActiveSession
-    trainView.ts        Train view models: blockViews, exerciseView, liveView, summaryView,
-                        BLOCK_LABELS, OUTCOME_LABELS
+    setTimer.ts         exercise timer (PLAN 5.4, ADR-040): timerModeFor (hold countdown with
+                        GET_READY_SECONDS, else stopwatch), readTimer (phase, clock, measured
+                        seconds from timestamps), measuredSeconds, reachedTarget, formatTimerClock,
+                        timerCaption, spokenTimer, timedPerformance, elapsedSeconds, totalDurationSec
+    trainView.ts        Train view models: blockViews, exerciseView, liveView, summaryView (with the
+                        stored session: time per exercise, session time), loggedSetText
+                        ("8 reps · 0:42"), sessionDurationSec, BLOCK_LABELS, OUTCOME_LABELS
     characterView.ts    Character tab view model (ADR-035): characterSheet, radarAxes, nextRank,
                         rankHint, activeStreak, characterTotals, balanceNote, recentSessions,
                         goalProgress
@@ -200,8 +210,13 @@ src/
     node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
                         NodeHistoryList, AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
     train/              Train flow parts: ExerciseCard (prescription, rest, markers), SetLogger
-                        (stepper + Log / Partial / Failed), RestPanel (countdown), NodeOptionSheet
-                        (swap/add picker), TrainWarningList (warnings acknowledged by key)
+                        (timer + stepper + Log / Partial / Failed), RestPanel (countdown),
+                        SessionClock (elapsed session time), NodeOptionSheet (swap/add picker),
+                        TrainWarningList (warnings acknowledged by key)
+    timer/SetTimerPanel.tsx  the exercise timer of one set (PLAN 5.4): Start hold / Start set →
+                        clock, Stop / Done, Cancel / Reset; vibrates at a hold's target, keeps the
+                        screen awake while it runs (expo-keep-awake). Train SetLogger and the hold
+                        Trials' TrialSetsPanel
     train/SessionResultPanels.tsx  XP, streak, level-ups, unlocks, exercises of a SessionResult
                         (Train summary and past session)
     character/          AttributeRadar (rasterized pixel radar), RankCrest (RANK_ICONS),
@@ -218,7 +233,9 @@ src/
                         custom tag, entry row
     character.test.tsx  component tests: radar, crest, goal card, history row, profile editor,
                         backup panel (real store, fake files)
-    train.test.tsx      component tests of the Train parts
+    train.test.tsx      component tests of the Train parts (SetLogger timer, SetTimerPanel with
+                        fake timers, summary times)
+    trial.test.tsx      component tests: TrialSetsPanel timers per hold set
     tree.test.tsx       component tests: tiles, chains, prerequisite list, unlock sheet (real store)
     DataGate.tsx        keeps the splash until fonts + startApp are done; error screen on failure
     ui/                 the UI kit; import from '@/components/ui'
@@ -226,12 +243,13 @@ src/
                         StatBar, LevelBadge, TierChip, WarningBanner, PixelModal, EmptyState,
                         LevelUpBurst (+ BURST_TITLES), PixelTextInput, PixelChip, NumberStepper
       useLevelUpKey.ts  replay key for a LEVEL UP! burst when a level rises while mounted (5.2)
+      useNow.ts         the screen clock: re-renders once a second while active (rest, timers)
       icons.ts          12x12 pixel icon grids + role colors (ICONS, ICON_NAMES, iconGrid,
                         iconCellColor: tint with `knockout` roles left empty, 5.2)
       frameGeometry.ts  notched-corner rects for PixelFrame
       ui.test.tsx       component render tests (RNTL); icons.test.ts, frameGeometry.test.ts
   lib/                  generic helpers: clamp.ts, deepEqual.ts, curve.ts (geometric level curves), median.ts,
-                        time.ts (MS_PER_HOUR/DAY/WEEK), hash.ts (FNV-1a, seeded tie-breaks),
+                        time.ts (MS_PER_HOUR/DAY/WEEK, currentTime for UI handlers), hash.ts (FNV-1a, seeded tie-breaks),
                         id.ts (createId for local records), contrast.ts (WCAG ratio),
                         pixelGrid.ts (icon grid → runs), segments.ts (litSegments for bars),
                         radar.ts (spoke points, polygon rasterized into cells), viewport.ts
@@ -329,6 +347,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
 | **Session plan / active session** | The Train flow's editable plan preview (`SessionPlan`, in memory) and the started session (`ActiveSession`, the `active_session` draft) with its logged sets; `finishedSession` turns it into a `LoggedSession` (ADR-034). |
+| **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics get a stopwatch. Stored as timestamps (`ActiveSession.timer`), so it survives an app kill; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
 | **Custom node / custom tag** | A node the user added (`user_` id) or edited through the node editor; shown with a "Custom" tag. "Reset to default" removes the edit; a custom node is deleted instead. Overlays can't clear `straightArm` on, or move, a built-in straight-arm node (ADR-036). |
 | **Shared progressions** | The overlay as YAML (`exportOverlay`), shared from My progressions. Importing one merges it into the user's overlay after a preview (`mergeOverlays`, ADR-036). |
 | **Stored overlay** | The one current overlay in `progression_overlay`; the store's tree is `applyOverlay(ALL_NODES, overlay).nodes`. An overlay with issues is never saved; a stored one that stops applying is kept and reported as `overlayIssues` (ADR-028). |
@@ -485,8 +504,9 @@ Schema in `src/db/schema.ts`; timestamps are integers in ms since the Unix epoch
     `home` (Home) and `park` (Park)
   - `sessions(id, started_at, ended_at?, equipment_profile_id?)`
   - `session_sets(session_id → sessions cascade, set_index, node_id, metric, prescribed_value,
-    prescribed_reps?, actual_value, actual_reps?, is_trial, timestamp)`, PK
-    `(session_id, set_index)`: one row per `LoggedSet` (ADR-021)
+    prescribed_reps?, actual_value, actual_reps?, is_trial, timestamp, duration_sec?)`, PK
+    `(session_id, set_index)`: one row per `LoggedSet` (ADR-021); `duration_sec` is the exercise
+    timer's measured whole seconds (migration 0003, PLAN 5.4, ADR-040), NULL for untimed sets
   - `user_actions(id, kind, node_id, at)`: `UserAction`s (`self_unlock`, ADR-023)
   - `node_progress(node_id, xp, level, trial_passed, trial_passed_at?, first_trained_at?,
     last_trained_at?, self_unlocked_at?)`: CACHE of `NodeProgress`, rewritten after every
@@ -501,8 +521,9 @@ Schema in `src/db/schema.ts`; timestamps are integers in ms since the Unix epoch
 - **Migrations:** `src/db/migrations/`, generated from the schema by `npm run db:generate`,
   additive only, applied by Drizzle (`__drizzle_migrations`) in one transaction on every start.
 - **Backups** (ADR-028): all tables above except `meta`, `node_progress` and `active_session`, as one JSON file with
-  `format: 'skillforge-backup'` and `schemaVersion` (`BACKUP_SCHEMA_VERSION` = 1, independent of the
-  database schema version). Import replaces everything; a newer `schemaVersion` is refused.
+  `format: 'skillforge-backup'` and `schemaVersion` (`BACKUP_SCHEMA_VERSION` = 2, independent of the
+  database schema version; 2 adds an optional `durationSec` per set, ADR-040; version 1 files still
+  import). Import replaces everything; a newer `schemaVersion` is refused.
 - Not stored (derived): node states, character level/attributes, session XP and outcome, streak.
 
 ## Equipment tags

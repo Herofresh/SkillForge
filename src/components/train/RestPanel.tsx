@@ -1,26 +1,10 @@
-import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { formatCountdown } from '@/domain/format';
 import { restSecondsLeft, type ActiveSession } from '@/domain/train';
-import { MS_PER_SECOND } from '@/lib/time';
 
 import { Spacing } from '../theme';
-import { PixelButton, PixelFrame, PixelIcon, PixelText } from '../ui';
-
-/**
- * The screen clock while `active`: re-renders once a second (the countdown's only timer). Mount the
- * panel with a key per rest so the clock starts fresh.
- */
-function useNow(active: boolean): number {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!active) return;
-    const timer = setInterval(() => setNow(Date.now()), MS_PER_SECOND);
-    return () => clearInterval(timer);
-  }, [active]);
-  return now;
-}
+import { PixelButton, PixelFrame, PixelIcon, PixelText, useNow } from '../ui';
 
 type Props = {
   session: ActiveSession;
@@ -29,7 +13,8 @@ type Props = {
 
 /**
  * The simple rest countdown after a set (PLAN 4.4), from the stored `restEndsAt` (so it survives a
- * restart). Advisory: logging the next set early is always possible. Full timers come later.
+ * restart). Advisory: logging the next set early is always possible, and starting the exercise
+ * timer ends it (PLAN 5.4). Mount it with a key per rest so the clock starts fresh.
  */
 export function RestPanel({ session, onSkip }: Props) {
   const now = useNow(session.restEndsAt !== undefined);
