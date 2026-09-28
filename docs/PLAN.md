@@ -128,7 +128,7 @@
   `schemaVersion` 2, version 1 still imports). Logged sets read "8 reps · 0:42"; the header shows the
   session clock; summary / past session show the session time and the time per exercise. Hold
   Trials have a timer per set.
-- Release v0.2.0 (5.7, ADR-043, PR link below): version 0.2.0 / versionCode 2, published as the
+- Release v0.2.0 (5.7, ADR-043, [PR #27](https://github.com/Herofresh/SkillForge/pull/27)): version 0.2.0 / versionCode 2, published ([release v0.2.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.2.0)) as the
   GitHub pre-release `v0.2.0` (arm64 + universal). **Checked upgrade-safe** on the emulator: the
   v0.1.0-preview1 APK with seeded data (`.maestro/release/upgrade-seed.yaml`), then `adb install -r`
   of 0.2.0 → hero, goal, session and the 40 XP still there, no onboarding
@@ -620,7 +620,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.4 Exercise timer (user request 2026-09-28): hold countdown with get-ready, vibration at the target and overtime, stopwatch for other metrics, per-set `durationSec` (additive column, backup version 2), session clock and times in the summary, hold Trials too (ADR-040, [PR #26](https://github.com/Herofresh/SkillForge/pull/26))
 - [x] 5.5 Acrobatics branch: rolls, judo breakfalls (ukemi) and the cartwheel path to a legendary aerial, gated on the wall handstand; left out of the rank median (ADR-041, [PR #25](https://github.com/Herofresh/SkillForge/pull/25))
 - [x] 5.6 App icon: original pixel-art icon from a code grid (`scripts/appIcon.ts`, `npm run icon:build`): icon, adaptive foreground / background / monochrome, splash, favicon (ADR-042, [PR #24](https://github.com/Herofresh/SkillForge/pull/24))
-- [x] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub; pinned signer check in `build:apk`, release upgrade flows (ADR-043, PR link below)
+- [x] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub; pinned signer check in `build:apk`, release upgrade flows (ADR-043, [PR #27](https://github.com/Herofresh/SkillForge/pull/27); release [v0.2.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.2.0))
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
@@ -646,3 +646,5 @@ compiled into a typed module for the app; users can layer their own changes on t
   (4.7–4.8, ADR-036); keep a changed draft across an app kill (5.2 only asks on leaving)
 - Polish extras (5.2, ADR-038): haptics on level-up/unlock (expo-haptics, optional), animate a
   newly lit edge on the tree map
+- Build script (5.7 review, ADR-043): delete the APK from `builds/` when the signer check fails
+  (today the check runs after the copy, so a wrongly signed APK stays there)
