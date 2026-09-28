@@ -81,10 +81,23 @@
   rejection issues, "Undo last import", about/credits, dev-only Style Guide. Maestro
   `character.yaml`, `settings.yaml`; screenshots `docs/screenshots/4.5-*.png`, `4.6-*.png`.
   **The four tabs are real now.**
+- Node editor and shared progressions (4.7–4.8, ADR-036, [PR #20](https://github.com/Herofresh/SkillForge/pull/20)): the node detail's
+  "Your tree" panel opens **Edit progression** (`app/node/[nodeId]/edit`: working range, Trial,
+  prerequisites with required/recommended and level, equipment options, cues, trained attributes;
+  a custom node also name, metric, position and difficulty), **Add exercise after this**, **Reset to
+  default**, **Hide exercise** / **Delete exercise**; the Tree header has **Add exercise**
+  (`app/progressions/new`). Every change is validated live with `applyOverlay` and the issues show
+  inline per section; Save is off while any exist. Added/edited nodes carry a "Custom" tag. The
+  backlog's overlay safety question is decided: overlays can't clear `straightArm` on a built-in
+  straight-arm node or move it to another branch. Settings → **My progressions**
+  (`app/progressions/`) lists every change (open / reset / show / delete), shares the overlay as
+  YAML via the share sheet, imports a shared one (paste or file) with a preview and merge, and
+  explains "Suggest to project" with a link to the contributor guide. Maestro `editor.yaml`;
+  screenshots `docs/screenshots/4.7-*.png`, `4.8-*.png`. **Phase 4 is complete.**
 
 ## Next up
-1. Phase 4: 4.7 in-app node editor, then 4.8 "Suggest to project" (see the handoff notes; decide
-   the overlay safety backlog item first).
+1. Phase 5: 5.1 graph view (dagre layout, SVG, pan/zoom, glowing unlocked edges, legendary
+   silhouettes), then 5.2 animations and polish, then 5.3 EAS build profile and Android APK.
 2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -92,6 +105,36 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Node editor and shared progressions (tasks 4.7–4.8, ADR-036):**
+  - Domain: `src/domain/nodeEditor.ts` (pure draft functions: `newCustomNode`, `placeAfter`,
+    `customNodeId`, steppers, prerequisite/equipment/cue/trains edits, `prerequisiteOptions`,
+    `issueSection` / `issuesBySection` / `editorIssueText`) and `src/domain/overlayEdit.ts`
+    (`nodeEditFor`, `withNode`, `withoutNodeChanges`, `withHidden`, `customizationOf`,
+    `customizedNodeIds`, `overlayEntries`, `describeOverlayEntry`, `mergeOverlays`,
+    `overlayImportPreview`). The straight-arm rule is `straightArmEditIssues` in `overlay.ts`, called
+    by `applyOverlay`.
+  - Store: `baseNodes` in state; `nodeDraft`, `newNodeDraft`, `nodeDraftIssues`, `saveNodeDraft`
+    (a new draft has id `NEW_NODE_ID` = '' and gets its `user_` id on save), `resetNode`,
+    `setNodeHidden` (built-in only; throws for user nodes), `exportOverlay`, `shareOverlay`,
+    `previewOverlayImport`, `importOverlay` (merge), `pickOverlayFile`. `BackupFiles.share` takes
+    optional `{ mimeType, dialogTitle }`.
+  - UI: `src/components/editor/` (`NodeEditorBody` = the screen body shared by edit and new,
+    `NodeEditorForm`, `PositionSheet`, `IssueNotes`, `CustomBadge`, `OverlayEntryRow`,
+    `SharePanel`), `node/CustomizeSection`, `settings/ProgressionsPanel`. The prerequisite picker
+    reuses the Train `NodeOptionSheet`. New kit bits: `Frames.arcane`, the `quill` icon,
+    `PixelTextInput` `multiline` / `autoCorrect`, `METRIC_LABELS` in `format.ts`.
+  - The editor keeps its draft in screen state (read once on mount); leaving without saving
+    discards it (no "unsaved changes" prompt yet).
+  - Not built (backlog): undo for an overlay import (reset entries one by one), editing patterns,
+    alternatives, regressions or sources, a node's `verify` note, clipboard paste button (the paste
+    field works with the system paste), an "unsaved changes" prompt, a Maestro step that imports
+    real YAML (covered by store and domain tests).
+  - Maestro `editor.yaml` (clearState): add "Towel hang" after Dead hang with Dead hang as
+    prerequisite, see its Custom tag, a cycle on Dead hang shows the inline error with Save off,
+    a valid edit + Reset to default, My progressions → share sheet (closed with back), import screen,
+    delete. Gotcha: the search field's keyboard covers the sheet's options: `hideKeyboard` after
+    `inputText` there (a keyboard is open, so it doesn't leave the screen). All eight flows took ~19.5 min
+    on the Pixel 8 Pro (editor.yaml ~6 min).
 - **Character tab and Settings (tasks 4.5–4.6, ADR-035):**
   - View model: `characterSheet` in `src/domain/characterView.ts` (`radarAxes`, `nextRank`,
     `rankHint`, `activeStreak`, `characterTotals`, `balanceNote`, `recentSessions`,
@@ -418,8 +461,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 4.x Safeguard warnings in the UI (ADR-023): every `SafeguardWarning` (before a Trial, test-out or self-unlock, during a live session and in the summary) is shown with its message and an acknowledge step; straight-arm ones explain why. Never a hard block. Part of 4.1, 4.3 and 4.4 (the Train part: ADR-034) ([PR #18](https://github.com/Herofresh/SkillForge/pull/18))
 - [x] 4.5 Character tab: level + XP, rank crest, pixel attribute radar, balance note, streak, totals, goals along their paths, recent sessions → past session summary (ADR-035) ([PR #19](https://github.com/Herofresh/SkillForge/pull/19))
 - [x] 4.6 Settings: hero name, equipment profiles CRUD, export (share sheet) / import with confirmation, readable rejection, undo last import, about/credits, dev Style Guide link (ADR-035) ([PR #19](https://github.com/Herofresh/SkillForge/pull/19))
-- [ ] 4.7 In-app node editor: add a `user_` node, edit a node's standards/prerequisites, hide a node; show `applyOverlay` issues inline and never save a broken tree
-- [ ] 4.8 "Suggest to project": share the overlay as YAML (`exportOverlay`) and import someone else's (`importOverlay`)
+- [x] 4.7 In-app node editor: add a `user_` node, edit a node's standards/prerequisites/equipment/cues/trains, hide a node, reset to default, "Custom" badges; show `applyOverlay` issues inline and never save a broken tree; overlays keep built-in straight-arm nodes straight-arm and in their branch (ADR-036) ([PR #20](https://github.com/Herofresh/SkillForge/pull/20))
+- [x] 4.8 "Suggest to project": share the overlay as YAML (`exportOverlay`) and import someone else's (`importOverlay`) with a preview and merge; link to the contributor guide (ADR-036) ([PR #20](https://github.com/Herofresh/SkillForge/pull/20))
 
 ### Phase 5: Graph view and release
 - [ ] 5.1 Graph view: dagre layout, SVG, pan/zoom, glowing unlocked edges, legendary silhouettes
@@ -440,8 +483,5 @@ compiled into a typed module for the app; users can layer their own changes on t
 - Notifications and reminders
 - More content: advanced/elite nodes, full flexibility branch
 - Optional cloud sync
-- Overlay safety (from the PR #4 review): `applyOverlay` only enforces `straight_arm: true` in the
-  front_lever, back_lever and planche branches, so an overlay edit can set `straight_arm: false` on
-  a built-in straight-arm node elsewhere (e.g. `german_hang`, `manna`, `tuck_human_flag`) or move it
-  to another `branch`, which would drop its tendon safeguards (AGENT.md §5, ADR-010). Decide before
-  the editor UI (4.7/4.8) whether overlays may clear `straightArm` on built-in nodes.
+- Progression editor extras: undo an overlay import, edit patterns/alternatives/regressions/sources,
+  an "unsaved changes" prompt when leaving the editor (4.7–4.8, ADR-036)

@@ -1,0 +1,314 @@
+# Node editor and shared progressions (PLAN 4.7, 4.8): from a fresh install, add a custom exercise
+# "Towel hang" after Dead hang with Dead hang as its prerequisite, see it with its Custom tag in the
+# tree, try to make Dead hang need it (a cycle: the inline error shows and Save stays off), save a
+# valid edit instead and reset it to the default, then open My progressions (share sheet, import
+# screen) and delete the custom exercise. Takes the 4.7/4.8 screenshots. Prerequisites and run: see
+# smoke.yaml / docs/CONTEXT.md.
+appId: host.exp.exponent
+name: Editor - custom exercise, cycle error, reset, share
+---
+# Fresh data, so the tree is the built-in one (wipes Expo Go's data, including the app database).
+- clearState
+- openLink: exp://127.0.0.1:8081
+- extendedWaitUntil:
+    visible: 'Name your hero|Continue'
+    timeout: 180000
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+- runFlow:
+    when:
+      visible: 'Toggle performance monitor'
+    commands:
+      - back
+- extendedWaitUntil:
+    visible:
+      id: 'onboarding-hero'
+    timeout: 60000
+- runFlow: subflows/finish-onboarding.yaml
+- tapOn: 'Tree'
+- extendedWaitUntil:
+    visible:
+      id: 'tree-screen'
+    timeout: 20000
+- tapOn:
+    id: 'branch-v_pull'
+# 4.7: add a custom exercise to the branch
+- tapOn:
+    id: 'tree-add-exercise'
+- extendedWaitUntil:
+    visible:
+      id: 'node-editor'
+    timeout: 20000
+- assertVisible:
+    id: 'editor-issues-name'
+- tapOn:
+    id: 'editor-name'
+- inputText: 'Towel hang'
+- hideKeyboard
+- assertNotVisible:
+    id: 'editor-issues-name'
+- tapOn:
+    id: 'editor-change-position'
+- extendedWaitUntil:
+    visible:
+      id: 'position-sheet'
+    timeout: 20000
+- tapOn:
+    id: 'position-dead_hang'
+- assertVisible:
+    id: 'editor-position'
+    text: 'Dead hang'
+- takeScreenshot: 4.7-new-exercise
+- scrollUntilVisible:
+    element:
+      id: 'editor-add-prerequisite'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'editor-add-prerequisite'
+- extendedWaitUntil:
+    visible:
+      id: 'prerequisite-sheet'
+    timeout: 20000
+- tapOn:
+    id: 'option-dead_hang'
+- scrollUntilVisible:
+    element:
+      id: 'editor-prereq-dead_hang'
+    direction: DOWN
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'editor-save'
+    direction: DOWN
+    timeout: 60000
+- assertVisible:
+    id: 'editor-status'
+    text: 'The tree stays valid with these changes.'
+- tapOn:
+    id: 'editor-save'
+# Saving opens the new skill's page: it carries the Custom badge
+- extendedWaitUntil:
+    visible:
+      id: 'node-detail'
+    timeout: 20000
+- assertVisible:
+    id: 'detail-custom'
+- takeScreenshot: 4.7-custom-detail
+- back
+# In the tree right under Dead hang, with its Custom tag
+- extendedWaitUntil:
+    visible:
+      id: 'tile-custom-user_towel_hang'
+    timeout: 20000
+- assertVisible:
+    id: 'tile-state-user_towel_hang'
+    text: 'Locked'
+- takeScreenshot: 4.7-tree-custom
+# An invalid edit: Dead hang can't need Towel hang (it needs Dead hang: a cycle)
+- tapOn:
+    id: 'tile-dead_hang'
+- extendedWaitUntil:
+    visible:
+      id: 'node-detail'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'edit-progression'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'edit-progression'
+- extendedWaitUntil:
+    visible:
+      id: 'node-editor'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'editor-add-prerequisite'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'editor-add-prerequisite'
+- extendedWaitUntil:
+    visible:
+      id: 'prerequisite-sheet'
+    timeout: 20000
+- tapOn:
+    id: 'prerequisite-sheet-search'
+- inputText: 'Towel'
+- hideKeyboard
+- tapOn:
+    id: 'option-user_towel_hang'
+- scrollUntilVisible:
+    element: '.*prerequisites form a cycle.*'
+    direction: DOWN
+    timeout: 60000
+- assertVisible:
+    id: 'editor-issues-prerequisites'
+- takeScreenshot: 4.7-cycle-error
+- scrollUntilVisible:
+    element:
+      id: 'editor-save'
+    direction: DOWN
+    timeout: 60000
+- assertVisible:
+    id: 'editor-save'
+    enabled: false
+# Remove it again and make a valid edit instead: one more on the Trial target
+- scrollUntilVisible:
+    element:
+      id: 'editor-prereq-remove-user_towel_hang'
+    direction: UP
+    timeout: 60000
+- tapOn:
+    id: 'editor-prereq-remove-user_towel_hang'
+- scrollUntilVisible:
+    element:
+      id: 'editor-trial-target-plus'
+    direction: UP
+    timeout: 60000
+- tapOn:
+    id: 'editor-trial-target-plus'
+- scrollUntilVisible:
+    element:
+      id: 'editor-save'
+    direction: DOWN
+    timeout: 60000
+- assertVisible:
+    id: 'editor-save'
+    enabled: true
+- tapOn:
+    id: 'editor-save'
+- extendedWaitUntil:
+    visible:
+      id: 'node-detail'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'detail-custom'
+    direction: UP
+    timeout: 60000
+# Reset to default: the badge goes away
+- scrollUntilVisible:
+    element:
+      id: 'reset-node'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'reset-node'
+- extendedWaitUntil:
+    visible:
+      id: 'reset-dialog'
+    timeout: 20000
+- tapOn:
+    id: 'reset-confirm'
+- extendedWaitUntil:
+    notVisible:
+      id: 'reset-node'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'detail-header'
+    direction: UP
+    timeout: 60000
+- assertNotVisible:
+    id: 'detail-custom'
+- back
+# 4.8: My progressions in Settings
+- extendedWaitUntil:
+    visible:
+      id: 'tree-screen'
+    timeout: 20000
+- tapOn: 'Settings'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-screen'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'open-progressions'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'open-progressions'
+- extendedWaitUntil:
+    visible:
+      id: 'progressions-screen'
+    timeout: 20000
+- assertVisible:
+    id: 'entry-user_towel_hang'
+- assertNotVisible:
+    id: 'entry-dead_hang'
+- takeScreenshot: 4.8-progressions
+# Share: the Android share sheet opens; close it with back
+- scrollUntilVisible:
+    element:
+      id: 'share-progressions'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'share-progressions'
+- extendedWaitUntil:
+    notVisible:
+      id: 'progressions-screen'
+    timeout: 10000
+    optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: 'progressions-screen'
+    commands:
+      - takeScreenshot: 4.8-share-sheet
+      - back
+- extendedWaitUntil:
+    visible:
+      id: 'progressions-screen'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'open-contributor-guide'
+    direction: DOWN
+    timeout: 60000
+# Import: the screen opens; nothing to preview without text
+- scrollUntilVisible:
+    element:
+      id: 'import-progressions'
+    direction: UP
+    timeout: 60000
+- tapOn:
+    id: 'import-progressions'
+- extendedWaitUntil:
+    visible:
+      id: 'import-progressions-screen'
+    timeout: 20000
+- assertVisible:
+    id: 'import-preview'
+    enabled: false
+- takeScreenshot: 4.8-import
+- back
+# Delete the custom exercise: the list is empty again
+- extendedWaitUntil:
+    visible:
+      id: 'progressions-screen'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'entry-action-user_towel_hang'
+    direction: UP
+    timeout: 60000
+- tapOn:
+    id: 'entry-action-user_towel_hang'
+- extendedWaitUntil:
+    visible:
+      id: 'entry-reset-dialog'
+    timeout: 20000
+- tapOn:
+    id: 'entry-reset-confirm'
+- extendedWaitUntil:
+    visible: 'No changes yet'
+    timeout: 20000
+- back

@@ -116,6 +116,7 @@ stepped corners and a hard shadow.
 | `gold` | `gold` | `surface` | Highlighted: level badge, info notes |
 | `parchment` | `bronze` | `parchment` | Lists and "documents" (ink text) |
 | `rune` | `rune` | `surface` | Magic moments: level-up, unlocks |
+| `arcane` | `arcane` | `surface` | The user's own changes: "Custom" badge, editor panels (4.7) |
 | `danger` | `danger` | `surface` | Safeguard warnings |
 | `selected` | `gold` | `surfaceRaised` | A picked chip or row (goal, tag, branch) |
 
@@ -182,6 +183,18 @@ About) and the shared `EquipmentProfileEditor`; destructive steps (remove a prof
 confirm in a `PixelModal` with a danger button. Screenshots: `docs/screenshots/4.5-*.png`,
 `4.6-*.png`.
 
+**Node editor and shared progressions (PLAN 4.7–4.8, ADR-036)** in `src/components/editor/`: the
+editor is a stack of `DetailSection` panels (an arcane "Exercise" panel for a custom node: name,
+metric chips, "Comes after" + `PositionSheet`, difficulty stepper, straight-arm chip; then
+Standards steppers, Prerequisites as raised cards with a "Required" chip, level stepper and Remove,
+Equipment options as tag-chip cards, Cues on parchment, Trains chips with "Auto"). Validator issues
+show inline under the section they are about in an `IssueNotes` danger frame ("FIX THIS TO SAVE");
+the footer states the problem count and Save stays disabled while there are any. `CustomBadge`
+(arcane frame, quill, "CUSTOM") marks added/edited nodes on the detail header; tiles get a smaller
+quill + "CUSTOM" tag. My progressions lists `OverlayEntryRow`s (raised cards), then `SharePanel`
+(Share / Import, and a parchment "Suggest to project" panel with the contributor-guide link).
+Screenshots: `docs/screenshots/4.7-*.png`, `4.8-*.png`.
+
 Bar math: `litSegments(fraction, count)` (`src/lib/segments.ts`) lights ≥ 1 segment for any gain and
 never shows full before 100 %. The fraction itself comes from the domain (e.g. XP thresholds in
 `progression.ts` / `character.ts`); components never compute game numbers.
@@ -191,13 +204,13 @@ never shows full before 100 %. The fraction itself comes from the domain (e.g. X
 12×12 character grids in `src/components/ui/icons.ts`, rendered by `PixelIcon` as SVG rects (one
 per horizontal run, `src/lib/pixelGrid.ts`). Roles: `#` main, `+` accent, `*` highlight, `o` shade,
 `.` empty; each icon maps roles to theme colors. The set: `sword`, `shield`, `flame`, `star`,
-`lock`, `chain`, `scroll`, `potion`, `bar`, `heart`, `rune`, `alert`, `check`, `cross`, and the tab icons
+`lock`, `chain`, `scroll`, `potion`, `bar`, `heart`, `rune`, `alert`, `check`, `cross`, `quill`, and the tab icons
 `tree`, `bar` (Train), `helmet` (Character), `gear` (Settings).
 
 Suggested meanings: sword = train/attempt · shield = safeguard · flame = streak · star = mastered /
 goal · lock = locked · chain = prerequisite · scroll = log, info, notes · potion = recovery, errors ·
 bar = equipment / strength · heart = health · rune = skill node / magic · alert = warning ·
-check = done / met · cross = not met.
+check = done / met · cross = not met · quill = edit / the user's own changes.
 
 Adding an icon: add a grid (exactly 12 rows of 12 characters, ≤ 4 roles, keep one role for icons
 that must tint), map its roles to `Colors`, and `icons.test.ts` checks it. Keep silhouettes readable

@@ -25,6 +25,11 @@
  *   rest) and read back by `loadAll`, so a killed app resumes it. `finishTraining` logs it as an
  *   ordinary session (deleting the draft in the same transaction); `trainSummary` keeps the result
  *   for the summary screen.
+ * - Node editor and shared progressions (PLAN 4.7–4.8, ADR-036): `nodeDraft` / `newNodeDraft`
+ *   start an editor draft, `nodeDraftIssues` validates it live (the overlay with the draft through
+ *   `applyOverlay`), `saveNodeDraft`, `resetNode` and `setNodeHidden` change the overlay through
+ *   `saveOverlay` (so a broken tree is never saved). `exportOverlay` / `shareOverlay` hand out the
+ *   overlay as YAML; `previewOverlayImport` / `importOverlay` merge a shared one after a preview.
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
  *
  * `createAppStore` takes its dependencies (database, built-in tree, clock, id source, file access) so
@@ -62,7 +67,23 @@ import {
   type WorkoutContext,
 } from '@/domain/generator';
 import { normalizeHeroName, toggleGoal } from '@/domain/onboarding';
-import { applyOverlay, EMPTY_OVERLAY } from '@/domain/overlay';
+import { customNodeId, NEW_NODE_ID, newCustomNode } from '@/domain/nodeEditor';
+import {
+  applyOverlay,
+  EMPTY_OVERLAY,
+  exportOverlay,
+  importOverlay,
+  OVERLAY_FILE_EXTENSION,
+  OVERLAY_FILE_PREFIX,
+  OVERLAY_MIME_TYPE,
+} from '@/domain/overlay';
+import {
+  overlayImportPreview,
+  withHidden,
+  withNode,
+  withoutNodeChanges,
+  type OverlayImportPreview,
+} from '@/domain/overlayEdit';
 import { nodeUseWarnings, resolveNode } from '@/domain/progression';
 import {
   applySession,
@@ -98,6 +119,7 @@ import {
 } from '@/domain/train';
 import {
   EQUIPMENT_TAGS,
+  type Branch,
   type EquipmentProfile,
   type EquipmentTag,
   type ExerciseNode,
@@ -126,10 +148,16 @@ export const ONBOARDING_COMPLETED_SETTING = 'onboarding_completed_at';
 /** File name prefix of the safety copy written before an import replaces the data. */
 export const SAFETY_COPY_PREFIX = 'skillforge-before-import';
 
+/** How the share sheet presents a file (defaults: a JSON backup). */
+export interface ShareOptions {
+  mimeType?: string;
+  dialogTitle?: string;
+}
+
 /** Platform file access for backups (`backupFiles.ts` in the app, a fake in tests). */
 export interface BackupFiles {
   /** Offers `text` to the user as a file (share sheet: save to Drive, send, …). */
-  share(fileName: string, text: string): Promise<void>;
+  share(fileName: string, text: string, options?: ShareOptions): Promise<void>;
   /** Lets the user pick a file and returns its text, or `undefined` when they cancel. */
   pick(): Promise<string | undefined>;
   /** Writes a copy into the app's own storage and returns its location. Throws on failure. */
@@ -166,9 +194,22 @@ export type ImportBackupResult =
 
 export type ImportBackupFileResult = ImportBackupResult | { status: 'canceled' };
 
+/** A shared overlay text read for import: unreadable (its format issues), or what it would do. */
+export type OverlayTextPreview =
+  | { status: 'unreadable'; issues: ValidationIssue[] }
+  | { status: 'ready'; preview: OverlayImportPreview };
+
+/** Saving an editor draft: the saved node's id, or the issues (and nothing saved). */
+export interface SaveNodeDraftResult {
+  nodeId: string;
+  issues: ValidationIssue[];
+}
+
 export interface AppState {
   /** `loadAll` has run at least once. */
   loaded: boolean;
+  /** The built-in tree (`ALL_NODES`) the overlay applies to. */
+  baseNodes: readonly ExerciseNode[];
   /** The user's tree: `applyOverlay(baseNodes, overlay).nodes`, or the built-in tree on issues. */
   nodes: readonly ExerciseNode[];
   /** The stored overlay (empty when the user changed nothing). */
@@ -240,6 +281,32 @@ export interface AppState {
    * `applyOverlay` issues instead (and writes nothing) when the merged tree would be broken.
    */
   saveOverlay(overlay: ProgressionOverlay): ValidationIssue[];
+  // --- Node editor and shared progressions (PLAN 4.7–4.8, ADR-036) ---
+  /**
+   * The editor draft of `nodeId`: a user node as stored, a built-in node with the user's edit (not
+   * the hidden-node rerouting of the merged tree). `undefined` for an unknown id.
+   */
+  nodeDraft(nodeId: string): ExerciseNode | undefined;
+  /** A new user node in `branch` after `afterId` (default: the end), not saved yet. */
+  newNodeDraft(branch: Branch, afterId?: string): ExerciseNode;
+  /** The `applyOverlay` issues the tree would have with `draft` saved (empty = it can be saved). */
+  nodeDraftIssues(draft: ExerciseNode): ValidationIssue[];
+  /** Saves `draft` into the overlay (a new node gets its `user_` id from its name). */
+  saveNodeDraft(draft: ExerciseNode): SaveNodeDraftResult;
+  /** Removes every change to `nodeId` ("Reset to default"; deletes a user node). */
+  resetNode(nodeId: string): ValidationIssue[];
+  /** Hides a built-in node from the tree, or shows it again. */
+  setNodeHidden(nodeId: string, hidden: boolean): ValidationIssue[];
+  /** The stored overlay as shareable YAML (`exportOverlay`). */
+  exportOverlay(): { fileName: string; text: string };
+  /** `exportOverlay`, then hand the `.yaml` file to the share sheet. */
+  shareOverlay(): Promise<void>;
+  /** Reads shared overlay text and previews merging it into the user's overlay. Writes nothing. */
+  previewOverlayImport(text: string): OverlayTextPreview;
+  /** Merges shared overlay text into the user's overlay and saves it; issues = nothing saved. */
+  importOverlay(text: string): ValidationIssue[];
+  /** Lets the user pick a shared overlay file; its text, or `undefined` when they cancel. */
+  pickOverlayFile(): Promise<string | undefined>;
   // --- Train flow (PLAN 4.4, ADR-034) ---
   /** Generates a plan for the profile and time and makes it the editable `trainPlan`. */
   planTraining(equipmentProfileId: string, minutes: number, seed?: number): SessionPlan;
@@ -385,8 +452,29 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       set({ activeSession: session });
     };
 
+    /** Every node id the overlay can refer to: built-in (hidden too) and the user's own. */
+    const knownIds = (): string[] => [
+      ...baseNodes.map((node) => node.id),
+      ...get().overlay.added.map((node) => node.id),
+    ];
+
+    /** A new draft gets its permanent `user_` id from its name. */
+    const withDraftId = (draft: ExerciseNode): ExerciseNode =>
+      draft.id === NEW_NODE_ID ? { ...draft, id: customNodeId(draft.name, knownIds()) } : draft;
+
+    /** Parses shared overlay text and previews the merge. */
+    const readSharedOverlay = (text: string): OverlayTextPreview => {
+      const parsed = importOverlay(text);
+      if (!parsed.overlay) return { status: 'unreadable', issues: parsed.issues };
+      return {
+        status: 'ready',
+        preview: overlayImportPreview(baseNodes, get().overlay, parsed.overlay),
+      };
+    };
+
     return {
       loaded: false,
+      baseNodes,
       nodes: baseNodes,
       overlay: EMPTY_OVERLAY,
       overlayIssues: [],
@@ -680,6 +768,72 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         saveOverlay(db, overlay, now());
         get().loadAll(); // the tree changed: full recompute (ADR-008)
         return [];
+      },
+
+      nodeDraft(nodeId) {
+        const { overlay } = get();
+        const added = overlay.added.find((node) => node.id === nodeId);
+        if (added) return added;
+        const base = baseNodes.find((node) => node.id === nodeId);
+        if (!base) return undefined;
+        return { ...base, ...overlay.edited[nodeId], id: base.id, source: base.source };
+      },
+
+      newNodeDraft(branch, afterId) {
+        return newCustomNode(get().nodes, branch, afterId);
+      },
+
+      nodeDraftIssues(draft) {
+        const overlay = withNode(get().overlay, baseNodes, withDraftId(draft));
+        return applyOverlay(baseNodes, overlay).issues;
+      },
+
+      saveNodeDraft(draft) {
+        const node = withDraftId(draft);
+        const issues = get().saveOverlay(withNode(get().overlay, baseNodes, node));
+        return { nodeId: node.id, issues };
+      },
+
+      resetNode(nodeId) {
+        return get().saveOverlay(withoutNodeChanges(get().overlay, nodeId));
+      },
+
+      setNodeHidden(nodeId, hidden) {
+        if (!baseNodes.some((node) => node.id === nodeId)) {
+          throw new Error(`Only built-in nodes can be hidden ('${nodeId}')`);
+        }
+        return get().saveOverlay(withHidden(get().overlay, nodeId, hidden));
+      },
+
+      exportOverlay() {
+        return {
+          fileName: backupFileName(now(), OVERLAY_FILE_PREFIX, OVERLAY_FILE_EXTENSION),
+          text: exportOverlay(get().overlay),
+        };
+      },
+
+      async shareOverlay() {
+        const files = requireFiles();
+        const { fileName, text } = get().exportOverlay();
+        await files.share(fileName, text, {
+          mimeType: OVERLAY_MIME_TYPE,
+          dialogTitle: 'Share your SkillForge progressions',
+        });
+      },
+
+      previewOverlayImport(text) {
+        return readSharedOverlay(text);
+      },
+
+      importOverlay(text) {
+        const read = readSharedOverlay(text);
+        if (read.status === 'unreadable') return read.issues;
+        if (read.preview.issues.length > 0) return read.preview.issues;
+        return get().saveOverlay(read.preview.merged);
+      },
+
+      pickOverlayFile() {
+        return requireFiles().pick();
       },
 
       exportBackup() {

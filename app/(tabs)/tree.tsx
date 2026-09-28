@@ -8,6 +8,7 @@ import { TreeLegend } from '@/components/tree/TreeLegend';
 import { NodeTile } from '@/components/tree/NodeTile';
 import { PixelButton, PixelFrame, PixelText } from '@/components/ui';
 import { BRANCH_NAMES } from '@/data/skills/branches';
+import { customizedNodeIds } from '@/domain/overlayEdit';
 import { branchColumn, branchSummary, defaultBranch, type TreeTile } from '@/domain/treeView';
 import type { Branch } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
@@ -15,13 +16,16 @@ import { useAppStore } from '@/store/useAppStore';
 /**
  * The Tree tab (PLAN 4.2): pick a branch, see its column of skill tiles in chain order with pixel
  * chains to their prerequisites, and tap a tile for the node detail. One branch at a time in a
- * FlatList of memoized tiles, so the 89-node tree stays light.
+ * FlatList of memoized tiles, so the 89-node tree stays light. "Add exercise" opens the editor for a
+ * custom node in the branch (PLAN 4.7); the user's own changes carry a "Custom" tag.
  */
 export default function TreeScreen() {
   const router = useRouter();
   const nodes = useAppStore((state) => state.nodes);
   const progress = useAppStore((state) => state.engine.progress);
   const goals = useAppStore((state) => state.goals);
+  const overlay = useAppStore((state) => state.overlay);
+  const customized = useMemo(() => customizedNodeIds(overlay), [overlay]);
   const [branch, setBranch] = useState<Branch>(() => defaultBranch(nodes, goals));
   const [legendOpen, setLegendOpen] = useState(false);
   const tiles = useMemo(
@@ -35,8 +39,8 @@ export default function TreeScreen() {
     [router],
   );
   const renderTile = useCallback<ListRenderItem<TreeTile>>(
-    ({ item }) => <NodeTile tile={item} onOpen={openNode} />,
-    [openNode],
+    ({ item }) => <NodeTile tile={item} onOpen={openNode} custom={customized.has(item.node.id)} />,
+    [openNode, customized],
   );
 
   const header = (
@@ -53,14 +57,23 @@ export default function TreeScreen() {
             ? ` · ${summary.goals} ${summary.goals === 1 ? 'goal' : 'goals'}`
             : '')}
       </PixelText>
-      <PixelButton
-        label="Legend"
-        icon="scroll"
-        variant="secondary"
-        onPress={() => setLegendOpen(true)}
-        testID="tree-legend"
-        style={styles.legendButton}
-      />
+      <View style={styles.headerButtons}>
+        <PixelButton
+          label="Legend"
+          icon="scroll"
+          variant="secondary"
+          onPress={() => setLegendOpen(true)}
+          testID="tree-legend"
+        />
+        <PixelButton
+          label="Add exercise"
+          icon="quill"
+          variant="secondary"
+          onPress={() => router.push({ pathname: '/progressions/new', params: { branch } })}
+          accessibilityHint="Adds your own exercise to this branch"
+          testID="tree-add-exercise"
+        />
+      </View>
     </PixelFrame>
   );
 
@@ -100,8 +113,10 @@ const styles = StyleSheet.create({
   header: {
     gap: Spacing.xs,
   },
-  legendButton: {
+  headerButtons: {
     marginTop: Spacing.sm,
-    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
   },
 });

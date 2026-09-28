@@ -27,7 +27,9 @@ node detail (`app/(tabs)/tree.tsx`, `app/node/`, `src/components/tree/`, `src/co
 ADR-033) and the 4.4 Train flow (`app/(tabs)/train.tsx`, `app/train/`, `src/components/train/`,
 `src/domain/train.ts`, `trainView.ts`, ADR-034) and the 4.5/4.6 Character tab and Settings
 (`app/(tabs)/character.tsx`, `settings.tsx`, `app/session/`, `src/components/character/`,
-`settings/`, `equipment/`, `src/domain/characterView.ts`, `src/lib/radar.ts`, ADR-035). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
+`settings/`, `equipment/`, `src/domain/characterView.ts`, `src/lib/radar.ts`, ADR-035) and the
+4.7/4.8 node editor and shared progressions (`app/node/[nodeId]/edit.tsx`, `app/progressions/`,
+`src/components/editor/`, `src/domain/nodeEditor.ts`, `overlayEdit.ts`, ADR-036). Files marked *(planned)* don't exist yet. Empty folders hold a `.gitkeep`.
 
 ```
 app/                    expo-router screens (UI only, no game logic)
@@ -43,6 +45,12 @@ app/                    expo-router screens (UI only, no game logic)
     index.tsx           header (state, level, XP), actions (goal, Attempt Trial, Unlock anyway sheet),
                         prerequisites ✓/✗ + alternatives, trains, standards, cues, history, review
     trial.tsx           Trial attempt: warnings to acknowledge, steppers, logTrial, outcome + burst
+    edit.tsx            "Edit progression" (PLAN 4.7, ADR-036): NodeEditorBody on nodeDraft(nodeId)
+  progressions/         the user's tree changes (PLAN 4.7–4.8, ADR-036), stack screens
+    index.tsx           "My progressions": every change (open / reset / show / delete), SharePanel
+                        (share YAML, import, suggest to project + contributor guide link)
+    new.tsx             "Add custom exercise" (?branch=&after=): NodeEditorBody on newNodeDraft
+    import.tsx          paste or pick shared YAML → preview (changes, "replaces yours", issues) → merge
   (tabs)/train.tsx      Train now (profile chips, 30/45/60 min → planTraining) or "Resume session"
   train/                Train flow stack screens (PLAN 4.4, ADR-034)
     preview.tsx         plan by block: sets × target, rest, markers, notes, warnings to acknowledge;
@@ -74,8 +82,16 @@ src/
   domain/               PURE TS game rules. No React/Expo/DB imports (ADR-009)
     types.ts            single source of shared types (nodes, issues, overlay, logged sets, progress)
     tier.ts             tierForOgLevel (tier is derived, never stored)
-    overlay.ts          user overlay: applyOverlay, exportOverlay/importOverlay (text),
-                        overlayToRaw/overlayFromRaw (data: DB row, backups), isEmptyOverlay
+    overlay.ts          user overlay: applyOverlay (+ straightArmEditIssues, ADR-036),
+                        exportOverlay/importOverlay (text), overlayToRaw/overlayFromRaw (data: DB row,
+                        backups), isEmptyOverlay, OVERLAY_FILE_* / PROGRESSIONS_GUIDE_URL
+    overlayEdit.ts      overlay changes from the editor (ADR-036): nodeEditFor (diff to built-in),
+                        withNode, withoutNodeChanges (reset/delete), withHidden, customizationOf,
+                        customizedNodeIds, overlayEntries / describeOverlayEntry, mergeOverlays,
+                        overlayImportPreview
+    nodeEditor.ts       node editor draft (ADR-036): newCustomNode, placeAfter, customNodeId, steppers
+                        (range, Trial, OG, prerequisite level), prerequisite/equipment/cue/trains
+                        edits, prerequisiteOptions, issueSection / issuesBySection / editorIssueText
     backup.ts           backup file format (ADR-028): serializeBackup, parseBackup (validates
                         everything before an import), backupFileName, BACKUP_SCHEMA_VERSION
     xp.ts               units, difficulty/outcome multipliers, exercise and session XP, streak
@@ -139,7 +155,10 @@ src/
                         trainPlan / activeSession / trainSummary, planTraining, swap/remove/add,
                         trainWarnings, acknowledgeTrainWarning, startTraining, logTrainingSet,
                         skip/select/rest, finishTraining, abandonTraining; sessionResults (per
-                        session, PLAN 4.5); lastImport + undoLastImport (PLAN 4.6)
+                        session, PLAN 4.5); lastImport + undoLastImport (PLAN 4.6); editor (ADR-036):
+                        baseNodes, nodeDraft, newNodeDraft, nodeDraftIssues, saveNodeDraft,
+                        resetNode, setNodeHidden, exportOverlay, shareOverlay, previewOverlayImport,
+                        importOverlay (merge), pickOverlayFile
     backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker)
     bootstrap.ts        startApp(): open, migrate, create store, loadAll (once)
     useAppStore.ts      useAppStore(selector) hook for components below DataGate
@@ -167,7 +186,13 @@ src/
     character/          AttributeRadar (rasterized pixel radar), RankCrest (RANK_ICONS),
                         SessionHistoryRow, GoalProgressCard
     equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form (onboarding, Settings)
-    settings/           BackupPanel (export, import confirm, rejection issues, undo), AboutPanel
+    settings/           BackupPanel (export, import confirm, rejection issues, undo), AboutPanel,
+                        ProgressionsPanel (count of tree changes → My progressions)
+    editor/             node editor (PLAN 4.7–4.8, ADR-036): NodeEditorBody (screen body: live
+                        issues, Save/Cancel), NodeEditorForm (sections with inline IssueNotes),
+                        PositionSheet, IssueNotes, CustomBadge, OverlayEntryRow, SharePanel
+    node/CustomizeSection.tsx  "Your tree" on the node detail: edit, add after, reset, hide/delete
+    editor.test.tsx     component tests: editor add/cycle/save (real store), custom tag, entry row
     character.test.tsx  component tests: radar, crest, goal card, history row, profile editor,
                         backup panel (real store, fake files)
     train.test.tsx      component tests of the Train parts
@@ -195,7 +220,9 @@ drizzle.config.ts       drizzle-kit config (sqlite, expo driver, schema -> src/d
 babel.config.js         babel-preset-expo + inline-import for .sql (also used by Jest)
 metro.config.js         Expo default + `sql` source extension
 jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
-.maestro/               E2E flows: character.yaml (clearState; level/XP after a session, history →
+.maestro/               E2E flows: editor.yaml (clearState; custom exercise with a prerequisite,
+                        cycle error, reset, My progressions share/import/delete; 4.7/4.8
+                        screenshots), character.yaml (clearState; level/XP after a session, history →
                         past session; 4.5 screenshots), settings.yaml (profile add/remove, export share
                         sheet, import cancel; 4.6 screenshots), onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
                         proof), styleguide.yaml (UI kit), train.yaml (clearState; plan, live session,
@@ -231,7 +258,10 @@ The 88 manifest nodes plus `straight_bar_dip` (Home dip, ADR-017). Content check
 store state set → UI re-renders. **Start-up:** `DataGate` → `startApp` → open → `migrateDatabase`
 → `loadAll` (read overlay → `applyOverlay(ALL_NODES, overlay)` = `state.nodes` → read history →
 `recompute` → rewrite cache) → screens render. **Overlay edit:** `saveOverlay(overlay)` →
-`applyOverlay` issues? return them, write nothing : store the row → `loadAll`.
+`applyOverlay` issues? return them, write nothing : store the row → `loadAll`. The editor
+(ADR-036) builds that overlay from a draft (`withNode`, `withoutNodeChanges`, `withHidden`) and
+checks it live with `nodeDraftIssues` before Save; an import previews `mergeOverlays(current,
+shared)` the same way.
 
 **Backup flow (ADR-028):** export: `exportBackup` / `shareBackup` → `readUserData` →
 `serializeBackup` → share sheet. Import: `importBackupFromFile` (document picker) → `importBackup`
@@ -262,6 +292,8 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
 | **Session plan / active session** | The Train flow's editable plan preview (`SessionPlan`, in memory) and the started session (`ActiveSession`, the `active_session` draft) with its logged sets; `finishedSession` turns it into a `LoggedSession` (ADR-034). |
+| **Custom node / custom tag** | A node the user added (`user_` id) or edited through the node editor; shown with a "Custom" tag. "Reset to default" removes the edit; a custom node is deleted instead. Overlays can't clear `straightArm` on, or move, a built-in straight-arm node (ADR-036). |
+| **Shared progressions** | The overlay as YAML (`exportOverlay`), shared from My progressions. Importing one merges it into the user's overlay after a preview (`mergeOverlays`, ADR-036). |
 | **Stored overlay** | The one current overlay in `progression_overlay`; the store's tree is `applyOverlay(ALL_NODES, overlay).nodes`. An overlay with issues is never saved; a stored one that stops applying is kept and reported as `overlayIssues` (ADR-028). |
 | **Backup** | A JSON file of all user data (`skillforge-backup`, `schemaVersion`). Import validates the whole file first and then replaces all data in one transaction; never a merge or a partial import (ADR-028). |
 | **Safety copy** | The backup of the current data that `importBackup` writes to `documents/backups/skillforge-before-import-<UTC>.json` before it replaces anything; importing it undoes the import. |

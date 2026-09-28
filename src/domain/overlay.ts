@@ -32,6 +32,14 @@ export const OVERLAY_FILE = 'overlay';
 /** Header that marks exported text as a SkillForge overlay. */
 export const OVERLAY_FORMAT = 'skillforge-progression-overlay';
 export const OVERLAY_VERSION = 1;
+/** File name prefix and type of a shared overlay (`exportOverlay` text as a `.yaml` file). */
+export const OVERLAY_FILE_PREFIX = 'skillforge-progressions';
+export const OVERLAY_FILE_EXTENSION = 'yaml';
+/** Plain text, so chat and mail apps accept it; the content is YAML. */
+export const OVERLAY_MIME_TYPE = 'text/plain';
+/** Where contributors read how to suggest a progression (the YAML goes into a PR or an issue). */
+export const PROGRESSIONS_GUIDE_URL =
+  'https://github.com/Herofresh/SkillForge/blob/main/content/progressions/README.md';
 
 export const EMPTY_OVERLAY: ProgressionOverlay = { added: [], edited: {}, hidden: [] };
 
@@ -61,10 +69,13 @@ export function applyOverlay(
   const issues: ValidationIssue[] = [];
   const report = (nodeId: string, message: string) =>
     issues.push({ file: OVERLAY_FILE, nodeId, message });
-  const baseIds = new Set(base.map((node) => node.id));
+  const baseById = new Map(base.map((node) => [node.id, node]));
+  const baseIds = new Set(baseById.keys());
 
-  for (const id of Object.keys(overlay.edited)) {
-    if (!baseIds.has(id)) report(id, 'edited node does not exist in the built-in matrix');
+  for (const [id, edit] of Object.entries(overlay.edited)) {
+    const baseNode = baseById.get(id);
+    if (!baseNode) report(id, 'edited node does not exist in the built-in matrix');
+    else issues.push(...straightArmEditIssues(baseNode, edit));
   }
   for (const id of overlay.hidden) {
     if (!baseIds.has(id)) report(id, 'hidden node does not exist in the built-in matrix');
@@ -89,6 +100,27 @@ export function applyOverlay(
   issues.push(...validateNodes(nodes).map((issue) => ({ ...issue, file: OVERLAY_FILE })));
 
   return issues.length > 0 ? { nodes: [...base], issues } : { nodes, issues };
+}
+
+/**
+ * The tendon-safeguard rule for overlays (ADR-036, AGENT.md §5): an edit may not clear
+ * `straightArm` on a built-in straight-arm node, nor move it to another branch. Either would drop
+ * its ADR-010 safeguards silently.
+ */
+export function straightArmEditIssues(baseNode: ExerciseNode, edit: NodeEdit): ValidationIssue[] {
+  if (!baseNode.straightArm) return [];
+  const issues: ValidationIssue[] = [];
+  const report = (message: string) =>
+    issues.push({ file: OVERLAY_FILE, nodeId: baseNode.id, message });
+  if (edit.straightArm === false) {
+    report(
+      'is a built-in straight-arm skill: straight_arm stays true so its tendon safeguards apply',
+    );
+  }
+  if (edit.branch !== undefined && edit.branch !== baseNode.branch) {
+    report(`is a built-in straight-arm skill and stays in the '${baseNode.branch}' branch`);
+  }
+  return issues;
 }
 
 /**

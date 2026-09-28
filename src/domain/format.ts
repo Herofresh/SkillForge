@@ -40,6 +40,14 @@ export const METRIC_UNITS: Readonly<Record<Metric, string>> = {
   load_xbw: '× BW',
 };
 
+/** What a metric measures, as the node editor names it (PLAN 4.7). */
+export const METRIC_LABELS: Readonly<Record<Metric, string>> = {
+  reps: 'Reps',
+  hold_s: 'Hold',
+  eccentric_s: 'Slow lowering',
+  load_xbw: 'Weighted',
+};
+
 /** OG level 0 marks a foundation node below the OG2 chart (see the progressions overview). */
 export const FOUNDATION_OG_LEVEL = 0;
 

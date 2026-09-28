@@ -8,6 +8,7 @@ import type { TreeTile } from '@/domain/treeView';
 import { Spacing, TileFrames } from '../theme';
 import { LevelBadge, LevelUpBurst, PixelFrame, PixelIcon, PixelText, TierChip, XPBar } from '../ui';
 
+import { CustomBadge } from '../editor/CustomBadge';
 import { GoalMarker } from '../tree/NodeTile';
 import { TILE_LOOKS } from '../tree/tileLook';
 
@@ -15,13 +16,15 @@ type Props = {
   tile: TreeTile;
   /** Set after a self-unlock to replay the "UNLOCKED!" burst. */
   unlockBurstKey?: number;
+  /** The user added (`added`) or changed (`edited`) this node: shows the "Custom" badge. */
+  custom?: 'added' | 'edited';
 };
 
 /**
  * The top of the node detail, framed like its tree tile: big state icon, name, tier, OG level,
  * state, goal marker, and the level with its XP bar (the cap and banked XP explained).
  */
-export function NodeHeader({ tile, unlockBurstKey }: Props) {
+export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
   const { node, state, level, isGoal, status } = tile;
   const look = TILE_LOOKS[state];
   const unlockedByUser = status.selfUnlocked && status.unmetHard.length > 0;
@@ -54,6 +57,7 @@ export function NodeHeader({ tile, unlockBurstKey }: Props) {
           {look.label}
         </PixelText>
         {isGoal && <GoalMarker testID="detail-goal-marker" />}
+        {custom && <CustomBadge kind={custom} testID="detail-custom" />}
       </View>
       <PixelText variant="small" tone="textMuted">
         {look.description}
