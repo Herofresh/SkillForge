@@ -1,8 +1,10 @@
 /**
  * The pixel icon set (PLAN 4.0, ADR-030). Every icon is a 12×12 character grid drawn in code, so the
  * app needs no image assets. Roles: `#` main color, `+` accent, `*` highlight, `o` shade; `.` is
- * empty. Each icon maps its roles to theme colors; `PixelIcon` can recolor everything to one tint
- * (tab bar, disabled states). Add an icon by adding a grid here: icons.test.ts checks its shape.
+ * empty. Each icon maps its roles to theme colors; `PixelIcon` can recolor it to one tint (tab bar,
+ * buttons, disabled states). Roles in `knockout` stay empty when tinted, so an icon with a large
+ * fill (scroll, shield) keeps its outline instead of turning into a solid block (PLAN 5.2).
+ * Add an icon by adding a grid here: icons.test.ts checks its shape.
  */
 import { parsePixelGrid, type PixelGrid } from '@/lib/pixelGrid';
 
@@ -16,6 +18,8 @@ export const ICON_SIZE_CELLS = 12;
 export interface IconDef {
   rows: readonly string[];
   colors: Readonly<Partial<Record<IconRole, string>>>;
+  /** Roles left empty when the icon is tinted (fills that would merge with the outline). */
+  knockout?: readonly IconRole[];
 }
 
 export const ICONS = {
@@ -52,6 +56,7 @@ export const ICONS = {
       '.....##.....',
     ],
     colors: { '#': Colors.gold, '+': Colors.dangerDark, '*': Colors.goldLight },
+    knockout: ['+'],
   },
   flame: {
     rows: [
@@ -137,6 +142,7 @@ export const ICONS = {
       '############',
     ],
     colors: { '#': Colors.bronze, '+': Colors.parchment, o: Colors.textOnParchment },
+    knockout: ['+'],
   },
   potion: {
     rows: [
@@ -342,4 +348,14 @@ export function iconGrid(name: IconName): PixelGrid {
     parsed.set(name, grid);
   }
   return grid;
+}
+
+/**
+ * The color of an icon cell with `role`: its own color, or `tint` when one is given. `undefined`
+ * means "leave the cell empty" (a knocked-out role of a tinted icon).
+ */
+export function iconCellColor<T>(name: IconName, role: IconRole, tint?: T): T | string | undefined {
+  const def: IconDef = ICONS[name];
+  if (tint === undefined) return def.colors[role];
+  return def.knockout?.includes(role) ? undefined : tint;
 }

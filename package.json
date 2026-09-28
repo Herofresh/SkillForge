@@ -65,7 +65,7 @@
     "progressions:check": "tsx scripts/progressions.ts check",
     "progressions:build": "tsx scripts/progressions.ts build",
     "progressions:review": "tsx scripts/progressions.ts review",
-    "e2e": "maestro test .maestro",
+    "e2e": "node scripts/e2e.ts",
     "db:generate": "drizzle-kit generate",
     "lockfile:check": "node scripts/lockfile.ts check",
     "lockfile:fix": "node scripts/lockfile.ts fix"

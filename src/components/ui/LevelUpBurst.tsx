@@ -23,6 +23,14 @@ type Props = {
   testID?: string;
 };
 
+/** One vocabulary for every reveal moment (PLAN 5.2, ADR-038). */
+export const BURST_TITLES = {
+  levelUp: 'LEVEL UP!',
+  unlocked: 'UNLOCKED!',
+  testedOut: 'TESTED OUT!',
+  questComplete: 'QUEST COMPLETE',
+} as const;
+
 const PARTICLE_COUNT = 12;
 const PARTICLE_SIZE = 4 * PIXEL;
 const PARTICLE_COLORS = [Colors.gold, Colors.rune, Colors.goldLight, Colors.ember];
@@ -54,7 +62,7 @@ function Particle({ index, progress }: { index: number; progress: SharedValue<nu
  * pops in. With reduced motion only the title is shown (no movement), and `onDone` fires at once.
  */
 export function LevelUpBurst({
-  title = 'LEVEL UP!',
+  title = BURST_TITLES.levelUp,
   subtitle,
   playKey = 0,
   onDone,
@@ -94,18 +102,21 @@ export function LevelUpBurst({
       accessible
       accessibilityRole="alert"
       accessibilityLabel={subtitle ? `${title} ${subtitle}` : title}>
-      {!reduceMotion && (
-        <View style={styles.origin} pointerEvents="none">
-          {Array.from({ length: PARTICLE_COUNT }, (_, index) => (
-            <Particle key={index} index={index} progress={progress} />
-          ))}
-        </View>
-      )}
-      <Animated.View style={titleStyle}>
-        <PixelText variant="display" align="center">
-          {title}
-        </PixelText>
-      </Animated.View>
+      {/* The ring bursts from the title's centre (PLAN 5.2), not the centre of title + subtitle. */}
+      <View>
+        {!reduceMotion && (
+          <View style={styles.origin} pointerEvents="none">
+            {Array.from({ length: PARTICLE_COUNT }, (_, index) => (
+              <Particle key={index} index={index} progress={progress} />
+            ))}
+          </View>
+        )}
+        <Animated.View style={titleStyle}>
+          <PixelText variant="display" align="center">
+            {title}
+          </PixelText>
+        </Animated.View>
+      </View>
       {subtitle !== undefined && (
         <PixelText variant="label" tone="rune" align="center">
           {subtitle}

@@ -101,10 +101,15 @@
   "LV n"), hard prerequisites as pixel lines that glow gold once met. Tap a node → its detail;
   Focus (goals, else what's trainable), − / +, and "List" (Switch to list). Maestro `map.yaml`;
   screenshots `docs/screenshots/5.1-*.png`.
+- Polish (5.2, ADR-038, [PR #22](https://github.com/Herofresh/SkillForge/pull/22)): every celebration is a `LevelUpBurst` from `BURST_TITLES`
+  (the node detail now plays LEVEL UP! when its level rose while open); tinted icons with a big
+  fill keep their outline (`knockout`), so the Export backup button has its scroll icon again;
+  leaving the progression editor with a changed draft asks "Discard changes?"; the Character
+  tab's empty goals / sessions use `EmptyState`; `npm run e2e` finds Maestro itself
+  (`scripts/e2e.ts`). Screenshot `docs/screenshots/5.2-*.png`.
 
 ## Next up
-1. Phase 5: 5.2 animations and polish (level-up and unlock reveal; the map could animate a newly
-   lit edge), then 5.3 EAS build profile and Android APK.
+1. Phase 5: 5.3 EAS build profile and Android APK.
 2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -112,6 +117,18 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Polish (task 5.2, ADR-038):**
+  - Reveals: import `BURST_TITLES` and `useLevelUpKey` from `@/components/ui` for any new
+    celebration; DESIGN.md §7 lists where each burst plays. The burst ring is centred on the title.
+  - Icons: a new icon with a large fill that is used tinted (buttons, tab bar) should list the fill
+    role in `knockout` (icons.test.ts checks every icon still draws something when tinted).
+  - Editor: `NodeEditorBody` guards leaving with `navigation.addListener('beforeRemove')` while
+    `draftChanged(initial, draft)`; the component test mocks `useNavigation` (`mockNavigation`)
+    and needs `await act(async …)` around the listener call. Maestro `editor.yaml` presses back on
+    the new-exercise form and keeps editing.
+  - Tooling: `npm run e2e -- .maestro/<flow>.yaml` runs one flow; `MAESTRO_BIN` overrides the path.
+  - Not built (backlog): haptics (expo-haptics) on level-up/unlock, animating a newly lit map edge,
+    a burst for self-unlock on the map, keeping the editor draft across an app kill.
 - **Tree map (task 5.1, ADR-037):**
   - Domain: `src/domain/treeMap.ts` (`TREE_MODES`, `parseTreeMode`, `nodeLayers`, `mapLayout`
     with `MAP_DIMS`, `mapTiles`, `edgeKey`, `boundsOf`, `mapFocus`, `routeRects`); camera math in
@@ -494,7 +511,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 ### Phase 5: Graph view and release
 - [x] 5.1 Graph view: dagre layout, SVG, pan/zoom, glowing unlocked edges, legendary silhouettes
   (own layered layout instead of dagre, View-drawn edges; ADR-037, [PR #21](https://github.com/Herofresh/SkillForge/pull/21))
-- [ ] 5.2 Animations and polish (level-up and unlock reveal)
+- [x] 5.2 Animations and polish: one reveal vocabulary (`BURST_TITLES`, `useLevelUpKey`, node-detail LEVEL UP!), tinted icons keep their outline (`knockout`; Export icon back), "Discard changes?" when leaving the editor with a changed draft, consistent empty states, `npm run e2e` without Maestro on PATH (ADR-038, [PR #22](https://github.com/Herofresh/SkillForge/pull/22))
 - [ ] 5.3 EAS build profile and Android APK
 
 ### Later / Backlog
@@ -511,5 +528,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - Notifications and reminders
 - More content: advanced/elite nodes, full flexibility branch
 - Optional cloud sync
-- Progression editor extras: undo an overlay import, edit patterns/alternatives/regressions/sources,
-  an "unsaved changes" prompt when leaving the editor (4.7–4.8, ADR-036)
+- Progression editor extras: undo an overlay import, edit patterns/alternatives/regressions/sources
+  (4.7–4.8, ADR-036); keep a changed draft across an app kill (5.2 only asks on leaving)
+- Polish extras (5.2, ADR-038): haptics on level-up/unlock (expo-haptics, optional), animate a
+  newly lit edge on the tree map

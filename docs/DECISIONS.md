@@ -968,3 +968,29 @@ Template:
   Long edges still pass behind nodes in a target's row when they span several layers; 5.2 could add
   channel routing. The map renders every node (~1.4k views for 89 nodes); if the tree grows a lot,
   cull off-screen nodes.
+
+## ADR-038: Polish pass: one reveal vocabulary, tint knockout for icons, unsaved-changes sheet (PLAN 5.2)
+- Date: 2026-09-28 · Status: Accepted (refines ADR-030, ADR-036)
+- Context: after Phase 4 and 5.1 the celebration moments used hand-typed titles, the node detail
+  had no level-up moment, a tinted `scroll` icon rendered as a solid block on gold buttons (so the
+  Export button had lost its icon), and the progression editor silently dropped a changed draft on
+  back (PR #20 notes). `npm run e2e` needed Maestro on PATH.
+- Decision:
+  - **Reveals:** every celebration is a `LevelUpBurst` with a title from `BURST_TITLES`; level-ups
+    use the shared `useLevelUpKey(level)` (plays only for a rise seen while mounted). The node
+    detail plays UNLOCKED! after "unlock anyway", else LEVEL UP! when its level rose while open
+    (e.g. back from a Trial). The particle ring now bursts from the title's centre. Reduce motion
+    still shows only the title.
+  - **Icon tint:** `IconDef.knockout` lists fill roles that stay empty when an icon is tinted
+    (`iconCellColor`); `scroll` and `shield` knock out their fill, so they keep outline and details
+    on buttons, the tab bar and history rows. Untinted icons are unchanged.
+  - **Unsaved changes:** `draftChanged(initial, draft)` (pure, structural via `lib/deepEqual`) marks
+    the editor dirty; a `beforeRemove` listener stops back / Cancel / header back while dirty and
+    opens a "Discard changes?" sheet (Keep editing = close, Discard changes = leave). Save and
+    discard let the navigation through. A warning with a choice, never a block (ADR-023). An edit
+    undone by hand counts as no change.
+  - **E2E runner:** `npm run e2e` runs `scripts/e2e.ts` (plain Node): `MAESTRO_BIN`, then the default
+    install, then PATH; sets `MAESTRO_CLI_NO_ANALYTICS=1`; extra args after `--` pick flows.
+- Consequences: no new dependency. Haptics were not added (optional; backlog). The editor guard
+  covers the edit and new screens (both use `NodeEditorBody`); an Android app kill still drops the
+  draft (it lives in screen state).

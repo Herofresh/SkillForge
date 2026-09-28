@@ -7,6 +7,8 @@
  * The functions don't try to keep the draft valid (the validator's issues are the feedback); they
  * only keep numbers on the metric's step and above zero, so a stepper never produces noise.
  */
+import { deepEqual } from '@/lib/deepEqual';
+
 import { searchNodes } from './assessment';
 import { nodesInBranch } from './branch';
 import { PROGRESSION_STEP } from './generator';
@@ -388,4 +390,12 @@ export function issuesBySection(
     grouped[issueSection(issue)].push(editorIssueText(issue, draftId, nodes));
   }
   return grouped;
+}
+
+/**
+ * Whether the draft differs from the node the editor started with (PLAN 5.2): leaving the editor
+ * then asks before throwing the changes away. Edits that were undone by hand count as no change.
+ */
+export function draftChanged(initial: ExerciseNode, draft: ExerciseNode): boolean {
+  return !deepEqual(initial, draft);
 }

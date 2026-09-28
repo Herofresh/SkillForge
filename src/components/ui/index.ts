@@ -2,7 +2,8 @@
 export { EmptyState } from './EmptyState';
 export { ICON_NAMES, type IconName } from './icons';
 export { LevelBadge } from './LevelBadge';
-export { LevelUpBurst } from './LevelUpBurst';
+export { BURST_TITLES, LevelUpBurst } from './LevelUpBurst';
+export { useLevelUpKey } from './useLevelUpKey';
 export { NumberStepper } from './NumberStepper';
 export { PixelButton } from './PixelButton';
 export { PixelChip } from './PixelChip';

@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import type { SummaryView } from '@/domain/trainView';
 
 import { Spacing, TOUCH_TARGET } from '../theme';
-import { LevelUpBurst, PixelFrame, PixelIcon, PixelText } from '../ui';
+import { BURST_TITLES, LevelUpBurst, PixelFrame, PixelIcon, PixelText } from '../ui';
 
 type Props = {
   view: SummaryView;
@@ -26,7 +26,7 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
     <>
       <PixelFrame variant="rune">
         {celebrate ? (
-          <LevelUpBurst title="QUEST COMPLETE" subtitle={subtitle} playKey={playKey} />
+          <LevelUpBurst title={BURST_TITLES.questComplete} subtitle={subtitle} playKey={playKey} />
         ) : (
           <PixelText variant="label" tone="rune" align="center">
             {subtitle}
@@ -52,7 +52,11 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
       {view.levelUps.length > 0 && (
         <PixelFrame variant="rune" contentStyle={styles.gap} testID="summary-level-ups">
           {celebrate ? (
-            <LevelUpBurst title="LEVEL UP!" subtitle={view.levelUps[0].name} playKey={playKey} />
+            <LevelUpBurst
+              title={BURST_TITLES.levelUp}
+              subtitle={view.levelUps[0].name}
+              playKey={playKey}
+            />
           ) : (
             <PixelText variant="label" tone="rune" accessibilityRole="header">
               Level ups
@@ -69,7 +73,11 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
       {view.unlocked.length > 0 && (
         <PixelFrame variant="rune" contentStyle={styles.gap} testID="summary-unlocked">
           {celebrate ? (
-            <LevelUpBurst title="UNLOCKED!" subtitle={view.unlocked[0].name} playKey={playKey} />
+            <LevelUpBurst
+              title={BURST_TITLES.unlocked}
+              subtitle={view.unlocked[0].name}
+              playKey={playKey}
+            />
           ) : (
             <PixelText variant="label" tone="rune" accessibilityRole="header">
               Unlocked

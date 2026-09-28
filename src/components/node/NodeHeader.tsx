@@ -6,7 +6,17 @@ import { tierForOgLevel } from '@/domain/tier';
 import type { TreeTile } from '@/domain/treeView';
 
 import { Spacing, TileFrames } from '../theme';
-import { LevelBadge, LevelUpBurst, PixelFrame, PixelIcon, PixelText, TierChip, XPBar } from '../ui';
+import {
+  BURST_TITLES,
+  LevelBadge,
+  LevelUpBurst,
+  PixelFrame,
+  PixelIcon,
+  PixelText,
+  TierChip,
+  useLevelUpKey,
+  XPBar,
+} from '../ui';
 
 import { CustomBadge } from '../editor/CustomBadge';
 import { GoalMarker } from '../tree/NodeTile';
@@ -22,12 +32,14 @@ type Props = {
 
 /**
  * The top of the node detail, framed like its tree tile: big state icon, name, tier, OG level,
- * state, goal marker, and the level with its XP bar (the cap and banked XP explained).
+ * state, goal marker, and the level with its XP bar (the cap and banked XP explained). Plays
+ * UNLOCKED! after a self-unlock and LEVEL UP! when the node's level rose while it was open.
  */
 export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
   const { node, state, level, isGoal, status } = tile;
   const look = TILE_LOOKS[state];
   const unlockedByUser = status.selfUnlocked && status.unmetHard.length > 0;
+  const levelUpKey = useLevelUpKey(level.level);
   return (
     <PixelFrame frame={TileFrames[state]} contentStyle={styles.content} testID="detail-header">
       <View style={styles.row}>
@@ -67,8 +79,22 @@ export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
           You unlocked this yourself. Its prerequisites are still listed below.
         </PixelText>
       )}
-      {unlockBurstKey !== undefined && (
-        <LevelUpBurst title="UNLOCKED!" subtitle={node.name} playKey={unlockBurstKey} />
+      {unlockBurstKey !== undefined ? (
+        <LevelUpBurst
+          title={BURST_TITLES.unlocked}
+          subtitle={node.name}
+          playKey={unlockBurstKey}
+          testID="detail-unlock-burst"
+        />
+      ) : (
+        levelUpKey !== undefined && (
+          <LevelUpBurst
+            title={BURST_TITLES.levelUp}
+            subtitle={`${node.name} · LV ${levelUpKey}`}
+            playKey={levelUpKey}
+            testID="detail-levelup-burst"
+          />
+        )
       )}
       <View style={styles.level}>
         <LevelBadge level={level.level} testID="detail-level" />
