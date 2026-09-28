@@ -1159,6 +1159,37 @@ Template:
   sizes on disk instead. If iOS becomes a target, an Icon Composer bundle (liquid-glass layers)
   may be worth adding by hand.
 
+## ADR-043: Releases stay upgrade-safe: one pinned signer, a rising versionCode, an upgrade check before publishing (PLAN 5.7)
+- Date: 2026-09-29 · Status: Accepted (refines ADR-039)
+- Context: the user asked that installing v0.2.0 on a phone that already has the first preview
+  keeps all progress. Android keeps an app's data on update only when the new APK has the same
+  package (`at.skillforge.app`), the **same signing certificate** and a versionCode that isn't lower;
+  otherwise the install is refused and the only way on is an uninstall, which deletes the
+  database. Our data side is already safe: migrations are additive (0003 only adds a column,
+  ADR-040) and run on start. The weak spot is the signer. Releases are signed with the React Native
+  template's debug keystore, which `expo prebuild --clean` regenerates from the template; if it
+  ever differed (another machine, a template change, a hand-made keystore), a release would
+  silently stop updating existing installs.
+- Decision:
+  - **Pinned signer:** `RELEASE_SIGNER_SHA256` in `scripts/buildApkConfig.ts` is the certificate of
+    every published APK (`fac61745…3b9c`, checked on the v0.1.0-preview1 assets). `npm run
+    build:apk` runs `apksigner verify --print-certs` on the finished APK and **fails** when the
+    signer differs, with a message that says why. Moving to a release key (5.3b) is a deliberate
+    change of this constant plus a migration path for existing installs (export a backup,
+    uninstall, install, import), decided with the user.
+  - **Version:** every release bumps `expo.android.versionCode` by one (v0.2.0 = versionCode 2).
+    The first preview's APK reported versionName "1.0.0" (built before ADR-039 set 0.1.0); only
+    the versionCode matters for updates, so 0.2.0 installs over it as an update.
+  - **Upgrade check before publishing:** `.maestro/release/upgrade-seed.yaml` runs on the previous
+    release's APK (fresh install, onboarding with a Pull-up test-out) and
+    `.maestro/release/upgrade-verify.yaml` runs after `adb install -r` of the new APK (hero, goal,
+    logged session and XP still there, no onboarding again). The flows target the installed app
+    (`appId: at.skillforge.app`), not Expo Go, and live in a subfolder so `npm run e2e` doesn't run
+    them. Runbook: CONTEXT.md → "Release upgrade check".
+- Consequences: a build with the wrong key can't be published by accident; the check costs one
+  apksigner call. The upgrade check needs the previous APK (from its GitHub release) and an
+  emulator, about 5 minutes. Debug signing stays a sideloading-only choice until 5.3b.
+
 ## ADR-046: Replay onboarding in memory only, first completion kept; history rows open the session (PLAN 5.10)
 - Date: 2026-09-29 · Status: Accepted
 - Context: ADR-031 suggested "Replay onboarding" by clearing the `onboarding_completed_at` setting.
