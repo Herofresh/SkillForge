@@ -112,6 +112,10 @@
   preview / production profiles (version source `local`, not used yet), app.json is version 0.1.0 /
   versionCode 1, and `npm run build:apk` (arm64) / `npm run build:apk:universal` (+ x86_64) build a
   release APK locally into `builds/` without an Expo account. README → "Install on your phone".
+- App icon (5.6, ADR-042, PR_LINK): an original pixel-art icon (a gold hero in a straddle
+  handstand inside a rune ring on the night background) replaces the Expo template icons. It is a
+  32 × 32 grid in `scripts/appIcon.ts`; `npm run icon:build` renders icon, adaptive foreground /
+  background / monochrome, splash and favicon. Preview `docs/screenshots/5.6-app-icon.png`.
 
 ## Next up
 1. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
@@ -124,6 +128,16 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **App icon (task 5.6, ADR-042):**
+  - Edit `MOTIF_ROWS` in `scripts/appIcon.ts` (roles → `Palette` keys in `MOTIF_COLORS`), run
+    `npm run icon:build`, look at `docs/screenshots/5.6-app-icon.png` (bottom row: 96 / 48 px),
+    commit the PNGs. `appIcon.test.ts` checks the grid, colors, sizes on disk, the safe zone and
+    that app.json points at exactly these files.
+  - `Palette` now lives in `src/components/palette.ts` (re-exported by `theme.ts`) so Node scripts
+    can import it without React Native.
+  - Not checked on a device yet: the icon in a real launcher / installed APK. `build:apk` runs
+    prebuild with `--no-clean`; if an old icon shows, rebuild with `npm run build:apk -- --clean`.
+  - iOS uses `icon.png`; the template `assets/expo.icon` bundle was removed.
 - **Build config (task 5.3a, ADR-039):**
   - `scripts/buildApk.ts` (I/O, runs via tsx) + `scripts/buildApkConfig.ts` (pure, tested in
     `buildApkConfig.test.ts`). Output `builds/SkillForge-<version>-vc<code>-<arm64|universal>-<commit>.apk`.
@@ -534,6 +548,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - 5.3 EAS build profile and Android APK, split in two:
   - [x] 5.3a Build config + local APK script: `eas.json` (development / preview / production, version source local), app.json version 0.1.0 / versionCode 1, `npm run build:apk[:universal]` (ADR-039, [PR #23](https://github.com/Herofresh/SkillForge/pull/23))
   - [ ] 5.3b EAS cloud build + proper release signing (needs the user: Expo account login, keystore decision)
+- [x] 5.6 App icon: original pixel-art icon from a code grid (`scripts/appIcon.ts`, `npm run icon:build`): icon, adaptive foreground / background / monochrome, splash, favicon (ADR-042, PR_LINK)
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
