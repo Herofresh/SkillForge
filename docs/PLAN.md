@@ -94,7 +94,7 @@
   YAML via the share sheet, imports a shared one (paste or file) with a preview and merge, and
   explains "Suggest to project" with a link to the contributor guide. Maestro `editor.yaml`;
   screenshots `docs/screenshots/4.7-*.png`, `4.8-*.png`. **Phase 4 is complete.**
-- Tree map (5.1, ADR-037, PR pending): the Tree tab has **Columns | Map** tabs (remembered in the
+- Tree map (5.1, ADR-037, [PR #21](https://github.com/Herofresh/SkillForge/pull/21)): the Tree tab has **Columns | Map** tabs (remembered in the
   `tree_view_mode` setting). Map shows the whole overlay-applied tree as a pan / pinch-zoom /
   double-tap graph: layers (longest hard-prerequisite chain) left to right, one stone lane per
   branch in its color, nodes in the column tiles' state frames (goal star, legendary silhouette,
@@ -493,7 +493,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 
 ### Phase 5: Graph view and release
 - [x] 5.1 Graph view: dagre layout, SVG, pan/zoom, glowing unlocked edges, legendary silhouettes
-  (own layered layout instead of dagre, View-drawn edges; ADR-037, PR link below)
+  (own layered layout instead of dagre, View-drawn edges; ADR-037, [PR #21](https://github.com/Herofresh/SkillForge/pull/21))
 - [ ] 5.2 Animations and polish (level-up and unlock reveal)
 - [ ] 5.3 EAS build profile and Android APK
 
