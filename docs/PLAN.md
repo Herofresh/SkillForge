@@ -128,7 +128,7 @@
   `schemaVersion` 2, version 1 still imports). Logged sets read "8 reps · 0:42"; the header shows the
   session clock; summary / past session show the session time and the time per exercise. Hold
   Trials have a timer per set.
-- History links and replay onboarding (5.10, ADR-046, PR_LINK): node detail history rows open
+- History links and replay onboarding (5.10, ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29)): node detail history rows open
   the past session (onboarding Trials too); Settings → **Replay onboarding** (confirmed) runs the
   intro again from the current hero, equipment and goals without deleting anything; the first
   completion time is kept. Maestro `settings.yaml` extended.
@@ -619,7 +619,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [ ] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub
 
 #### v0.3.0
-- [x] 5.10 Node history opens the past session; replay onboarding from Settings (ADR-046, PR_LINK)
+- [x] 5.10 Node history opens the past session; replay onboarding from Settings (ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29))
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
