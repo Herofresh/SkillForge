@@ -7,6 +7,7 @@ import { DetailSection } from '@/components/node/DetailSection';
 import { AboutPanel } from '@/components/settings/AboutPanel';
 import { BackupPanel } from '@/components/settings/BackupPanel';
 import { ProgressionsPanel } from '@/components/settings/ProgressionsPanel';
+import { ReplayOnboardingPanel } from '@/components/settings/ReplayOnboardingPanel';
 import { Spacing } from '@/components/theme';
 import { PixelButton, PixelModal, PixelText, PixelTextInput, Screen } from '@/components/ui';
 import { HERO_NAME_MAX_LENGTH, normalizeHeroName } from '@/domain/onboarding';
@@ -16,8 +17,9 @@ import { useAppStore } from '@/store/useAppStore';
 /**
  * Settings (PLAN 4.6): the hero's name, equipment profiles (add, edit tags, rename, remove with a
  * confirmation), backups (export, import with a "replaces all your data" confirmation, undo the last
- * import), "My progressions" (tree changes and sharing, PLAN 4.7–4.8), about and credits, and the
- * dev-only Style Guide. There are no units or other preferences yet.
+ * import), "My progressions" (tree changes and sharing, PLAN 4.7–4.8), "Replay onboarding" (PLAN
+ * 5.10), about and credits, and the dev-only Style Guide. There are no units or other preferences
+ * yet.
  */
 export default function SettingsScreen() {
   const router = useRouter();
@@ -43,6 +45,7 @@ export default function SettingsScreen() {
 
       <ProgressionsPanel />
       <BackupPanel />
+      <ReplayOnboardingPanel />
       <AboutPanel />
 
       {__DEV__ && (

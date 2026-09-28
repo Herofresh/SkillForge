@@ -139,6 +139,10 @@
   as `pausedAt` / `pausedMs`, so a paused timer survives an app kill; the paused time is not
   measured), and the phone buzzes at "go" (one short), at the hold target (two long, as before) and
   when the rest countdown reaches zero (three short), only while the app is open.
+- History links and replay onboarding (5.10, ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29)): node detail history rows open
+  the past session (onboarding Trials too); Settings → **Replay onboarding** (confirmed) runs the
+  intro again from the current hero, equipment and goals without deleting anything; the first
+  completion time is kept. Maestro `settings.yaml` extended.
 
 ## Next up
 1. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
@@ -167,6 +171,16 @@
     component tests (fake timers + a `Vibration` spy). Vibration is untested on a real phone.
   - Not built (backlog): sound, a background notification, pausing the rest countdown, timers for
     rep Trials.
+- **History links and replay onboarding (task 5.10, ADR-046):**
+  - Node detail: `NodeHistoryList` takes `onOpenSession`; every row is a button that pushes
+    `app/session/[sessionId]` (onboarding test-outs are ordinary Trial sessions, so they open too).
+    The session screen treats a missing / non-string id as unknown ("Session not found").
+  - Replay: `replayOnboarding()` clears `onboardingCompletedAt` **in memory only**; the stored
+    setting stays, so a restart mid-replay returns to the tabs. `completeOnboarding` keeps the first
+    completion (`onboardingCompletionAt` in `src/domain/onboarding.ts`). No prefill code: the steps
+    already read the store. Settings → `ReplayOnboardingPanel` (confirm sheet `replay-dialog`).
+  - E2E: `settings.yaml` ends with the replay (confirm → hero step → `finish-onboarding` subflow →
+    Tree). Not run on the emulator by the author.
 - **Release v0.2.0 (task 5.7, ADR-043):**
   - Release routine: bump `expo.version` + `expo.android.versionCode` (+1) in app.json, build
     both APKs (`-- --clean` after icon/plugin/native changes), run the "Release upgrade check" in
@@ -312,8 +326,8 @@
   - The Character tab reads the clock on focus (`useFocusEffect`) for the streak, and plays LEVEL
     UP! when the level rose while the tab was mounted.
   - Not built (backlog): undo after a restart (pick a safety copy from `documents/backups/`),
-    pruning old safety copies, replay onboarding, units/preferences (none exist), linking the node
-    detail history to the past-session screen.
+    pruning old safety copies, units/preferences (none exist). Replay onboarding and the node
+    history links came in 5.10 (ADR-046).
   - Maestro: `character.yaml` (clearState, logs one session through Train); `settings.yaml` (no
     clearState; add + remove a "Gym" profile, share sheet closed with back, import cancel paths).
     Gotcha: Maestro `hideKeyboard` presses back when no keyboard is open, which leaves the tab;
@@ -644,6 +658,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 
 #### v0.3.0
 - [x] 5.8 Timer extras: pause/resume, buzz at go and at rest end (ADR-044, [PR #30](https://github.com/Herofresh/SkillForge/pull/30))
+- [x] 5.10 Node history opens the past session; replay onboarding from Settings (ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29))
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
@@ -654,8 +669,9 @@ compiled into a typed module for the app; users can layer their own changes on t
   run, and a prerequisite for E2E in CI (5.3a, ADR-039)
 - Backups: "undo" after an app restart (choose one of the safety copies in `documents/backups/`),
   prune old safety copies (4.6 keeps the last import's copy in memory only, ADR-035)
-- Settings extras: replay onboarding, units/preferences once there are any
-- Node detail history rows could open the past-session screen (`app/session/[sessionId]`)
+- Settings extras: units/preferences once there are any
+- Replay onboarding extras (5.10, ADR-046): a "Back to the app" exit on the hero step during a
+  replay (today: finish it, or restart the app)
 - Timer extras (after 5.8, ADR-040 / ADR-044): sound, a notification when a hold's target or the
   rest's end passes while the app is in the background, timers for rep Trials, pausing the rest
   countdown

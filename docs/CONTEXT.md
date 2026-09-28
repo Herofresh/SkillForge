@@ -66,9 +66,11 @@ app/                    expo-router screens (UI only, no game logic)
                         streak, SessionResult warnings acknowledged before Done
   (tabs)/character.tsx  character sheet (PLAN 4.5, ADR-035): hero, level + XP, rank crest, pixel
                         radar + stat bars, balance note, streak/totals, goals, recent sessions
-  session/[sessionId].tsx  a past session's summary (SessionResultPanels), from the history
+  session/[sessionId].tsx  a past session's summary (SessionResultPanels), from the Character
+                        history and the node detail's history rows (PLAN 5.10); unknown id → not found
   (tabs)/settings.tsx   Settings (PLAN 4.6, ADR-035): hero name, equipment profiles (rename,
-                        confirmed remove), backup export/import/undo, about/credits, Style Guide
+                        confirmed remove), backup export/import/undo, replay onboarding (5.10,
+                        ADR-046), about/credits, Style Guide
   onboarding/           first-run flow (PLAN 4.1, ADR-031), a Stack; every step saves through the store
     _layout.tsx         Stack; redirects to /tree once onboarding is completed
     index.tsx           1 welcome + "Name your hero" (setHeroName)
@@ -121,7 +123,8 @@ src/
                         sessions and user actions), ADR-008/021/023
     equipment.ts        HOME_EQUIPMENT, PARK_EQUIPMENT, DEFAULT_EQUIPMENT_PROFILES (seeded),
                         EQUIPMENT_TAG_LABELS, toggleEquipmentTag
-    onboarding.ts       normalizeHeroName, toggleGoal (MAX_GOALS 5), ONBOARDING_STEPS, onboardingSummary
+    onboarding.ts       normalizeHeroName, toggleGoal (MAX_GOALS 5), ONBOARDING_STEPS, onboardingSummary,
+                        parseOnboardingCompletedAt, onboardingCompletionAt (first completion kept)
     assessment.ts       goalPathNodes, assessmentAnchors (≤ 6), searchNodes, trial results +
                         trialSession (a Trial as a session), testOutWarnings, unlockedByTrial
     format.ts           formatPerformance / formatTrial ("3 sets of 8 reps"), METRIC_UNITS,
@@ -180,7 +183,7 @@ src/
                         profile CRUD, generateWorkout(profileId, minutes, seed?), saveOverlay,
                         exportBackup, importBackup, shareBackup, importBackupFromFile; onboarding:
                         onboardingCompletedAt, setHeroName, toggleGoal, logTrial, testOutWarnings,
-                        completeOnboarding; node detail: selfUnlockWarnings; Train (ADR-034):
+                        completeOnboarding, replayOnboarding (in memory only, ADR-046); node detail: selfUnlockWarnings; Train (ADR-034):
                         trainPlan / activeSession / trainSummary, planTraining, swap/remove/add,
                         trainWarnings, acknowledgeTrainWarning, startTraining, logTrainingSet,
                         skip/select/rest, finishTraining, abandonTraining; sessionResults (per
@@ -212,7 +215,7 @@ src/
                         transform; Focus, zoom −/+, "Switch to list"), MapCanvas (lane bands, edge
                         lines as Views), MapNode (fixed-size state-framed node button)
     node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
-                        NodeHistoryList, AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
+                        NodeHistoryList (rows open the past session), AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
     train/              Train flow parts: ExerciseCard (prescription, rest, markers), SetLogger
                         (timer + stepper + Log / Partial / Failed), RestPanel (countdown, buzz
                         at its end),
@@ -230,7 +233,8 @@ src/
                         SessionHistoryRow, GoalProgressCard
     equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form (onboarding, Settings)
     settings/           BackupPanel (export, import confirm, rejection issues, undo), AboutPanel,
-                        ProgressionsPanel (count of tree changes → My progressions)
+                        ProgressionsPanel (count of tree changes → My progressions),
+                        ReplayOnboardingPanel (confirm → replayOnboarding)
     editor/             node editor (PLAN 4.7–4.8, ADR-036): NodeEditorBody (screen body: live
                         issues, Save/Cancel), NodeEditorForm (sections with inline IssueNotes),
                         PositionSheet, IssueNotes, CustomBadge, OverlayEntryRow, SharePanel;
@@ -281,7 +285,7 @@ jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
                         cycle error, reset, My progressions share/import/delete, discard-changes
                         sheet; 4.7/4.8/5.2 screenshots), character.yaml (clearState; level/XP after a session, history →
                         past session; 4.5 screenshots), settings.yaml (profile add/remove, export share
-                        sheet, import cancel; 4.6 screenshots), map.yaml (Tree Map: zoom, pan, double tap,
+                        sheet, import cancel, replay onboarding; 4.6 screenshots), map.yaml (Tree Map: zoom, pan, double tap,
                         focus, open a node, back to Columns; 5.1 screenshots), onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
                         proof), styleguide.yaml (UI kit), train.yaml (clearState; plan, live session,
                         kill + resume, summary; takes the 4.4 screenshots), tree.yaml (clearState; branch, detail, goal,
@@ -392,7 +396,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Streak** | Consecutive sessions at most 72 h apart. Adds a character-XP bonus. |
 | **Engine state** | Derived state rebuilt from history (sessions and user actions): node progress, total XP, streak, last straight-arm session, last applied position (`src/domain/recompute.ts`). |
 | **Tree map** | The Tree tab's Map mode: the whole tree as a pan/zoom graph, layers (longest hard-prerequisite chain) left to right, one lane per branch, hard prerequisites as lines lit gold once met (ADR-037). |
-| **Onboarding** | The first-run flow (hero name, equipment, goals, optional assessment, summary). Shown until the setting `onboarding_completed_at` exists (ADR-031). |
+| **Onboarding** | The first-run flow (hero name, equipment, goals, optional assessment, summary). Shown until the setting `onboarding_completed_at` exists (ADR-031). Settings → Replay onboarding shows it again for the running app, with all data kept (ADR-046). |
 | **Assessment** | Onboarding's optional step: log a Trial for anchor nodes on the goal paths (or any searched node); a passed one is a test-out. Stored as ordinary Trial sessions. |
 | **Anchor node** | One of up to 6 nodes spread evenly (by ogLevel) over the goals and their transitive hard prerequisites (`assessmentAnchors`). |
 | **Legendary node** | An elite node shown as a locked silhouette, there for motivation. |

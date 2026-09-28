@@ -11,15 +11,19 @@ import { summaryView } from '@/domain/trainView';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
- * A past session (PLAN 4.5), opened from the Character tab's history: the same panels as the
- * Train summary (XP, streak, level-ups, unlocks, exercises), without the bursts, and its advisory
- * notes as plain text (they were acknowledged when the session was logged).
+ * A past session (PLAN 4.5), opened from the Character tab's history or a node detail's history
+ * (PLAN 5.10): the same panels as the Train summary (XP, streak, level-ups, unlocks, exercises),
+ * without the bursts, and its advisory notes as plain text (they were acknowledged when the session
+ * was logged). An unknown or missing id shows "Session not found".
  */
 export default function PastSessionScreen() {
-  const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
+  const params = useLocalSearchParams<{ sessionId?: string }>();
+  const sessionId = typeof params.sessionId === 'string' ? params.sessionId : undefined;
   const router = useRouter();
   const session = useAppStore((state) => state.sessions.find((entry) => entry.id === sessionId));
-  const result = useAppStore((state) => state.sessionResults[sessionId]);
+  const result = useAppStore((state) =>
+    sessionId === undefined ? undefined : state.sessionResults[sessionId],
+  );
   const nodes = useAppStore((state) => state.nodes);
   const view = useMemo(
     () => (result ? summaryView(result, nodes, session) : undefined),
