@@ -112,6 +112,10 @@
   preview / production profiles (version source `local`, not used yet), app.json is version 0.1.0 /
   versionCode 1, and `npm run build:apk` (arm64) / `npm run build:apk:universal` (+ x86_64) build a
   release APK locally into `builds/` without an Expo account. README → "Install on your phone".
+- Acrobatics branch (5.5, ADR-041, PR pending): a 13th branch `acrobatics` with 13 nodes (rolls,
+  judo breakfalls, cartwheel → round-off → legendary aerial), gated on the wall plank / wall
+  handstand, all floor skill work training balance + mobility. **102 nodes.** It is left out of the
+  rank median (`RANK_BRANCHES`) so no existing rank drops.
 
 ## Next up
 1. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
@@ -136,6 +140,19 @@
     the APKs to a GitHub pre-release with their SHA-256.
   - 5.3b: `eas init` writes `extra.eas.projectId` into app.json; `development` needs
     `npx expo install expo-dev-client`; never commit a keystore (`*.jks` is gitignored).
+- **Acrobatics branch (task 5.5, ADR-041):**
+  - Content: `content/progressions/acrobatics.yaml`; sources and chain notes in
+    docs/research/progressions.md → B13. Every ogLevel and trial is inferred (`verify:` on all 13
+    nodes), so the coach review (1.10) should look at this branch too.
+  - Code: `BRANCHES` gained `acrobatics` at the end; `BRANCH_NAMES`, `BranchColors`
+    (`Palette.orchid`) follow. The rank median uses `RANK_BRANCHES` in `character.ts`. The
+    generator needed no change (skill slots; balance/mobility skip the 48 h rest). Tests:
+    `crossBranchGates.test.ts` (gates, shape), `generator.test.ts` (slots, rest),
+    `character.test.ts` (rank median).
+  - Not verified on the emulator: the extra Tree tab / map lane / onboarding tab come from
+    `BRANCHES`; a quick look at the map lane color on a device is worth doing.
+  - Not modelled: dive roll, mae ukemi (forward impact breakfall), handsprings and flips; no mat
+    equipment tag (everything is `floor`, cues ask for a soft surface).
 - **Polish (task 5.2, ADR-038):**
   - Reveals: import `BURST_TITLES` and `useLevelUpKey` from `@/components/ui` for any new
     celebration; DESIGN.md §7 lists where each burst plays. The burst ring is centred on the title.
@@ -534,6 +551,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - 5.3 EAS build profile and Android APK, split in two:
   - [x] 5.3a Build config + local APK script: `eas.json` (development / preview / production, version source local), app.json version 0.1.0 / versionCode 1, `npm run build:apk[:universal]` (ADR-039, [PR #23](https://github.com/Herofresh/SkillForge/pull/23))
   - [ ] 5.3b EAS cloud build + proper release signing (needs the user: Expo account login, keystore decision)
+- [x] 5.5 Acrobatics branch: rolls, judo breakfalls (ukemi) and the cartwheel path to a legendary aerial, gated on the wall handstand; left out of the rank median (ADR-041, PR pending)
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.

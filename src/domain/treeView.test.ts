@@ -88,7 +88,7 @@ describe('branchColumn', () => {
     expect(branchSummary(tiles)).toEqual({ total: 4, open: 2, proficient: 1, goals: 1 });
   });
 
-  it('builds all 12 branches of the real dataset', () => {
+  it('builds every branch of the real dataset', () => {
     const count = [...new Set(ALL_NODES.map((node) => node.branch))]
       .map((branch) => branchColumn(ALL_NODES, branch, {}, []).length)
       .reduce((sum, n) => sum + n, 0);

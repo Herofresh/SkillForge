@@ -36,6 +36,8 @@ export const Palette = {
   sky: '#58A6FF',
   amethyst: '#B07CFF',
   sunfire: '#F5A524',
+  /** Acrobatics lane (PLAN 5.5): a pink apart from blood, ember and amethyst. */
+  orchid: '#F28FD0',
 } as const;
 
 /** Semantic colors: what components use. */
@@ -209,6 +211,7 @@ export const BranchColors: Readonly<Record<Branch, string>> = {
   legs: Palette.verdant,
   dynamic: Palette.bone,
   flexibility: Palette.arcane,
+  acrobatics: Palette.orchid,
 };
 
 /**

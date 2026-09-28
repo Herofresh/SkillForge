@@ -14,4 +14,5 @@ export const BRANCH_NAMES: Record<Branch, string> = {
   legs: 'Legs',
   dynamic: 'Dynamic skills and hybrids',
   flexibility: 'Flexibility and mobility',
+  acrobatics: 'Acrobatics',
 };
