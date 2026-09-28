@@ -1,6 +1,6 @@
 /**
  * SkillForge design tokens (PLAN 4.0, ADR-030, docs/DESIGN.md): pixel-art meets dark fantasy
- * grimoire. This is the ONLY place for colors, fonts, spacing, borders and frame styles; import the
+ * grimoire. This is the ONLY place for colors (the raw hex values sit in `palette.ts`), fonts, spacing, borders and frame styles; import the
  * tokens, never copy a hex value or a font name into a component.
  */
 import { DarkTheme, type Theme } from 'expo-router';
@@ -8,37 +8,10 @@ import { DarkTheme, type Theme } from 'expo-router';
 import type { TileState } from '@/domain/treeView';
 import type { Attribute, Branch, RankTitle, Tier } from '@/domain/types';
 
-/** Raw palette. Contrast pairs are pinned in theme.test.ts and listed in docs/DESIGN.md. */
-export const Palette = {
-  night: '#0D0B14',
-  stone: '#1A1624',
-  stoneRaised: '#262036',
-  stoneEdge: '#3E3654',
-  ink: '#050408',
-  parchment: '#EAD9A8',
-  parchmentInk: '#2B1D0E',
-  bone: '#F3EAD3',
-  mist: '#B4A9C8',
-  gold: '#E9B949',
-  goldLight: '#FFE08A',
-  goldDark: '#9A7328',
-  bronze: '#7A5424',
-  rune: '#62E3F0',
-  /** Dim rune: the inner glow line of an available tile (decoration only). */
-  runeShade: '#2A7C86',
-  arcane: '#A58BFF',
-  ember: '#F2893B',
-  blood: '#EC6B73',
-  bloodDark: '#8E2230',
-  steel: '#C5CCD8',
-  steelDark: '#6E7890',
-  verdant: '#6BD17A',
-  sky: '#58A6FF',
-  amethyst: '#B07CFF',
-  sunfire: '#F5A524',
-  /** Acrobatics lane (PLAN 5.5): a pink apart from blood, ember and amethyst. */
-  orchid: '#F28FD0',
-} as const;
+import { Palette } from './palette';
+
+/** Raw palette (`palette.ts`). Contrast pairs are pinned in theme.test.ts and listed in docs/DESIGN.md. */
+export { Palette };
 
 /** Semantic colors: what components use. */
 export const Colors = {

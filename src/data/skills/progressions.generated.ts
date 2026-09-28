@@ -4699,7 +4699,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "cues": [
       "Sit in a tight ball, knees to the chest, chin tucked in.",
       "Rock back onto the shoulder blades and forward again onto the feet.",
-      "Arms reach straight forward, don't clutch the knees; the head never touches the floor."
+      "Hands by the ears, palms up (\"pizza hands\"), ready for the backward roll; the head never touches the floor."
     ],
     "sourceUrls": [
       "https://www.nrgq.co.uk/wp-content/uploads/2018/12/Foundation_Teaching-Progressions-FORWARD-ROLL-_-VARIATIONS.pdf",
