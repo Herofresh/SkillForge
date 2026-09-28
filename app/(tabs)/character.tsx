@@ -57,7 +57,6 @@ export default function CharacterScreen() {
   return <CharacterBody sheet={sheet} />;
 }
 
-/** Plays LEVEL UP! when the character level rose while the tab was mounted (e.g. after a session). */
 function Stat({
   icon,
   label,

@@ -3,7 +3,8 @@
  * app needs no image assets. Roles: `#` main color, `+` accent, `*` highlight, `o` shade; `.` is
  * empty. Each icon maps its roles to theme colors; `PixelIcon` can recolor it to one tint (tab bar,
  * buttons, disabled states). Roles in `knockout` stay empty when tinted, so an icon with a large
- * fill (scroll, shield) keeps its outline instead of turning into a solid block (PLAN 5.2). Add an icon by adding a grid here: icons.test.ts checks its shape.
+ * fill (scroll, shield) keeps its outline instead of turning into a solid block (PLAN 5.2).
+ * Add an icon by adding a grid here: icons.test.ts checks its shape.
  */
 import { parsePixelGrid, type PixelGrid } from '@/lib/pixelGrid';
 
