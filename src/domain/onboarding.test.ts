@@ -4,11 +4,28 @@ import {
   HERO_NAME_MAX_LENGTH,
   MAX_GOALS,
   normalizeHeroName,
+  onboardingCompletionAt,
   onboardingStepNumber,
   onboardingSummary,
+  parseOnboardingCompletedAt,
   toggleGoal,
 } from './onboarding';
 import { emptyProgress } from './progression';
+
+describe('onboarding completion', () => {
+  it('reads a stored timestamp and ignores anything else', () => {
+    expect(parseOnboardingCompletedAt(1234)).toBe(1234);
+    expect(parseOnboardingCompletedAt(undefined)).toBeUndefined();
+    expect(parseOnboardingCompletedAt('1234')).toBeUndefined();
+    expect(parseOnboardingCompletedAt(Number.NaN)).toBeUndefined();
+  });
+
+  it('takes now on the first run and keeps the first completion on a replay', () => {
+    expect(onboardingCompletionAt(undefined, 99)).toBe(99);
+    expect(onboardingCompletionAt(12, 99)).toBe(12);
+    expect(onboardingCompletionAt(null, 99)).toBe(99);
+  });
+});
 
 describe('normalizeHeroName', () => {
   it('trims and collapses whitespace', () => {

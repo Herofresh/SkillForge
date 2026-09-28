@@ -121,3 +121,59 @@ describe('onboarding store actions', () => {
     test.close();
   });
 });
+
+describe('replayOnboarding (PLAN 5.10)', () => {
+  it('re-opens the flow with every piece of data kept, and finishing again resets nothing', async () => {
+    const path = join(tempDir, 'replay.db');
+    const first = await openTestDatabase(path);
+    const clock = { now: NOW };
+    const store = storeFor(first, clock);
+    store.getState().setHeroName('Aria');
+    store.getState().toggleGoal('pull_up');
+    store.getState().logTrial('dead_hang', defaultTrialResults(node('dead_hang')));
+    store.getState().completeOnboarding();
+    const profiles = store.getState().equipmentProfiles;
+    const sessionIds = store.getState().sessions.map((session) => session.id);
+
+    clock.now = NOW + MS_PER_HOUR;
+    store.getState().replayOnboarding();
+    expect(store.getState().onboardingCompletedAt).toBeUndefined();
+    // The stored completion stays: nothing is written by the replay itself.
+    expect(getSetting(first.db, ONBOARDING_COMPLETED_SETTING)).toBe(NOW);
+    // The steps start from the current data.
+    expect(store.getState().profile?.heroName).toBe('Aria');
+    expect(store.getState().goals).toEqual(['pull_up']);
+    expect(store.getState().equipmentProfiles).toEqual(profiles);
+    expect(store.getState().engine.progress.dead_hang.trialPassed).toBe(true);
+
+    // A test-out during the replay is one more ordinary Trial session.
+    store.getState().logTrial('pull_up', defaultTrialResults(node('pull_up')));
+    expect(listSessions(first.db).map((session) => session.id)).toEqual([
+      ...sessionIds,
+      expect.any(String),
+    ]);
+    const trialId = store.getState().sessions.at(-1)!.id;
+    expect(store.getState().sessionResults[trialId]).toBeDefined();
+
+    store.getState().completeOnboarding();
+    expect(store.getState().onboardingCompletedAt).toBe(NOW);
+    expect(getSetting(first.db, ONBOARDING_COMPLETED_SETTING)).toBe(NOW);
+    expect(store.getState().goals).toEqual(['pull_up']);
+    expect(store.getState().equipmentProfiles).toEqual(profiles);
+    expect(listSessions(first.db)).toHaveLength(sessionIds.length + 1);
+    first.close();
+  });
+
+  it('ends with a restart: the stored completion opens the tabs again', async () => {
+    const path = join(tempDir, 'replay-restart.db');
+    const first = await openTestDatabase(path);
+    const store = storeFor(first);
+    store.getState().completeOnboarding();
+    store.getState().replayOnboarding();
+    first.close();
+
+    const second = await openTestDatabase(path);
+    expect(storeFor(second).getState().onboardingCompletedAt).toBe(NOW);
+    second.close();
+  });
+});

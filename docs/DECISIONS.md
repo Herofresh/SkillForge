@@ -1189,3 +1189,33 @@ Template:
 - Consequences: a build with the wrong key can't be published by accident; the check costs one
   apksigner call. The upgrade check needs the previous APK (from its GitHub release) and an
   emulator, about 5 minutes. Debug signing stays a sideloading-only choice until 5.3b.
+
+## ADR-046: Replay onboarding in memory only, first completion kept; history rows open the session (PLAN 5.10)
+- Date: 2026-09-29 · Status: Accepted
+- Context: ADR-031 suggested "Replay onboarding" by clearing the `onboarding_completed_at` setting.
+  A replay must not delete or reset anything (hero, equipment, goals, sessions, tree changes), the
+  test-outs must stay ordinary Trial sessions, and finishing again must not duplicate anything.
+  Separately, the node detail's history rows (ADR-033) were plain text, while the Character
+  history already opens `app/session/[sessionId]` (ADR-035).
+- Decision:
+  - **Replay is an in-memory flag flip:** `replayOnboarding()` only sets the store's
+    `onboardingCompletedAt` to `undefined`; the stored setting is not touched. The existing gates
+    (`/`, the tabs layout, the onboarding layout) then show the intro, and "Begin" hands back to the
+    tabs as on the first run. Settings → **Replay onboarding** asks first ("Your data stays. Only
+    the intro runs again ...").
+  - **No prefill code:** every step already reads the store (the hero field starts from the stored
+    name, the equipment editor and goal picker show the stored profiles and goals), so the replay
+    starts from the current data. A test-out is `logTrial` as before: one more Trial session.
+  - **First completion kept:** `completeOnboarding` stores `onboardingCompletionAt(stored, now)`,
+    which keeps an existing timestamp and only takes `now` on the first run. Finishing a replay
+    writes the same value again: nothing new, nothing reset.
+  - **A restart ends a replay:** `loadAll` reads the untouched setting, so an app killed mid-replay
+    opens on the tabs with everything saved so far kept (unlike the first run, which resumes). This
+    avoids a state where an export mid-replay, or a crash, leaves a finished user "not onboarded".
+  - **History rows open the session:** every `NodeHistoryList` row is a button (role button, label
+    "date[, Trial]: sets", hint "Opens the session summary") that pushes `app/session/[sessionId]`;
+    onboarding test-outs are sessions like any other, so they open too. The session screen takes a
+    missing or non-string id as unknown and shows "Session not found".
+- Consequences: no schema, migration or backup change. The hero step has no "back to the app"
+  exit during a replay (Android back leaves the app; a restart ends the replay); a "Skip" on the
+  replay could come later if users ask. ADR-031's "clear the setting" idea is not used.

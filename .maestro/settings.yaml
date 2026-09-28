@@ -1,7 +1,7 @@
 # Settings (PLAN 4.6): add and remove an equipment profile, export a backup (the share sheet opens
-# and is closed with back; skipped when none shows), and the import's cancel paths (the
-# confirmation, then the file picker). Takes the 4.6 screenshots. Prerequisites and run: see
-# smoke.yaml / docs/CONTEXT.md.
+# and is closed with back; skipped when none shows), the import's cancel paths (the confirmation,
+# then the file picker) and replaying onboarding (PLAN 5.10). Takes the 4.6 screenshots.
+# Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Settings - equipment profile, export, import cancel
 ---
@@ -153,3 +153,25 @@ name: Settings - equipment profile, export, import cancel
     visible:
       id: 'backup-canceled'
     timeout: 20000
+# Replay onboarding (PLAN 5.10): the confirmation says the data stays; the intro opens with the
+# stored hero name, and finishing it lands on the tree again.
+- scrollUntilVisible:
+    element:
+      id: 'replay-onboarding'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'replay-onboarding'
+- extendedWaitUntil:
+    visible:
+      id: 'replay-dialog'
+    timeout: 20000
+- assertVisible: 'Your data stays.*'
+- tapOn:
+    id: 'replay-confirm'
+- extendedWaitUntil:
+    visible:
+      id: 'onboarding-hero'
+    timeout: 20000
+- runFlow: subflows/finish-onboarding.yaml
+- assertVisible: 'Tree'
