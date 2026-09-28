@@ -3,8 +3,9 @@
  * show, built from the session model (`train.ts`), the tree and a `SessionResult`. Pure, so screens
  * only render; the wording comes from `format.ts`.
  */
-import { formatPerformance, formatPrescription, formatRest } from './format';
+import { formatClock, formatPerformance, formatPrescription, formatRest } from './format';
 import type { SessionResult } from './recompute';
+import { elapsedSeconds, totalDurationSec } from './setTimer';
 import {
   exerciseSets,
   isExerciseDone,
@@ -17,11 +18,13 @@ import {
 } from './train';
 import type {
   ExerciseNode,
+  LoggedSet,
   Metric,
   NodeLookup,
   Outcome,
   SafeguardWarning,
   SetPerformance,
+  StoredSession,
 } from './types';
 
 export const BLOCK_LABELS: Readonly<Record<SessionBlockKind, string>> = {
@@ -118,6 +121,12 @@ export function blockViews(
   return blocks;
 }
 
+/** A logged set's result with its measured time, e.g. "8 reps · 0:42" (untimed: "8 reps"). */
+export function loggedSetText(set: Pick<LoggedSet, 'metric' | 'actual' | 'durationSec'>): string {
+  const result = formatPerformance(set.metric, set.actual);
+  return set.durationSec === undefined ? result : `${result} · ${formatClock(set.durationSec)}`;
+}
+
 /** One logged set in the live card: "Set 2 · 8 reps · Success". */
 export interface LoggedSetView {
   index: number;
@@ -161,7 +170,7 @@ export function liveView(session: ActiveSession, lookup: NodeLookup): LiveView {
       plannedSets: exercise.sets,
       sets: sets.map((set, index) => ({
         index,
-        text: formatPerformance(set.metric, set.actual),
+        text: loggedSetText(set),
         outcome: setOutcome(set),
       })),
       suggested: lastDone?.actual ?? exercise.target,
@@ -192,14 +201,40 @@ export interface SummaryView {
     xp: number;
     trialAttempted: boolean;
     trialPassed: boolean;
+    /** The exercise's timed sets added up ("2:15"); unset when no set was timed. */
+    time?: string;
   }[];
+  /** Start to finish ("42:10"); unset when unknown or under a second (e.g. a quick Trial). */
+  sessionTime?: string;
   levelUps: { nodeId: string; name: string; from: number; to: number }[];
   unlocked: { nodeId: string; name: string }[];
   warnings: SafeguardWarning[];
 }
 
-export function summaryView(result: SessionResult, nodes: readonly ExerciseNode[]): SummaryView {
+/** Whole seconds from start to finish of a stored session; `undefined` without an end. */
+export function sessionDurationSec(session: StoredSession): number | undefined {
+  return session.endedAt === undefined
+    ? undefined
+    : elapsedSeconds(session.startedAt, session.endedAt);
+}
+
+/**
+ * The summary of `result`. With the stored `session` it also shows the time per exercise (its
+ * timed sets) and the session's total time (PLAN 5.4).
+ */
+export function summaryView(
+  result: SessionResult,
+  nodes: readonly ExerciseNode[],
+  session?: StoredSession,
+): SummaryView {
   const lookup: NodeLookup = new Map(nodes.map((node) => [node.id, node]));
+  const exerciseTime = (nodeId: string): { time?: string } => {
+    const seconds = session
+      ? totalDurationSec(session.sets.filter((set) => set.nodeId === nodeId))
+      : undefined;
+    return seconds === undefined ? {} : { time: formatClock(seconds) };
+  };
+  const total = session ? sessionDurationSec(session) : undefined;
   return {
     totalXp: result.xp.total,
     exerciseXp: result.xp.exerciseXp,
@@ -214,7 +249,9 @@ export function summaryView(result: SessionResult, nodes: readonly ExerciseNode[
       xp: exercise.xp,
       trialAttempted: exercise.trialAttempted,
       trialPassed: exercise.trialPassed,
+      ...exerciseTime(exercise.nodeId),
     })),
+    ...(total !== undefined && total > 0 ? { sessionTime: formatClock(total) } : {}),
     levelUps: result.levelUps.map((levelUp) => ({
       ...levelUp,
       name: nameOf(lookup, levelUp.nodeId),

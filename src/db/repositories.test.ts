@@ -68,6 +68,18 @@ describe('session repository', () => {
     ]);
   });
 
+  it('round-trips the measured duration of timed sets (PLAN 5.4)', () => {
+    const base = makeSession('s-timed', 9_000, [{ nodeId: 'dead_hang', count: 2 }]);
+    const timed: LoggedSession = {
+      ...base,
+      sets: [{ ...base.sets[0], durationSec: 37 }, base.sets[1]],
+    };
+    insertSession(test.db, timed);
+    const [read] = listSessions(test.db);
+    expect(read).toEqual(timed);
+    expect(read.sets[1]).not.toHaveProperty('durationSec');
+  });
+
   it('stores nothing when a set index repeats (one transaction)', () => {
     const broken: LoggedSession = {
       id: 's-bad',

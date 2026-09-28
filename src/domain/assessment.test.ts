@@ -125,6 +125,14 @@ describe('Trial results', () => {
     expect(evaluateTrial(pullUp, weaker.sets)).toBe(false);
   });
 
+  it('records the timer durations of timed Trial sets only', () => {
+    const hang = node('dead_hang');
+    const results = defaultTrialResults(hang);
+    const session = trialSession(hang, results, 's1', NOW, [31, undefined]);
+    expect(session.sets[0].durationSec).toBe(31);
+    expect(session.sets[1]).not.toHaveProperty('durationSec');
+  });
+
   it('a logged test-out on a locked node makes it proficient and unlocks successors', () => {
     const pullUp = node('pull_up');
     const session = trialSession(pullUp, defaultTrialResults(pullUp), 's1', NOW);

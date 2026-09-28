@@ -7,6 +7,7 @@ import { Colors, Frames, Spacing, TOUCH_TARGET } from '@/components/theme';
 import { ExerciseCard } from '@/components/train/ExerciseCard';
 import { NodeOptionSheet } from '@/components/train/NodeOptionSheet';
 import { RestPanel } from '@/components/train/RestPanel';
+import { SessionClock } from '@/components/train/SessionClock';
 import { SetLogger } from '@/components/train/SetLogger';
 import { TrainWarningList } from '@/components/train/TrainWarningList';
 import {
@@ -54,6 +55,9 @@ function LiveSession({ session }: { session: ActiveSession }) {
   const skipExercise = useAppStore((state) => state.skipTrainingExercise);
   const selectExercise = useAppStore((state) => state.selectTrainingExercise);
   const skipRest = useAppStore((state) => state.skipTrainingRest);
+  const startTimer = useAppStore((state) => state.startTrainingTimer);
+  const stopTimer = useAppStore((state) => state.stopTrainingTimer);
+  const resetTimer = useAppStore((state) => state.resetTrainingTimer);
   const addOptions = useAppStore((state) => state.addTrainingOptions);
   const addExercise = useAppStore((state) => state.addTrainingExercise);
   const finish = useAppStore((state) => state.finishTraining);
@@ -93,9 +97,12 @@ function LiveSession({ session }: { session: ActiveSession }) {
             color={Colors.rune}
             testID="session-progress"
           />
-          <PixelText variant="small" tone="textMuted">
-            {`${counts.exercisesDone} of ${counts.exercises} exercises done`}
-          </PixelText>
+          <View style={styles.row}>
+            <PixelText variant="small" tone="textMuted" style={styles.rowText}>
+              {`${counts.exercisesDone} of ${counts.exercises} exercises done`}
+            </PixelText>
+            <SessionClock startedAt={session.startedAt} />
+          </View>
         </PixelFrame>
 
         <TrainWarningList
@@ -115,6 +122,12 @@ function LiveSession({ session }: { session: ActiveSession }) {
               current={current}
               onLog={(entered, mark) => logSet(current.exercise.key, entered, mark)}
               pendingNote={pending ? ACKNOWLEDGE_TO_LOG_NOTE : undefined}
+              timer={
+                session.timer?.exerciseKey === current.exercise.key ? session.timer : undefined
+              }
+              onStartTimer={() => startTimer(current.exercise.key)}
+              onStopTimer={stopTimer}
+              onResetTimer={resetTimer}
             />
             <PixelButton
               label="Skip exercise"

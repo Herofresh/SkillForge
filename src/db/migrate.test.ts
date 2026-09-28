@@ -2,7 +2,10 @@ import { DEFAULT_EQUIPMENT_PROFILES } from '@/domain/equipment';
 
 import { deleteEquipmentProfile, listEquipmentProfiles } from './equipmentProfileRepository';
 import { META_KEYS, getMeta, setMeta } from './metaRepository';
+import { migrate } from 'drizzle-orm/expo-sqlite/migrator';
+
 import { migrateDatabase, SCHEMA_VERSION } from './migrate';
+import migrations from './migrations/migrations';
 import { getProfile } from './profileRepository';
 import { insertSession, listSessions } from './sessionRepository';
 import {
@@ -67,6 +70,44 @@ describe('migrateDatabase', () => {
     await expect(migrateDatabase(test.db, TEST_SEED_TIME)).rejects.toThrow(/newer|only knows/);
     expect(getMeta(test.db, META_KEYS.schemaVersion)).toBe(String(SCHEMA_VERSION + 1));
     expect(listSessions(test.db)).toHaveLength(1);
+    test.close();
+  });
+
+  it('upgrades a v0.1.0 database (3 migrations) with its data intact (PLAN 5.4, 5.7)', async () => {
+    const test = openUnmigrated();
+    const V0_1_0_MIGRATIONS = 3;
+    const entries = migrations.journal.entries.slice(0, V0_1_0_MIGRATIONS);
+    const old = Object.fromEntries(
+      Object.entries(migrations.migrations).slice(0, V0_1_0_MIGRATIONS),
+    ) as typeof migrations.migrations;
+    await migrate(test.db, { journal: { ...migrations.journal, entries }, migrations: old });
+    // A set as v0.1.0 wrote it: no duration_sec column yet.
+    test.sqlite.raw.exec(
+      "INSERT INTO sessions (id, started_at, ended_at) VALUES ('old', 1000, 2000);" +
+        'INSERT INTO session_sets (session_id, set_index, node_id, metric, prescribed_value, ' +
+        "actual_value, is_trial, timestamp) VALUES ('old', 0, 'dead_hang', 'hold_s', 30, 31, 0, 1500);",
+    );
+
+    await migrateDatabase(test.db, TEST_SEED_TIME);
+    expect(getMeta(test.db, META_KEYS.schemaVersion)).toBe(String(SCHEMA_VERSION));
+    expect(listSessions(test.db)).toEqual([
+      {
+        id: 'old',
+        startedAt: 1000,
+        sets: [
+          {
+            sessionId: 'old',
+            setIndex: 0,
+            nodeId: 'dead_hang',
+            metric: 'hold_s',
+            prescribed: { value: 30 },
+            actual: { value: 31 },
+            isTrial: false,
+            timestamp: 1500,
+          },
+        ],
+      },
+    ]);
     test.close();
   });
 

@@ -33,7 +33,10 @@ const data: UserData = {
     { id: 'gym', name: 'Gym', tags: ['rings'] },
   ],
   sessions: [
-    { ...makeSession('s1', 2_000, [{ nodeId: 'dead_hang', count: 2 }]), endedAt: 2_500 },
+    {
+      ...makeSession('s1', 2_000, [{ nodeId: 'dead_hang', count: 2 }]),
+      endedAt: 2_500,
+    },
     {
       ...makeSession('s2', 3_000, [
         {
@@ -97,6 +100,46 @@ describe('serializeBackup / parseBackup', () => {
       settings: {},
     };
     expect(parseBackup(serializeBackup(empty, EXPORTED_AT), base).data).toEqual(empty);
+  });
+});
+
+describe('set durations (schema version 2, PLAN 5.4)', () => {
+  const timed: UserData = {
+    ...data,
+    sessions: data.sessions.map((session, index) =>
+      index === 0
+        ? { ...session, sets: session.sets.map((set) => ({ ...set, durationSec: 31 })) }
+        : session,
+    ),
+  };
+
+  it('round-trips the durations of timed sets and leaves untimed sets without one', () => {
+    const document = documentOf(timed);
+    expect(document.schemaVersion).toBe(2);
+    const [first, second] = document.sessions as { sets: Record<string, unknown>[] }[];
+    expect(first.sets[0].durationSec).toBe(31);
+    expect(second.sets[0]).not.toHaveProperty('durationSec');
+    expect(parseDocument(document).data).toEqual(timed);
+  });
+
+  it('still reads a version 1 backup (from v0.1.0), which has no durations', () => {
+    const v1 = { ...documentOf(), schemaVersion: 1 };
+    const parsed = parseDocument(v1);
+    expect(parsed.issues).toEqual([]);
+    expect(parsed.data).toEqual(data);
+  });
+
+  it('rejects a duration in a version 1 file and a duration that is not whole seconds', () => {
+    expect(messages({ ...documentOf(timed), schemaVersion: 1 })).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/sessions\[0\]\.sets\[0\]: unknown field 'durationSec'/),
+      ]),
+    );
+    const broken = documentOf(timed);
+    (broken.sessions as { sets: Record<string, unknown>[] }[])[0].sets[0].durationSec = 1.5;
+    expect(messages(broken)).toEqual([
+      expect.stringMatching(/sessions\[0\]\.sets\[0\]\.durationSec: must be a whole number/),
+    ]);
   });
 });
 

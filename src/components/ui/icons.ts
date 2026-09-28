@@ -161,6 +161,24 @@ export const ICONS = {
     ],
     colors: { '#': Colors.danger, '*': Colors.parchment, '+': Colors.bronze },
   },
+  hourglass: {
+    rows: [
+      '############',
+      '.*........*.',
+      '.*++++++++*.',
+      '..*++++++*..',
+      '...*++++*...',
+      '....*++*....',
+      '.....**.....',
+      '....*++*....',
+      '...*.++.*...',
+      '..*.++++.*..',
+      '.*++++++++*.',
+      '############',
+    ],
+    colors: { '#': Colors.bronze, '*': Colors.steel, '+': Colors.gold },
+    knockout: ['+'],
+  },
   bar: {
     rows: [
       '............',

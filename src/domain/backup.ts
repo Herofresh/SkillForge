@@ -37,8 +37,16 @@ import {
 
 /** Marks a JSON document as a SkillForge backup. */
 export const BACKUP_FORMAT = 'skillforge-backup';
-/** The backup layout this build writes and the newest one it reads. Bump it with a new ADR. */
-export const BACKUP_SCHEMA_VERSION = 1;
+/**
+ * The backup layout this build writes and the newest one it reads. Bump it with a new ADR.
+ * - 1: the first layout (ADR-028).
+ * - 2: a set may carry `durationSec`, the time the exercise timer measured (PLAN 5.4, ADR-040).
+ *   Version 1 files are still read (they have no durations); an app that reads only version 1
+ *   refuses a version 2 file with "made by a newer SkillForge" instead of an unknown-field error.
+ */
+export const BACKUP_SCHEMA_VERSION = 2;
+/** The first version whose sets may carry `durationSec`. */
+const DURATION_SCHEMA_VERSION = 2;
 /** Label used as `file` in backup issues. */
 export const BACKUP_FILE = 'backup';
 export const BACKUP_MIME_TYPE = 'application/json';
@@ -111,6 +119,7 @@ export function serializeBackup(data: UserData, exportedAt: number): string {
         actual: performanceToRaw(set.actual),
         isTrial: set.isTrial,
         timestamp: set.timestamp,
+        ...(set.durationSec !== undefined ? { durationSec: set.durationSec } : {}),
       })),
     })),
     userActions: data.userActions.map(({ id, kind, nodeId, at }) => ({ id, kind, nodeId, at })),
@@ -267,7 +276,7 @@ function readPerformance(value: unknown, path: string, fail: Fail): SetPerforman
   return reps === undefined ? { value: amount } : { value: amount, reps };
 }
 
-const SET_KEYS = [
+const SET_KEYS_V1 = [
   'setIndex',
   'nodeId',
   'metric',
@@ -276,15 +285,23 @@ const SET_KEYS = [
   'isTrial',
   'timestamp',
 ] as const;
+const SET_KEYS = [...SET_KEYS_V1, 'durationSec'] as const;
 
 function readSet(
   value: unknown,
   path: string,
   sessionId: string,
+  version: number,
   fail: Fail,
 ): LoggedSet | undefined {
-  const record = readRecord(value, path, fail, SET_KEYS);
+  const allowed = version >= DURATION_SCHEMA_VERSION ? SET_KEYS : SET_KEYS_V1;
+  const record = readRecord(value, path, fail, allowed);
   if (!record) return undefined;
+  const durationSec =
+    record.durationSec === undefined
+      ? undefined
+      : readInteger(record.durationSec, `${path}.durationSec`, fail);
+  if (record.durationSec !== undefined && durationSec === undefined) return undefined;
   const set = {
     sessionId,
     setIndex: readInteger(record.setIndex, `${path}.setIndex`, fail),
@@ -295,10 +312,16 @@ function readSet(
     isTrial: readBoolean(record.isTrial, `${path}.isTrial`, fail),
     timestamp: readInteger(record.timestamp, `${path}.timestamp`, fail),
   };
-  return Object.values(set).every((field) => field !== undefined) ? (set as LoggedSet) : undefined;
+  if (!Object.values(set).every((field) => field !== undefined)) return undefined;
+  return { ...(set as LoggedSet), ...(durationSec !== undefined ? { durationSec } : {}) };
 }
 
-function readSession(value: unknown, path: string, fail: Fail): StoredSession | undefined {
+function readSession(
+  value: unknown,
+  path: string,
+  version: number,
+  fail: Fail,
+): StoredSession | undefined {
   const record = readRecord(value, path, fail, [
     'id',
     'startedAt',
@@ -316,7 +339,7 @@ function readSession(value: unknown, path: string, fail: Fail): StoredSession | 
       ? undefined
       : readText(record.equipmentProfileId, `${path}.equipmentProfileId`, fail);
   const sets = readList(record.sets, `${path}.sets`, fail, (item, setPath) =>
-    readSet(item, setPath, id ?? '', fail),
+    readSet(item, setPath, id ?? '', version, fail),
   );
   if (sets) checkUnique(sets, `${path}.sets`, (set) => set.setIndex, 'setIndex', fail);
   const invalidOptional =
@@ -414,7 +437,7 @@ export function parseBackup(text: string, baseNodes: readonly ExerciseNode[]): B
     checkUnique(equipmentProfiles, 'equipmentProfiles', (item) => item.id, 'id', fail);
   }
   const sessions = readList(parsed.sessions, 'sessions', fail, (item, path) =>
-    readSession(item, path, fail),
+    readSession(item, path, version, fail),
   );
   if (sessions) checkUnique(sessions, 'sessions', (item) => item.id, 'id', fail);
   const userActions = readList(parsed.userActions, 'userActions', fail, (item, path) =>

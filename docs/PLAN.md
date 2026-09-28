@@ -548,12 +548,11 @@ compiled into a typed module for the app; users can layer their own changes on t
 - 5.3 EAS build profile and Android APK, split in two:
   - [x] 5.3a Build config + local APK script: `eas.json` (development / preview / production, version source local), app.json version 0.1.0 / versionCode 1, `npm run build:apk[:universal]` (ADR-039, [PR #23](https://github.com/Herofresh/SkillForge/pull/23))
   - [ ] 5.3b EAS cloud build + proper release signing (needs the user: Expo account login, keystore decision)
-- [x] 5.6 App icon: original pixel-art icon from a code grid (`scripts/appIcon.ts`, `npm run icon:build`): icon, adaptive foreground / background / monochrome, splash, favicon (ADR-042, [PR #24](https://github.com/Herofresh/SkillForge/pull/24))
 
 #### v0.2.0
 - [~] 5.4 Exercise timer (user request 2026-09-28): hold countdown with get-ready, vibration at the target and overtime, stopwatch for other metrics, per-set `durationSec` (additive column, backup version 2), session clock and times in the summary, hold Trials too (in progress, agent)
 - [ ] 5.5 Acrobatics branch: rolls, breakfalls (judo ukemi), cartwheel progressions
-- [ ] 5.6 App icon
+- [x] 5.6 App icon: original pixel-art icon from a code grid (`scripts/appIcon.ts`, `npm run icon:build`): icon, adaptive foreground / background / monochrome, splash, favicon (ADR-042, [PR #24](https://github.com/Herofresh/SkillForge/pull/24))
 - [ ] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub
 
 ### Later / Backlog

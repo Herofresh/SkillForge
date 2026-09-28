@@ -11,6 +11,7 @@
       "icon": "./assets/images/icon.png"
     },
     "android": {
+      "permissions": ["android.permission.VIBRATE"],
       "adaptiveIcon": {
         "backgroundColor": "#0D0B14",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

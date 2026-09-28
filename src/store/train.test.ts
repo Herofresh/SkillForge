@@ -107,6 +107,61 @@ describe('Train flow in the store', () => {
     second.close();
   });
 
+  it('times a set, keeps the timer across a restart and stores the duration (PLAN 5.4)', async () => {
+    const path = join(tempDir, 'app.db');
+    const first = await openTestDatabase(path);
+    const store = storeFor(first);
+    store.getState().planTraining('home', 30);
+    store.getState().startTraining();
+    const key = store.getState().activeSession?.currentKey ?? '';
+    store.getState().logTrainingSet(key, { value: 3 });
+    expect(store.getState().activeSession?.restEndsAt).toBeDefined();
+
+    const next = store.getState().activeSession?.currentKey ?? '';
+    store.getState().startTrainingTimer(next);
+    expect(store.getState().activeSession?.restEndsAt).toBeUndefined();
+    expect(store.getState().activeSession?.timer).toEqual({ exerciseKey: next, startedAt: clock });
+    first.close();
+
+    // The app is killed mid-set; the timer comes back with its start time.
+    const second = await openTestDatabase(path);
+    const reopened = storeFor(second);
+    expect(reopened.getState().activeSession?.timer).toEqual({
+      exerciseKey: next,
+      startedAt: clock,
+    });
+    const exercise = reopened.getState().activeSession?.exercises.find((e) => e.key === next);
+    clock += 45 * MS_PER_SECOND;
+    const measured = reopened.getState().stopTrainingTimer();
+    expect(measured).toBe(exercise?.metric === 'hold_s' ? 42 : 45);
+    expect(reopened.getState().stopTrainingTimer()).toBe(measured);
+    clock += 5 * MS_PER_SECOND;
+    reopened.getState().logTrainingSet(next, exercise?.target ?? { value: 1 });
+    const logged = reopened.getState().activeSession?.sets.at(-1);
+    expect(logged?.durationSec).toBe(measured);
+    expect(reopened.getState().activeSession?.timer).toBeUndefined();
+
+    reopened.getState().startTrainingTimer(next);
+    reopened.getState().resetTrainingTimer();
+    expect(reopened.getState().activeSession?.timer).toBeUndefined();
+    expect(reopened.getState().stopTrainingTimer()).toBeUndefined();
+
+    reopened.getState().finishTraining();
+    const [stored] = listStoredSessions(second.db);
+    expect(stored.sets.find((set) => set.nodeId === exercise?.nodeId)?.durationSec).toBe(measured);
+    expect(reopened.getState().sessions[0]).toMatchObject({ id: stored.id, endedAt: clock });
+    second.close();
+  });
+
+  it('records the timed durations of a Trial', async () => {
+    const test = await openTestDatabase();
+    const store = storeFor(test);
+    store.getState().logTrial('dead_hang', [{ value: 31 }, { value: 30 }, { value: 30 }], [31]);
+    const [stored] = listStoredSessions(test.db);
+    expect(stored.sets.map((set) => set.durationSec)).toEqual([31, undefined, undefined]);
+    test.close();
+  });
+
   it('skips, adds, rests and abandons without logging anything', async () => {
     const test = await openTestDatabase();
     const store = storeFor(test);

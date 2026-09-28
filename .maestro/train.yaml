@@ -1,7 +1,7 @@
-# Train flow (PLAN 4.4): from a fresh install, plan a 30-min Home session, look at the plan preview
-# and a swap sheet, start it, log all sets of the first exercise, then kill the app and check that
-# the session resumes with its sets (the draft is saved after every set), finish it and see the
-# summary with XP > 0. Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
+# Train flow (PLAN 4.4, 5.4): from a fresh install, plan a 30-min Home session, look at the plan
+# preview and a swap sheet, start it, time and log the first exercise's set, start the next set's
+# timer, then kill the app and check that the session resumes with its sets and the running timer
+# (the draft is saved after every change), finish it and see the summary with XP > 0. Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Train - plan, live session, resume after a restart, summary
 ---
@@ -74,7 +74,26 @@ name: Train - plan, live session, resume after a restart, summary
 - assertVisible:
     id: 'set-label'
     text: 'Set 1 of 1'
+- assertVisible:
+    id: 'session-clock'
 - takeScreenshot: 4.4-session
+# Exercise timer (5.4): start it, stop it (a hold shows Stop after its 3 s get-ready), log the set
+- tapOn:
+    id: 'set-timer-start'
+- extendedWaitUntil:
+    visible:
+      id: 'set-timer-stop'
+    timeout: 20000
+- takeScreenshot: 5.4-timer
+- tapOn:
+    id: 'set-timer-stop'
+- assertVisible:
+    id: 'set-timer-reset'
+- scrollUntilVisible:
+    element:
+      id: 'log-set'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'log-set'
 - extendedWaitUntil:
@@ -84,6 +103,18 @@ name: Train - plan, live session, resume after a restart, summary
 - assertVisible:
     id: 'session-progress'
 - takeScreenshot: 4.4-rest
+# Starting the next set's timer ends the rest
+- scrollUntilVisible:
+    element:
+      id: 'set-timer-start'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'set-timer-start'
+- extendedWaitUntil:
+    notVisible:
+      id: 'rest-panel'
+    timeout: 20000
 # Kill the app mid-session and open it again: it resumes with the logged set
 - stopApp
 - launchApp
@@ -99,6 +130,17 @@ name: Train - plan, live session, resume after a restart, summary
     visible:
       id: 'live-session'
     timeout: 20000
+- assertVisible:
+    id: 'set-timer-clock'
+- tapOn:
+    id: 'set-timer-reset'
+- assertVisible:
+    id: 'set-timer-start'
+- scrollUntilVisible:
+    element:
+      id: 'session-row-e0'
+    direction: DOWN
+    timeout: 60000
 - assertVisible:
     id: 'session-row-e0'
     text: '.*1 / 1.*'

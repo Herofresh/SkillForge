@@ -1,0 +1,1 @@
+ALTER TABLE `session_sets` ADD `duration_sec` integer;

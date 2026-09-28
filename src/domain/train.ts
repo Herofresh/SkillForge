@@ -13,6 +13,7 @@ import { MS_PER_SECOND } from '@/lib/time';
 import { searchNodes } from './assessment';
 import { exerciseSeconds, isDoableWith, plannedSets, PROGRESSION_STEP } from './generator';
 import { resolveTree, type ProgressMap } from './progression';
+import { measuredSeconds, timerModeFor, type SetTimer } from './setTimer';
 import {
   WORKOUT_BLOCK_KINDS,
   type EquipmentTag,
@@ -82,6 +83,16 @@ export interface ActiveSession extends SessionPlan {
   currentKey?: string;
   /** When the rest after the last set ends (ms); `undefined` when not resting. */
   restEndsAt?: number;
+  /**
+   * The exercise timer of the set being done (PLAN 5.4, ADR-040), running or stopped, until the
+   * set is logged. Timestamps only, so it survives an app kill. Drafts before 5.4 don't have it.
+   */
+  timer?: SessionTimer;
+}
+
+/** The set timer of exercise `exerciseKey` (the next set to log of that exercise). */
+export interface SessionTimer extends SetTimer {
+  exerciseKey: string;
 }
 
 /** How a set is marked when it is logged. */
@@ -332,6 +343,8 @@ function afterLogging(session: ActiveSession, exercise: SessionExercise): string
 /**
  * Logs one set of exercise `key` (prescribed = its target) and starts its rest. Logging a skipped
  * exercise un-skips it. The current exercise moves on to the pair partner or the next open one.
+ * A timer of that exercise gives the set its `durationSec` (stopped: as stopped; running: until
+ * `at`) and is cleared.
  */
 export function logSessionSet(
   session: ActiveSession,
@@ -341,6 +354,8 @@ export function logSessionSet(
 ): ActiveSession {
   const exercise = session.exercises.find((entry) => entry.key === key);
   if (!exercise) return session;
+  const { timer, ...untimed } = session;
+  const timed = timer?.exerciseKey === key ? timer : undefined;
   const set: SessionSetLog = {
     sessionId: session.id,
     nodeId: exercise.nodeId,
@@ -351,10 +366,12 @@ export function logSessionSet(
     isTrial: exercise.isTrial ?? false,
     timestamp: at,
     exerciseKey: key,
+    ...(timed ? { durationSec: measuredSeconds(timed, timerModeFor(exercise.metric), at) } : {}),
   };
   const { skipped: _unskipped, ...active } = exercise;
   const next: ActiveSession = {
-    ...session,
+    // Another exercise's timer is dropped too: the user moved on without logging it.
+    ...untimed,
     exercises: session.exercises.map((entry) => (entry.key === key ? active : entry)),
     sets: [...session.sets, set],
   };
@@ -369,7 +386,7 @@ export function logSessionSet(
 /** Skips exercise `key` (what it logged so far stays); the next open one becomes current. */
 export function skipExercise(session: ActiveSession, key: string): ActiveSession {
   const next: ActiveSession = {
-    ...session,
+    ...(session.timer?.exerciseKey === key ? clearSetTimer(session) : session),
     exercises: session.exercises.map((entry) =>
       entry.key === key ? { ...entry, skipped: true } : entry,
     ),
@@ -389,11 +406,34 @@ export function addSessionExercise(
     : { ...next, currentKey: next.exercises[next.exercises.length - 1].key };
 }
 
-/** Shows exercise `key` (the user picked it from the list). */
+/** Shows exercise `key` (the user picked it from the list); another exercise's timer is dropped. */
 export function selectExercise(session: ActiveSession, key: string): ActiveSession {
-  return session.exercises.some((entry) => entry.key === key)
-    ? { ...session, currentKey: key }
-    : session;
+  if (!session.exercises.some((entry) => entry.key === key)) return session;
+  const kept =
+    session.timer && session.timer.exerciseKey !== key ? clearSetTimer(session) : session;
+  return { ...kept, currentKey: key };
+}
+
+/**
+ * Starts the timer for the next set of exercise `key` at `at` (replacing any other timer). Starting
+ * it ends the rest countdown: the user is working again.
+ */
+export function startSetTimer(session: ActiveSession, key: string, at: number): ActiveSession {
+  if (!session.exercises.some((entry) => entry.key === key)) return session;
+  return { ...skipRest(session), timer: { exerciseKey: key, startedAt: at } };
+}
+
+/** Stops the running timer at `at`; its measurement is kept for the set until it is logged. */
+export function stopSetTimer(session: ActiveSession, at: number): ActiveSession {
+  const { timer } = session;
+  if (!timer || timer.stoppedAt !== undefined) return session;
+  return { ...session, timer: { ...timer, stoppedAt: Math.max(at, timer.startedAt) } };
+}
+
+/** Throws the timer away (cancel / reset); the set is then logged without a duration. */
+export function clearSetTimer(session: ActiveSession): ActiveSession {
+  const { timer: _cleared, ...rest } = session;
+  return rest;
 }
 
 export function skipRest(session: ActiveSession): ActiveSession {
@@ -515,13 +555,24 @@ function isSetLog(value: unknown): value is SessionSetLog {
     isNumber(value.timestamp) &&
     typeof value.isTrial === 'boolean' &&
     isPerformance(value.prescribed) &&
-    isPerformance(value.actual)
+    isPerformance(value.actual) &&
+    (value.durationSec === undefined || isNumber(value.durationSec))
+  );
+}
+
+function isTimer(value: unknown): value is SessionTimer {
+  return (
+    isRecord(value) &&
+    isString(value.exerciseKey) &&
+    isNumber(value.startedAt) &&
+    (value.stoppedAt === undefined || isNumber(value.stoppedAt))
   );
 }
 
 /**
  * A stored active session read back (validated at the boundary): `undefined` when the data doesn't
- * have the expected shape, e.g. written by a future app version.
+ * have the expected shape, e.g. written by a future app version. Drafts from before the exercise
+ * timer (no `timer`, no `durationSec`) parse as they are.
  */
 export function parseActiveSession(raw: unknown): ActiveSession | undefined {
   if (
@@ -540,7 +591,8 @@ export function parseActiveSession(raw: unknown): ActiveSession | undefined {
     !Array.isArray(raw.acknowledged) ||
     !raw.acknowledged.every(isString) ||
     (raw.currentKey !== undefined && !isString(raw.currentKey)) ||
-    (raw.restEndsAt !== undefined && !isNumber(raw.restEndsAt))
+    (raw.restEndsAt !== undefined && !isNumber(raw.restEndsAt)) ||
+    (raw.timer !== undefined && !isTimer(raw.timer))
   ) {
     return undefined;
   }
