@@ -14,6 +14,7 @@ import { RankCrest } from './character/RankCrest';
 import { SessionHistoryRow } from './character/SessionHistoryRow';
 import { EquipmentProfileEditor } from './equipment/EquipmentProfileEditor';
 import { BackupPanel } from './settings/BackupPanel';
+import { ReplayOnboardingPanel } from './settings/ReplayOnboardingPanel';
 
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
@@ -112,6 +113,26 @@ describe('EquipmentProfileEditor', () => {
     await user.press(screen.getByRole('button', { name: 'Remove Park' }));
     expect(onRemove).toHaveBeenCalledWith(expect.objectContaining({ id: 'park' }));
     expect(store.getState().equipmentProfiles).toHaveLength(3); // the screen confirms first
+  });
+});
+
+describe('ReplayOnboardingPanel', () => {
+  it('replays the intro only after the confirmation says the data stays (PLAN 5.10)', async () => {
+    const store = await startStore();
+    store.getState().setHeroName('Aria');
+    store.getState().completeOnboarding();
+    const user = userEvent.setup();
+    await render(<ReplayOnboardingPanel />);
+    await user.press(screen.getByRole('button', { name: 'Replay onboarding' }));
+    expect(screen.getByText(/Your data stays\. Only the intro runs again/)).toBeOnTheScreen();
+    // The backdrop and the button both close the sheet.
+    await user.press(screen.getAllByRole('button', { name: 'Cancel' })[0]);
+    expect(store.getState().onboardingCompletedAt).toBe(NOW);
+
+    await user.press(screen.getByRole('button', { name: 'Replay onboarding' }));
+    await user.press(screen.getByTestId('replay-confirm'));
+    expect(store.getState().onboardingCompletedAt).toBeUndefined();
+    expect(store.getState().profile?.heroName).toBe('Aria');
   });
 });
 

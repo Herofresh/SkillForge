@@ -3,11 +3,12 @@ import { render, screen, userEvent } from '@testing-library/react-native';
 import { ALL_NODES } from '@/data/skills';
 import { openTestDatabase, type TestDatabase } from '@/db/testing/testDatabase';
 import { PROFICIENT_LEVEL, xpForLevel } from '@/domain/progression';
-import { branchColumn, nodeDetail } from '@/domain/treeView';
+import { branchColumn, nodeDetail, nodeHistory } from '@/domain/treeView';
 import type { NodeProgress } from '@/domain/types';
 import { createAppStore, type AppStore } from '@/store/appStore';
 import { setAppStore } from '@/store/useAppStore';
 
+import { NodeHistoryList } from './node/NodeHistoryList';
 import { PrerequisiteList } from './node/PrerequisiteList';
 import { UnlockSheet } from './node/UnlockSheet';
 import { NodeTile } from './tree/NodeTile';
@@ -118,5 +119,29 @@ describe('UnlockSheet', () => {
     expect(onUnlocked).toHaveBeenCalledTimes(1);
     expect(store.getState().userActions.map((action) => action.nodeId)).toEqual(['scapular_pull']);
     expect(store.getState().engine.progress.scapular_pull?.selfUnlockedAt).toBe(NOW);
+  });
+});
+
+describe('NodeHistoryList', () => {
+  it('opens the past session from each row, onboarding Trials too (PLAN 5.10)', async () => {
+    const test = await openTestDatabase();
+    const store = createAppStore({ db: test.db, baseNodes: ALL_NODES, now: () => NOW });
+    store.getState().loadAll();
+    store.getState().logTrial('dead_hang', [{ value: 30 }, { value: 30 }, { value: 30 }]);
+    const history = nodeHistory(store.getState().sessions, 'dead_hang');
+    const onOpenSession = jest.fn();
+    const user = userEvent.setup();
+    await render(
+      <NodeHistoryList history={history} metric="hold_s" onOpenSession={onOpenSession} />,
+    );
+    await user.press(screen.getByRole('button', { name: /, Trial: 30 s · 30 s · 30 s$/ }));
+    expect(onOpenSession).toHaveBeenCalledWith(history[0].sessionId);
+    test.close();
+  });
+
+  it('says when nothing is logged', async () => {
+    await render(<NodeHistoryList history={[]} metric="reps" onOpenSession={jest.fn()} />);
+    expect(screen.getByTestId('history-empty')).toBeOnTheScreen();
+    expect(screen.queryByRole('button')).toBeNull();
   });
 });
