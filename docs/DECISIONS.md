@@ -833,3 +833,41 @@ Template:
 - Consequences: an app kill loses at most the set being entered. The summary result is kept in
   memory only (after a restart the session is in history, just without the summary screen). The
   Character tab (4.5) reads the finished sessions from `state.sessions`.
+
+## ADR-035: Character sheet and Settings: derived view model, pixel radar, in-memory undo of an import (PLAN 4.5, 4.6)
+- Date: 2026-09-28 · Status: Accepted
+- Context: The Character tab must show level, rank, the six attributes (open-ended point sums,
+  ADR-023), the push/pull balance, streak, totals, goals and the history; Settings must manage
+  equipment profiles and the ADR-028 backups with a clear "replaces all your data" step and an undo.
+- Decision:
+  - **One pure view model:** `characterSheet` (`src/domain/characterView.ts`) builds everything the
+    tab shows from the tree, engine state, sessions, their results and the goals; the screen only
+    renders it. The radar is normalised to the largest attribute (`radarAxes`), so it shows the
+    balance, not an absolute scale; the exact points are in stat bars under it.
+  - **Streak "now":** `activeStreak` shows the engine's streak only while the next session can
+    still extend it (≤ 72 h since the last one), else 0. The clock is read when the tab gets focus.
+  - **Goal progress** = proficient nodes on the goal's path (the goal and its transitive hard
+    prerequisites, `goalPathNodes`) / path length; "next" is the easiest open path node that is not
+    locked (else the easiest open one).
+  - **Session results in the store:** `sessionResults` (by session id) is filled by `loadAll`'s
+    recompute and kept current by every apply/recompute, so the history shows XP per session and a
+    past session opens `app/session/[sessionId]` with the same panels as the Train summary
+    (`SessionResultPanels`, no bursts, warnings as plain notes: they were acknowledged when logged).
+  - **Pixel radar:** the hexagon grid, spokes, value area and its outline are rasterized into 6 dp
+    cells (`src/lib/radar.ts`) and drawn as SVG rects, so the chart is real pixel art at any size;
+    labels are Views around it; the whole chart is one accessible image with a spoken summary.
+  - **Rank crest:** the rank's emblem (shield → sword → rune → star → flame) in a frame of its
+    `RankColors` (steel, then the tier colors).
+  - **Settings:** hero name, the equipment editor shared with onboarding
+    (`EquipmentProfileEditor`) plus rename and a confirmed remove (the last profile can't be
+    removed), backups, about/credits (`src/data/credits.ts`: sources and the three OFL fonts), and
+    the dev-only Style Guide. No units or other preferences exist yet, so none are shown.
+  - **Import:** a confirmation sheet says it replaces all data (and a session in progress) and that
+    a safety copy is saved first; a rejected file shows at most `BACKUP_ISSUES_SHOWN` (5) readable
+    issues plus "and n more" and changes nothing. **Undo last import** re-imports the safety copy
+    (`undoLastImport`, which saves a safety copy of the imported data in turn). The copy to undo is
+    kept in memory (`lastImport`) for the running app only: it can't live in the database, which the
+    import replaces; the files stay in `documents/backups/`.
+- Consequences: the undo button disappears after an app restart (backlog: pick a safety copy from
+  `documents/backups/`). A radar with one trained attribute is a line; the markers and bars carry
+  it. `PlaceholderScreen` is gone (no placeholder tabs left).

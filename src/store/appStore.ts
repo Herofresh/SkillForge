@@ -11,7 +11,9 @@
  *   (or recompute when it lies in the past, `canApplyIncrementally`) and refresh the cache.
  * - Backups (PLAN 3.3, ADR-028): `exportBackup` serializes all user data; `importBackup` validates
  *   the whole file first, saves a safety copy of the current data, then replaces everything in one
- *   transaction and reloads. Never a partial import.
+ *   transaction and reloads. Never a partial import. `lastImport` keeps the safety copy for
+ *   `undoLastImport` (PLAN 4.6).
+ * - Character tab (PLAN 4.5): `sessionResults` keeps every session's `SessionResult`.
  * - Onboarding (PLAN 4.1, ADR-031): `setHeroName`, `toggleGoal`, `logTrial` (assessment test-outs,
  *   logged as ordinary Trial sessions) and `completeOnboarding` (the `onboarding_completed_at`
  *   setting, so it travels with backups).
@@ -177,6 +179,11 @@ export interface AppState {
    */
   overlayIssues: ValidationIssue[];
   engine: EngineState;
+  /**
+   * What each logged session earned (`SessionResult` by session id), from the last recompute plus
+   * the sessions applied since: the Character tab's history and the past-session summary (PLAN 4.5).
+   */
+  sessionResults: Readonly<Record<string, SessionResult>>;
   /** Full history in replay order (source of truth, ADR-008). */
   sessions: LoggedSession[];
   userActions: UserAction[];
@@ -192,6 +199,11 @@ export interface AppState {
   activeSession?: ActiveSession;
   /** The result of the last finished Train session, for the summary screen; in memory only. */
   trainSummary?: { sessionId: string; result: SessionResult };
+  /**
+   * The safety copy of the data the last import in this app run replaced (PLAN 4.6), for "Undo last
+   * import"; in memory only. The file itself stays in `documents/backups/`.
+   */
+  lastImport?: SafetyCopy;
 
   loadAll(): void;
   logSession(session: LoggedSession, details?: SessionDetails): SessionResult;
@@ -270,6 +282,11 @@ export interface AppState {
    * one transaction and reloads.
    */
   importBackup(text: string): ImportBackupResult;
+  /**
+   * Restores the data the last import replaced (`importBackup(lastImport.text)`, which saves a
+   * safety copy of its own first) and forgets `lastImport`. Throws when there is none.
+   */
+  undoLastImport(): ImportBackupResult;
   /** `exportBackup`, then hand the file to the share sheet. */
   shareBackup(): Promise<void>;
   /** Let the user pick a file, then `importBackup` it. */
@@ -277,6 +294,9 @@ export interface AppState {
 }
 
 export type AppStore = StoreApi<AppState>;
+
+const resultsById = (results: readonly SessionResult[]): Record<string, SessionResult> =>
+  Object.fromEntries(results.map((result) => [result.sessionId, result]));
 
 function uniqueTags(tags: readonly EquipmentTag[]): EquipmentTag[] {
   return [...new Set(tags)];
@@ -313,15 +333,21 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
 
     /** Applies a session that is already stored (incrementally, or by recomputing the past). */
     const applyStoredSession = (session: LoggedSession): SessionResult => {
-      const { engine, sessions, userActions, nodes } = get();
+      const { engine, sessions, userActions, nodes, sessionResults } = get();
       const allSessions = [...sessions, session].sort(compareHistory);
       if (canApplyIncrementally(engine, session)) {
         const step = applySession(engine, session, nodes);
-        commitEngine(step.state, { sessions: allSessions });
+        commitEngine(step.state, {
+          sessions: allSessions,
+          sessionResults: { ...sessionResults, [session.id]: step.result },
+        });
         return step.result;
       }
       const rebuilt = recompute(nodes, allSessions, userActions);
-      commitEngine(rebuilt.state, { sessions: allSessions });
+      commitEngine(rebuilt.state, {
+        sessions: allSessions,
+        sessionResults: resultsById(rebuilt.results),
+      });
       return rebuilt.results.find((result) => result.sessionId === session.id) as SessionResult;
     };
 
@@ -365,6 +391,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       overlay: EMPTY_OVERLAY,
       overlayIssues: [],
       engine: INITIAL_ENGINE_STATE,
+      sessionResults: {},
       sessions: [],
       userActions: [],
       goals: [],
@@ -375,7 +402,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const { nodes, issues: overlayIssues } = applyOverlay(baseNodes, overlay);
         const sessions = listSessions(db);
         const userActions = listUserActions(db);
-        const { state: engine } = recompute(nodes, sessions, userActions);
+        const { state: engine, results } = recompute(nodes, sessions, userActions);
         const completedAt = getSetting(db, ONBOARDING_COMPLETED_SETTING);
         commitEngine(engine, {
           onboardingCompletedAt: typeof completedAt === 'number' ? completedAt : undefined,
@@ -384,6 +411,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           overlay,
           overlayIssues,
           sessions,
+          sessionResults: resultsById(results),
           userActions,
           goals: listGoals(db),
           equipmentProfiles: listEquipmentProfiles(db),
@@ -410,7 +438,10 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           return step.result;
         }
         const rebuilt = recompute(nodes, sessions, allActions);
-        commitEngine(rebuilt.state, { userActions: allActions });
+        commitEngine(rebuilt.state, {
+          userActions: allActions,
+          sessionResults: resultsById(rebuilt.results),
+        });
         return rebuilt.actionResults.find(
           (result) => result.actionId === action.id,
         ) as UserActionResult;
@@ -666,10 +697,21 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const location = deps.files?.saveSafetyCopy(fileName, current);
         replaceUserData(db, data, at);
         get().loadAll(); // history in the past and a new tree: full recompute
-        return {
-          status: 'imported',
-          safetyCopy: { fileName, text: current, ...(location !== undefined ? { location } : {}) },
+        const safetyCopy: SafetyCopy = {
+          fileName,
+          text: current,
+          ...(location !== undefined ? { location } : {}),
         };
+        set({ lastImport: safetyCopy });
+        return { status: 'imported', safetyCopy };
+      },
+
+      undoLastImport() {
+        const copy = get().lastImport;
+        if (!copy) throw new Error('No import to undo');
+        const result = get().importBackup(copy.text);
+        if (result.status === 'imported') set({ lastImport: undefined });
+        return result;
       },
 
       async shareBackup() {

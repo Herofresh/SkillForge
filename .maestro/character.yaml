@@ -1,0 +1,132 @@
+# Character tab (PLAN 4.5): from a fresh install the sheet shows level 1 and an empty history; after
+# a logged session it shows the earned XP and the session, which opens its summary. Takes the 4.5
+# screenshots. Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
+appId: host.exp.exponent
+name: Character - level and XP after a logged session, history opens the session
+---
+# Fresh data, so the sheet starts empty (wipes Expo Go's data, including the app database).
+- clearState
+- openLink: exp://127.0.0.1:8081
+- extendedWaitUntil:
+    visible: 'Name your hero|Continue'
+    timeout: 180000
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+- runFlow:
+    when:
+      visible: 'Toggle performance monitor'
+    commands:
+      - back
+- extendedWaitUntil:
+    visible:
+      id: 'onboarding-hero'
+    timeout: 60000
+- runFlow: subflows/finish-onboarding.yaml
+# A new hero: no XP, an empty radar
+- tapOn: 'Character'
+- extendedWaitUntil:
+    visible:
+      id: 'character-screen'
+    timeout: 20000
+- assertVisible:
+    id: 'character-total-xp'
+    text: '0 XP earned in total'
+- assertVisible:
+    id: 'attribute-radar'
+# Log a short session: Train now (Home, 30 min) → start → log the first set → finish
+- tapOn: 'Train'
+- extendedWaitUntil:
+    visible:
+      id: 'train-now'
+    timeout: 20000
+- tapOn:
+    id: 'profile-home'
+- tapOn:
+    id: 'minutes-30'
+- tapOn:
+    id: 'train-now'
+- extendedWaitUntil:
+    visible:
+      id: 'plan-preview'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'start-session'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'start-session'
+- extendedWaitUntil:
+    visible:
+      id: 'live-session'
+    timeout: 20000
+- tapOn:
+    id: 'log-set'
+- extendedWaitUntil:
+    visible:
+      id: 'rest-panel'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'finish-session'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'finish-session'
+- extendedWaitUntil:
+    visible:
+      id: 'finish-dialog'
+    timeout: 20000
+- tapOn:
+    id: 'finish-confirm'
+- extendedWaitUntil:
+    visible:
+      id: 'session-summary'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'summary-done'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'summary-done'
+- extendedWaitUntil:
+    visible:
+      id: 'train-now'
+    timeout: 20000
+# The sheet now shows the XP and the session
+- tapOn: 'Character'
+- extendedWaitUntil:
+    visible:
+      id: 'character-screen'
+    timeout: 20000
+- assertVisible:
+    id: 'character-total-xp'
+    text: '[1-9][0-9]* XP earned in total'
+- assertVisible:
+    id: 'character-xp'
+- takeScreenshot: 4.5-character
+- scrollUntilVisible:
+    element:
+      id: 'recent-session-0'
+    direction: DOWN
+    timeout: 60000
+- takeScreenshot: 4.5-character-history
+- tapOn:
+    id: 'recent-session-0'
+- extendedWaitUntil:
+    visible:
+      id: 'past-session'
+    timeout: 20000
+- assertVisible:
+    id: 'summary-total-xp'
+    text: '\+[1-9][0-9]* XP'
+- takeScreenshot: 4.5-session
+- back
+- extendedWaitUntil:
+    visible:
+      id: 'character-screen'
+    timeout: 20000

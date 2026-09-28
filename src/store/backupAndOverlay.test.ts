@@ -241,6 +241,34 @@ describe('backup export/import (PLAN 3.3)', () => {
     test.close();
   });
 
+  it('undoes the last import from its safety copy', async () => {
+    const test = await openTestDatabase();
+    const { files } = fakeFiles();
+    const store = storeFor(test, files);
+    fillWithData(test, store);
+    const engineBefore = store.getState().engine;
+    expect(store.getState().lastImport).toBeUndefined();
+    expect(() => store.getState().undoLastImport()).toThrow(/No import/);
+
+    const empty: UserData = {
+      goals: [],
+      equipmentProfiles: [],
+      sessions: [],
+      userActions: [],
+      overlay: EMPTY_OVERLAY,
+      settings: {},
+    };
+    const imported = store.getState().importBackup(serializeBackup(empty, NOW));
+    expect(imported.status).toBe('imported');
+    expect(store.getState().lastImport?.text).toBe(
+      imported.status === 'imported' ? imported.safetyCopy.text : undefined,
+    );
+    expect(store.getState().undoLastImport().status).toBe('imported');
+    expect(store.getState().engine).toEqual(engineBefore);
+    expect(store.getState().lastImport).toBeUndefined();
+    test.close();
+  });
+
   it('rejects malformed and newer files with readable errors and writes nothing', async () => {
     const test = await openTestDatabase();
     const { files, saved } = fakeFiles();

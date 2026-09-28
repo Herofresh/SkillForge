@@ -69,4 +69,5 @@ name: Style guide - components render and respond
 - tapOn: 'Replay burst'
 - assertVisible: 'LEVEL UP!'
 - back
-- assertVisible: 'Equipment profiles'
+- assertVisible:
+    id: 'open-styleguide'

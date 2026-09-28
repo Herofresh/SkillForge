@@ -6,7 +6,7 @@
 import { DarkTheme, type Theme } from 'expo-router';
 
 import type { TileState } from '@/domain/treeView';
-import type { Attribute, Tier } from '@/domain/types';
+import type { Attribute, RankTitle, Tier } from '@/domain/types';
 
 /** Raw palette. Contrast pairs are pinned in theme.test.ts and listed in docs/DESIGN.md. */
 export const Palette = {
@@ -74,6 +74,18 @@ export const TierColors: Readonly<Record<Tier, string>> = {
   intermediate: Palette.sky,
   advanced: Palette.amethyst,
   elite: Palette.sunfire,
+};
+
+/**
+ * Rank crest colors (PLAN 4.5): steel for Novice, then the tier colors upwards, so a Master's crest
+ * matches the advanced tier and a Legend's the legendary gold.
+ */
+export const RankColors: Readonly<Record<RankTitle, string>> = {
+  Novice: Palette.steel,
+  Apprentice: Palette.verdant,
+  Adept: Palette.sky,
+  Master: Palette.amethyst,
+  Legend: Palette.sunfire,
 };
 
 /** Attribute colors for stat bars and the radar. */

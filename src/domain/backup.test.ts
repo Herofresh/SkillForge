@@ -2,6 +2,7 @@ import { makeChain, makeNode, makeSession } from '@/data/testFixtures';
 import { formatIssue } from '@/data/validate';
 
 import {
+  backupIssueLines,
   BACKUP_FORMAT,
   BACKUP_SCHEMA_VERSION,
   backupFileName,
@@ -222,5 +223,21 @@ describe('backupFileName', () => {
       'skillforge-backup-2026-09-27T08-30-05Z.json',
     );
     expect(backupFileName(0, 'before-import')).toBe('before-import-1970-01-01T00-00-00Z.json');
+  });
+});
+
+describe('backupIssueLines', () => {
+  it('drops the backup label and caps the list', () => {
+    const issues = Array.from({ length: 7 }, (_, index) => ({
+      file: 'backup',
+      message: `sessions[${index}].id: must be a string`,
+    }));
+    const { lines, more } = backupIssueLines([...issues, { file: 'overlay', message: 'bad' }], 5);
+    expect(lines).toHaveLength(5);
+    expect(lines[0]).toBe('sessions[0].id: must be a string');
+    expect(more).toBe(3);
+    expect(backupIssueLines([{ file: 'overlay', nodeId: 'x', message: 'bad' }]).lines).toEqual([
+      'overlay: x: bad',
+    ]);
   });
 });

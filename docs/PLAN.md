@@ -7,7 +7,7 @@
 - Repo: https://github.com/Herofresh/SkillForge (public).
 - Phase 0 is done: docs (PR #1), the Expo SDK 57 scaffold with tooling (PR #2), and GitHub Actions
   CI (PR #3).
-- The app has four placeholder tabs (Tree · Train · Character · Settings) on a dark theme. It runs
+- The app has four tabs (Tree · Train · Character · Settings) on a dark theme. It runs
   in Expo Go on the emulator, and a Maestro smoke flow checks that every tab renders (task 0.6,
   ADR-022). The default E2E AVD is now `Pixel_8_Pro_API_35` with `-gpu host` (task 0.8, ADR-032).
 - Phase 1 is merged ([PR #4](https://github.com/Herofresh/SkillForge/pull/4)) except 1.6 (OG verification) and 1.10 (coach review): shared
@@ -72,10 +72,19 @@
   before Done). The live session is a draft in the new `active_session` table, saved after every
   change; the app reopens on the Train tab with "Resume session". Maestro `train.yaml` (includes
   the kill-and-resume check); screenshots `docs/screenshots/4.4-*.png`.
+- Character tab and Settings (4.5–4.6, ADR-035, [PR #19](https://github.com/Herofresh/SkillForge/pull/19)): the Character tab shows the hero,
+  level + XP bar, rank crest with the next rank's threshold, a pixel-art attribute radar (normalised
+  to the largest attribute) with stat bars, the push/pull balance note, streak and totals, goals
+  with their path progress and next step, and the last 10 sessions (tap → `app/session/[sessionId]`,
+  the Train summary panels). Settings: hero name, equipment profiles (add, tags, rename, confirmed
+  remove), export backup (share sheet), import with a "replaces all your data" confirmation, readable
+  rejection issues, "Undo last import", about/credits, dev-only Style Guide. Maestro
+  `character.yaml`, `settings.yaml`; screenshots `docs/screenshots/4.5-*.png`, `4.6-*.png`.
+  **The four tabs are real now.**
 
 ## Next up
-1. Phase 4 UI on top of the store (`useAppStore`) built from the design system (4.0,
-   `docs/DESIGN.md`): next 4.5 Character, then 4.6 Settings (see the handoff notes).
+1. Phase 4: 4.7 in-app node editor, then 4.8 "Suggest to project" (see the handoff notes; decide
+   the overlay safety backlog item first).
 2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -83,6 +92,30 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Character tab and Settings (tasks 4.5–4.6, ADR-035):**
+  - View model: `characterSheet` in `src/domain/characterView.ts` (`radarAxes`, `nextRank`,
+    `rankHint`, `activeStreak`, `characterTotals`, `balanceNote`, `recentSessions`,
+    `goalProgress`). Pixel geometry in `src/lib/radar.ts` (`rasterizePolygon` with a hole for
+    outlines, `segmentQuad` for spokes).
+  - Store: `sessionResults` (every session's `SessionResult`, kept by loadAll/apply/recompute),
+    `lastImport` + `undoLastImport()` (memory only; gone after a restart).
+  - Shared UI: `SessionResultPanels` (Train summary and past session), `EquipmentProfileEditor`
+    (onboarding and Settings; `onRename`/`onRemove` hand the confirmation to the screen). Settings
+    panels in `src/components/settings/`, credits in `src/data/credits.ts`.
+  - The Character tab reads the clock on focus (`useFocusEffect`) for the streak, and plays LEVEL
+    UP! when the level rose while the tab was mounted.
+  - Not built (backlog): undo after a restart (pick a safety copy from `documents/backups/`),
+    pruning old safety copies, replay onboarding, units/preferences (none exist), linking the node
+    detail history to the past-session screen.
+  - Maestro: `character.yaml` (clearState, logs one session through Train); `settings.yaml` (no
+    clearState; add + remove a "Gym" profile, share sheet closed with back, import cancel paths).
+    Gotcha: Maestro `hideKeyboard` presses back when no keyboard is open, which leaves the tab;
+    the add-profile button dismisses the keyboard itself, so the flow doesn't call it there. All seven
+    flows took ~14 min on the Pixel 8 Pro. The
+    Settings tab keeps its scroll position between flows: the flow scrolls up first.
+  - Gotcha: during this task Expo Go kept running an old bundle after edits (even after
+    `clearState`); restarting Metro with `npx expo start -c` fixed it. Restart Metro before the
+    final E2E run.
 - **Train flow (task 4.4, ADR-034):**
   - Model: `src/domain/train.ts` (`SessionPlan` → `ActiveSession`, pure: swap/remove/add, pairs,
     `logSessionSet`, `markedPerformance`, skip, rest, `projectedSets`, `finishedSession`,
@@ -312,8 +345,7 @@
     (see the CI gotcha below). Check for this after every install.
 - Scaffold (tasks 0.2–0.5): routes are in root `app/` (not the template's `src/app/`, see ADR-014).
   Tooling choices are in ADR-013. Folder layout, alias and commands are in `docs/CONTEXT.md`.
-- UI colors live only in `src/components/theme.ts`. Tab screens use `PlaceholderScreen`; replace them
-  in Phase 4.
+- UI colors live only in `src/components/theme.ts`. (`PlaceholderScreen` was removed in 4.5–4.6.)
 - Add dependencies with `npx expo install <pkg>` so versions match SDK 57. `npx expo-doctor` passed
   21/21 checks at scaffold time.
 - CI (`.github/workflows/ci.yml`) runs on Node 24 for every PR and on every push to `main`: it
@@ -384,8 +416,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 4.3 Node detail: cues, level/XP, prerequisites ✓/✗ with alternatives, set goal, attempt Trial / test out, "unlock anyway" (self-unlock) for locked nodes, history, review status (ADR-033) ([PR #17](https://github.com/Herofresh/SkillForge/pull/17))
 - [x] 4.4 Train flow: Train now → profile and time → plan preview (swap/remove/add) → live logging (persisted draft, resume after restart) → summary with XP, level-ups and unlocks (ADR-034) ([PR #18](https://github.com/Herofresh/SkillForge/pull/18))
 - [x] 4.x Safeguard warnings in the UI (ADR-023): every `SafeguardWarning` (before a Trial, test-out or self-unlock, during a live session and in the summary) is shown with its message and an acknowledge step; straight-arm ones explain why. Never a hard block. Part of 4.1, 4.3 and 4.4 (the Train part: ADR-034) ([PR #18](https://github.com/Herofresh/SkillForge/pull/18))
-- [ ] 4.5 Character tab: level, rank, attribute radar, streak, recent sessions
-- [ ] 4.6 Settings: equipment profiles, export/import
+- [x] 4.5 Character tab: level + XP, rank crest, pixel attribute radar, balance note, streak, totals, goals along their paths, recent sessions → past session summary (ADR-035) ([PR #19](https://github.com/Herofresh/SkillForge/pull/19))
+- [x] 4.6 Settings: hero name, equipment profiles CRUD, export (share sheet) / import with confirmation, readable rejection, undo last import, about/credits, dev Style Guide link (ADR-035) ([PR #19](https://github.com/Herofresh/SkillForge/pull/19))
 - [ ] 4.7 In-app node editor: add a `user_` node, edit a node's standards/prerequisites, hide a node; show `applyOverlay` issues inline and never save a broken tree
 - [ ] 4.8 "Suggest to project": share the overlay as YAML (`exportOverlay`) and import someone else's (`importOverlay`)
 
@@ -398,6 +430,10 @@ compiled into a typed module for the app; users can layer their own changes on t
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
   Expo Go. Every UI task in Phase 4 should also add or extend a flow in `.maestro/`.
+- Backups: "undo" after an app restart (choose one of the safety copies in `documents/backups/`),
+  prune old safety copies (4.6 keeps the last import's copy in memory only, ADR-035)
+- Settings extras: replay onboarding, units/preferences once there are any
+- Node detail history rows could open the past-session screen (`app/session/[sessionId]`)
 - Hold stopwatch and a full rest timer (4.4 has a basic countdown from `restEndsAt`; sound/vibration, pause)
 - Train flow extras: reorder exercises, shuffle the plan (seed), edit or delete a logged set
 - Weekly plans and scheduling
