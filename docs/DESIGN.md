@@ -19,8 +19,9 @@ See the dev-only **Style Guide** screen (Settings → Style Guide in development
 
 ## 2. Palette
 
-Raw colors are in `Palette`; components use the semantic `Colors` (and `TierColors`,
-`AttributeColors`). Never write a hex value outside `theme.ts`.
+Raw colors are in `Palette` (`src/components/palette.ts`, re-exported by `theme.ts`; its own file so
+Node scripts like the app icon build can import it); components use the semantic `Colors` (and `TierColors`,
+`AttributeColors`). Never write a hex value outside `palette.ts` / `theme.ts`.
 
 | Token (`Colors.`) | Hex | Use |
 |---|---|---|
@@ -228,6 +229,24 @@ that must tint), map its roles to `Colors`, and `icons.test.ts` checks it. Keep 
 at 24 dp: 1-cell details disappear on a phone. A tint paints every role in one color, so an icon with
 a large fill (scroll, shield) lists that fill role in `knockout`: tinted, those cells stay empty and
 the outline and details remain (PLAN 5.2; before, the tinted scroll was a solid block on buttons).
+
+### App icon (PLAN 5.6, ADR-042)
+
+The launcher icon is the same kind of grid, 32 × 32 cells, in `scripts/appIcon.ts` (`MOTIF_ROWS`):
+a gold hero in a straddle handstand on a bronze floor (`gold` body, `goldLight` lit left edges and
+two sparkles, `goldDark` shaded right edges) inside a two-cell `rune` ring with a `runeShade` inner
+line around a `stone` disc, on the `night` background. Roles map to `Palette` keys; nothing else.
+
+- `npm run icon:build` renders it with nearest-neighbour cells (whole pixels per cell) to every
+  image app.json uses: `icon.png` 1024 (28 px cells), the adaptive foreground and monochrome
+  1024 (19 px cells: the motif is 64 of 108 dp, inside the 66 dp safe zone), the solid night
+  adaptive background, `splash-icon.png` 1024 transparent (32 px cells) and `favicon.png` 48.
+- The themed (monochrome) icon drops the disc (`MONOCHROME_KNOCKOUT`) so the hero and ring stay
+  separate shapes when Android tints the mask.
+- Preview: `docs/screenshots/5.6-app-icon.png` (icon, circle and squircle masks, themed icon,
+  splash; bottom row the launcher icon at 96 and 48 px and both ×4).
+- Editing: keep the silhouette mirror-symmetric (tested), keep details ≥ 2 cells so they survive
+  48 px, rebuild, look at the preview, commit the PNGs.
 
 ## 7. Motion
 
