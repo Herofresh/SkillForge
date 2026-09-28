@@ -24,6 +24,7 @@ to be a programmer to read or change them.
 | `legs.yaml` | Legs |
 | `dynamic.yaml` | Muscle-up, elbow lever, human flag |
 | `flexibility.yaml` | Flexibility and mobility |
+| `acrobatics.yaml` | Acrobatics: rolls, judo breakfalls, cartwheel to aerial |
 
 ## A complete example
 

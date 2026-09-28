@@ -112,6 +112,10 @@
   preview / production profiles (version source `local`, not used yet), app.json is version 0.1.0 /
   versionCode 1, and `npm run build:apk` (arm64) / `npm run build:apk:universal` (+ x86_64) build a
   release APK locally into `builds/` without an Expo account. README → "Install on your phone".
+- Acrobatics branch (5.5, ADR-041, [PR #25](https://github.com/Herofresh/SkillForge/pull/25)): a 13th branch `acrobatics` with 13 nodes (rolls,
+  judo breakfalls, cartwheel → round-off → legendary aerial), gated on the wall plank / wall
+  handstand, all floor skill work training balance + mobility. **102 nodes.** It is left out of the
+  rank median (`RANK_BRANCHES`) so no existing rank drops.
 - App icon (5.6, ADR-042, [PR #24](https://github.com/Herofresh/SkillForge/pull/24)): an original pixel-art icon (a gold hero in a straddle
   handstand inside a rune ring on the night background) replaces the Expo template icons. It is a
   32 × 32 grid in `scripts/appIcon.ts`; `npm run icon:build` renders icon, adaptive foreground /
@@ -153,9 +157,11 @@
     Compiler lint flags a bare `Date.now()` in a hook's handler.
   - Data: never edit migration 0003; a later set field needs a new additive column and backup
     `schemaVersion` 3 (keep reading 1 and 2).
-  - Not tested: the Maestro flows (not run; `train.yaml` has new timer steps and
-    `train.yaml` / `character.yaml` scroll to `log-set` first), vibration and keep-awake on a real
-    phone. No 5.4 screenshots yet (`train.yaml` takes `5.4-timer`).
+  - E2E: the reviewer ran `smoke`, `train` and `character` on the Pixel 8 Pro AVD (all green;
+    `train.yaml` covers the stopwatch, the rest ending on start, the timer surviving a kill, and
+    the summary's session / exercise times). `docs/screenshots/5.4-timer.png` is from that run.
+    The hold countdown and vibration are only covered by component tests (the first planned
+    exercise is a rep warm-up); keep-awake and vibration are untested on a real phone.
   - Not built (backlog "Timer extras"): sound, pause, a buzz at "go", a background notification at
     the target, timers for rep Trials.
 - **App icon (task 5.6, ADR-042):**
@@ -180,6 +186,19 @@
     the APKs to a GitHub pre-release with their SHA-256.
   - 5.3b: `eas init` writes `extra.eas.projectId` into app.json; `development` needs
     `npx expo install expo-dev-client`; never commit a keystore (`*.jks` is gitignored).
+- **Acrobatics branch (task 5.5, ADR-041):**
+  - Content: `content/progressions/acrobatics.yaml`; sources and chain notes in
+    docs/research/progressions.md → B13. Every ogLevel and trial is inferred (`verify:` on all 13
+    nodes), so the coach review (1.10) should look at this branch too.
+  - Code: `BRANCHES` gained `acrobatics` at the end; `BRANCH_NAMES`, `BranchColors`
+    (`Palette.orchid`) follow. The rank median uses `RANK_BRANCHES` in `character.ts`. The
+    generator needed no change (skill slots; balance/mobility skip the 48 h rest). Tests:
+    `crossBranchGates.test.ts` (gates, shape), `generator.test.ts` (slots, rest),
+    `character.test.ts` (rank median).
+  - Not verified on the emulator: the extra Tree tab / map lane / onboarding tab come from
+    `BRANCHES`; a quick look at the map lane color on a device is worth doing.
+  - Not modelled: dive roll, mae ukemi (forward impact breakfall), handsprings and flips; no mat
+    equipment tag (everything is `floor`, cues ask for a soft surface).
 - **Polish (task 5.2, ADR-038):**
   - Reveals: import `BURST_TITLES` and `useLevelUpKey` from `@/components/ui` for any new
     celebration; DESIGN.md §7 lists where each burst plays. The burst ring is centred on the title.
@@ -581,7 +600,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 
 #### v0.2.0
 - [x] 5.4 Exercise timer (user request 2026-09-28): hold countdown with get-ready, vibration at the target and overtime, stopwatch for other metrics, per-set `durationSec` (additive column, backup version 2), session clock and times in the summary, hold Trials too (ADR-040, [PR #26](https://github.com/Herofresh/SkillForge/pull/26))
-- [ ] 5.5 Acrobatics branch: rolls, breakfalls (judo ukemi), cartwheel progressions
+- [x] 5.5 Acrobatics branch: rolls, judo breakfalls (ukemi) and the cartwheel path to a legendary aerial, gated on the wall handstand; left out of the rank median (ADR-041, [PR #25](https://github.com/Herofresh/SkillForge/pull/25))
 - [x] 5.6 App icon: original pixel-art icon from a code grid (`scripts/appIcon.ts`, `npm run icon:build`): icon, adaptive foreground / background / monochrome, splash, favicon (ADR-042, [PR #24](https://github.com/Herofresh/SkillForge/pull/24))
 - [ ] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub
 

@@ -30,6 +30,8 @@ export const Palette = {
   sky: '#58A6FF',
   amethyst: '#B07CFF',
   sunfire: '#F5A524',
+  /** Acrobatics lane (PLAN 5.5): a pink apart from blood, ember and amethyst. */
+  orchid: '#F28FD0',
 } as const;
 
 export type PaletteColor = keyof typeof Palette;

@@ -250,7 +250,7 @@ Template:
   muscle-up. Whether `alternatives` should satisfy prerequisites is left to PLAN 2.2.
 
 ## ADR-018: XP and character formulas (constants of Phase 2.1 and 2.4)
-- Date: 2026-09-27 · Status: Accepted, amended by ADR-023 (attributes and the balance-warning input)
+- Date: 2026-09-27 · Status: Accepted, amended by ADR-023 (attributes and the balance-warning input) and ADR-041 (rank branches)
 - Context: PLAN 2.1 and 2.4 needed concrete numbers for the planned formulas in `docs/CONTEXT.md`.
   The values are a first balance pass; ADR-008 makes retuning safe (recompute from history).
 - Decision (constants live only in `src/domain/xp.ts` and `src/domain/character.ts`):
@@ -1071,6 +1071,52 @@ Template:
   no vibration at "go", and no timer for rep Trials (not asked for; backlog). A timer that runs
   while the app is in the background vibrates only when the app is open (no notification). XP and
   outcomes ignore durations; they are informational.
+
+## ADR-041: Acrobatics branch: rolls, breakfalls and the cartwheel path; left out of the rank median (PLAN 5.5)
+- Date: 2026-09-28 · Status: Accepted (amends ADR-018's rank rule; the number may need a renumber
+  when rebasing past the timer ADR)
+- Context: the user asked for "more skills like cartwheel and judo rolls, so mobility and their
+  progression". Nothing in the tree covers ground tumbling or falling: `dynamic` holds bar and pole
+  skills, `flexibility` holds joint prep, compression and the bridge. The decision to add a new
+  branch rather than extend those two was made with the request. A new branch touches every
+  `Record<Branch, …>` and the rank, which is the median over all branches (ADR-018).
+- Decision:
+  - **Branch** `acrobatics` ("Acrobatics"), appended to the end of `BRANCHES` so the order of the
+    existing tabs, lanes and generated module stays the same. 13 nodes in
+    `content/progressions/acrobatics.yaml`, all new snake_case ids; no existing id or node changed.
+    Two interleaved chains (ogLevel must not drop as `order` rises): rolls and judo breakfalls
+    (`tuck_rock` [0] → `back_breakfall` → `side_breakfall` → `forward_shoulder_roll` →
+    `backward_shoulder_roll`; `tuck_rock` → `forward_roll` → `backward_roll`) and the cartwheel path
+    (`bunny_hop_cartwheel` → `cartwheel` → `quarter_turn_cartwheel` → `round_off`; `cartwheel` →
+    `one_handed_cartwheel`; both → `aerial_cartwheel`, legendary). Order and gates follow the Judo
+    Canada breakfall guide, the NRG gymnastics teaching progressions and GMB tumbling
+    (docs/research/progressions.md → B13).
+  - **Cross-branch gates** link to existing nodes instead of duplicating them: `wall_plank` (hard)
+    before the bunny-hop cartwheel, `wall_handstand` (hard) before the cartwheel and the round-off,
+    `wrist_prep`, `hollow_hold` and `push_up` as recommended.
+  - **Shape:** every node is `metric: reps`, `equipment: floor` (no mat tag exists; the cues ask
+    for a soft surface), `skill: true`, `straight_arm: false`, with patterns `balance` + `mobility`
+    (+ `explosive` for the round-off and the aerial). No new pattern or attribute: they train
+    balance and mobility through `PATTERN_ATTRIBUTES`. These are not tendon-loading holds, so the
+    ADR-010 safeguards do not apply; safety lives in the cues (chin in, head off the floor, slap at
+    ~45°, learn the aerial with a coach on mats).
+  - **Generator:** no code change. `skill: true` puts the nodes in the skill slots (fresh, early in
+    the session, like handstands), never in strength, core or cool-down slots; `balance` and
+    `mobility` are exempt from the 48 h pattern rest, which suits falls practised every session
+    (Judo Canada). Without an acrobatics goal they compete for the first skill slot like any other
+    skill; a goal puts its frontier there.
+  - **Rank:** `RANK_BRANCHES` (every branch except `acrobatics`) replaces `BRANCHES` in the rank
+    median. A 13th value of 0 for most people would lower the median of 12 (mean of the 6th and
+    7th values) to the 6th value, so adding the branch could have dropped an existing user's rank.
+    Acrobatics still pays into attributes and the radar.
+  - **Color:** `BranchColors.acrobatics` = new `Palette.orchid` `#F28FD0` (a pink apart from blood,
+    ember and amethyst), contrast-tested on `surface` and `background` like every lane.
+  - **Standards:** OG2 has no tumbling chart and no source gives rep standards, so every ogLevel
+    and trial is inferred and carries a `verify:` note (coach review, PLAN 1.10).
+- Consequences: 102 nodes. The onboarding goal picker, the Tree tab and the tree map pick up the
+  branch from `BRANCHES` (one more tab, one more lane). The dive roll (springboard and mats in the
+  sources), mae ukemi, handsprings and flips are not modelled. If the rank should count acrobatics
+  after all, that is a product decision and a one-line change to `RANK_BRANCHES`.
 
 ## ADR-042: App icon as a code-defined pixel grid rendered by a script (PLAN 5.6)
 - Date: 2026-09-28 · Status: Accepted (extends ADR-030)

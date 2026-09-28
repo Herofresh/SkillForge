@@ -79,6 +79,26 @@ describe('cross-branch gates', () => {
     );
   });
 
+  it('cartwheels build on the wall handstand, the round-off on the quarter-turn cartwheel', () => {
+    expect(directPrerequisites('bunny_hop_cartwheel', 'hard')).toContain('wall_plank');
+    expect(directPrerequisites('cartwheel', 'hard')).toEqual(
+      expect.arrayContaining(['bunny_hop_cartwheel', 'wall_handstand']),
+    );
+    expect(directPrerequisites('round_off', 'hard')).toEqual(
+      expect.arrayContaining(['quarter_turn_cartwheel', 'wall_handstand']),
+    );
+    expect(directPrerequisites('aerial_cartwheel', 'hard')).toEqual(
+      expect.arrayContaining(['round_off', 'one_handed_cartwheel']),
+    );
+  });
+
+  it('judo breakfalls go back, side, then the rolling breakfall; rolls start from the tuck rock', () => {
+    expect(directPrerequisites('back_breakfall', 'hard')).toContain('tuck_rock');
+    expect(directPrerequisites('side_breakfall', 'hard')).toContain('back_breakfall');
+    expect(directPrerequisites('forward_shoulder_roll', 'hard')).toContain('side_breakfall');
+    expect(allPrerequisites('backward_roll', 'hard')).toContain('tuck_rock');
+  });
+
   it('pistol squat needs a full squat and the Bulgarian split squat', () => {
     const gates = allPrerequisites('pistol_squat', 'hard');
     expect(gates).toContain('deep_squat');
@@ -109,6 +129,28 @@ describe('straight-arm flags (ADR-010)', () => {
     ).map((n) => n.id);
     // Handstand presses use straight arms but are balance skills, not tendon-loading holds.
     expect(unflagged).toEqual(['wall_straddle_press_eccentric', 'straddle_press_to_handstand']);
+  });
+});
+
+describe('acrobatics branch (PLAN 5.5, ADR-041)', () => {
+  const acrobatics = ALL_NODES.filter((n) => n.branch === 'acrobatics');
+  const recoveryFree: readonly Pattern[] = ['balance', 'mobility', 'explosive'];
+
+  it('has the rolls, breakfalls and the cartwheel path up to a legendary aerial', () => {
+    expect(acrobatics.map((n) => n.id)).toEqual(
+      expect.arrayContaining(['tuck_rock', 'forward_roll', 'back_breakfall', 'cartwheel']),
+    );
+    expect(acrobatics.filter((n) => n.legendary).map((n) => n.id)).toEqual(['aerial_cartwheel']);
+    expect(acrobatics.find((n) => n.ogLevel === 0)?.id).toBe('tuck_rock');
+  });
+
+  it('is skill work on the floor, not straight-arm, and never trips the 48 h pattern rest', () => {
+    for (const n of acrobatics) {
+      expect(n.isSkill).toBe(true);
+      expect(n.straightArm).toBe(false);
+      expect(n.equipment).toEqual([['floor']]);
+      expect(n.patterns.every((p) => recoveryFree.includes(p))).toBe(true);
+    }
   });
 });
 

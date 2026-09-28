@@ -142,6 +142,15 @@ export function branchOgLevels(
   return levels;
 }
 
+/**
+ * Branches whose peak ogLevel counts towards the rank median: every branch except `acrobatics`
+ * (ADR-041). Acrobatics is an optional side path; counting it would add a 13th value (0 for most
+ * people) and could lower an existing user's rank just because the branch was added.
+ */
+export const RANK_BRANCHES: readonly Branch[] = BRANCHES.filter(
+  (branch) => branch !== 'acrobatics',
+);
+
 export function rankForMedianOgLevel(medianOgLevel: number): RankTitle {
   const match = RANK_MIN_MEDIAN_OG_LEVEL.find(({ min }) => medianOgLevel >= min);
   return match?.rank ?? 'Novice';
@@ -159,7 +168,7 @@ export interface Character {
   attributes: AttributeValues;
   /** Highest proficient ogLevel per attribute (`attributePeakOgLevels`); input of the balance warning. */
   peakOgLevels: AttributeValues;
-  /** Median over all 12 branches of the branch's highest proficient ogLevel. */
+  /** Median over the `RANK_BRANCHES` of the branch's highest proficient ogLevel. */
   medianOgLevel: number;
   rank: RankTitle;
   pushPullWarning: boolean;
@@ -172,7 +181,7 @@ export function computeCharacter(
 ): Character {
   const branchLevels = branchOgLevels(nodes, progress);
   const peakOgLevels = attributePeakOgLevels(nodes, progress);
-  const medianOgLevel = median(BRANCHES.map((branch) => branchLevels[branch]));
+  const medianOgLevel = median(RANK_BRANCHES.map((branch) => branchLevels[branch]));
   return {
     totalXp,
     level: characterLevel(totalXp),

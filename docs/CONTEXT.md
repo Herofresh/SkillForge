@@ -196,7 +196,7 @@ src/
     fonts.ts            FONT_ASSETS for useFonts (keys = FontFamily names)
     NodeRow.tsx         a node as a list row: icon, name, tier chip, OG level, straight-arm tag, status
     onboarding/OnboardingScaffold.tsx  step bar "STEP n / 5", title, scrolling body, Back/Skip/Next footer
-    BranchTabs.tsx      the 12 branches as horizontal pixel tabs (goal picker, Tree tab)
+    BranchTabs.tsx      the 13 branches as horizontal pixel tabs (goal picker, Tree tab)
     SafeguardWarningList.tsx  WarningBanner per SafeguardWarning + useAcknowledgements (ADR-023)
     stackHeader.ts      stackHeaderOptions(title) for pushed stack screens
     trial/              useTrialAttempt (warnings, results, log) + TrialSetsPanel / TrialOutcome,
@@ -288,7 +288,7 @@ jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
 `progressionFormat.ts`, check with `validate.ts`) → `progressions.generated.ts` + review sheet → app
 imports `ALL_NODES` → at runtime `applyOverlay(ALL_NODES, userOverlay)` gives the user's tree.
 
-**Dataset (89 nodes, all `review.status: draft`):**
+**Dataset (102 nodes, all `review.status: draft`):**
 
 | Branch | Nodes | Branch | Nodes | Branch | Nodes |
 |---|---|---|---|---|---|
@@ -296,8 +296,13 @@ imports `ALL_NODES` → at runtime `applyOverlay(ALL_NODES, userOverlay)` gives 
 | `v_push` | 9 | `back_lever` | 7 | `legs` | 8 |
 | `v_pull` | 9 | `planche` | 6 | `dynamic` | 8 |
 | `h_pull` | 6 | `handstand` | 8 | `flexibility` | 5 |
+| `acrobatics` | 13 | | | | |
 
-The 88 manifest nodes plus `straight_bar_dip` (Home dip, ADR-017). Content checks beyond the validator
+The 88 manifest nodes plus `straight_bar_dip` (Home dip, ADR-017) and the 13-node **acrobatics**
+branch (rolls, judo breakfalls, cartwheel → round-off → legendary aerial; PLAN 5.5, ADR-041). All
+acrobatics nodes are `skill: true` floor work with only `balance`/`mobility`(/`explosive`)
+patterns, so the generator puts them in skill slots and the 48 h pattern rest never holds them back.
+Content checks beyond the validator
 (cross-branch gates, straight-arm flags, a Home path per pattern) are in
 `src/data/skills/crossBranchGates.test.ts`. With the Home profile only `parallel_bar_dip` (dip bars),
 `iron_cross` (rings) and the three human flags (pole) are out of reach.
@@ -352,6 +357,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Review status** | `draft` or `coach_reviewed`, per node, with free-text `review.notes`. |
 | **Verify note** | A node's `verify:` text: something still uncertain (the `TODO(verify)` flag, ⚠ on the review sheet). |
 | **Branch** | A progression family, e.g. `planche` or `v_pull`. Nodes in a branch form a chain ordered by `chainOrder`. |
+| **Acrobatics** | The ground tumbling and safe-falling branch (rolls, judo breakfalls / ukemi, cartwheel path). Trains balance and mobility, sits in skill slots, and does not count towards the rank median (ADR-041). |
 | **Prerequisite** | An edge from another node that must reach `minLevel`. `hard` edges lock the node; `recommended` edges only show a warning. |
 | **ogLevel** | Cross-branch difficulty from 0 to 17, taken from the Overcoming Gravity 2 charts (ADR-007). 0 = foundation exercise below OG2 level 1 (ADR-016). |
 | **Tier** | Beginner 0–5 · Intermediate 6–8 · Advanced 9–12 · Elite 13+ (derived by `tierForOgLevel`). |
@@ -431,7 +437,8 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
   pull + core · squat, hinge → legs · core → core · balance → balance · mobility → mobility ·
   explosive → nothing. Example: tuck planche (OG 5) at level 5 adds 2.25 × 5 = 11.25 to push and core.
 - **Attribute peaks:** highest ogLevel of a proficient node that trains the attribute (same mapping).
-- **Rank** from the median over the 12 branches of each branch's highest proficient ogLevel:
+- **Rank** from the median over the 12 `RANK_BRANCHES` (every branch except `acrobatics`, ADR-041)
+  of each branch's highest proficient ogLevel:
   Novice < 2 ≤ Apprentice < 6 ≤ Adept < 9 ≤ Master < 13 ≤ Legend.
 - **Balance warning:** |push peak − pull peak| > 2 OG levels.
 
