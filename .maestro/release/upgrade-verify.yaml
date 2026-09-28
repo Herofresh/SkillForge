@@ -19,9 +19,10 @@ name: Upgrade check 2 - data survives the update
 - assertVisible:
     id: 'hero-name'
     text: 'Aria'
-- assertNotVisible:
+# The seed's Pull-up test-out earns 40 XP on v0.1.0; same formulas, so the same total after update.
+- assertVisible:
     id: 'character-total-xp'
-    text: '0 XP earned in total'
+    text: '40 XP earned in total'
 - scrollUntilVisible:
     element:
       id: 'goal-pull_up'
@@ -32,4 +33,4 @@ name: Upgrade check 2 - data survives the update
       id: 'recent-session-0'
     direction: DOWN
     timeout: 30000
-- takeScreenshot: docs/screenshots/5.7-upgrade-after
+- takeScreenshot: 5.7-upgrade-after

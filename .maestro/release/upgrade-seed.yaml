@@ -83,4 +83,4 @@ name: Upgrade check 1 - seed data on the previous release
 - assertNotVisible:
     id: 'character-total-xp'
     text: '0 XP earned in total'
-- takeScreenshot: docs/screenshots/5.7-upgrade-before
+- takeScreenshot: 5.7-upgrade-before

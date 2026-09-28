@@ -8,6 +8,8 @@
  * 2. Writes android/local.properties from ANDROID_HOME (or the default SDK location).
  * 3. Runs `gradlew assembleRelease` for the chosen ABIs (signed with the debug keystore).
  * 4. Copies the APK to builds/ with a versioned name and prints its SHA-256.
+ * 5. Checks the signer with apksigner: a different key than the published releases' would stop
+ *    phones from updating without an uninstall (and data loss), so the build fails (ADR-043).
  *
  * Run through tsx (it imports the tested pure module `buildApkConfig.ts`).
  */
@@ -18,6 +20,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  readdirSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
@@ -29,12 +32,15 @@ import {
   GRADLE_APK_PATH,
   PREBUILD_PROTECTED_FILES,
   apkFileName,
+  apksignerPath,
   appVersion,
   gradleCommand,
   localPropertiesContent,
   parseBuildArgs,
+  parseSignerDigests,
   prebuildArgs,
   resolveSdkDir,
+  signerProblem,
 } from './buildApkConfig';
 
 // npm run always starts scripts in the package root.
@@ -89,7 +95,7 @@ function prebuild(clean: boolean): void {
   }
 }
 
-function writeLocalProperties(): void {
+function writeLocalProperties(): string {
   const sdkDir = resolveSdkDir(process.env, process.platform, homedir());
   if (!sdkDir || !existsSync(sdkDir)) {
     throw new Error(
@@ -98,6 +104,28 @@ function writeLocalProperties(): void {
   }
   writeFileSync(join(ANDROID_DIR, 'local.properties'), localPropertiesContent(sdkDir));
   console.log(`\nAndroid SDK: ${sdkDir}`);
+  return sdkDir;
+}
+
+/** Fails the build when the APK isn't signed with the published releases' key (ADR-043). */
+function checkSigner(sdkDir: string, apk: string): void {
+  const buildTools = join(sdkDir, 'build-tools');
+  const versions = existsSync(buildTools) ? readdirSync(buildTools) : [];
+  const apksigner = apksignerPath(sdkDir, versions, process.platform);
+  if (!apksigner || !existsSync(apksigner)) {
+    throw new Error(`apksigner not found under ${buildTools}; install the Android build-tools`);
+  }
+  // One quoted command string with a shell (the .bat needs one on Windows); both are our paths.
+  const result = spawnSync(`"${apksigner}" verify --print-certs "${apk}"`, {
+    encoding: 'utf8',
+    shell: true,
+  });
+  if (result.status !== 0) {
+    throw new Error(`apksigner verify failed:\n${result.stderr || result.stdout}`);
+  }
+  const problem = signerProblem(parseSignerDigests(result.stdout));
+  if (problem) throw new Error(`Signer check: ${problem}`);
+  console.log('Signer:  the release key (updates over earlier installs keep their data)');
 }
 
 function sha256(path: string): string {
@@ -124,7 +152,7 @@ function main(): void {
   } else {
     prebuild(options.clean);
   }
-  writeLocalProperties();
+  const sdkDir = writeLocalProperties();
 
   const gradle = gradleCommand(process.platform, options.abis);
   // A full path: cmd.exe doesn't reliably find a .bat in the spawn cwd.
@@ -143,6 +171,7 @@ function main(): void {
   const sizeMb = (statSync(target).size / (1024 * 1024)).toFixed(1);
   console.log(`\nAPK:     ${target} (${sizeMb} MB)`);
   console.log(`SHA-256: ${sha256(target)}`);
+  checkSigner(sdkDir, target);
   console.log('Signed with the debug keystore: fine for sideloading, not for Play (PLAN 5.3b).');
 }
 
