@@ -128,7 +128,7 @@
   `schemaVersion` 2, version 1 still imports). Logged sets read "8 reps · 0:42"; the header shows the
   session clock; summary / past session show the session time and the time per exercise. Hold
   Trials have a timer per set.
-- Live-session edits (5.9, ADR-045, [PR #PRNUM](https://github.com/Herofresh/SkillForge/pull/PRNUM)): tap a logged set's line to change it
+- Live-session edits (5.9, ADR-045, [PR #31](https://github.com/Herofresh/SkillForge/pull/31)): tap a logged set's line to change it
   (stepper, Save / Partial / Failed against its own prescription, its time kept) or delete it
   (confirmed; later sets move up, `setIndex` stays dense). "Reorder" on the session list shows
   Up / Down per exercise; a strength pair moves as one. Pure functions in `train.ts`, the draft is
@@ -622,7 +622,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [ ] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub
 
 #### v0.3.0
-- [x] 5.9 Edit/delete a logged set, reorder exercises in the live session (ADR-045, [PR #PRNUM](https://github.com/Herofresh/SkillForge/pull/PRNUM))
+- [x] 5.9 Edit/delete a logged set, reorder exercises in the live session (ADR-045, [PR #31](https://github.com/Herofresh/SkillForge/pull/31))
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
