@@ -14,6 +14,7 @@ const TEXT_PAIRS: readonly [string, string, string][] = [
   ['gold', Colors.gold, Colors.surfaceRaised],
   ['rune', Colors.rune, Colors.surface],
   ['arcane', Colors.arcane, Colors.surface],
+  ['arcane', Colors.arcane, Colors.surfaceRaised],
   ['ember', Colors.ember, Colors.surface],
   ['danger', Colors.danger, Colors.surface],
   ['danger', Colors.danger, Colors.surfaceRaised],
@@ -25,6 +26,7 @@ const TEXT_PAIRS: readonly [string, string, string][] = [
     [`tile ${state} textMuted`, Colors.textMuted, frame.fill] as [string, string, string],
     [`tile ${state} rune`, Colors.rune, frame.fill] as [string, string, string],
     [`tile ${state} gold`, Colors.gold, frame.fill] as [string, string, string],
+    [`tile ${state} arcane`, Colors.arcane, frame.fill] as [string, string, string],
   ]),
   ...Object.entries(AttributeColors).map(
     ([name, color]) => [`attribute ${name}`, color, Colors.surface] as [string, string, string],

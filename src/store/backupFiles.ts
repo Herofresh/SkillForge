@@ -10,7 +10,7 @@ import * as Sharing from 'expo-sharing';
 
 import { BACKUP_MIME_TYPE } from '@/domain/backup';
 
-import type { BackupFiles } from './appStore';
+import type { BackupFiles, ShareOptions } from './appStore';
 
 /** Folder in the app's document directory for the safety copies written before an import. */
 export const SAFETY_COPY_FOLDER = 'backups';
@@ -21,15 +21,15 @@ export const SAFETY_COPY_FOLDER = 'backups';
  */
 const PICKABLE_TYPES = '*/*';
 
-async function share(fileName: string, text: string): Promise<void> {
+async function share(fileName: string, text: string, options: ShareOptions = {}): Promise<void> {
   if (!(await Sharing.isAvailableAsync())) {
     throw new Error('Sharing files is not available on this device');
   }
   const file = new File(Paths.cache, fileName);
   file.write(text);
   await Sharing.shareAsync(file.uri, {
-    mimeType: BACKUP_MIME_TYPE,
-    dialogTitle: 'Save your SkillForge backup',
+    mimeType: options.mimeType ?? BACKUP_MIME_TYPE,
+    dialogTitle: options.dialogTitle ?? 'Save your SkillForge backup',
   });
 }
 

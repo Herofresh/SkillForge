@@ -156,3 +156,59 @@ describe('exportOverlay / importOverlay', () => {
     );
   });
 });
+
+describe('straight-arm safeguard rule for overlays (ADR-036)', () => {
+  // A built-in straight-arm node outside the three straight-arm branches (like manna, human flag).
+  const flagBase = [
+    ...base,
+    makeNode({
+      id: 'tuck_flag',
+      branch: 'dynamic',
+      straightArm: true,
+      isSkill: true,
+      metric: 'hold_s',
+      workingRange: { min: 5, max: 10 },
+      trial: { sets: 3, target: 10 },
+      patterns: ['straight_arm_pull'],
+    }),
+  ];
+
+  it('rejects clearing straight_arm on a built-in straight-arm node', () => {
+    const { nodes, issues } = applyOverlay(
+      flagBase,
+      overlay({ edited: { tuck_flag: { straightArm: false } } }),
+    );
+    expect(nodes).toEqual(flagBase);
+    expect(issues.map(formatIssue)).toEqual([
+      'overlay: tuck_flag: is a built-in straight-arm skill: straight_arm stays true so its tendon safeguards apply',
+    ]);
+  });
+
+  it('rejects moving a built-in straight-arm node to another branch', () => {
+    const { issues } = applyOverlay(
+      flagBase,
+      overlay({ edited: { tuck_flag: { branch: 'core', chainOrder: 99 } } }),
+    );
+    expect(issues.map(formatIssue)).toEqual([
+      "overlay: tuck_flag: is a built-in straight-arm skill and stays in the 'dynamic' branch",
+    ]);
+  });
+
+  it('allows other edits and keeping the flag and branch as they are', () => {
+    const { issues, nodes } = applyOverlay(
+      flagBase,
+      overlay({
+        edited: {
+          tuck_flag: { straightArm: true, branch: 'dynamic', trial: { sets: 3, target: 8 } },
+        },
+      }),
+    );
+    expect(issues).toEqual([]);
+    expect(byId(nodes, 'tuck_flag')).toMatchObject({ straightArm: true, branch: 'dynamic' });
+  });
+
+  it('lets a non-straight-arm built-in node become straight-arm', () => {
+    const { issues } = applyOverlay(base, overlay({ edited: { pull_up: { straightArm: true } } }));
+    expect(issues).toEqual([]);
+  });
+});

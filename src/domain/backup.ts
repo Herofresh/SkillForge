@@ -65,12 +65,16 @@ export interface BackupParse {
 }
 
 /** A file name like `skillforge-backup-2026-09-27T08-30-00Z.json` (no `:` for Android/Windows). */
-export function backupFileName(exportedAt: number, prefix: string = BACKUP_FORMAT): string {
+export function backupFileName(
+  exportedAt: number,
+  prefix: string = BACKUP_FORMAT,
+  extension = 'json',
+): string {
   const stamp = new Date(exportedAt)
     .toISOString()
     .replace(/\.\d{3}Z$/, 'Z')
     .replace(/:/g, '-');
-  return `${prefix}-${stamp}.json`;
+  return `${prefix}-${stamp}.${extension}`;
 }
 
 function performanceToRaw({ value, reps }: SetPerformance): SetPerformance {

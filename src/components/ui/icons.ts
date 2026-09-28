@@ -258,6 +258,23 @@ export const ICONS = {
     colors: { '#': Colors.danger },
   },
   // Tab bar icons: one role each, so a tint recolors them cleanly.
+  quill: {
+    rows: [
+      '..........##',
+      '.........#*#',
+      '........#*+#',
+      '.......#*+#.',
+      '......#*+#..',
+      '.....#*+#...',
+      '....#*+#....',
+      '...#++#.....',
+      '..#+##......',
+      '..##........',
+      '.o..........',
+      'o...........',
+    ],
+    colors: { '#': Colors.text, '*': Colors.goldLight, '+': Colors.arcane, o: Colors.steel },
+  },
   tree: {
     rows: [
       '............',

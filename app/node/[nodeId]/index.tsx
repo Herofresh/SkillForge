@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AttributeChips } from '@/components/node/AttributeChips';
+import { CustomizeSection } from '@/components/node/CustomizeSection';
 import { DetailSection } from '@/components/node/DetailSection';
 import { NodeHeader } from '@/components/node/NodeHeader';
 import { NodeHistoryList } from '@/components/node/NodeHistoryList';
@@ -13,6 +14,7 @@ import { Spacing } from '@/components/theme';
 import { EmptyState, PixelButton, PixelText, Screen } from '@/components/ui';
 import { formatShortDate, formatTrial, formatWorkingRange } from '@/domain/format';
 import { MAX_GOALS } from '@/domain/onboarding';
+import { customizationOf } from '@/domain/overlayEdit';
 import { nodeDetail, type NodeDetail } from '@/domain/treeView';
 import type { ReviewStatus } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
@@ -25,7 +27,8 @@ const REVIEW_TEXT: Readonly<Record<ReviewStatus, string>> = {
 /**
  * The node detail (PLAN 4.3): everything about one skill, from the user's tree with the overlay
  * applied (`state.nodes`), and its actions: set/remove goal, attempt the Trial, and "unlock anyway"
- * for a locked node (ADR-023: advisory, acknowledged, never blocked).
+ * for a locked node (ADR-023: advisory, acknowledged, never blocked), and "Your tree": edit, add after,
+ * reset, hide or delete (PLAN 4.7, ADR-036).
  */
 export default function NodeDetailScreen() {
   const { nodeId } = useLocalSearchParams<{ nodeId: string }>();
@@ -54,6 +57,11 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
   const trialPassedAt = useAppStore(
     (state) => state.engine.progress[detail.tile.node.id]?.trialPassedAt,
   );
+  const overlay = useAppStore((state) => state.overlay);
+  const customization = useMemo(
+    () => customizationOf(overlay, detail.tile.node.id),
+    [overlay, detail.tile.node.id],
+  );
   const [goalsFull, setGoalsFull] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
   const [unlockBurstKey, setUnlockBurstKey] = useState<number | undefined>();
@@ -75,7 +83,13 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
     <>
       <Stack.Screen options={stackHeaderOptions(node.name)} />
       <Screen testID="node-detail">
-        <NodeHeader tile={tile} unlockBurstKey={unlockBurstKey} />
+        <NodeHeader
+          tile={tile}
+          unlockBurstKey={unlockBurstKey}
+          custom={
+            customization === 'added' || customization === 'edited' ? customization : undefined
+          }
+        />
 
         <DetailSection title="Actions" icon="sword" variant="raised" testID="detail-actions">
           <PixelButton
@@ -162,6 +176,8 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
         <DetailSection title="History" icon="scroll" testID="detail-history">
           <NodeHistoryList history={history} metric={node.metric} />
         </DetailSection>
+
+        <CustomizeSection node={node} customization={customization} />
 
         <DetailSection title="Review" icon="rune" testID="detail-review">
           <PixelText variant="small">{REVIEW_TEXT[node.review.status]}</PixelText>

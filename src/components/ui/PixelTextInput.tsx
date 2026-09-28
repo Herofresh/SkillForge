@@ -16,6 +16,8 @@ type Props = Pick<
   | 'autoCapitalize'
   | 'returnKeyType'
   | 'onSubmitEditing'
+  | 'multiline'
+  | 'autoCorrect'
 > & {
   /** Caps label above the field; also the screen-reader label. */
   label: string;
@@ -23,6 +25,8 @@ type Props = Pick<
   accessibilityLabel?: string;
   testID?: string;
 };
+
+const MULTILINE_HEIGHT = 6 * TOUCH_TARGET - 2 * Spacing.xs;
 
 /**
  * A text field in a stone pixel frame that lights up gold while focused. Body font, at least 48 dp
@@ -45,7 +49,7 @@ export function PixelTextInput({ label, accessibilityLabel, testID, ...inputProp
           placeholderTextColor={Colors.textMuted}
           selectionColor={Colors.gold}
           cursorColor={Colors.gold}
-          style={styles.input}
+          style={[styles.input, inputProps.multiline && styles.multiline]}
         />
       </PixelFrame>
     </View>
@@ -62,5 +66,11 @@ const styles = StyleSheet.create({
     minHeight: TOUCH_TARGET - 2 * Spacing.xs,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
+  },
+  /** A few lines of pasted text (e.g. shared progressions), scrolling inside the field. */
+  multiline: {
+    minHeight: MULTILINE_HEIGHT,
+    maxHeight: MULTILINE_HEIGHT,
+    textAlignVertical: 'top',
   },
 });

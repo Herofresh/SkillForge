@@ -871,3 +871,54 @@ Template:
 - Consequences: the undo button disappears after an app restart (backlog: pick a safety copy from
   `documents/backups/`). A radar with one trained attribute is a line; the markers and bars carry
   it. `PlaceholderScreen` is gone (no placeholder tabs left).
+
+## ADR-036: In-app node editor on the overlay, straight-arm rule for overlays, merge-on-import (PLAN 4.7, 4.8)
+- Date: 2026-09-28 · Status: Accepted
+- Context: Users can change the tree in the app (standards, prerequisites, equipment, cues, trained
+  attributes), add their own exercises, hide built-in ones, and share their changes. The overlay
+  (ADR-016) and `saveOverlay` (ADR-028) already existed; the PR #4 review left a backlog question:
+  an overlay could set `straight_arm: false` on a built-in straight-arm node outside the three
+  straight-arm branches (e.g. `german_hang`, `manna`, the human flags) or move it to another branch,
+  which would silently drop its ADR-010 tendon safeguards (AGENT.md §5).
+- Decision:
+  - **Straight-arm rule (the backlog item):** `applyOverlay` rejects an edit that clears
+    `straightArm` on a built-in straight-arm node or changes its `branch`
+    (`straightArmEditIssues`). It is a validation issue like a cycle, so such an overlay is never
+    saved or imported. Making a non-straight-arm node straight-arm, or a user node straight-arm, stays
+    allowed; user nodes in the straight-arm branches must be straight-arm (validator), and a new user
+    node is straight-arm when the node above it is. The safeguards themselves stay advisory (ADR-023).
+  - **Draft model:** the editor edits a whole `ExerciseNode` draft through pure functions
+    (`src/domain/nodeEditor.ts`). A built-in draft starts from the built-in node plus the user's edit
+    (not the hidden-node rerouting of the merged tree, so hiding a node never leaks into another
+    node's edit). Saving stores only the fields that differ from the built-in node
+    (`nodeEditFor`); an edit equal to the default removes itself. User nodes are stored whole.
+  - **Live validation:** every change runs `applyOverlay` on the overlay with the draft
+    (`nodeDraftIssues`); issues show inline in the section they are about (`issueSection` maps the
+    validator's wording to name / position / standards / prerequisites / equipment / trains / other)
+    and Save stays disabled while there are any. The store's `saveOverlay` still refuses a broken tree.
+    These are data-integrity errors, not safeguards, so disabling Save doesn't conflict with ADR-023.
+  - **What is editable:** built-in nodes: working range, Trial (sets, target, reps), prerequisites
+    (node, required/recommended, level), equipment options, cues, trained attributes (Auto = derived
+    from patterns). User nodes also: name, metric (resets the standards to `DEFAULT_STANDARDS`),
+    position ("comes after", `chainOrder` between the neighbours, OG level clamped between theirs),
+    OG level and the straight-arm flag. Patterns, skill flag and equipment defaults come from the node
+    above. Not editable: ids (a new node's id is `user_` + its name, made unique, fixed on save),
+    patterns, alternatives, regressions, sources.
+  - **Custom exercises start without prerequisites**; the user picks them (the flow and tests add
+    one explicitly). Hide is for built-in nodes (their dependents inherit their prerequisites, their
+    history counts again when shown); user nodes are deleted instead. "Reset to default" removes the
+    node's edit and hidden flag. Goals on a hidden/deleted node are kept (ignored while it is gone).
+  - **Badges:** added and edited nodes carry a "Custom" tag (arcane quill) on the tile and the
+    detail header; `Frames.arcane` and the `quill` icon mark the user's own changes everywhere.
+  - **Sharing (4.8):** "Share my progressions" writes `exportOverlay` YAML to
+    `skillforge-progressions-<time>.yaml` and hands it to the share sheet as `text/plain` (chat and
+    mail apps accept it). **Import merges** into the user's overlay instead of replacing it: the
+    shared user nodes and edits win per node id, hidden lists are joined, everything else of the
+    user's stays (`mergeOverlays`). The preview lists every entry (added / changed fields / hidden,
+    "replaces yours") and the merged tree's issues; Import is offered only when there are none. Text
+    comes from a paste field or the file picker. "Suggest to project" explains that the YAML goes
+    into a GitHub issue or PR and links to `content/progressions/README.md`.
+- Consequences: a user can't weaken a built-in straight-arm node's safeguards through the overlay;
+  a stored overlay from before this rule that does so now fails `applyOverlay` and falls back to the
+  built-in tree (`overlayIssues`, shown on My progressions). There is no undo for an import beyond
+  resetting entries one by one (a backup export before importing is the safety net).
