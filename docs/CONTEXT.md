@@ -83,6 +83,9 @@ scripts/
   lockfile.ts           npm run lockfile:check|fix (plain Node, ADR-029)
   e2e.ts                npm run e2e: finds Maestro (MAESTRO_BIN, ~/.maestro install, PATH), sets
                         MAESTRO_CLI_NO_ANALYTICS, runs .maestro/ or the flows passed after `--`
+  buildApk.ts           npm run build:apk[:universal] (tsx, ADR-039): prebuild, restore package.json,
+                        local.properties, gradlew assembleRelease, copy to builds/ + SHA-256
+  buildApkConfig.ts     its pure parts (args, ABIs, SDK path, APK name, commands), Jest-tested
 src/
   domain/               PURE TS game rules. No React/Expo/DB imports (ADR-009)
     types.ts            single source of shared types (nodes, issues, overlay, logged sets, progress)
@@ -233,6 +236,11 @@ docs/                   PLAN, DECISIONS, CONTEXT, DESIGN (visual language), rese
   research/node-manifest.md  planned MVP nodes (ids, order, OG level, prerequisites)
   review/progression-matrix.md  GENERATED coach review sheet
 .github/workflows/ci.yml  CI (Node 24): typecheck, lint, format:check, test, progressions:check
+app.json                Expo config: version + android.versionCode (the one version source,
+                        ADR-039), package at.skillforge.app, adaptive icon, plugins
+eas.json                EAS profiles development / preview (APK) / production (AAB), version
+                        source local; not used until 5.3b (Expo login)
+android/, builds/       GENERATED, gitignored: prebuild's native project and the copied APKs
 drizzle.config.ts       drizzle-kit config (sqlite, expo driver, schema -> src/db/migrations)
 babel.config.js         babel-preset-expo + inline-import for .sql (also used by Jest)
 metro.config.js         Expo default + `sql` source extension
@@ -506,6 +514,8 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 | `npm run lockfile:check` | `npm ci --dry-run` with the pinned npm on a clean copy of package.json + package-lock.json: fails if CI's `npm ci` would reject the lockfile (ADR-029). Also runs in CI. |
 | `npm run lockfile:fix` | Re-resolve package-lock.json with the pinned npm (`install --package-lock-only`), then run the check. Run after every `npx expo install` / `npm install`. |
 | `npm run e2e` | Maestro E2E flows in `.maestro/` against Expo Go on a running emulator (see "E2E tests"); `npm run e2e -- .maestro/tree.yaml` runs one flow |
+| `npm run build:apk` | Local release APK for phones (arm64-v8a) in `builds/`, no Expo account (ADR-039). `-- --clean` recreates android/, `-- --skip-prebuild` only runs Gradle, `-- --abis=a,b` picks ABIs. ~14 min cold, a few minutes incremental. |
+| `npm run build:apk:universal` | The same with arm64-v8a + x86_64, so it also runs on the x86_64 emulator |
 | `npx expo-doctor` | Checks dependency versions and config against the SDK |
 | `npx expo install <pkg>` | Add a dependency at the SDK-compatible version (prefer it over `npm install`) |
 
@@ -529,7 +539,8 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
       `--package_file=<file>`.
     - Stop the adb server (`adb kill-server`) before updating platform-tools, because a running
       `adb.exe` is locked.
-  - Build APKs with EAS cloud (5.3).
+  - Build APKs locally with `npm run build:apk` (5.3a, ADR-039); it writes `android/local.properties`
+    from `ANDROID_HOME` or this default path. EAS cloud builds are 5.3b.
 - **Maestro** 2.10 is installed at `%USERPROFILE%\.maestro\maestro\bin`. It isn't on PATH;
   `npm run e2e` finds it there (5.2).
 
@@ -616,5 +627,19 @@ build is needed.
   `package.json` `devEngines.packageManager` (a mismatch prints `EBADDEVENGINES`, a warning only).
   After any install run `npm run lockfile:fix`; don't hand-patch the lockfile. The script lives in
   `scripts/lockfile.ts` and runs on plain Node (type stripping), so keep it free of dependencies.
+- **Local APK builds (ADR-039):**
+  - Release APKs are signed with the **debug keystore** (the React Native template's). Fine for
+    sideloading; Play rejects it, and a later release-key APK can't update it in place (uninstall,
+    which wipes the data; export a backup first). The release keystore is 5.3b.
+  - **ABI quirk:** the arm64-only APK installs on the x86_64 emulator but crashes at start with
+    `SoLoaderDSONotFoundError` (libreactnative.so). Not an app bug; use `build:apk:universal` there.
+  - `expo prebuild` rewrites package.json's `android`/`ios` scripts to `expo run:*`. The script
+    restores package.json byte for byte and warns if prebuild changed any other tracked file. Don't
+    run a bare `npx expo prebuild` and commit the result.
+  - Prebuild defaults to recreating android/ (a cold ~14 min Gradle build); the script passes
+    `--no-clean` unless you pass `--clean` (do that after changing app.json plugins or native deps).
+  - Gradle's warnings about hard links / "failed to create a hard link, copying instead" and
+    deprecated features are harmless.
+  - Bump `expo.android.versionCode` in app.json for every APK you hand out (no autoIncrement).
 - **Line endings:** `.gitattributes` forces LF. Git may warn "CRLF will be replaced by LF" once per file;
   that's expected.

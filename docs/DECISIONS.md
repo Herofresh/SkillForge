@@ -994,3 +994,37 @@ Template:
 - Consequences: no new dependency. Haptics were not added (optional; backlog). The editor guard
   covers the edit and new screens (both use `NodeEditorBody`); an Android app kill still drops the
   draft (it lives in screen state).
+
+## ADR-039: EAS build profiles with a local version source, and a local APK script without an Expo account (PLAN 5.3a)
+- Date: 2026-09-28 · Status: Accepted (refines ADR-001)
+- Context: ADR-001 planned installable APKs through EAS cloud builds, which need an Expo account
+  login and a signing-key decision from the user. A local Gradle release build already worked
+  (pre-release `v0.1.0-preview1`), but by hand: prebuild, `local.properties`, Gradle with an ABI
+  list, and undoing prebuild's rewrite of the package.json `android`/`ios` scripts.
+- Decision:
+  - **`eas.json`** is committed now so 5.3b only has to log in: `development` (dev client, internal,
+    APK), `preview` (internal, APK), `production` (app bundle). `cli.appVersionSource` is
+    **`local`**: `expo.version` and `expo.android.versionCode` in `app.json` are the one source of
+    the version, in git and readable by the local script; `remote` would keep the versionCode on
+    EAS servers, which local builds can't read. No `autoIncrement` (it would rewrite app.json on
+    every cloud build); bump `versionCode` by hand for each release.
+  - **App version** `0.1.0` / versionCode `1`, matching the `v0.1.0-preview1` tag (app.json said
+    1.0.0 before).
+  - **`npm run build:apk`** (arm64-v8a, phones) and **`npm run build:apk:universal`** (+ x86_64,
+    the emulator) run `scripts/buildApk.ts` via tsx: `expo prebuild --platform android
+    --no-install --no-clean` with `CI=1`, restore package.json byte for byte and warn about any
+    other tracked file prebuild touched, write `android/local.properties` from `ANDROID_HOME` /
+    `ANDROID_SDK_ROOT` / Android Studio's default path, `gradlew assembleRelease
+    -PreactNativeArchitectures=…`, copy the APK to the gitignored `builds/` as
+    `SkillForge-<version>-vc<code>-<arm64|universal>-<commit>.apk` and print its SHA-256. The pure
+    parts (arguments, ABIs, SDK path, file name, commands) are in `scripts/buildApkConfig.ts` with
+    Jest tests. `--clean` recreates android/ (after plugin or native dependency changes),
+    `--skip-prebuild` runs only Gradle.
+  - **Signing:** release builds are signed with the React Native template's debug keystore. Fine
+    for sideloading; not accepted by Play and not a stable identity. A release keystore (or EAS
+    managed credentials) is 5.3b and a user decision; no keystore or secret is committed.
+- Consequences: anyone with the Android SDK and JDK 17 can build an installable APK offline
+  (~14 min cold, a few minutes incremental). An APK signed with the debug key can't be updated in
+  place by a later release-key APK (uninstall first, which deletes the app's data; export a backup
+  first). The `development` profile needs `expo-dev-client` installed before it is used (5.3b).
+  No dependency added.
