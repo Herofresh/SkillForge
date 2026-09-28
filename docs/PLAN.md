@@ -107,9 +107,16 @@
   leaving the progression editor with a changed draft asks "Discard changes?"; the Character
   tab's empty goals / sessions use `EmptyState`; `npm run e2e` finds Maestro itself
   (`scripts/e2e.ts`). Screenshot `docs/screenshots/5.2-*.png`.
+- Build config (5.3a, ADR-039, PR_LINK): a first preview APK is published as the GitHub
+  pre-release `v0.1.0-preview1` (arm64 + universal, debug-signed). `eas.json` has the development /
+  preview / production profiles (version source `local`, not used yet), app.json is version 0.1.0 /
+  versionCode 1, and `npm run build:apk` (arm64) / `npm run build:apk:universal` (+ x86_64) build a
+  release APK locally into `builds/` without an Expo account. README → "Install on your phone".
 
 ## Next up
-1. Phase 5: 5.3 EAS build profile and Android APK.
+1. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
+   `eas init` links the project) and decide the signing key (EAS-managed credentials or an own
+   keystore kept outside git). Then install `expo-dev-client` for the development profile.
 2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -117,6 +124,18 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Build config (task 5.3a, ADR-039):**
+  - `scripts/buildApk.ts` (I/O, runs via tsx) + `scripts/buildApkConfig.ts` (pure, tested in
+    `buildApkConfig.test.ts`). Output `builds/SkillForge-<version>-vc<code>-<arm64|universal>-<commit>.apk`.
+  - Prebuild runs with `--no-clean` (keeps android/ and Gradle's cache); pass `-- --clean` after
+    changing app.json plugins or native dependencies. The script restores package.json (prebuild
+    rewrites the `android`/`ios` scripts) and warns about other tracked changes.
+  - Signed with the debug keystore. The arm64 APK crashes on the x86_64 emulator
+    (`SoLoaderDSONotFoundError`); use the universal one there. See CONTEXT.md → Gotchas.
+  - Releases: bump `expo.android.versionCode` (and `expo.version`) in app.json, build, attach
+    the APKs to a GitHub pre-release with their SHA-256.
+  - 5.3b: `eas init` writes `extra.eas.projectId` into app.json; `development` needs
+    `npx expo install expo-dev-client`; never commit a keystore (`*.jks` is gitignored).
 - **Polish (task 5.2, ADR-038):**
   - Reveals: import `BURST_TITLES` and `useLevelUpKey` from `@/components/ui` for any new
     celebration; DESIGN.md §7 lists where each burst plays. The burst ring is centred on the title.
@@ -512,12 +531,17 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.1 Graph view: dagre layout, SVG, pan/zoom, glowing unlocked edges, legendary silhouettes
   (own layered layout instead of dagre, View-drawn edges; ADR-037, [PR #21](https://github.com/Herofresh/SkillForge/pull/21))
 - [x] 5.2 Animations and polish: one reveal vocabulary (`BURST_TITLES`, `useLevelUpKey`, node-detail LEVEL UP!), tinted icons keep their outline (`knockout`; Export icon back), "Discard changes?" when leaving the editor with a changed draft, consistent empty states, `npm run e2e` without Maestro on PATH (ADR-038, [PR #22](https://github.com/Herofresh/SkillForge/pull/22))
-- [ ] 5.3 EAS build profile and Android APK
+- 5.3 EAS build profile and Android APK, split in two:
+  - [x] 5.3a Build config + local APK script: `eas.json` (development / preview / production, version source local), app.json version 0.1.0 / versionCode 1, `npm run build:apk[:universal]` (ADR-039, PR_LINK)
+  - [ ] 5.3b EAS cloud build + proper release signing (needs the user: Expo account login, keystore decision)
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
   Expo Go. Every UI task in Phase 4 should also add or extend a flow in `.maestro/`.
+- Maestro against the preview/dev build instead of Expo Go (`appId: at.skillforge.app`, install
+  the APK from `npm run build:apk:universal`): no Expo Go dev menu or intro, closer to what users
+  run, and a prerequisite for E2E in CI (5.3a, ADR-039)
 - Backups: "undo" after an app restart (choose one of the safety copies in `documents/backups/`),
   prune old safety copies (4.6 keeps the last import's copy in memory only, ADR-035)
 - Settings extras: replay onboarding, units/preferences once there are any

@@ -5,7 +5,37 @@ SkillForge is a gamified calisthenics progression tracker, built as an RPG-style
 Pick the skills you want to learn. The app generates workouts that train their prerequisites, you earn
 XP for every session, your exercises level up, and harder progressions unlock as you go.
 
-> Status: early development (Phase 0 scaffold). See [docs/PLAN.md](docs/PLAN.md).
+> Status: early development (Phase 5, first preview APK). See [docs/PLAN.md](docs/PLAN.md).
+
+## Install on your phone
+
+SkillForge is Android only for now, and it isn't on the Play Store.
+
+**Download a preview APK.**
+
+1. Open the [Releases](https://github.com/Herofresh/SkillForge/releases) page on your phone and pick
+   the newest pre-release (e.g. `v0.1.0-preview1`).
+2. Download the **arm64** APK. The **universal** APK also runs on the x86_64 Android emulator; it
+   is bigger but works on phones too.
+3. Open the file and allow "Install unknown apps" for your browser or file manager when Android asks.
+   Play Protect may warn about an unknown developer, because preview builds are signed with a
+   development key.
+
+Preview builds are signed with a development key. A later build signed with the real release key
+can't update them in place: you'll have to uninstall first, which deletes the app's data. Export a
+backup first (Settings → Export backup) and import it again afterwards.
+
+**Build it yourself.** You need Node.js 22+, JDK 17 and the Android SDK (Android Studio installs it;
+set `ANDROID_HOME` if it isn't in the default location). No Expo account is needed.
+
+```bash
+npm install
+npm run build:apk             # arm64 APK for phones (the first build takes ~15 min)
+npm run build:apk:universal   # arm64 + x86_64, also runs on the emulator
+```
+
+The APK lands in `builds/` with its SHA-256 printed. Install it with `adb install -r <file>` or copy
+it to the phone.
 
 ## Getting started
 

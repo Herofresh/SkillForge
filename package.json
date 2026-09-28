@@ -68,7 +68,9 @@
     "e2e": "node scripts/e2e.ts",
     "db:generate": "drizzle-kit generate",
     "lockfile:check": "node scripts/lockfile.ts check",
-    "lockfile:fix": "node scripts/lockfile.ts fix"
+    "lockfile:fix": "node scripts/lockfile.ts fix",
+    "build:apk": "tsx scripts/buildApk.ts",
+    "build:apk:universal": "tsx scripts/buildApk.ts --universal"
   },
   "private": true,
   "jest": {
