@@ -6,7 +6,7 @@
 import { DarkTheme, type Theme } from 'expo-router';
 
 import type { TileState } from '@/domain/treeView';
-import type { Attribute, RankTitle, Tier } from '@/domain/types';
+import type { Attribute, Branch, RankTitle, Tier } from '@/domain/types';
 
 /** Raw palette. Contrast pairs are pinned in theme.test.ts and listed in docs/DESIGN.md. */
 export const Palette = {
@@ -189,6 +189,41 @@ export const TileFrames: Readonly<Record<TileState, FrameStyle>> = {
 export const ChainColors = {
   met: Colors.gold,
   unmet: Colors.steelDark,
+} as const;
+
+/**
+ * Branch lane colors on the tree map (PLAN 5.1): warm for push, cool for pull, rune/arcane for the
+ * straight-arm levers, gold light for planche, and the attribute colors for the rest. Used for the
+ * lane's rule line and its caps title (text, contrast-tested on `background` and `surface`).
+ */
+export const BranchColors: Readonly<Record<Branch, string>> = {
+  h_push: Palette.ember,
+  v_push: Palette.sunfire,
+  v_pull: Palette.sky,
+  h_pull: Palette.steel,
+  front_lever: Palette.rune,
+  back_lever: Palette.amethyst,
+  planche: Palette.goldLight,
+  handstand: Palette.parchment,
+  core: Palette.gold,
+  legs: Palette.verdant,
+  dynamic: Palette.bone,
+  flexibility: Palette.arcane,
+};
+
+/**
+ * The tree map (PLAN 5.1): lane bands in stone on the night sky, edges as square pixel lines (gold
+ * with a soft gold glow once met, dull steel before; `ChainColors`).
+ */
+export const MapStyle = {
+  laneFill: Colors.surface,
+  chainWidth: 2 * PIXEL,
+  unmetWidth: PIXEL,
+  /** The glow under a met chain: a wider gold line at low opacity (the only soft edge allowed). */
+  glowWidth: 5 * PIXEL,
+  glowOpacity: 0.3,
+  /** Height of the lane's top rule line. */
+  laneRule: PIXEL,
 } as const;
 
 /** Button looks: frame + text color. */

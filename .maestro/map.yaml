@@ -1,0 +1,93 @@
+# Tree map (PLAN 5.1): switch the Tree tab to Map, zoom and pan it (buttons, a double tap and swipes),
+# focus, open a node from the map and come back, then switch back to Columns (the flow leaves the
+# tab in Columns, which the other flows expect). Prerequisites and run: see smoke.yaml /
+# docs/CONTEXT.md.
+appId: host.exp.exponent
+name: Tree map - switch, zoom, pan, open a node, back to columns
+---
+- openLink: exp://127.0.0.1:8081
+- extendedWaitUntil:
+    visible: 'Tree|Style Guide|Step . / 5|Continue'
+    timeout: 180000
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+- runFlow:
+    when:
+      visible: 'Toggle performance monitor'
+    commands:
+      - back
+- runFlow:
+    when:
+      visible:
+        id: 'styleguide'
+    commands:
+      - back
+- runFlow: subflows/finish-onboarding.yaml
+- tapOn: 'Tree'
+- extendedWaitUntil:
+    visible:
+      id: 'tree-screen'
+    timeout: 20000
+# Switch to the map: it opens on what can be trained (no goals) or the goals.
+- tapOn:
+    id: 'tree-mode-map'
+- extendedWaitUntil:
+    visible:
+      id: 'tree-map'
+    timeout: 20000
+- assertVisible:
+    id: 'map-focus'
+- assertVisible:
+    id: 'map-switch-to-list'
+- takeScreenshot: 5.1-map
+# Zoom out and in with the buttons, pan with swipes, zoom with a double tap, then focus again.
+- tapOn:
+    id: 'map-zoom-out'
+- tapOn:
+    id: 'map-zoom-out'
+- takeScreenshot: 5.1-map-overview
+- tapOn:
+    id: 'map-zoom-in'
+- swipe:
+    start: 70%, 50%
+    end: 30%, 40%
+    duration: 600
+- swipe:
+    start: 30%, 40%
+    end: 70%, 50%
+    duration: 600
+- doubleTapOn:
+    point: 50%, 45%
+- tapOn:
+    id: 'map-focus'
+# Open a node from the map: whichever node the focus shows first (goals or what's trainable
+# depend on earlier flows).
+- extendedWaitUntil:
+    visible:
+      id: 'map-node-.*'
+    timeout: 10000
+- tapOn:
+    id: 'map-node-.*'
+- extendedWaitUntil:
+    visible:
+      id: 'node-detail'
+    timeout: 20000
+- takeScreenshot: 5.1-map-node-detail
+- back
+# Back on the map (the mode is remembered), then back to the columns.
+- extendedWaitUntil:
+    visible:
+      id: 'tree-map'
+    timeout: 20000
+- tapOn:
+    id: 'map-switch-to-list'
+- extendedWaitUntil:
+    visible:
+      id: 'tree-column'
+    timeout: 20000
+- assertVisible: 'Skill Tree'
+- assertNotVisible:
+    id: 'tree-map'

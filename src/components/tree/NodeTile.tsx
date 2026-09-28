@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { formatLevelProgress, formatOgLevel, spokenOgLevel } from '@/domain/format';
+import { formatLevelProgress, formatOgLevel } from '@/domain/format';
 import { tierForOgLevel } from '@/domain/tier';
 import type { TreeTile } from '@/domain/treeView';
 
@@ -10,7 +10,12 @@ import { PixelFrame, PixelIcon, PixelText, TierChip, XPBar } from '../ui';
 
 import { CHAIN_HEIGHT, CHAIN_WIDTH, ChainLink } from './ChainLink';
 import { PrereqChip } from './PrereqChip';
-import { TILE_LOOKS, TRAINED_TILE_STATES } from './tileLook';
+import {
+  TILE_LOOKS,
+  TRAINED_TILE_STATES,
+  tileAccessibilityLabel,
+  tileStateLabel,
+} from './tileLook';
 
 type Props = {
   tile: TreeTile;
@@ -43,22 +48,11 @@ export function GoalMarker({ testID }: { testID?: string }) {
  * Memoized: the column re-renders only the tiles whose data changed.
  */
 export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false }: Props) {
-  const { node, state, level, isGoal, chainAbove, links, status } = tile;
+  const { node, state, level, isGoal, chainAbove, links } = tile;
   const look = TILE_LOOKS[state];
   const trained = TRAINED_TILE_STATES.includes(state);
   const silhouette = state === 'legendary';
-  const label = [
-    node.name,
-    look.label,
-    trained ? `level ${level.level}` : undefined,
-    spokenOgLevel(node.ogLevel),
-    node.straightArm ? 'straight-arm' : undefined,
-    isGoal ? 'goal' : undefined,
-    custom ? 'custom' : undefined,
-    status.selfUnlocked && status.unmetHard.length > 0 ? 'unlocked by you' : undefined,
-  ]
-    .filter(Boolean)
-    .join(', ');
+  const label = tileAccessibilityLabel(tile, custom);
 
   return (
     <View>
@@ -109,9 +103,7 @@ export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false }:
                 />
               ) : (
                 <PixelText variant="label" tone={look.tone} testID={`tile-state-${node.id}`}>
-                  {status.selfUnlocked && state === 'available'
-                    ? 'Ready · Unlocked by you'
-                    : look.label}
+                  {tileStateLabel(tile)}
                 </PixelText>
               )}
             </View>

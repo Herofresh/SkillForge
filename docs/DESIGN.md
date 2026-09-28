@@ -195,6 +195,17 @@ quill + "CUSTOM" tag. My progressions lists `OverlayEntryRow`s (raised cards), t
 (Share / Import, and a parchment "Suggest to project" panel with the contributor-guide link).
 Screenshots: `docs/screenshots/4.7-*.png`, `4.8-*.png`.
 
+**Tree map (PLAN 5.1, ADR-037)** in `src/components/tree/map/`: the Tree tab's Columns | Map tabs
+(`TreeModeTabs`, two `PixelChip` tabs). The map is the night sky with a stone lane per branch, a
+2 dp rule and caps title in the branch's color (`BranchColors`: push warm, pull cool, levers rune /
+amethyst, planche gold light, then parchment, gold, green, bone, arcane). `MapNode` is a fixed
+136 × 84 dp card in the tile's `TileFrames` frame with the state icon (a gold star below it for a
+goal, else the quill for a custom node), the name (2 lines), a 8 dp tier pip and the caps state or
+"LV n". Edges (`MapCanvas`) are square pixel lines, `MapStyle`: steel-dark 2 dp unmet; gold 4 dp on
+a 10 dp gold glow at 30 % once met (the one soft touch). Controls sit at the bottom: List (scroll,
+"Switch to list"), − / +, and a gold Goals / Focus button (star). Screenshots:
+`docs/screenshots/5.1-map.png`, `5.1-map-overview.png`, `5.1-map-node-detail.png`.
+
 Bar math: `litSegments(fraction, count)` (`src/lib/segments.ts`) lights ≥ 1 segment for any gain and
 never shows full before 100 %. The fraction itself comes from the domain (e.g. XP thresholds in
 `progression.ts` / `character.ts`); components never compute game numbers.

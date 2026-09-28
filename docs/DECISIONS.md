@@ -922,3 +922,49 @@ Template:
   a stored overlay from before this rule that does so now fails `applyOverlay` and falls back to the
   built-in tree (`overlayIssues`, shown on My progressions). There is no undo for an import beyond
   resetting entries one by one (a backup export before importing is the safety net).
+
+## ADR-037: Tree map as a second Tree-tab mode: own layered layout, lanes left to right, View-drawn edges (PLAN 5.1)
+- Date: 2026-09-28 · Status: Accepted (refines ADR-003: no dagre)
+- Context: ADR-003 wants the tree both as branch columns and as a pan/zoom graph ("dagre layout and
+  SVG"). The graph must show all ~90 nodes with cross-branch prerequisites, reuse the column view's
+  states (ADR-033), stay smooth on the Pixel 8 Pro emulator and keep the column view as the
+  screen-reader path.
+- Decision:
+  - **Mode:** the Tree tab gets Columns | Map tabs; the choice is the `tree_view_mode` setting
+    (`setTreeMode`, `parseTreeMode`, default Columns), so it survives restarts and travels with
+    backups like `onboarding_completed_at`.
+  - **Layout without dagre:** a small pure function (`mapLayout` in `src/domain/treeMap.ts`, tested)
+    instead of a dependency. A node's layer is its longest chain of **hard** prerequisites (the same
+    edges the column view chains and links; recommended ones stay in the detail). Layers run **left
+    to right** (a tech tree) and each branch is a horizontal lane in `BRANCHES` order, with
+    same-layer nodes of a branch stacked as rows in `chainOrder`. On a portrait phone that is ~10
+    columns × ~25 rows instead of ~25 columns × 10 rows. Edges are orthogonal elbows that bend in
+    the gap just before the target's layer, so vertical runs never cross a node; edges into one node
+    are spread 8 dp apart. The layout depends only on `state.nodes` and is memoized on it; progress
+    only restyles nodes and edges (`mapTiles` reuses `treeTile`).
+  - **Drawing:** nodes are fixed-size `MapNode` buttons in the tile frames (`TileFrames`, same icons,
+    labels and accessible text as `NodeTile` through shared `tileLook` helpers; a trained node shows
+    "LV n", its state icon says the rest), a tier pip, a gold star for goals, the silhouette for a
+    locked legendary node. Lanes are stone bands with a branch-colored rule and caps title
+    (`BranchColors`, contrast-tested). Edges are square pixel lines: dull steel 2 dp when unmet,
+    gold 4 dp on a 10 dp gold glow at 30 % once met. **Everything is plain Views, not one SVG:**
+    react-native-svg on Android renders an `Svg` into a bitmap of its full size, and a map-sized SVG
+    (~200 MB at 3.5× density) crashed Expo Go. Pixel icons stay small SVGs.
+  - **Gestures:** react-native-gesture-handler Pan + Pinch (simultaneous) racing a double Tap, on a
+    local `GestureHandlerRootView`; the camera is three Reanimated shared values applied as one
+    transform (origin top-left) on the UI thread, so moving never re-renders React. The math is
+    pure worklets in `src/lib/viewport.ts` (`zoomAround`, `clampPan`: the content edge can reach the
+    middle of the screen, never further; `fitBox`). Zoom is 0.2–2× (at least what shows the whole
+    map); double tap zooms 2× around the finger, or back out to 0.6× when already close. Node taps
+    are ordinary `Pressable`s (a pan cancels them).
+  - **Viewport:** the map opens on, and the gold Focus button returns to, the goals; without goals
+    what can be trained now (available/training); else the roots (`mapFocus`). Focus fits them at
+    0.6–1.2× so names stay readable; a box too big for 0.6× shows its top-left corner. Camera moves are a
+    180 ms linear timing (not the stepped celebration motion) and instant with reduce motion.
+  - **Accessibility:** the map has a "List" button labelled "Switch to list", zoom −/+ buttons for
+    people who can't pinch, and every node is a labelled button; Columns stays the recommended
+    screen-reader path. Map text scales up to 1.2× (fixed node size); the columns scale fully.
+- Consequences: no new dependency. A tree with very long cross-branch chains gets wide, not tall.
+  Long edges still pass behind nodes in a target's row when they span several layers; 5.2 could add
+  channel routing. The map renders every node (~1.4k views for 89 nodes); if the tree grows a lot,
+  cull off-screen nodes.

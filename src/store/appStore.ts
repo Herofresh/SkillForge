@@ -17,7 +17,7 @@
  * - Onboarding (PLAN 4.1, ADR-031): `setHeroName`, `toggleGoal`, `logTrial` (assessment test-outs,
  *   logged as ordinary Trial sessions) and `completeOnboarding` (the `onboarding_completed_at`
  *   setting, so it travels with backups).
- * - Tree and node detail (PLAN 4.2–4.3): `toggleGoal`, `logTrial` / `testOutWarnings` and
+ * - Tree and node detail (PLAN 4.2–4.3, 5.1): `setTreeMode` (Columns | Map, a setting), `toggleGoal`, `logTrial` / `testOutWarnings` and
  *   `selfUnlock` / `selfUnlockWarnings` (what to acknowledge before the "unlock anyway").
  * - Train flow (PLAN 4.4, ADR-034): `planTraining` turns a generated plan into an editable
  *   `trainPlan` (swap, remove, add, acknowledge its warnings), `startTraining` makes it the
@@ -85,6 +85,7 @@ import {
   type OverlayImportPreview,
 } from '@/domain/overlayEdit';
 import { nodeUseWarnings, resolveNode } from '@/domain/progression';
+import { DEFAULT_TREE_MODE, parseTreeMode, type TreeMode } from '@/domain/treeMap';
 import {
   applySession,
   applyUserAction,
@@ -144,6 +145,9 @@ export const GENERATOR_HISTORY_DAYS = 28;
 
 /** Setting key: when the user finished onboarding (ms since the Unix epoch). */
 export const ONBOARDING_COMPLETED_SETTING = 'onboarding_completed_at';
+
+/** Setting key: the Tree tab's mode, Columns or Map (PLAN 5.1, `parseTreeMode`). */
+export const TREE_MODE_SETTING = 'tree_view_mode';
 
 /** File name prefix of the safety copy written before an import replaces the data. */
 export const SAFETY_COPY_PREFIX = 'skillforge-before-import';
@@ -234,6 +238,8 @@ export interface AppState {
   profile?: HeroProfile;
   /** When onboarding was finished; unset = show the first-run flow (PLAN 4.1). */
   onboardingCompletedAt?: number;
+  /** The Tree tab's mode (PLAN 5.1): the branch columns or the whole-tree map. */
+  treeMode: TreeMode;
   /** The plan preview being edited (PLAN 4.4); in memory only. */
   trainPlan?: SessionPlan;
   /** The session in progress, persisted after every change (resumed after a restart). */
@@ -271,6 +277,8 @@ export interface AppState {
   selfUnlockWarnings(nodeId: string): SafeguardWarning[];
   /** Marks onboarding as done (the app then opens on the tabs). */
   completeOnboarding(): void;
+  /** Switches the Tree tab between Columns and Map and remembers it (setting `tree_view_mode`). */
+  setTreeMode(mode: TreeMode): void;
   createEquipmentProfile(name: string, tags: readonly EquipmentTag[]): EquipmentProfile;
   updateEquipmentProfile(id: string, changes: EquipmentProfileChanges): void;
   deleteEquipmentProfile(id: string): void;
@@ -484,6 +492,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       userActions: [],
       goals: [],
       equipmentProfiles: [],
+      treeMode: DEFAULT_TREE_MODE,
 
       loadAll() {
         const overlay = getOverlay(db)?.overlay ?? EMPTY_OVERLAY;
@@ -494,6 +503,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const completedAt = getSetting(db, ONBOARDING_COMPLETED_SETTING);
         commitEngine(engine, {
           onboardingCompletedAt: typeof completedAt === 'number' ? completedAt : undefined,
+          treeMode: parseTreeMode(getSetting(db, TREE_MODE_SETTING)),
           loaded: true,
           nodes,
           overlay,
@@ -585,6 +595,11 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const at = now();
         setSetting(db, ONBOARDING_COMPLETED_SETTING, at);
         set({ onboardingCompletedAt: at });
+      },
+
+      setTreeMode(mode) {
+        setSetting(db, TREE_MODE_SETTING, mode);
+        set({ treeMode: mode });
       },
 
       createEquipmentProfile(name, tags) {

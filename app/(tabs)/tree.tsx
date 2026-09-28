@@ -6,9 +6,12 @@ import { BranchTabs } from '@/components/BranchTabs';
 import { Colors, Spacing } from '@/components/theme';
 import { TreeLegend } from '@/components/tree/TreeLegend';
 import { NodeTile } from '@/components/tree/NodeTile';
+import { TreeMap } from '@/components/tree/map/TreeMap';
+import { TreeModeTabs } from '@/components/tree/TreeModeTabs';
 import { PixelButton, PixelFrame, PixelText } from '@/components/ui';
 import { BRANCH_NAMES } from '@/data/skills/branches';
 import { customizedNodeIds } from '@/domain/overlayEdit';
+import { mapFocus, mapLayout, mapTiles } from '@/domain/treeMap';
 import { branchColumn, branchSummary, defaultBranch, type TreeTile } from '@/domain/treeView';
 import type { Branch } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
@@ -18,6 +21,10 @@ import { useAppStore } from '@/store/useAppStore';
  * chains to their prerequisites, and tap a tile for the node detail. One branch at a time in a
  * FlatList of memoized tiles, so the 89-node tree stays light. "Add exercise" opens the editor for a
  * custom node in the branch (PLAN 4.7); the user's own changes carry a "Custom" tag.
+ *
+ * Map mode (PLAN 5.1, ADR-037) shows the whole tree as a pan/zoom graph instead. The layout
+ * depends only on the tree, so it is computed once per `state.nodes`; progress only restyles it.
+ * The mode is a setting (`treeMode`); Columns stays the screen-reader-friendly path.
  */
 export default function TreeScreen() {
   const router = useRouter();
@@ -25,6 +32,8 @@ export default function TreeScreen() {
   const progress = useAppStore((state) => state.engine.progress);
   const goals = useAppStore((state) => state.goals);
   const overlay = useAppStore((state) => state.overlay);
+  const treeMode = useAppStore((state) => state.treeMode);
+  const setTreeMode = useAppStore((state) => state.setTreeMode);
   const customized = useMemo(() => customizedNodeIds(overlay), [overlay]);
   const [branch, setBranch] = useState<Branch>(() => defaultBranch(nodes, goals));
   const [legendOpen, setLegendOpen] = useState(false);
@@ -77,9 +86,21 @@ export default function TreeScreen() {
     </PixelFrame>
   );
 
+  if (treeMode === 'map') {
+    return (
+      <View style={styles.root} testID="tree-screen">
+        <View style={styles.tabs}>
+          <TreeModeTabs value={treeMode} onChange={setTreeMode} />
+        </View>
+        <TreeMapMode openNode={openNode} customized={customized} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.root} testID="tree-screen">
       <View style={styles.tabs}>
+        <TreeModeTabs value={treeMode} onChange={setTreeMode} />
         <BranchTabs value={branch} onChange={setBranch} />
       </View>
       <FlatList
@@ -97,6 +118,33 @@ export default function TreeScreen() {
   );
 }
 
+/** Map mode: the layout (once per tree), the node states and the focus, memoized over store state. */
+function TreeMapMode({
+  openNode,
+  customized,
+}: {
+  openNode: (nodeId: string) => void;
+  customized: ReadonlySet<string>;
+}) {
+  const nodes = useAppStore((state) => state.nodes);
+  const progress = useAppStore((state) => state.engine.progress);
+  const goals = useAppStore((state) => state.goals);
+  const setTreeMode = useAppStore((state) => state.setTreeMode);
+  const layout = useMemo(() => mapLayout(nodes), [nodes]);
+  const mapState = useMemo(() => mapTiles(nodes, progress, goals), [nodes, progress, goals]);
+  const focus = useMemo(() => mapFocus(layout, mapState, goals), [layout, mapState, goals]);
+  return (
+    <TreeMap
+      layout={layout}
+      state={mapState}
+      focus={focus}
+      customized={customized}
+      onOpen={openNode}
+      onSwitchToList={() => setTreeMode('columns')}
+    />
+  );
+}
+
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -105,6 +153,7 @@ const styles = StyleSheet.create({
   tabs: {
     paddingTop: Spacing.sm,
     paddingLeft: Spacing.md,
+    gap: Spacing.sm,
   },
   list: {
     padding: Spacing.md,
