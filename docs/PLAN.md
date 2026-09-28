@@ -550,6 +550,12 @@ compiled into a typed module for the app; users can layer their own changes on t
   - [ ] 5.3b EAS cloud build + proper release signing (needs the user: Expo account login, keystore decision)
 - [x] 5.6 App icon: original pixel-art icon from a code grid (`scripts/appIcon.ts`, `npm run icon:build`): icon, adaptive foreground / background / monochrome, splash, favicon (ADR-042, [PR #24](https://github.com/Herofresh/SkillForge/pull/24))
 
+#### v0.2.0
+- [~] 5.4 Exercise timer (user request 2026-09-28): hold countdown with get-ready, vibration at the target and overtime, stopwatch for other metrics, per-set `durationSec` (additive column, backup version 2), session clock and times in the summary, hold Trials too (in progress, agent)
+- [ ] 5.5 Acrobatics branch: rolls, breakfalls (judo ukemi), cartwheel progressions
+- [ ] 5.6 App icon
+- [ ] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub
+
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
@@ -561,7 +567,10 @@ compiled into a typed module for the app; users can layer their own changes on t
   prune old safety copies (4.6 keeps the last import's copy in memory only, ADR-035)
 - Settings extras: replay onboarding, units/preferences once there are any
 - Node detail history rows could open the past-session screen (`app/session/[sessionId]`)
-- Hold stopwatch and a full rest timer (4.4 has a basic countdown from `restEndsAt`; sound/vibration, pause)
+- Timer extras (after 5.4, ADR-040): sound, pause, a vibration at "go", a notification when a hold's
+  target passes while the app is in the background, timers for rep Trials, pausing the rest countdown
+- Exercise demo animations: pixel-art animations per exercise, possibly generated/created with
+  different AI tools (user idea 2026-09-28, not now)
 - Train flow extras: reorder exercises, shuffle the plan (seed), edit or delete a logged set
 - Weekly plans and scheduling
 - Notifications and reminders
