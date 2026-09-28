@@ -17,6 +17,7 @@ import {
   addSessionExercise,
   allAcknowledged,
   clearSetTimer,
+  pauseSetTimer,
   exerciseSets,
   finishedSession,
   logSessionSet,
@@ -35,6 +36,7 @@ import {
   skipExercise,
   skipRest,
   startSession,
+  resumeSetTimer,
   startSetTimer,
   stopSetTimer,
   swapOptions,
@@ -360,6 +362,37 @@ describe('exercise timer (PLAN 5.4)', () => {
     const running = startSetTimer(started(), 'e0', NOW);
     expect(parseActiveSession(JSON.parse(JSON.stringify(running)))).toEqual(running);
   });
+
+  it('pauses and resumes; the stored draft keeps the pause and the paused time (PLAN 5.8)', () => {
+    const running = startSetTimer(started(), 'e0', NOW);
+    const paused = pauseSetTimer(running, NOW + 10 * S);
+    expect(paused.timer).toEqual({ exerciseKey: 'e0', startedAt: NOW, pausedAt: NOW + 10 * S });
+    expect(pauseSetTimer(paused, NOW + 20 * S)).toBe(paused);
+    expect(parseActiveSession(JSON.parse(JSON.stringify(paused)))).toEqual(paused);
+
+    const resumed = resumeSetTimer(paused, NOW + 70 * S);
+    expect(resumed.timer).toEqual({ exerciseKey: 'e0', startedAt: NOW, pausedMs: 60 * S });
+    expect(resumeSetTimer(resumed, NOW + 80 * S)).toBe(resumed);
+    expect(parseActiveSession(JSON.parse(JSON.stringify(resumed)))).toEqual(resumed);
+    const logged = logSessionSet(resumed, 'e0', { value: 8 }, NOW + 95 * S);
+    expect(logged.sets[0].durationSec).toBe(35);
+  });
+
+  it('logs a paused timer up to its pause, and stops it there', () => {
+    const paused = pauseSetTimer(startSetTimer(started(), 'e0', NOW), NOW + 25 * S);
+    expect(logSessionSet(paused, 'e0', { value: 8 }, NOW + 90 * S).sets[0].durationSec).toBe(25);
+    expect(stopSetTimer(paused, NOW + 90 * S).timer).toEqual({
+      exerciseKey: 'e0',
+      startedAt: NOW,
+      stoppedAt: NOW + 25 * S,
+    });
+  });
+
+  it('ignores pause and resume without a timer', () => {
+    const session = started();
+    expect(pauseSetTimer(session, NOW)).toBe(session);
+    expect(resumeSetTimer(session, NOW)).toBe(session);
+  });
 });
 
 describe('stored draft', () => {
@@ -377,6 +410,18 @@ describe('stored draft', () => {
     expect(parseActiveSession({ ...started(), sets: [{ nodeId: 'a' }] })).toBeUndefined();
     expect(parseActiveSession({ ...started(), restEndsAt: 'soon' })).toBeUndefined();
     expect(parseActiveSession({ ...started(), timer: { exerciseKey: 'e0' } })).toBeUndefined();
+    expect(
+      parseActiveSession({
+        ...started(),
+        timer: { exerciseKey: 'e0', startedAt: NOW, pausedAt: 'later' },
+      }),
+    ).toBeUndefined();
+    expect(
+      parseActiveSession({
+        ...started(),
+        timer: { exerciseKey: 'e0', startedAt: NOW, pausedMs: '5' },
+      }),
+    ).toBeUndefined();
     const logged = logSessionSet(started(), 'e0', { value: 8 }, NOW);
     expect(
       parseActiveSession({ ...logged, sets: [{ ...logged.sets[0], durationSec: '1:00' }] }),
@@ -388,6 +433,13 @@ describe('stored draft', () => {
     expect(old).not.toHaveProperty('timer');
     expect(old.sets[0]).not.toHaveProperty('durationSec');
     expect(parseActiveSession(old)).toEqual(old);
+  });
+
+  it('reads a draft whose timer is from before the pause (5.4 shape)', () => {
+    const old = JSON.parse(JSON.stringify(startSetTimer(started(), 'e0', NOW)));
+    expect(old.timer).toEqual({ exerciseKey: 'e0', startedAt: NOW });
+    expect(parseActiveSession(old)).toEqual(old);
+    expect(pauseSetTimer(old, NOW + MS_PER_SECOND).timer?.pausedAt).toBe(NOW + MS_PER_SECOND);
   });
 });
 

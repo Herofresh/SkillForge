@@ -23,6 +23,8 @@ type Props = {
   onStartTimer: () => void;
   /** Stops the timer and returns what it measured (whole seconds). */
   onStopTimer: () => number | undefined;
+  onPauseTimer: () => void;
+  onResumeTimer: () => void;
   onResetTimer: () => void;
 };
 
@@ -41,6 +43,8 @@ export function SetLogger({
   timer,
   onStartTimer,
   onStopTimer,
+  onPauseTimer,
+  onResumeTimer,
   onResetTimer,
 }: Props) {
   const [entered, setEntered] = useState<SetPerformance>(() =>
@@ -82,6 +86,8 @@ export function SetLogger({
         timer={timer}
         onStart={onStartTimer}
         onStop={stopTimer}
+        onPause={onPauseTimer}
+        onResume={onResumeTimer}
         onReset={onResetTimer}
         testID="set-timer"
       />

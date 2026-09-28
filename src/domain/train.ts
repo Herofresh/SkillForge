@@ -13,7 +13,14 @@ import { MS_PER_SECOND } from '@/lib/time';
 import { searchNodes } from './assessment';
 import { exerciseSeconds, isDoableWith, plannedSets, PROGRESSION_STEP } from './generator';
 import { resolveTree, type ProgressMap } from './progression';
-import { measuredSeconds, timerModeFor, type SetTimer } from './setTimer';
+import {
+  measuredSeconds,
+  pauseTimer,
+  resumeTimer,
+  stopTimer,
+  timerModeFor,
+  type SetTimer,
+} from './setTimer';
 import {
   WORKOUT_BLOCK_KINDS,
   type EquipmentTag,
@@ -85,7 +92,8 @@ export interface ActiveSession extends SessionPlan {
   restEndsAt?: number;
   /**
    * The exercise timer of the set being done (PLAN 5.4, ADR-040), running or stopped, until the
-   * set is logged. Timestamps only, so it survives an app kill. Drafts before 5.4 don't have it.
+   * set is logged. Timestamps only, so it survives an app kill, paused too (5.8). Drafts before
+   * 5.4 don't have it; timers before 5.8 have no pause fields.
    */
   timer?: SessionTimer;
 }
@@ -423,11 +431,35 @@ export function startSetTimer(session: ActiveSession, key: string, at: number): 
   return { ...skipRest(session), timer: { exerciseKey: key, startedAt: at } };
 }
 
-/** Stops the running timer at `at`; its measurement is kept for the set until it is logged. */
-export function stopSetTimer(session: ActiveSession, at: number): ActiveSession {
+/** Applies `change` to the session's timer; the same session when there is none or nothing changed. */
+function withTimer(
+  session: ActiveSession,
+  change: (timer: SetTimer, at: number) => SetTimer,
+  at: number,
+): ActiveSession {
   const { timer } = session;
-  if (!timer || timer.stoppedAt !== undefined) return session;
-  return { ...session, timer: { ...timer, stoppedAt: Math.max(at, timer.startedAt) } };
+  if (!timer) return session;
+  const { exerciseKey, ...clock } = timer;
+  const next = change(clock, at);
+  return next === clock ? session : { ...session, timer: { ...next, exerciseKey } };
+}
+
+/**
+ * Stops the running (or paused) timer at `at`; its measurement is kept for the set until it is
+ * logged. A paused timer stops at its pause.
+ */
+export function stopSetTimer(session: ActiveSession, at: number): ActiveSession {
+  return withTimer(session, stopTimer, at);
+}
+
+/** Pauses the running timer at `at` (PLAN 5.8); the pause is stored with the draft. */
+export function pauseSetTimer(session: ActiveSession, at: number): ActiveSession {
+  return withTimer(session, pauseTimer, at);
+}
+
+/** Resumes the paused timer at `at`; the paused time is left out of what it measures. */
+export function resumeSetTimer(session: ActiveSession, at: number): ActiveSession {
+  return withTimer(session, resumeTimer, at);
 }
 
 /** Throws the timer away (cancel / reset); the set is then logged without a duration. */
@@ -565,14 +597,17 @@ function isTimer(value: unknown): value is SessionTimer {
     isRecord(value) &&
     isString(value.exerciseKey) &&
     isNumber(value.startedAt) &&
-    (value.stoppedAt === undefined || isNumber(value.stoppedAt))
+    (value.stoppedAt === undefined || isNumber(value.stoppedAt)) &&
+    (value.pausedAt === undefined || isNumber(value.pausedAt)) &&
+    (value.pausedMs === undefined || isNumber(value.pausedMs))
   );
 }
 
 /**
  * A stored active session read back (validated at the boundary): `undefined` when the data doesn't
  * have the expected shape, e.g. written by a future app version. Drafts from before the exercise
- * timer (no `timer`, no `durationSec`) parse as they are.
+ * timer (no `timer`, no `durationSec`) and timers from before its pause (no `pausedAt`, no
+ * `pausedMs`) parse as they are.
  */
 export function parseActiveSession(raw: unknown): ActiveSession | undefined {
   if (

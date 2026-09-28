@@ -128,6 +128,10 @@
   `schemaVersion` 2, version 1 still imports). Logged sets read "8 reps · 0:42"; the header shows the
   session clock; summary / past session show the session time and the time per exercise. Hold
   Trials have a timer per set.
+- Timer extras (5.8, ADR-044, PR_LINK): the set timer has Pause / Resume (stored in the draft
+  as `pausedAt` / `pausedMs`, so a paused timer survives an app kill; the paused time is not
+  measured), and the phone buzzes at "go" (one short), at the hold target (two long, as before) and
+  when the rest countdown reaches zero (three short), only while the app is open.
 
 ## Next up
 1. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
@@ -140,6 +144,22 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Timer extras (task 5.8, ADR-044):**
+  - Domain: `setTimer.ts` has `pauseTimer`, `resumeTimer`, `stopTimer`, `isPaused`, `TimerCue`,
+    `timerCue`, `restCue`, `CUE_MAX_GAP_MS`; `reachedTarget` is gone (replaced by `timerCue`).
+    `TimerReading.paused` is new. `train.ts` has `pauseSetTimer` / `resumeSetTimer`;
+    `parseActiveSession` accepts timers with or without `pausedAt` / `pausedMs`.
+  - Store: `pauseTrainingTimer()`, `resumeTrainingTimer()`. `useTrialAttempt` has
+    `pauseTimer(index)` / `resumeTimer(index)`; `TrialSetsPanel` shows timers only when all five
+    timer handlers are given.
+  - UI: `SetTimerPanel` takes `onPause` / `onResume` (ids `<prefix>-pause`, `<prefix>-resume`;
+    Cancel moved to its own full-width row). Vibration patterns are in
+    `src/components/timer/vibration.ts` (`CUE_VIBRATIONS`, `buzz`). `RestPanel` buzzes at zero.
+  - E2E: `train.yaml` now pauses the second set's timer, kills the app and resumes it after the
+    restart. Not run by the author (no emulator in that session); the cues are covered only by
+    component tests (fake timers + a `Vibration` spy). Vibration is untested on a real phone.
+  - Not built (backlog): sound, a background notification, pausing the rest countdown, timers for
+    rep Trials.
 - **Exercise timer (task 5.4, ADR-040):**
   - Domain: `src/domain/setTimer.ts` (`timerModeFor`, `readTimer`, `measuredSeconds`,
     `reachedTarget`, `formatTimerClock`, `timerCaption`, `spokenTimer`, `timedPerformance`,
@@ -162,8 +182,8 @@
     the summary's session / exercise times). `docs/screenshots/5.4-timer.png` is from that run.
     The hold countdown and vibration are only covered by component tests (the first planned
     exercise is a rep warm-up); keep-awake and vibration are untested on a real phone.
-  - Not built (backlog "Timer extras"): sound, pause, a buzz at "go", a background notification at
-    the target, timers for rep Trials.
+  - Not built in 5.4: pause and a buzz at "go" came in 5.8 (see above); sound, a background
+    notification and timers for rep Trials are still in the backlog.
 - **App icon (task 5.6, ADR-042):**
   - Edit `MOTIF_ROWS` in `scripts/appIcon.ts` (roles → `Palette` keys in `MOTIF_COLORS`), run
     `npm run icon:build`, look at `docs/screenshots/5.6-app-icon.png` (bottom row: 96 / 48 px),
@@ -604,6 +624,9 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.6 App icon: original pixel-art icon from a code grid (`scripts/appIcon.ts`, `npm run icon:build`): icon, adaptive foreground / background / monochrome, splash, favicon (ADR-042, [PR #24](https://github.com/Herofresh/SkillForge/pull/24))
 - [ ] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub
 
+#### v0.3.0
+- [x] 5.8 Timer extras: pause/resume, buzz at go and at rest end (ADR-044, PR_LINK)
+
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
@@ -615,8 +638,9 @@ compiled into a typed module for the app; users can layer their own changes on t
   prune old safety copies (4.6 keeps the last import's copy in memory only, ADR-035)
 - Settings extras: replay onboarding, units/preferences once there are any
 - Node detail history rows could open the past-session screen (`app/session/[sessionId]`)
-- Timer extras (after 5.4, ADR-040): sound, pause, a vibration at "go", a notification when a hold's
-  target passes while the app is in the background, timers for rep Trials, pausing the rest countdown
+- Timer extras (after 5.8, ADR-040 / ADR-044): sound, a notification when a hold's target or the
+  rest's end passes while the app is in the background, timers for rep Trials, pausing the rest
+  countdown
 - Exercise demo animations: pixel-art animations per exercise, possibly generated/created with
   different AI tools (user idea 2026-09-28, not now)
 - Train flow extras: reorder exercises, shuffle the plan (seed), edit or delete a logged set

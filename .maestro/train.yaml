@@ -1,7 +1,7 @@
-# Train flow (PLAN 4.4, 5.4): from a fresh install, plan a 30-min Home session, look at the plan
-# preview and a swap sheet, start it, time and log the first exercise's set, start the next set's
-# timer, then kill the app and check that the session resumes with its sets and the running timer
-# (the draft is saved after every change), finish it and see the summary with XP > 0. Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
+# Train flow (PLAN 4.4, 5.4, 5.8): from a fresh install, plan a 30-min Home session, look at the
+# plan preview and a swap sheet, start it, time and log the first exercise's set, start and pause the
+# next set's timer, then kill the app and check that the session resumes with its sets and the paused
+# timer, which resumes (the draft is saved after every change), finish it and see the summary with XP > 0. Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Train - plan, live session, resume after a restart, summary
 ---
@@ -115,6 +115,12 @@ name: Train - plan, live session, resume after a restart, summary
     notVisible:
       id: 'rest-panel'
     timeout: 20000
+# Pause it (5.8): the pause is saved with the draft
+- tapOn:
+    id: 'set-timer-pause'
+- assertVisible:
+    id: 'set-timer-resume'
+- assertVisible: 'Paused'
 # Kill the app mid-session and open it again: it resumes with the logged set
 - stopApp
 - launchApp
@@ -132,6 +138,12 @@ name: Train - plan, live session, resume after a restart, summary
     timeout: 20000
 - assertVisible:
     id: 'set-timer-clock'
+# The timer came back paused; resume it
+- assertVisible: 'Paused'
+- tapOn:
+    id: 'set-timer-resume'
+- assertVisible:
+    id: 'set-timer-pause'
 - tapOn:
     id: 'set-timer-reset'
 - assertVisible:

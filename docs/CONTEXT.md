@@ -136,10 +136,13 @@ src/
                         swapOptions / addOptions, replace/remove/addExercise, startSession,
                         logSessionSet (pairs alternate; takes the timer's durationSec),
                         markedPerformance, skip, rest, start/stop/clearSetTimer (5.4),
+                        pause/resumeSetTimer (5.8),
                         projectedSets, finishedSession, warningKey, parseActiveSession
     setTimer.ts         exercise timer (PLAN 5.4, ADR-040): timerModeFor (hold countdown with
                         GET_READY_SECONDS, else stopwatch), readTimer (phase, clock, measured
-                        seconds from timestamps), measuredSeconds, reachedTarget, formatTimerClock,
+                        seconds from timestamps, paused time left out), measuredSeconds,
+                        pause/resume/stopTimer + isPaused (5.8, ADR-044), timerCue / restCue
+                        (TimerCue go / target / rest_end, CUE_MAX_GAP_MS), formatTimerClock,
                         timerCaption, spokenTimer, timedPerformance, elapsedSeconds, totalDurationSec
     trainView.ts        Train view models: blockViews, exerciseView, liveView, summaryView (with the
                         stored session: time per exercise, session time), loggedSetText
@@ -210,13 +213,16 @@ src/
     node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
                         NodeHistoryList, AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
     train/              Train flow parts: ExerciseCard (prescription, rest, markers), SetLogger
-                        (timer + stepper + Log / Partial / Failed), RestPanel (countdown),
+                        (timer + stepper + Log / Partial / Failed), RestPanel (countdown, buzz
+                        at its end),
                         SessionClock (elapsed session time), NodeOptionSheet (swap/add picker),
                         TrainWarningList (warnings acknowledged by key)
     timer/SetTimerPanel.tsx  the exercise timer of one set (PLAN 5.4): Start hold / Start set →
-                        clock, Stop / Done, Cancel / Reset; vibrates at a hold's target, keeps the
-                        screen awake while it runs (expo-keep-awake). Train SetLogger and the hold
-                        Trials' TrialSetsPanel
+                        clock, Pause / Resume (5.8), Stop / Done, Cancel / Reset; buzzes at "go"
+                        and at a hold's target, keeps the screen awake while it ticks
+                        (expo-keep-awake). Train SetLogger and the hold Trials' TrialSetsPanel
+    timer/vibration.ts  CUE_VIBRATIONS (the pattern per TimerCue, SHORT/LONG_BUZZ_MS, BUZZ_GAP_MS)
+                        and buzz(cue) over React Native's Vibration (ADR-044)
     train/SessionResultPanels.tsx  XP, streak, level-ups, unlocks, exercises of a SessionResult
                         (Train summary and past session)
     character/          AttributeRadar (rasterized pixel radar), RankCrest (RANK_ICONS),
@@ -234,7 +240,8 @@ src/
     character.test.tsx  component tests: radar, crest, goal card, history row, profile editor,
                         backup panel (real store, fake files)
     train.test.tsx      component tests of the Train parts (SetLogger timer, SetTimerPanel with
-                        fake timers, summary times)
+                        fake timers: pause / resume, buzz at go and target; RestPanel buzz,
+                        summary times)
     trial.test.tsx      component tests: TrialSetsPanel timers per hold set
     tree.test.tsx       component tests: tiles, chains, prerequisite list, unlock sheet (real store)
     DataGate.tsx        keeps the splash until fonts + startApp are done; error screen on failure
@@ -347,7 +354,8 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
 | **Session plan / active session** | The Train flow's editable plan preview (`SessionPlan`, in memory) and the started session (`ActiveSession`, the `active_session` draft) with its logged sets; `finishedSession` turns it into a `LoggedSession` (ADR-034). |
-| **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics get a stopwatch. Stored as timestamps (`ActiveSession.timer`), so it survives an app kill; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
+| **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics get a stopwatch. It can be paused and resumed (5.8, ADR-044; the paused time is not measured). Stored as timestamps plus the paused time (`ActiveSession.timer`), so it survives an app kill, paused too; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
+| **Timer cue** | A moment the phone buzzes (PLAN 5.8, ADR-044): `go` (a hold's get-ready ends: one short buzz), `target` (the hold reaches its target: two long buzzes), `rest_end` (the rest countdown reaches zero: three short buzzes). Only while the screen sees the moment pass; no sound, no background notification. |
 | **Custom node / custom tag** | A node the user added (`user_` id) or edited through the node editor; shown with a "Custom" tag. "Reset to default" removes the edit; a custom node is deleted instead. Overlays can't clear `straightArm` on, or move, a built-in straight-arm node (ADR-036). |
 | **Shared progressions** | The overlay as YAML (`exportOverlay`), shared from My progressions. Importing one merges it into the user's overlay after a preview (`mergeOverlays`, ADR-036). |
 | **Stored overlay** | The one current overlay in `progression_overlay`; the store's tree is `applyOverlay(ALL_NODES, overlay).nodes`. An overlay with issues is never saved; a stored one that stops applying is kept and reported as `overlayIssues` (ADR-028). |
