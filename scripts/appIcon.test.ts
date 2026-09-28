@@ -119,8 +119,18 @@ describe('app icon assets', () => {
       'assets/images/android-icon-monochrome.png',
     ]) {
       const asset = assetFor(path);
-      const motifDp = ((MOTIF_CELLS * asset.cell) / asset.size) * ADAPTIVE_LAYER_DP;
-      expect(motifDp).toBeLessThanOrEqual(ADAPTIVE_SAFE_ZONE_DP);
+      // The safe zone is a circle: every painted cell's outer corners must lie within its radius.
+      const centre = MOTIF_CELLS / 2;
+      let maxCells = 0;
+      for (const run of parsePixelGrid(MOTIF_ROWS).runs) {
+        for (const x of [run.x, run.x + run.width]) {
+          for (const y of [run.y, run.y + 1]) {
+            maxCells = Math.max(maxCells, Math.hypot(x - centre, y - centre));
+          }
+        }
+      }
+      const radiusDp = ((maxCells * asset.cell) / asset.size) * ADAPTIVE_LAYER_DP;
+      expect(radiusDp).toBeLessThanOrEqual(ADAPTIVE_SAFE_ZONE_DP / 2);
     }
   });
 
@@ -140,15 +150,15 @@ describe('app icon assets', () => {
   });
 
   it('leaves the foreground transparent outside the motif and fills the background', () => {
-    const fg = renderLayer('foreground', ICON_SIZE_PX, 19);
+    const fg = renderLayer('foreground', ICON_SIZE_PX, 18);
     expect(pixelAt(fg, 0, 0)[3]).toBe(0);
     expect(pixelAt(fg, ICON_SIZE_PX / 2, ICON_SIZE_PX / 2)[3]).toBe(255);
-    const bg = renderLayer('background', ICON_SIZE_PX, 19);
+    const bg = renderLayer('background', ICON_SIZE_PX, 18);
     expect(rgbaKey(pixelAt(bg, 0, 0))).toBe(rgbaKey(hexToRgba(Palette[BACKGROUND_COLOR])));
   });
 
   it('knocks the disc out of the monochrome mask', () => {
-    const cell = 19;
+    const cell = assetFor('assets/images/android-icon-monochrome.png').cell;
     const mono = renderLayer('monochrome', ICON_SIZE_PX, cell);
     const offset = motifOffset(ICON_SIZE_PX, cell);
     MOTIF_ROWS.forEach((row, y) => {

@@ -110,24 +110,25 @@ export interface IconAsset {
 export const ICON_ASSETS: readonly IconAsset[] = [
   // Store / iOS / legacy icon: full bleed, motif at 87.5 % so a circular mask never cuts the ring.
   { path: 'assets/images/icon.png', size: ICON_SIZE_PX, layer: 'full', cell: 28 },
-  // Adaptive layers: the motif is 608 px of 1024 (59 %, 64 dp) inside the 66 dp safe zone.
+  // Adaptive layers: the motif is 576 px of 1024 (~61 dp); its outermost pixel corners sit 32.7 dp
+  // from the centre, inside the 66 dp safe-zone circle (radius 33 dp).
   {
     path: 'assets/images/android-icon-foreground.png',
     size: ICON_SIZE_PX,
     layer: 'foreground',
-    cell: 19,
+    cell: 18,
   },
   {
     path: 'assets/images/android-icon-background.png',
     size: ICON_SIZE_PX,
     layer: 'background',
-    cell: 19,
+    cell: 18,
   },
   {
     path: 'assets/images/android-icon-monochrome.png',
     size: ICON_SIZE_PX,
     layer: 'monochrome',
-    cell: 19,
+    cell: 18,
   },
   // Splash: transparent, edge to edge (app.json scales it to `imageWidth`).
   { path: 'assets/images/splash-icon.png', size: ICON_SIZE_PX, layer: 'foreground', cell: 32 },

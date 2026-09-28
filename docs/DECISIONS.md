@@ -1048,8 +1048,9 @@ Template:
     `pngjs` is only a transitive dependency of the Expo tooling, so relying on it would break
     silently.
   - **Assets (`ICON_ASSETS`):** `icon.png` 1024 full bleed, 28 px cells (motif 87.5 %, a circular
-    mask never cuts the ring); adaptive foreground and monochrome 1024 transparent, 19 px cells =
-    608 px = 64 dp of the 108 dp layer, inside the 66 dp safe zone; adaptive background 1024 solid
+    mask never cuts the ring); adaptive foreground and monochrome 1024 transparent, 18 px cells =
+    576 px (~61 dp of the 108 dp layer); the ring's outermost pixel corners sit 32.7 dp from the
+    centre, inside the 66 dp safe-zone circle (tested against the radius, not the square side); adaptive background 1024 solid
     night; `splash-icon.png` 1024 transparent, 32 px cells (app.json scales it to `imageWidth`
     76); `favicon.png` 48, 1 px cells. The monochrome (themed icon) layer knocks the disc out
     (`MONOCHROME_KNOCKOUT`) so the hero and ring stay separate shapes in the alpha mask.

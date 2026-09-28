@@ -239,7 +239,7 @@ line around a `stone` disc, on the `night` background. Roles map to `Palette` ke
 
 - `npm run icon:build` renders it with nearest-neighbour cells (whole pixels per cell) to every
   image app.json uses: `icon.png` 1024 (28 px cells), the adaptive foreground and monochrome
-  1024 (19 px cells: the motif is 64 of 108 dp, inside the 66 dp safe zone), the solid night
+  1024 (18 px cells: the motif is ~61 of 108 dp, every pixel inside the 66 dp safe-zone circle), the solid night
   adaptive background, `splash-icon.png` 1024 transparent (32 px cells) and `favicon.png` 48.
 - The themed (monochrome) icon drops the disc (`MONOCHROME_KNOCKOUT`) so the hero and ring stay
   separate shapes when Android tints the mask.
