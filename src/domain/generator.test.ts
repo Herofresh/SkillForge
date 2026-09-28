@@ -519,4 +519,42 @@ describe('generateWorkout', () => {
       }),
     );
   });
+
+  describe('acrobatics (PLAN 5.5, ADR-041)', () => {
+    const acrobatic = (nodeId: string) => node(nodeId).branch === 'acrobatics';
+
+    it('trains an acrobatics goal in a skill slot, starting at its frontier', () => {
+      const recentSessions = [
+        testOutSession('base', daysAgo(10), [
+          'wall_plank',
+          'wall_handstand',
+          'bunny_hop_cartwheel',
+        ]),
+      ];
+      const plan = generateWorkout(request({ goals: ['round_off'], recentSessions }));
+      const skill = plan.blocks.filter((block) => block.kind === 'skill');
+      expect(skill.flatMap((block) => block.exercises.map((e) => e.nodeId))).toContain('cartwheel');
+    });
+
+    it('never puts acrobatics into strength, core or cool-down slots', () => {
+      for (const goals of [[], ['aerial_cartwheel'], ['strict_bar_muscle_up']]) {
+        const plan = generateWorkout(request({ goals, recentSessions: INTERMEDIATE }));
+        for (const block of plan.blocks) {
+          if (block.kind === 'skill' || block.kind === 'warm_up') continue;
+          expect(block.exercises.filter((e) => acrobatic(e.nodeId))).toEqual([]);
+        }
+      }
+    });
+
+    it('is not held back by the 48 h rule (balance and mobility are exempt)', () => {
+      const recentSessions = [
+        ...INTERMEDIATE,
+        testOutSession('rolls', daysAgo(3), ['tuck_rock']),
+        workSession('yesterday', NOW - 20 * MS_PER_HOUR, 'forward_roll', 6),
+      ];
+      const plan = generateWorkout(request({ goals: ['forward_shoulder_roll'], recentSessions }));
+      // The roll's frontier is the back breakfall (-> side breakfall -> shoulder roll).
+      expect(ids(plan)).toContain('back_breakfall');
+    });
+  });
 });

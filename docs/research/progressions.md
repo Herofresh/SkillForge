@@ -110,6 +110,41 @@ This branch is our own synthesis. No single source gives a levelled chain.
 - **Others:** German Hang, Skin the Cat, Pike/Pancake compression, Front/Middle Split, Wrist Prep (GMB)
 - **Suggestion:** rate these by a hold or range standard rather than reps.
 
+### B13. Acrobatics (tumbling and safe falling; PLAN 5.5, ADR-041)
+Our own synthesis. OG2 has no tumbling chart, so every level is inferred, and none of the sources
+gives rep standards (coaches judge the shape, and judo practises falls every session). All trials
+are placeholders with a `verify:` note.
+
+- **Rolls and breakfalls:** Tuck rock [0] → Back breakfall / ushiro ukemi [0] → Side breakfall /
+  yoko ukemi [1] → Forward shoulder roll / zenpo kaiten ukemi [1] → Backward shoulder roll [1];
+  Tuck rock → Forward roll [1] → Backward roll [2].
+  - Judo Canada teaches back, side, then the rolling breakfall, each from lying → sitting →
+    crouching → standing → on the move; the forward (impact) breakfall mae ukemi comes last and is
+    not modelled. Cues: chin to chest, head never touches the floor, strike with the whole arm at
+    35–55° (ideally 45°) from the body, never cross the legs.
+  - NRG: "rocking backwards and forwards in tuck is often the first step" of the forward roll;
+    roll onto the back of the head, never the top, hips high. Pinn / RecGymPros: backward roll from
+    "rock and roll" with hands by the ears, pushing through the hands so the neck carries no weight.
+  - GMB tumbling: shoulder rolls take the head and neck out of the roll; forward before backward.
+- **Cartwheel path:** Bunny-hop cartwheel [1] → Cartwheel [2] → Cartwheel with a quarter turn [2]
+  → Round-off [3]; Cartwheel → One-handed cartwheel [3]; Round-off + One-handed → Aerial [~6,
+  legendary].
+  - NRG side cartwheel: early attempts are "bunny-hopping around from 2 feet to 2 feet" with the
+    weight on the hands; sequence foot, hand, hand, foot, foot. The front-to-back (¼ turn)
+    cartwheel "is the prerequisite to the beginnings of a Round-off".
+  - NRG round-off prerequisites: a straight front-to-back cartwheel, "a strong, straight kick to
+    Handstand", good body tension, the shoulder push.
+  - GymnasticsHQ: cartwheel drills start with wall handstands and handstand kick-ups; the aerial
+    builds on the cartwheel, the round-off (leg push) and fast, close cartwheels, learned with a
+    coach and off a raised soft surface first.
+- **Cross-branch gates:** the bunny-hop cartwheel needs the wall plank (weight on straight arms,
+  hips over shoulders); the cartwheel and the round-off need the wall handstand (kick-up); the
+  round-off recommends the hollow hold (body tension); the backward roll recommends push-ups (the
+  arm push); wrist prep is recommended before the cartwheel path.
+- **Equipment:** there is no mat tag, so everything is `floor`; the cues ask for a soft surface.
+- **Not modelled:** the dive roll (the sources teach it off a springboard onto mats), mae ukemi,
+  round-off rebound, handsprings and flips.
+
 ## 2. Cross-branch prerequisites
 
 | Target | Prerequisite(s) | Threshold | Source quality |
@@ -238,8 +273,21 @@ This branch is our own synthesis. No single source gives a levelled chain.
 - [Calisthenics Corner: front lever](https://www.calisthenics-corner.com/skills/front-lever/)
 - [Wikipedia: Front lever](https://en.wikipedia.org/wiki/Front_lever)
 - [Wikipedia: Iron cross (gymnastics)](https://en.wikipedia.org/wiki/Iron_cross_(gymnastics))
+- [Judo Canada: Breakfalls instruction guide (2023)](https://judocanada.org/wp-content/uploads/2023/07/Guide-Chutes_2023_EN.pdf)
+- [Judo encyclopedia: Ukemi-waza](https://www.judo-encyclopedia.com/judo_encyclopedia/ukemi-waza/)
+- [NRG: Forward roll teaching progressions](https://www.nrgq.co.uk/wp-content/uploads/2018/12/Foundation_Teaching-Progressions-FORWARD-ROLL-_-VARIATIONS.pdf)
+- [NRG: Side-to-side and front-to-back cartwheel](https://www.nrgq.co.uk/wp-content/uploads/2018/12/Foundation_Teaching-Progressions-CARTWHEELS.pdf)
+- [NRG: One-handed cartwheel](https://www.nrgq.co.uk/wp-content/uploads/2018/12/Developmental_Teaching-Progressions-ONE-HANDED-CARTWHEEL.pdf)
+- [NRG: Round-off](https://www.nrgq.co.uk/wp-content/uploads/2018/12/Developmental_Teaching-Progressions-ROUND-OFF.pdf)
+- [GMB: Tumbling skills](https://gmb.io/tumbling/)
+- [GymnasticsHQ: How to do a cartwheel](https://gymnasticshq.com/how-to-do-a-cartwheel/)
+- [GymnasticsHQ: How to do an aerial cartwheel](https://gymnasticshq.com/how-to-do-an-aerial-cartwheel/)
+- [Pinn Gymnastics: backward roll progressions](https://www.pinngym.com/favorite-backward-roll-progressions)
+- [RecGymPros: drills for teaching back rolls](https://recgympros.com/drills-for-teaching-back-rolls/)
+- [Wikipedia: Aerial cartwheel](https://en.wikipedia.org/wiki/Aerial_cartwheel)
 
 **Caveats:**
 - The `~` levels and the tier band boundaries are inferred.
 - The muscle-up, front lever, planche and flag thresholds come from secondary coaching sites.
 - The flexibility branch is our own synthesis.
+- The acrobatics branch is our own synthesis; its OG levels and rep standards are all inferred.

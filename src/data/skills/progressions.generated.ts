@@ -4667,5 +4667,702 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "status": "draft"
     },
     "source": "core"
+  },
+  {
+    "id": "tuck_rock",
+    "branch": "acrobatics",
+    "name": "Tuck rock",
+    "chainOrder": 10,
+    "ogLevel": 0,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 10
+    },
+    "trial": {
+      "sets": 3,
+      "target": 10
+    },
+    "prerequisites": [],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Sit in a tight ball, knees to the chest, chin tucked in.",
+      "Rock back onto the shoulder blades and forward again onto the feet.",
+      "Hands by the ears, palms up (\"pizza hands\"), ready for the backward roll; the head never touches the floor."
+    ],
+    "sourceUrls": [
+      "https://www.nrgq.co.uk/wp-content/uploads/2018/12/Foundation_Teaching-Progressions-FORWARD-ROLL-_-VARIATIONS.pdf",
+      "https://www.pinngym.com/favorite-backward-roll-progressions"
+    ],
+    "verify": "The first step of both the forward and the backward roll (NRG, Pinn \"rock and roll\"); no source gives a rep standard, so the 3 x 10 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "back_breakfall",
+    "branch": "acrobatics",
+    "name": "Back breakfall (ushiro ukemi)",
+    "chainOrder": 20,
+    "ogLevel": 0,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 10
+    },
+    "trial": {
+      "sets": 3,
+      "target": 10
+    },
+    "prerequisites": [
+      {
+        "nodeId": "tuck_rock",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "tuck_rock",
+    "cues": [
+      "Chin to the chest, eyes on your belt; the head never touches the floor.",
+      "Sit the hips down close to the heels and roll back on a rounded back.",
+      "Slap the floor with both whole arms at about 45 degrees from the body, palms down.",
+      "Build up from lying, to sitting, to squatting, to standing; stay low until it is easy."
+    ],
+    "sourceUrls": [
+      "https://judocanada.org/wp-content/uploads/2023/07/Guide-Chutes_2023_EN.pdf",
+      "https://www.judo-encyclopedia.com/judo_encyclopedia/ukemi-waza/"
+    ],
+    "verify": "Judo Canada teaches it first, in stages from lying to standing; OG level 0 is assumed and the 3 x 10 trial is a placeholder (judo practises falls every session, not to a rep standard).",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "forward_roll",
+    "branch": "acrobatics",
+    "name": "Forward roll",
+    "chainOrder": 30,
+    "ogLevel": 1,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 6
+    },
+    "trial": {
+      "sets": 3,
+      "target": 6
+    },
+    "prerequisites": [
+      {
+        "nodeId": "tuck_rock",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "tuck_rock",
+    "cues": [
+      "Squat, hands shoulder-width on the floor, hips high.",
+      "Tuck the chin to the chest and roll onto the back of the head and shoulders, never the top of the head.",
+      "Stay in a tight ball and reach forward to stand up without pushing off the floor behind you."
+    ],
+    "sourceUrls": [
+      "https://www.nrgq.co.uk/wp-content/uploads/2018/12/Foundation_Teaching-Progressions-FORWARD-ROLL-_-VARIATIONS.pdf"
+    ],
+    "verify": "OG level 1 is inferred; the 3 x 6 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "side_breakfall",
+    "branch": "acrobatics",
+    "name": "Side breakfall (yoko ukemi)",
+    "chainOrder": 40,
+    "ogLevel": 1,
+    "metric": "reps",
+    "workingRange": {
+      "min": 6,
+      "max": 10
+    },
+    "trial": {
+      "sets": 3,
+      "target": 10
+    },
+    "prerequisites": [
+      {
+        "nodeId": "back_breakfall",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "back_breakfall",
+    "cues": [
+      "Alternate sides; count every fall as one rep.",
+      "Swing one leg across the body and sit down close to the heel of the standing leg.",
+      "Land on the side, not the back; slap with the whole arm on the falling side at about 45 degrees.",
+      "Chin tucked, head up off the floor; legs apart, never crossed."
+    ],
+    "sourceUrls": [
+      "https://judocanada.org/wp-content/uploads/2023/07/Guide-Chutes_2023_EN.pdf",
+      "https://www.judo-encyclopedia.com/judo_encyclopedia/ukemi-waza/"
+    ],
+    "verify": "Judo Canada teaches it second, after the back breakfall; OG level 1 is inferred and the 3 x 10 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "forward_shoulder_roll",
+    "branch": "acrobatics",
+    "name": "Forward shoulder roll (zenpo kaiten ukemi)",
+    "chainOrder": 50,
+    "ogLevel": 1,
+    "metric": "reps",
+    "workingRange": {
+      "min": 4,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "side_breakfall",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "The roll ends in a side breakfall."
+      },
+      {
+        "nodeId": "forward_roll",
+        "minLevel": 5,
+        "kind": "recommended"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "side_breakfall",
+    "cues": [
+      "Alternate sides; count every roll as one rep.",
+      "Roll diagonally along the arm and the back of the shoulder to the opposite hip; the head stays off the floor.",
+      "Chin in, look towards the far shoulder; keep the leading arm round like a wheel.",
+      "Start from kneeling, then from standing, then walking; slap the floor with the free arm as you finish."
+    ],
+    "sourceUrls": [
+      "https://judocanada.org/wp-content/uploads/2023/07/Guide-Chutes_2023_EN.pdf",
+      "https://gmb.io/tumbling/",
+      "https://www.judo-encyclopedia.com/judo_encyclopedia/ukemi-waza/"
+    ],
+    "verify": "Judo Canada teaches it third (kneeling, standing, on the move); OG level 1 is inferred and the 3 x 8 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "backward_shoulder_roll",
+    "branch": "acrobatics",
+    "name": "Backward shoulder roll",
+    "chainOrder": 60,
+    "ogLevel": 1,
+    "metric": "reps",
+    "workingRange": {
+      "min": 4,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "forward_shoulder_roll",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "back_breakfall",
+        "minLevel": 5,
+        "kind": "recommended"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "back_breakfall",
+    "cues": [
+      "Alternate sides; count every roll as one rep.",
+      "Sit back, turn the head away and roll over the back of one shoulder, not the neck.",
+      "Tuck the head under the other arm; walk the knees or feet around to finish."
+    ],
+    "sourceUrls": [
+      "https://gmb.io/tumbling/"
+    ],
+    "verify": "GMB teaches it after the forward shoulder roll; OG level 1 is inferred and the 3 x 8 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "bunny_hop_cartwheel",
+    "branch": "acrobatics",
+    "name": "Bunny-hop cartwheel",
+    "chainOrder": 70,
+    "ogLevel": 1,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 10
+    },
+    "trial": {
+      "sets": 3,
+      "target": 10
+    },
+    "prerequisites": [
+      {
+        "nodeId": "wall_plank",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "Comfortable taking your weight on straight arms with the hips over the shoulders."
+      },
+      {
+        "nodeId": "wrist_prep",
+        "minLevel": 5,
+        "kind": "recommended"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Stand sideways to a line, put both hands down on it and hop both feet over to the other side.",
+      "Arms straight, weight on the hands; fingers turned sideways to the line.",
+      "Lift the hips a little higher with every hop; sequence foot, hand, hand, foot, foot."
+    ],
+    "sourceUrls": [
+      "https://www.nrgq.co.uk/wp-content/uploads/2018/12/Foundation_Teaching-Progressions-CARTWHEELS.pdf",
+      "https://gmb.io/tumbling/"
+    ],
+    "verify": "NRG: \"early attempts may just be bunny-hopping around from 2 feet to 2 feet\"; GMB starts from hands-on-the-ground cartwheels. OG level 1 is inferred; the 3 x 10 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "backward_roll",
+    "branch": "acrobatics",
+    "name": "Backward roll",
+    "chainOrder": 80,
+    "ogLevel": 2,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 6
+    },
+    "trial": {
+      "sets": 3,
+      "target": 6
+    },
+    "prerequisites": [
+      {
+        "nodeId": "forward_roll",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "push_up",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "The arms have to push the body over the head, off the neck."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "tuck_rock",
+    "cues": [
+      "Hands by the ears, palms up, like holding a pizza tray; chin tucked in.",
+      "Rock back; the hands and the back of the head touch the floor together.",
+      "Push hard through the hands so the neck carries no weight, and land on the feet, not the knees.",
+      "Learn it down a slope first; stop if you feel pressure in the neck."
+    ],
+    "sourceUrls": [
+      "https://www.pinngym.com/favorite-backward-roll-progressions",
+      "https://recgympros.com/drills-for-teaching-back-rolls/"
+    ],
+    "verify": "OG level 2 is inferred; the 3 x 6 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "cartwheel",
+    "branch": "acrobatics",
+    "name": "Cartwheel",
+    "chainOrder": 90,
+    "ogLevel": 2,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 6
+    },
+    "trial": {
+      "sets": 3,
+      "target": 6
+    },
+    "prerequisites": [
+      {
+        "nodeId": "bunny_hop_cartwheel",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "wall_handstand",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "Kicking up to a handstand against the wall comes before the cartwheel (GymnasticsHQ)."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "bunny_hop_cartwheel",
+    "cues": [
+      "Start sideways to a line, arms up by the ears, one leg lifted in the direction of travel.",
+      "Lunge in and down; place hand, hand on the line, fingers turned sideways.",
+      "Legs split wide and pass through vertical; land foot, foot close to the hands, arms up."
+    ],
+    "sourceUrls": [
+      "https://www.nrgq.co.uk/wp-content/uploads/2018/12/Foundation_Teaching-Progressions-CARTWHEELS.pdf",
+      "https://gymnasticshq.com/how-to-do-a-cartwheel/",
+      "https://gmb.io/tumbling/"
+    ],
+    "verify": "Not levelled in OG2 (2 inferred, next to the wall handstand); the 3 x 6 trial is a placeholder. NRG notes narrow side splits and tight shoulders make it harder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "quarter_turn_cartwheel",
+    "branch": "acrobatics",
+    "name": "Cartwheel with a quarter turn (front to back)",
+    "chainOrder": 100,
+    "ogLevel": 2,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 6
+    },
+    "trial": {
+      "sets": 3,
+      "target": 6
+    },
+    "prerequisites": [
+      {
+        "nodeId": "cartwheel",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "cartwheel",
+    "cues": [
+      "Start facing along the line, not sideways.",
+      "First hand as in the cartwheel; turn the second hand in so its fingers point back.",
+      "Finish facing where you started from, usually in a lunge."
+    ],
+    "sourceUrls": [
+      "https://www.nrgq.co.uk/wp-content/uploads/2018/12/Foundation_Teaching-Progressions-CARTWHEELS.pdf"
+    ],
+    "verify": "NRG calls it the prerequisite of the round-off; OG level 2 is inferred and the 3 x 6 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "one_handed_cartwheel",
+    "branch": "acrobatics",
+    "name": "One-handed cartwheel",
+    "chainOrder": 110,
+    "ogLevel": 3,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 6
+    },
+    "trial": {
+      "sets": 3,
+      "target": 6
+    },
+    "prerequisites": [
+      {
+        "nodeId": "cartwheel",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "cartwheel",
+    "cues": [
+      "Place one hand, fingers sideways; the free arm sweeps down in front and out to the side.",
+      "Legs swing straight over the top with a tight torso.",
+      "First foot lands close to the hand; lift the chest quickly.",
+      "Stepping stone - put the second hand on top of the first as you go over."
+    ],
+    "sourceUrls": [
+      "https://www.nrgq.co.uk/wp-content/uploads/2018/12/Developmental_Teaching-Progressions-ONE-HANDED-CARTWHEEL.pdf",
+      "https://gymnasticshq.com/how-to-do-a-cartwheel/"
+    ],
+    "verify": "NRG: it needs the strength to hold the body on one arm; OG level 3 is inferred and the 3 x 6 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "round_off",
+    "branch": "acrobatics",
+    "name": "Round-off",
+    "chainOrder": 120,
+    "ogLevel": 3,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 5
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "quarter_turn_cartwheel",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "A good, straight front-to-back cartwheel with correct hand placement (NRG)."
+      },
+      {
+        "nodeId": "wall_handstand",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "A strong, straight kick to handstand (NRG)."
+      },
+      {
+        "nodeId": "hollow_hold",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "Good body tension and a dished exit."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility",
+      "explosive"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "quarter_turn_cartwheel",
+    "cues": [
+      "Step in with the arms by the ears, lunge deep and reach far forward.",
+      "Second hand turns to point backwards; head stays between the arms.",
+      "Snap the legs together after vertical and push hard through the shoulders.",
+      "Land on both feet facing back, in a dished (hollow) shape, not a pike."
+    ],
+    "sourceUrls": [
+      "https://www.nrgq.co.uk/wp-content/uploads/2018/12/Developmental_Teaching-Progressions-ROUND-OFF.pdf"
+    ],
+    "verify": "OG level 3 is inferred; the 3 x 5 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "aerial_cartwheel",
+    "branch": "acrobatics",
+    "name": "Aerial cartwheel",
+    "chainOrder": 130,
+    "ogLevel": 6,
+    "metric": "reps",
+    "workingRange": {
+      "min": 1,
+      "max": 3
+    },
+    "trial": {
+      "sets": 3,
+      "target": 3
+    },
+    "prerequisites": [
+      {
+        "nodeId": "round_off",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "Teaches the push off the legs."
+      },
+      {
+        "nodeId": "one_handed_cartwheel",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "mobility",
+      "explosive"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "one_handed_cartwheel",
+    "legendary": true,
+    "cues": [
+      "Learn it with a coach and on a soft mat first, ideally off a raised surface.",
+      "Drill needle kicks and fast, close cartwheels before taking the hands away.",
+      "Drive hard with the back leg and lift the chest; the legs do the work, not the arms."
+    ],
+    "sourceUrls": [
+      "https://gymnasticshq.com/how-to-do-an-aerial-cartwheel/",
+      "https://en.wikipedia.org/wiki/Aerial_cartwheel"
+    ],
+    "verify": "Not levelled in OG2; 6 (FIG A range) is inferred. The 3 x 3 trial is a placeholder. The sources advise a spotter and mats, which this app cannot check.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
   }
 ];

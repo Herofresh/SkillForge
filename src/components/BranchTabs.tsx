@@ -15,7 +15,7 @@ type Props = {
 };
 
 /**
- * The 12 branches as a horizontally scrolling row of pixel tabs (goal picker, Tree tab). Scrolls the
+ * The branches as a horizontally scrolling row of pixel tabs (goal picker, Tree tab). Scrolls the
  * selected tab into view when it first lays out, so a preselected later branch isn't hidden.
  */
 export function BranchTabs({ value, onChange, testIDPrefix = 'branch' }: Props) {

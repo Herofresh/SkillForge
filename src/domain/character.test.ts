@@ -12,6 +12,7 @@ import {
   nodeAttributes,
   nodeContribution,
   PATTERN_ATTRIBUTES,
+  RANK_BRANCHES,
   rankForMedianOgLevel,
 } from '@/domain/character';
 import { emptyProgress, selfUnlock, xpForLevel, type ProgressMap } from '@/domain/progression';
@@ -204,6 +205,24 @@ describe('computeCharacter', () => {
     expect(character.peakOgLevels.pull).toBe(2);
     expect(character.pushPullWarning).toBe(true);
     expect(character.level).toBe(characterLevel(500));
+  });
+
+  it('leaves acrobatics out of the rank median, so adding the branch cannot lower a rank', () => {
+    expect(RANK_BRANCHES).toHaveLength(BRANCHES.length - 1);
+    expect(RANK_BRANCHES).not.toContain('acrobatics');
+    // Six rank branches at OG 2, six at OG 0: median 1 whether or not acrobatics is proficient.
+    const nodes = RANK_BRANCHES.map((branch, index) =>
+      makeNode({ id: `n_${branch}`, branch, ogLevel: index < 6 ? 2 : 0, patterns: ['mobility'] }),
+    );
+    const roll = makeNode({ id: 'roll', branch: 'acrobatics', ogLevel: 6, patterns: ['balance'] });
+    const rolled = [...nodes, roll];
+    const ids = rolled.map((node) => node.id);
+    expect(computeCharacter(nodes, passed(...ids.slice(0, -1)), 0).medianOgLevel).toBe(1);
+    // Counted as a 13th branch, the median would have risen to 2.
+    const withRoll = computeCharacter(rolled, passed(...ids), 0);
+    expect(withRoll.medianOgLevel).toBe(1);
+    // It still pays into its attributes.
+    expect(withRoll.peakOgLevels.balance).toBe(6);
   });
 });
 
