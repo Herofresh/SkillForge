@@ -101,7 +101,7 @@
   "LV n"), hard prerequisites as pixel lines that glow gold once met. Tap a node → its detail;
   Focus (goals, else what's trainable), − / +, and "List" (Switch to list). Maestro `map.yaml`;
   screenshots `docs/screenshots/5.1-*.png`.
-- Polish (5.2, ADR-038, PR TBD): every celebration is a `LevelUpBurst` from `BURST_TITLES`
+- Polish (5.2, ADR-038, [PR #22](https://github.com/Herofresh/SkillForge/pull/22)): every celebration is a `LevelUpBurst` from `BURST_TITLES`
   (the node detail now plays LEVEL UP! when its level rose while open); tinted icons with a big
   fill keep their outline (`knockout`), so the Export backup button has its scroll icon again;
   leaving the progression editor with a changed draft asks "Discard changes?"; the Character
@@ -511,7 +511,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 ### Phase 5: Graph view and release
 - [x] 5.1 Graph view: dagre layout, SVG, pan/zoom, glowing unlocked edges, legendary silhouettes
   (own layered layout instead of dagre, View-drawn edges; ADR-037, [PR #21](https://github.com/Herofresh/SkillForge/pull/21))
-- [x] 5.2 Animations and polish: one reveal vocabulary (`BURST_TITLES`, `useLevelUpKey`, node-detail LEVEL UP!), tinted icons keep their outline (`knockout`; Export icon back), "Discard changes?" when leaving the editor with a changed draft, consistent empty states, `npm run e2e` without Maestro on PATH (ADR-038, PR TBD)
+- [x] 5.2 Animations and polish: one reveal vocabulary (`BURST_TITLES`, `useLevelUpKey`, node-detail LEVEL UP!), tinted icons keep their outline (`knockout`; Export icon back), "Discard changes?" when leaving the editor with a changed draft, consistent empty states, `npm run e2e` without Maestro on PATH (ADR-038, [PR #22](https://github.com/Herofresh/SkillForge/pull/22))
 - [ ] 5.3 EAS build profile and Android APK
 
 ### Later / Backlog
