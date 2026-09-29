@@ -148,18 +148,29 @@
   (confirmed; later sets move up, `setIndex` stays dense). "Reorder" on the session list shows
   Up / Down per exercise; a strength pair moves as one. Pure functions in `train.ts`, the draft is
   saved after each change, old drafts load unchanged.
+- Release v0.3.0 (5.11, PR link below): timer extras (5.8), edit/delete sets + reorder (5.9), history
+  links + replay onboarding (5.10), as the GitHub pre-release `v0.3.0` (arm64 + universal). No
+  database or backup change since v0.2.0. Upgrade check (CONTEXT.md "Release upgrade check") passed
+  on the emulator from the v0.2.0 APK **and** straight from the v0.1.0-preview1 APK: hero, goal,
+  session and the 40 XP kept.
 
 ## Next up
-1. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
+1. On the user's phone: install v0.3.0 over the installed build (Update, no uninstall) and try the
+   timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
+2. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
    `eas init` links the project) and decide the signing key (EAS-managed credentials or an own
    keystore kept outside git). Then install `expo-dev-client` for the development profile.
-2. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
 ## Blockers
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Release v0.3.0 (task 5.11):** same routine as 5.7. Test the upgrade from every release a user
+  may still have (0.1.0 and 0.2.0 so far); the seed flow works on both. The emulator got very slow
+  after hours of E2E runs (taps ~60 s, adb hanging): cold-boot it and `adb kill-server` when
+  flows start timing out.
 - **Live-session edits (task 5.9, ADR-045):**
   - Domain: `moveExercise` / `canMoveExercise` (units = single or adjacent pair partners),
     `editSessionSet`, `deleteSessionSet` in `src/domain/train.ts`; `liveView` adds `setIndex` and
@@ -677,6 +688,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.8 Timer extras: pause/resume, buzz at go and at rest end (ADR-044, [PR #30](https://github.com/Herofresh/SkillForge/pull/30))
 - [x] 5.9 Edit/delete a logged set, reorder exercises in the live session (ADR-045, [PR #31](https://github.com/Herofresh/SkillForge/pull/31))
 - [x] 5.10 Node history opens the past session; replay onboarding from Settings (ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29))
+- [x] 5.11 v0.3.0 release: version 0.3.0 / versionCode 3, upgrade check from v0.2.0 and straight from v0.1.0 (ADR-043 routine, PR link below)
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
@@ -707,3 +719,7 @@ compiled into a typed module for the app; users can layer their own changes on t
   newly lit edge on the tree map
 - Build script (5.7 review, ADR-043): delete the APK from `builds/` when the signer check fails
   (today the check runs after the copy, so a wrongly signed APK stays there)
+- Onboarding replay (5.10 review): the equipment step's "Remove" deletes a profile at once; during
+  a replay these are the user's real profiles, while Settings asks first. Reuse that confirmation
+- E2E (5.8 review): `train.yaml` asserts the rest panel right after set 1, which races the 30 s rest
+  when the emulator is slow; wait on something that doesn't expire
