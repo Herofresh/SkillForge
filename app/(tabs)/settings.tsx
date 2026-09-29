@@ -23,11 +23,9 @@ import { useAppStore } from '@/store/useAppStore';
  */
 export default function SettingsScreen() {
   const router = useRouter();
-  const deleteProfile = useAppStore((state) => state.deleteEquipmentProfile);
   // Re-mounts the name field when the stored name changes elsewhere (e.g. an import).
   const heroName = useAppStore((state) => state.profile?.heroName ?? '');
   const [renaming, setRenaming] = useState<EquipmentProfile | undefined>();
-  const [removing, setRemoving] = useState<EquipmentProfile | undefined>();
 
   return (
     <Screen testID="settings-screen">
@@ -40,7 +38,7 @@ export default function SettingsScreen() {
         <PixelText variant="small" tone="textMuted">
           Workouts only use the equipment of the place you pick on the Train tab.
         </PixelText>
-        <EquipmentProfileEditor onRename={setRenaming} onRemove={setRemoving} />
+        <EquipmentProfileEditor onRename={setRenaming} />
       </View>
 
       <ProgressionsPanel />
@@ -59,26 +57,6 @@ export default function SettingsScreen() {
       )}
 
       {renaming && <RenameSheet profile={renaming} onClose={() => setRenaming(undefined)} />}
-      <PixelModal
-        visible={removing !== undefined}
-        title={`Remove ${removing?.name ?? ''}?`}
-        onClose={() => setRemoving(undefined)}
-        closeLabel="Keep it"
-        testID="remove-dialog">
-        <PixelText>
-          The profile and its equipment list are removed. Sessions you logged with it stay in your
-          history.
-        </PixelText>
-        <PixelButton
-          label="Remove"
-          variant="danger"
-          onPress={() => {
-            if (removing) deleteProfile(removing.id);
-            setRemoving(undefined);
-          }}
-          testID="remove-confirm"
-        />
-      </PixelModal>
     </Screen>
   );
 }

@@ -153,6 +153,8 @@
   database or backup change since v0.2.0. Upgrade check (CONTEXT.md "Release upgrade check") passed
   on the emulator from the v0.2.0 APK **and** straight from the v0.1.0-preview1 APK: hero, goal,
   session and the 40 XP kept.
+- Remove confirmation everywhere (5.12, [PR #34](https://github.com/Herofresh/SkillForge/pull/34)): the equipment step of onboarding now asks
+  "Remove <name>?" like Settings; the dialog lives in `EquipmentProfileEditor`, so both use one.
 - `build:apk` (5.13, ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35)): the signer check runs on Gradle's APK before
   the copy, so a wrongly signed APK never lands in `builds/`; path and SHA-256 are printed only
   for an APK that passed.
@@ -170,6 +172,10 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Remove confirmation (task 5.12):** `EquipmentProfileEditor` owns the "Remove <name>?" sheet
+  (`remove-dialog`, `remove-confirm`, "Keep it") and always asks, on first run too; the `onRemove`
+  prop is gone. Settings only passes `onRename`. No Maestro change needed (`settings.yaml` already
+  confirms; `onboarding.yaml` never taps Remove); not run on the emulator by the author.
 - **build:apk signer order (task 5.13):** only the order in `scripts/buildApk.ts` `main` changed
   (`checkSigner` on `GRADLE_APK_PATH`, then copy); verified by typecheck, lint and tests, not by a
   real Gradle build. The next release build is the first real run.
@@ -697,6 +703,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.11 v0.3.0 release: version 0.3.0 / versionCode 3, upgrade check from v0.2.0 and straight from v0.1.0 (ADR-043 routine, [PR #32](https://github.com/Herofresh/SkillForge/pull/32); release [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0))
 
 #### Next
+- [x] 5.12 Confirm before removing an equipment profile in onboarding ([PR #34](https://github.com/Herofresh/SkillForge/pull/34))
 - [x] 5.13 build:apk checks the signer before copying the APK (ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35))
 
 ### Later / Backlog
@@ -726,7 +733,5 @@ compiled into a typed module for the app; users can layer their own changes on t
   (4.7–4.8, ADR-036); keep a changed draft across an app kill (5.2 only asks on leaving)
 - Polish extras (5.2, ADR-038): haptics on level-up/unlock (expo-haptics, optional), animate a
   newly lit edge on the tree map
-- Onboarding replay (5.10 review): the equipment step's "Remove" deletes a profile at once; during
-  a replay these are the user's real profiles, while Settings asks first. Reuse that confirmation
 - E2E (5.8 review): `train.yaml` asserts the rest panel right after set 1, which races the 30 s rest
   when the emulator is slow; wait on something that doesn't expire

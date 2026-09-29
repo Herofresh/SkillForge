@@ -95,12 +95,11 @@ describe('SessionHistoryRow', () => {
 });
 
 describe('EquipmentProfileEditor', () => {
-  it('adds a profile and hands rename/remove to the screen', async () => {
+  it('adds a profile and hands rename to the screen', async () => {
     const store = await startStore();
     const onRename = jest.fn();
-    const onRemove = jest.fn();
     const user = userEvent.setup();
-    await render(<EquipmentProfileEditor onRename={onRename} onRemove={onRemove} />);
+    await render(<EquipmentProfileEditor onRename={onRename} />);
     await user.type(screen.getByTestId('new-profile-input'), 'Gym');
     await user.press(screen.getByTestId('add-profile'));
     expect(store.getState().equipmentProfiles.map((profile) => profile.name)).toEqual([
@@ -110,9 +109,24 @@ describe('EquipmentProfileEditor', () => {
     ]);
     await user.press(screen.getByRole('button', { name: 'Rename Home' }));
     expect(onRename).toHaveBeenCalledWith(expect.objectContaining({ id: 'home' }));
+  });
+
+  it('asks before removing a profile, also without Settings (onboarding, PLAN 5.12)', async () => {
+    const store = await startStore();
+    const user = userEvent.setup();
+    await render(<EquipmentProfileEditor />);
     await user.press(screen.getByRole('button', { name: 'Remove Park' }));
-    expect(onRemove).toHaveBeenCalledWith(expect.objectContaining({ id: 'park' }));
-    expect(store.getState().equipmentProfiles).toHaveLength(3); // the screen confirms first
+    expect(screen.getByText('Remove Park?')).toBeOnTheScreen();
+    expect(store.getState().equipmentProfiles).toHaveLength(2); // nothing removed yet
+    // The backdrop and the button both close the sheet.
+    await user.press(screen.getAllByRole('button', { name: 'Keep it' })[0]);
+    expect(store.getState().equipmentProfiles).toHaveLength(2);
+
+    await user.press(screen.getByRole('button', { name: 'Remove Park' }));
+    await user.press(screen.getByTestId('remove-confirm'));
+    expect(store.getState().equipmentProfiles.map((profile) => profile.id)).toEqual(['home']);
+    // The last profile has no Remove button.
+    expect(screen.queryByRole('button', { name: 'Remove Home' })).toBeNull();
   });
 });
 
