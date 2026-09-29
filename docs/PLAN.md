@@ -153,6 +153,8 @@
   database or backup change since v0.2.0. Upgrade check (CONTEXT.md "Release upgrade check") passed
   on the emulator from the v0.2.0 APK **and** straight from the v0.1.0-preview1 APK: hero, goal,
   session and the 40 XP kept.
+- Remove confirmation everywhere (5.12, PR_LINK): the equipment step of onboarding now asks
+  "Remove <name>?" like Settings; the dialog lives in `EquipmentProfileEditor`, so both use one.
 
 ## Next up
 1. On the user's phone: install v0.3.0 over the installed build (Update, no uninstall) and try the
@@ -167,6 +169,10 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Remove confirmation (task 5.12):** `EquipmentProfileEditor` owns the "Remove <name>?" sheet
+  (`remove-dialog`, `remove-confirm`, "Keep it") and always asks, on first run too; the `onRemove`
+  prop is gone. Settings only passes `onRename`. No Maestro change needed (`settings.yaml` already
+  confirms; `onboarding.yaml` never taps Remove); not run on the emulator by the author.
 - **Release v0.3.0 (task 5.11):** same routine as 5.7. Test the upgrade from every release a user
   may still have (0.1.0 and 0.2.0 so far); the seed flow works on both. The emulator got very slow
   after hours of E2E runs (taps ~60 s, adb hanging): cold-boot it and `adb kill-server` when
@@ -690,6 +696,9 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.10 Node history opens the past session; replay onboarding from Settings (ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29))
 - [x] 5.11 v0.3.0 release: version 0.3.0 / versionCode 3, upgrade check from v0.2.0 and straight from v0.1.0 (ADR-043 routine, PR link below)
 
+#### Next
+- [x] 5.12 Confirm before removing an equipment profile in onboarding (PR_LINK)
+
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
@@ -719,7 +728,5 @@ compiled into a typed module for the app; users can layer their own changes on t
   newly lit edge on the tree map
 - Build script (5.7 review, ADR-043): delete the APK from `builds/` when the signer check fails
   (today the check runs after the copy, so a wrongly signed APK stays there)
-- Onboarding replay (5.10 review): the equipment step's "Remove" deletes a profile at once; during
-  a replay these are the user's real profiles, while Settings asks first. Reuse that confirmation
 - E2E (5.8 review): `train.yaml` asserts the rest panel right after set 1, which races the 30 s rest
   when the emulator is slow; wait on something that doesn't expire

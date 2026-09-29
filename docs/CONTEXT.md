@@ -74,7 +74,7 @@ app/                    expo-router screens (UI only, no game logic)
   onboarding/           first-run flow (PLAN 4.1, ADR-031), a Stack; every step saves through the store
     _layout.tsx         Stack; redirects to /tree once onboarding is completed
     index.tsx           1 welcome + "Name your hero" (setHeroName)
-    equipment.tsx       2 Home/Park tag chips, add/remove profiles (equipment CRUD)
+    equipment.tsx       2 Home/Park tag chips, add/remove (confirmed) profiles (equipment CRUD)
     goals.tsx           3 branch tabs + node rows, 1–5 goals (toggleGoal)
     assessment.tsx      4 optional: anchors on the goal paths + search → trial/[nodeId]
     trial/[nodeId].tsx  Trial form: warnings to acknowledge, a stepper per set, logTrial, result + burst
@@ -235,7 +235,8 @@ src/
                         (Train summary and past session)
     character/          AttributeRadar (rasterized pixel radar), RankCrest (RANK_ICONS),
                         SessionHistoryRow, GoalProgressCard
-    equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form (onboarding, Settings)
+    equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form + the "Remove?"
+                        confirmation (onboarding, Settings)
     settings/           BackupPanel (export, import confirm, rejection issues, undo), AboutPanel,
                         ProgressionsPanel (count of tree changes → My progressions),
                         ReplayOnboardingPanel (confirm → replayOnboarding)

@@ -6,31 +6,38 @@ import { EQUIPMENT_TAGS, type EquipmentProfile, type EquipmentTag } from '@/doma
 import { useAppStore } from '@/store/useAppStore';
 
 import { Spacing } from '../theme';
-import { PixelButton, PixelChip, PixelFrame, PixelIcon, PixelText, PixelTextInput } from '../ui';
+import {
+  PixelButton,
+  PixelChip,
+  PixelFrame,
+  PixelIcon,
+  PixelModal,
+  PixelText,
+  PixelTextInput,
+} from '../ui';
 
 /** Tags a new profile starts with: every place has a floor. */
 export const NEW_PROFILE_TAGS: readonly EquipmentTag[] = ['floor'];
 
 type Props = {
-  /** What "Remove" does; deletes the profile right away when omitted (onboarding). */
-  onRemove?: (profile: EquipmentProfile) => void;
   /** Shows a "Rename" button per profile (Settings). */
   onRename?: (profile: EquipmentProfile) => void;
 };
 
 /**
  * The equipment profiles (ADR-005) as cards of tag chips, plus a form to add a place. Every change
- * goes straight to the store. Used by onboarding step 2 and Settings (PLAN 4.1, 4.6). The last
- * profile can't be removed: the Train tab needs one.
+ * goes straight to the store. Used by onboarding step 2 and Settings (PLAN 4.1, 4.6). "Remove" always
+ * asks first, in both places (PLAN 5.12): a replayed onboarding shows the user's real profiles. The
+ * last profile can't be removed: the Train tab needs one.
  */
-export function EquipmentProfileEditor({ onRemove, onRename }: Props) {
+export function EquipmentProfileEditor({ onRename }: Props) {
   const profiles = useAppStore((state) => state.equipmentProfiles);
   const updateProfile = useAppStore((state) => state.updateEquipmentProfile);
   const createProfile = useAppStore((state) => state.createEquipmentProfile);
   const deleteProfile = useAppStore((state) => state.deleteEquipmentProfile);
   const [newName, setNewName] = useState('');
+  const [removing, setRemoving] = useState<EquipmentProfile | undefined>();
   const canAdd = newName.trim().length > 0;
-  const remove = onRemove ?? ((profile: EquipmentProfile) => deleteProfile(profile.id));
 
   const add = () => {
     if (!canAdd) return;
@@ -80,7 +87,7 @@ export function EquipmentProfileEditor({ onRemove, onRename }: Props) {
                   label={onRename ? 'Remove' : `Remove ${profile.name}`}
                   variant="danger"
                   accessibilityLabel={`Remove ${profile.name}`}
-                  onPress={() => remove(profile)}
+                  onPress={() => setRemoving(profile)}
                   testID={`remove-${profile.id}`}
                   style={styles.flex}
                 />
@@ -108,6 +115,26 @@ export function EquipmentProfileEditor({ onRemove, onRename }: Props) {
           testID="add-profile"
         />
       </PixelFrame>
+      <PixelModal
+        visible={removing !== undefined}
+        title={`Remove ${removing?.name ?? ''}?`}
+        onClose={() => setRemoving(undefined)}
+        closeLabel="Keep it"
+        testID="remove-dialog">
+        <PixelText>
+          The profile and its equipment list are removed. Sessions you logged with it stay in your
+          history.
+        </PixelText>
+        <PixelButton
+          label="Remove"
+          variant="danger"
+          onPress={() => {
+            if (removing) deleteProfile(removing.id);
+            setRemoving(undefined);
+          }}
+          testID="remove-confirm"
+        />
+      </PixelModal>
     </>
   );
 }
