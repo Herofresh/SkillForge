@@ -7,7 +7,9 @@ import { blockViews, liveView, type SummaryView } from '@/domain/trainView';
 import type { SafeguardWarning, WorkoutPlan } from '@/domain/types';
 
 import { SetTimerPanel } from './timer/SetTimerPanel';
+import { CUE_VIBRATIONS } from './timer/vibration';
 import { ExerciseCard } from './train/ExerciseCard';
+import { RestPanel } from './train/RestPanel';
 import { SessionResultPanels } from './train/SessionResultPanels';
 import { SetLogger } from './train/SetLogger';
 import { TrainWarningList } from './train/TrainWarningList';
@@ -54,6 +56,8 @@ describe('ExerciseCard', () => {
 const timerHandlers = () => ({
   onStartTimer: jest.fn(),
   onStopTimer: jest.fn(() => undefined),
+  onPauseTimer: jest.fn(),
+  onResumeTimer: jest.fn(),
   onResetTimer: jest.fn(),
 });
 
@@ -152,13 +156,33 @@ describe('SetLogger', () => {
 
 describe('SetTimerPanel', () => {
   const NOW = 1_790_000_000_000;
-  const handlers = () => ({ onStart: jest.fn(), onStop: jest.fn(), onReset: jest.fn() });
+  const handlers = () => ({
+    onStart: jest.fn(),
+    onStop: jest.fn(),
+    onPause: jest.fn(),
+    onResume: jest.fn(),
+    onReset: jest.fn(),
+  });
+  /** Lets the screen clock tick once a second, like on a phone. */
+  const tick = async (seconds: number) => {
+    for (let i = 0; i < seconds; i += 1) {
+      await act(async () => {
+        jest.advanceTimersByTime(1_000);
+      });
+    }
+  };
+  let vibrate: jest.SpyInstance;
 
-  beforeEach(() => jest.useFakeTimers({ now: NOW }));
-  afterEach(() => jest.useRealTimers());
+  beforeEach(() => {
+    jest.useFakeTimers({ now: NOW });
+    vibrate = jest.spyOn(Vibration, 'vibrate').mockImplementation(() => {});
+  });
+  afterEach(() => {
+    vibrate.mockRestore();
+    jest.useRealTimers();
+  });
 
-  it('gets ready, counts the hold down, vibrates at the target and counts on past it', async () => {
-    const vibrate = jest.spyOn(Vibration, 'vibrate').mockImplementation(() => {});
+  it('gets ready, buzzes at go, counts the hold down, buzzes at the target and counts on', async () => {
     await render(
       <SetTimerPanel
         metric="hold_s"
@@ -171,27 +195,96 @@ describe('SetTimerPanel', () => {
     expect(screen.getByTestId('t-clock')).toHaveTextContent('3');
     expect(screen.getByText('Get ready')).toBeOnTheScreen();
     expect(screen.queryByTestId('t-stop')).toBeNull();
+    expect(screen.getByTestId('t-pause')).toHaveTextContent('Pause');
 
-    await act(async () => {
-      jest.advanceTimersByTime(5_000);
-    });
+    await tick(2);
+    expect(vibrate).not.toHaveBeenCalled();
+    await tick(1);
+    expect(screen.getByText('Hold')).toBeOnTheScreen();
+    expect(vibrate).toHaveBeenCalledTimes(1);
+    expect(vibrate).toHaveBeenLastCalledWith(CUE_VIBRATIONS.go);
+
+    await tick(2);
     expect(screen.getByTestId('t-clock')).toHaveTextContent('0:08');
     expect(screen.getByTestId('t-stop')).toHaveTextContent('Stop');
-    expect(vibrate).not.toHaveBeenCalled();
+    expect(vibrate).toHaveBeenCalledTimes(1);
 
-    await act(async () => {
-      jest.advanceTimersByTime(8_000);
-    });
+    await tick(8);
     expect(screen.getByText('Target reached')).toBeOnTheScreen();
     expect(screen.getByTestId('t-clock')).toHaveTextContent('+0 s');
-    expect(vibrate).toHaveBeenCalledTimes(1);
+    expect(vibrate).toHaveBeenCalledTimes(2);
+    expect(vibrate).toHaveBeenLastCalledWith(CUE_VIBRATIONS.target);
 
-    await act(async () => {
-      jest.advanceTimersByTime(7_000);
-    });
+    await tick(7);
     expect(screen.getByTestId('t-clock')).toHaveTextContent('+7 s');
-    expect(vibrate).toHaveBeenCalledTimes(1);
-    vibrate.mockRestore();
+    expect(vibrate).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not buzz for a moment that passed while the screen was away', async () => {
+    await render(
+      <SetTimerPanel
+        metric="hold_s"
+        targetSec={10}
+        timer={{ startedAt: NOW }}
+        testID="t"
+        {...handlers()}
+      />,
+    );
+    // One long gap (the app in the background) jumps past "go" and the target.
+    await act(async () => {
+      jest.setSystemTime(NOW + 20_000);
+      jest.advanceTimersByTime(1_000);
+    });
+    expect(screen.getByText('Target reached')).toBeOnTheScreen();
+    expect(vibrate).not.toHaveBeenCalled();
+  });
+
+  it('pauses: the clock stands still, Resume shows, and a resumed timer runs on', async () => {
+    const actions = handlers();
+    const view = await render(
+      <SetTimerPanel
+        metric="hold_s"
+        targetSec={30}
+        timer={{ startedAt: NOW - 13_000 }}
+        testID="t"
+        {...actions}
+      />,
+    );
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('0:20');
+    await fireEvent.press(screen.getByTestId('t-pause'));
+    expect(actions.onPause).toHaveBeenCalled();
+
+    await view.rerender(
+      <SetTimerPanel
+        metric="hold_s"
+        targetSec={30}
+        timer={{ startedAt: NOW - 13_000, pausedAt: NOW }}
+        testID="t"
+        {...actions}
+      />,
+    );
+    await tick(5);
+    expect(screen.getByText('Paused')).toBeOnTheScreen();
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('0:20');
+    expect(screen.getByTestId('t-stop')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId('t-resume'));
+    expect(actions.onResume).toHaveBeenCalled();
+
+    await view.rerender(
+      <SetTimerPanel
+        metric="hold_s"
+        targetSec={30}
+        timer={{ startedAt: NOW - 13_000, pausedMs: 5_000 }}
+        testID="t"
+        {...actions}
+      />,
+    );
+    expect(screen.getByText('Hold')).toBeOnTheScreen();
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('0:20');
+    await tick(2);
+    expect(screen.getByTestId('t-clock')).toHaveTextContent('0:18');
+    expect(screen.getByTestId('t-pause')).toBeOnTheScreen();
+    expect(vibrate).not.toHaveBeenCalled();
   });
 
   it('runs a stopwatch with Done and Cancel', async () => {
@@ -229,6 +322,50 @@ describe('SetTimerPanel', () => {
     expect(screen.getByText('Held')).toBeOnTheScreen();
     expect(screen.getByTestId('t-clock')).toHaveTextContent('0:37');
     expect(screen.getByTestId('t-reset')).toHaveTextContent('Reset timer');
+  });
+});
+
+describe('RestPanel', () => {
+  const NOW = 1_790_000_000_000;
+  const session = startSession(sessionPlan(WORKOUT, 'home', 30), 's', NOW);
+
+  beforeEach(() => jest.useFakeTimers({ now: NOW }));
+  afterEach(() => jest.useRealTimers());
+
+  it('buzzes once when the rest countdown reaches zero on screen (PLAN 5.8)', async () => {
+    const vibrate = jest.spyOn(Vibration, 'vibrate').mockImplementation(() => {});
+    await render(
+      <RestPanel session={{ ...session, restEndsAt: NOW + 2_000 }} onSkip={jest.fn()} />,
+    );
+    expect(screen.getByTestId('rest-countdown')).toBeOnTheScreen();
+    await act(async () => {
+      jest.advanceTimersByTime(1_000);
+    });
+    expect(vibrate).not.toHaveBeenCalled();
+    await act(async () => {
+      jest.advanceTimersByTime(1_000);
+    });
+    expect(screen.queryByTestId('rest-panel')).toBeNull();
+    expect(vibrate).toHaveBeenCalledTimes(1);
+    expect(vibrate).toHaveBeenLastCalledWith(CUE_VIBRATIONS.rest_end);
+    await act(async () => {
+      jest.advanceTimersByTime(3_000);
+    });
+    expect(vibrate).toHaveBeenCalledTimes(1);
+    vibrate.mockRestore();
+  });
+
+  it('stays quiet for a rest that was over before the screen opened', async () => {
+    const vibrate = jest.spyOn(Vibration, 'vibrate').mockImplementation(() => {});
+    await render(
+      <RestPanel session={{ ...session, restEndsAt: NOW - 5_000 }} onSkip={jest.fn()} />,
+    );
+    await act(async () => {
+      jest.advanceTimersByTime(2_000);
+    });
+    expect(screen.queryByTestId('rest-panel')).toBeNull();
+    expect(vibrate).not.toHaveBeenCalled();
+    vibrate.mockRestore();
   });
 });
 

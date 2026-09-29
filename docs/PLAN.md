@@ -135,6 +135,10 @@
   (`upgrade-verify.yaml`); screenshots `docs/screenshots/5.7-*.png` (also the launcher icon and
   the Acrobatics tab in the APK). `npm run build:apk` now fails unless the APK's signer is
   `RELEASE_SIGNER_SHA256` (the key every published APK uses).
+- Timer extras (5.8, ADR-044, [PR #30](https://github.com/Herofresh/SkillForge/pull/30)): the set timer has Pause / Resume (stored in the draft
+  as `pausedAt` / `pausedMs`, so a paused timer survives an app kill; the paused time is not
+  measured), and the phone buzzes at "go" (one short), at the hold target (two long, as before) and
+  when the rest countdown reaches zero (three short), only while the app is open.
 - History links and replay onboarding (5.10, ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29)): node detail history rows open
   the past session (onboarding Trials too); Settings → **Replay onboarding** (confirmed) runs the
   intro again from the current hero, equipment and goals without deleting anything; the first
@@ -151,6 +155,22 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Timer extras (task 5.8, ADR-044):**
+  - Domain: `setTimer.ts` has `pauseTimer`, `resumeTimer`, `stopTimer`, `isPaused`, `TimerCue`,
+    `timerCue`, `restCue`, `CUE_MAX_GAP_MS`; `reachedTarget` is gone (replaced by `timerCue`).
+    `TimerReading.paused` is new. `train.ts` has `pauseSetTimer` / `resumeSetTimer`;
+    `parseActiveSession` accepts timers with or without `pausedAt` / `pausedMs`.
+  - Store: `pauseTrainingTimer()`, `resumeTrainingTimer()`. `useTrialAttempt` has
+    `pauseTimer(index)` / `resumeTimer(index)`; `TrialSetsPanel` shows timers only when all five
+    timer handlers are given.
+  - UI: `SetTimerPanel` takes `onPause` / `onResume` (ids `<prefix>-pause`, `<prefix>-resume`;
+    Cancel moved to its own full-width row). Vibration patterns are in
+    `src/components/timer/vibration.ts` (`CUE_VIBRATIONS`, `buzz`). `RestPanel` buzzes at zero.
+  - E2E: `train.yaml` now pauses the second set's timer, kills the app and resumes it after the
+    restart. Not run by the author (no emulator in that session); the cues are covered only by
+    component tests (fake timers + a `Vibration` spy). Vibration is untested on a real phone.
+  - Not built (backlog): sound, a background notification, pausing the rest countdown, timers for
+    rep Trials.
 - **History links and replay onboarding (task 5.10, ADR-046):**
   - Node detail: `NodeHistoryList` takes `onOpenSession`; every row is a button that pushes
     `app/session/[sessionId]` (onboarding test-outs are ordinary Trial sessions, so they open too).
@@ -174,7 +194,7 @@
     aren't run by `npm run e2e` (subfolder).
 - **Exercise timer (task 5.4, ADR-040):**
   - Domain: `src/domain/setTimer.ts` (`timerModeFor`, `readTimer`, `measuredSeconds`,
-    `reachedTarget`, `formatTimerClock`, `timerCaption`, `spokenTimer`, `timedPerformance`,
+    `reachedTarget` (now `timerCue`, 5.8), `formatTimerClock`, `timerCaption`, `spokenTimer`, `timedPerformance`,
     `elapsedSeconds`, `totalDurationSec`); `train.ts` has `ActiveSession.timer`, `startSetTimer`,
     `stopSetTimer`, `clearSetTimer`, and `logSessionSet` writes `durationSec`. `formatClock` is in
     `format.ts`; `loggedSetText`, `sessionDurationSec` and `summaryView(result, nodes, session?)` are
@@ -194,8 +214,8 @@
     the summary's session / exercise times). `docs/screenshots/5.4-timer.png` is from that run.
     The hold countdown and vibration are only covered by component tests (the first planned
     exercise is a rep warm-up); keep-awake and vibration are untested on a real phone.
-  - Not built (backlog "Timer extras"): sound, pause, a buzz at "go", a background notification at
-    the target, timers for rep Trials.
+  - Not built in 5.4: pause and a buzz at "go" came in 5.8 (see above); sound, a background
+    notification and timers for rep Trials are still in the backlog.
 - **App icon (task 5.6, ADR-042):**
   - Edit `MOTIF_ROWS` in `scripts/appIcon.ts` (roles → `Palette` keys in `MOTIF_COLORS`), run
     `npm run icon:build`, look at `docs/screenshots/5.6-app-icon.png` (bottom row: 96 / 48 px),
@@ -637,6 +657,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.7 v0.2.0 release: upgrade-safe over v0.1.0 (same package + signing key, higher versionCode, additive migrations), APK on GitHub; pinned signer check in `build:apk`, release upgrade flows (ADR-043, [PR #27](https://github.com/Herofresh/SkillForge/pull/27); release [v0.2.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.2.0))
 
 #### v0.3.0
+- [x] 5.8 Timer extras: pause/resume, buzz at go and at rest end (ADR-044, [PR #30](https://github.com/Herofresh/SkillForge/pull/30))
 - [x] 5.10 Node history opens the past session; replay onboarding from Settings (ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29))
 
 ### Later / Backlog
@@ -651,8 +672,9 @@ compiled into a typed module for the app; users can layer their own changes on t
 - Settings extras: units/preferences once there are any
 - Replay onboarding extras (5.10, ADR-046): a "Back to the app" exit on the hero step during a
   replay (today: finish it, or restart the app)
-- Timer extras (after 5.4, ADR-040): sound, pause, a vibration at "go", a notification when a hold's
-  target passes while the app is in the background, timers for rep Trials, pausing the rest countdown
+- Timer extras (after 5.8, ADR-040 / ADR-044): sound, a notification when a hold's target or the
+  rest's end passes while the app is in the background, timers for rep Trials, pausing the rest
+  countdown
 - Exercise demo animations: pixel-art animations per exercise, possibly generated/created with
   different AI tools (user idea 2026-09-28, not now)
 - Train flow extras: reorder exercises, shuffle the plan (seed), edit or delete a logged set

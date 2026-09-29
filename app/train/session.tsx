@@ -57,6 +57,8 @@ function LiveSession({ session }: { session: ActiveSession }) {
   const skipRest = useAppStore((state) => state.skipTrainingRest);
   const startTimer = useAppStore((state) => state.startTrainingTimer);
   const stopTimer = useAppStore((state) => state.stopTrainingTimer);
+  const pauseTimer = useAppStore((state) => state.pauseTrainingTimer);
+  const resumeTimer = useAppStore((state) => state.resumeTrainingTimer);
   const resetTimer = useAppStore((state) => state.resetTrainingTimer);
   const addOptions = useAppStore((state) => state.addTrainingOptions);
   const addExercise = useAppStore((state) => state.addTrainingExercise);
@@ -127,6 +129,8 @@ function LiveSession({ session }: { session: ActiveSession }) {
               }
               onStartTimer={() => startTimer(current.exercise.key)}
               onStopTimer={stopTimer}
+              onPauseTimer={pauseTimer}
+              onResumeTimer={resumeTimer}
               onResetTimer={resetTimer}
             />
             <PixelButton

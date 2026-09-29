@@ -113,9 +113,11 @@ import {
   finishedSession,
   logSessionSet,
   markedPerformance,
+  pauseSetTimer,
   projectedSets,
   removeExercise,
   replaceExercise,
+  resumeSetTimer,
   selectExercise,
   sessionPlan,
   skipExercise,
@@ -366,6 +368,10 @@ export interface AppState {
   startTrainingTimer(key: string): void;
   /** Stops the running timer; returns what it measured (whole seconds), `undefined` without one. */
   stopTrainingTimer(): number | undefined;
+  /** Pauses the running timer (stored in the draft, so it survives an app kill; PLAN 5.8). */
+  pauseTrainingTimer(): void;
+  /** Resumes the paused timer; the paused time is not measured. */
+  resumeTrainingTimer(): void;
   /** Cancels or resets the timer; the set is then logged without a duration. */
   resetTrainingTimer(): void;
   /** Nodes to add to the live session (or the plan): suggestions, or matches for `query`. */
@@ -779,6 +785,14 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const at = now();
         saveSession(stopSetTimer(session, at));
         return measuredSeconds(timer, timerModeFor(exercise.metric), at);
+      },
+
+      pauseTrainingTimer() {
+        saveSession(pauseSetTimer(requireSession(), now()));
+      },
+
+      resumeTrainingTimer() {
+        saveSession(resumeSetTimer(requireSession(), now()));
       },
 
       resetTrainingTimer() {

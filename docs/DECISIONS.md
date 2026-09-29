@@ -1190,6 +1190,39 @@ Template:
   apksigner call. The upgrade check needs the previous APK (from its GitHub release) and an
   emulator, about 5 minutes. Debug signing stays a sideloading-only choice until 5.3b.
 
+## ADR-044: Timer pause from timestamps, vibration cues at "go" and at the rest end (PLAN 5.8)
+- Date: 2026-09-29 · Status: Accepted (extends ADR-040; the number may need a renumber when other
+  ADRs written in parallel land first)
+- Context: the user uses the exercise timer instead of a separate clock app (request 2026-09-28).
+  ADR-040 left out pause, a buzz at "go" and anything at the rest's end, so the user had to look at
+  the phone to know when to start holding or when the rest was over.
+- Decision:
+  - **Pause from timestamps:** `SetTimer` gains two optional fields: `pausedAt` (set while paused)
+    and `pausedMs` (the paused time of pauses already resumed). Readings use
+    `(stoppedAt ?? pausedAt ?? now) − startedAt − pausedMs`, so a paused timer is frozen and the
+    paused time is never measured. `pauseTimer` / `resumeTimer` / `stopTimer` in
+    `src/domain/setTimer.ts` are pure (a stop while paused stops at the pause); `train.ts` wraps
+    them for the live session (`pauseSetTimer`, `resumeSetTimer`, `stopSetTimer`) and the store
+    saves the draft after each (`pauseTrainingTimer`, `resumeTrainingTimer`), so a paused timer
+    survives an app kill. Old drafts (no timer, or a 5.4 timer without the new fields) parse as
+    they are and read as never paused. Trials use the same functions in screen state. Pause works
+    in every phase (get-ready too). The screen stays awake only while the clock ticks, not while
+    paused. The readout is keyed by start and `pausedMs`, so a resume starts a fresh screen clock.
+  - **Cues:** `TimerCue` = `go` | `target` | `rest_end`. `timerCue(previous, next, now)` gives `go`
+    on the step out of get-ready and `target` on holding → overtime; `restCue` gives `rest_end` when
+    the rest seconds left reach 0. Both need the previous reading (value + time) and stay quiet when
+    it is older than `CUE_MAX_GAP_MS` (2.5 s): the screen reads once a second, so a longer gap means
+    the app was in the background when the moment passed and there should be no late buzz on
+    return. A rest that was over before the panel opened stays quiet too.
+  - **Patterns:** named in `src/components/timer/vibration.ts` (`CUE_VIBRATIONS`, `SHORT_BUZZ_MS`
+    200, `LONG_BUZZ_MS` 400, `BUZZ_GAP_MS` 150): `go` one short buzz, `target` two long buzzes (the
+    5.4 pattern, unchanged), `rest_end` three short buzzes, so they can be told apart without
+    looking. React Native's `Vibration`, no new dependency (`VIBRATE` is already in app.json).
+- Consequences: no sound and no background notification (backlog); a cue is only felt while the
+  app is open. Pausing the rest countdown is not built (it would need its own stored pause and a
+  button; left in the backlog, the user can skip the rest or start the timer). Durations stay
+  informational; a paused set's `durationSec` is its unpaused time.
+
 ## ADR-046: Replay onboarding in memory only, first completion kept; history rows open the session (PLAN 5.10)
 - Date: 2026-09-29 · Status: Accepted
 - Context: ADR-031 suggested "Replay onboarding" by clearing the `onboarding_completed_at` setting.

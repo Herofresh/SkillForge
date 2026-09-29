@@ -73,6 +73,8 @@ function TrialForm({ node }: { node: ExerciseNode }) {
         timers={attempt.timers}
         onStartTimer={attempt.startTimer}
         onStopTimer={attempt.stopTimer}
+        onPauseTimer={attempt.pauseTimer}
+        onResumeTimer={attempt.resumeTimer}
         onResetTimer={attempt.resetTimer}
         pendingNote={attempt.allAcknowledged ? undefined : ACKNOWLEDGE_TO_LOG_NOTE}
       />

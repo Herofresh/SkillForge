@@ -3,7 +3,15 @@ import { useState } from 'react';
 import { defaultTrialResults, stepTrialResult } from '@/domain/assessment';
 import { formatTrial } from '@/domain/format';
 import type { SessionResult } from '@/domain/recompute';
-import { measuredSeconds, timedPerformance, timerModeFor, type SetTimer } from '@/domain/setTimer';
+import {
+  measuredSeconds,
+  pauseTimer as paused,
+  resumeTimer as resumed,
+  stopTimer as stopped,
+  timedPerformance,
+  timerModeFor,
+  type SetTimer,
+} from '@/domain/setTimer';
 import type { ExerciseNode, SetPerformance } from '@/domain/types';
 import { currentTime } from '@/lib/time';
 import { useAppStore } from '@/store/useAppStore';
@@ -44,12 +52,21 @@ export function useTrialAttempt(node: ExerciseNode) {
     if (!timer || timer.stoppedAt !== undefined) return;
     const at = currentTime();
     const seconds = measuredSeconds(timer, mode, at);
-    withTimer(index, { ...timer, stoppedAt: at });
+    withTimer(index, stopped(timer, at));
     setResults((current) =>
       current.map((result, i) =>
         i === index ? timedPerformance(node.metric, result, seconds) : result,
       ),
     );
+  };
+  /** Pauses / resumes set `index`'s timer (PLAN 5.8); the pause is not measured. */
+  const pauseTimer = (index: number) => {
+    const timer = timers[index];
+    if (timer) withTimer(index, paused(timer, currentTime()));
+  };
+  const resumeTimer = (index: number) => {
+    const timer = timers[index];
+    if (timer) withTimer(index, resumed(timer, currentTime()));
   };
   const resetTimer = (index: number) => withTimer(index, undefined);
   const log = () => {
@@ -69,6 +86,8 @@ export function useTrialAttempt(node: ExerciseNode) {
     timers,
     startTimer,
     stopTimer,
+    pauseTimer,
+    resumeTimer,
     resetTimer,
     outcome,
     log,

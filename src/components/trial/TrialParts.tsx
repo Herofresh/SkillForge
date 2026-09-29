@@ -22,6 +22,8 @@ type SetsProps = {
   timers?: readonly (SetTimer | undefined)[];
   onStartTimer?: (index: number) => void;
   onStopTimer?: (index: number) => void;
+  onPauseTimer?: (index: number) => void;
+  onResumeTimer?: (index: number) => void;
   onResetTimer?: (index: number) => void;
 };
 
@@ -37,12 +39,16 @@ export function TrialSetsPanel({
   timers = [],
   onStartTimer,
   onStopTimer,
+  onPauseTimer,
+  onResumeTimer,
   onResetTimer,
 }: SetsProps) {
   const timed =
     timerModeFor(node.metric) === 'hold' &&
     onStartTimer !== undefined &&
     onStopTimer !== undefined &&
+    onPauseTimer !== undefined &&
+    onResumeTimer !== undefined &&
     onResetTimer !== undefined;
   return (
     <PixelFrame contentStyle={styles.gap}>
@@ -66,6 +72,8 @@ export function TrialSetsPanel({
               timer={timers[index]}
               onStart={() => onStartTimer(index)}
               onStop={() => onStopTimer(index)}
+              onPause={() => onPauseTimer(index)}
+              onResume={() => onResumeTimer(index)}
               onReset={() => onResetTimer(index)}
               testID={`trial-timer-${index}`}
             />
