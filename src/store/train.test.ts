@@ -153,6 +153,45 @@ describe('Train flow in the store', () => {
     second.close();
   });
 
+  it('edits, deletes and reorders in the live session and saves the draft each time (PLAN 5.9)', async () => {
+    const test = await openTestDatabase();
+    const store = storeFor(test);
+    const state = () => store.getState();
+    state().planTraining('home', 30);
+    state().startTraining();
+    const key = state().activeSession?.currentKey ?? '';
+    const exercise = state().activeSession?.exercises.find((entry) => entry.key === key);
+    if (!exercise) throw new Error('expected a current exercise');
+    state().startTrainingTimer(key);
+    clock += 30 * MS_PER_SECOND;
+    state().logTrainingSet(key, exercise.target);
+    const logged = state().activeSession?.sets[0];
+    expect(logged?.durationSec).toBe(30);
+
+    // Failed logs 0, against the set's own prescription; the measured time stays.
+    state().editTrainingSet(0, exercise.target, 'failed');
+    expect(state().activeSession?.sets[0]).toEqual({
+      ...logged,
+      actual: { ...exercise.target, value: 0 },
+    });
+    expect(getActiveSession(test.db)).toEqual(state().activeSession);
+    state().editTrainingSet(0, { ...exercise.target, value: exercise.target.value + 1 });
+    expect(state().activeSession?.sets[0].actual.value).toBe(exercise.target.value + 1);
+    expect(() => state().editTrainingSet(9, exercise.target)).toThrow('No logged set 9');
+
+    const [first] = state().activeSession?.exercises ?? [];
+    state().moveTrainingExercise(first.key, 1);
+    expect(state().activeSession?.exercises[0].key).not.toBe(first.key);
+    expect(getActiveSession(test.db)?.exercises).toEqual(state().activeSession?.exercises);
+
+    state().deleteTrainingSet(0);
+    expect(state().activeSession?.sets).toEqual([]);
+    expect(getActiveSession(test.db)?.sets).toEqual([]);
+    expect(state().finishTraining()).toBeUndefined();
+    expect(listStoredSessions(test.db)).toEqual([]);
+    test.close();
+  });
+
   it('keeps a paused timer across a restart and leaves the pause out (PLAN 5.8)', async () => {
     const path = join(tempDir, 'app.db');
     const first = await openTestDatabase(path);

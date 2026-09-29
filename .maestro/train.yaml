@@ -1,7 +1,9 @@
-# Train flow (PLAN 4.4, 5.4, 5.8): from a fresh install, plan a 30-min Home session, look at the
-# plan preview and a swap sheet, start it, time and log the first exercise's set, start and pause the
-# next set's timer, then kill the app and check that the session resumes with its sets and the paused
-# timer, which resumes (the draft is saved after every change), finish it and see the summary with XP > 0. Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
+# Train flow (PLAN 4.4, 5.4, 5.8, 5.9): from a fresh install, plan a 30-min Home session, look at
+# the plan preview and a swap sheet, start it, time and log the first exercise's set, start and pause
+# the next set's timer, then kill the app and check that the session resumes with its sets and the
+# paused timer, which resumes (the draft is saved after every change), edit the logged set, move an
+# exercise down, finish it and see the summary with XP > 0. Prerequisites and run: see smoke.yaml /
+# docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Train - plan, live session, resume after a restart, summary
 ---
@@ -156,6 +158,42 @@ name: Train - plan, live session, resume after a restart, summary
 - assertVisible:
     id: 'session-row-e0'
     text: '.*1 / 1.*'
+# Edit the logged set (5.9): show the first exercise again, tap its set, step up and save
+- tapOn:
+    id: 'session-row-e0'
+- scrollUntilVisible:
+    element:
+      id: 'logged-set-0'
+    direction: UP
+    timeout: 60000
+- tapOn:
+    id: 'logged-set-0'
+- extendedWaitUntil:
+    visible:
+      id: 'edit-set-sheet'
+    timeout: 20000
+- tapOn:
+    id: 'edit-set-stepper-plus'
+- takeScreenshot: 5.9-edit-set
+- tapOn:
+    id: 'edit-set-save'
+- extendedWaitUntil:
+    notVisible:
+      id: 'edit-set-sheet'
+    timeout: 20000
+# Reorder (5.9): move the first exercise down, then leave the reorder mode
+- scrollUntilVisible:
+    element:
+      id: 'session-reorder'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'session-reorder'
+- tapOn:
+    id: 'move-down-e0'
+- takeScreenshot: 5.9-reorder
+- tapOn:
+    id: 'session-reorder'
 # Finish (confirm) and see the summary
 - scrollUntilVisible:
     element:

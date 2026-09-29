@@ -1223,6 +1223,42 @@ Template:
   button; left in the backlog, the user can skip the rest or start the timer). Durations stay
   informational; a paused set's `durationSec` is its unpaused time.
 
+## ADR-045: Edit or delete a logged set and reorder exercises in the live session (PLAN 5.9)
+- Date: 2026-09-29 · Status: Accepted (extends ADR-034, ADR-040)
+- Context: a mistyped set could only be fixed by abandoning the session, and the order of the plan
+  was fixed once it started (backlog "Train flow extras"). The live session is a persisted draft
+  (ADR-034) that v0.2.0 users may already have on their phone, and `setIndex` is "the position in
+  logging order" that `finishedSession`, `projectedSets` and `sessionCounts` rely on.
+- Decision:
+  - **Edit a set:** tapping a logged-set line (current exercise, quill icon, 48 dp row) opens
+    `EditSetSheet`: the logger's `NumberStepper` with `stepTrialResult`, starting at the logged
+    result (for a set logged as 0 at its target), then Save / Partial / Failed. The marks mean
+    what they mean when logging (`markedPerformance`), judged against the set's own `prescribed`,
+    not the exercise's current target. Only `actual` changes (`editSessionSet`): `prescribed`,
+    `timestamp` and a measured `durationSec` stay (the time was measured, the count was mistyped).
+    Editing is not gated by the unacknowledged-warnings step: it only corrects what happened, and
+    the warnings recompute from the sets anyway.
+  - **Delete a set:** "Delete set" in the sheet asks first (inline: Delete set / Keep set).
+    `deleteSessionSet` removes it and renumbers the rest in order, so `setIndex` stays dense and
+    equal to the array position; logging afterwards appends at `sets.length` as before. Its
+    exercise may be open again; if nothing was current (all done), it becomes current. Rest,
+    timer and the current exercise otherwise stay. Sets are addressed by `setIndex`.
+  - **Reorder:** a "Reorder" toggle on the session list swaps the rows' tap-to-select for Up / Down
+    buttons (disabled at the ends). `moveExercise` swaps the exercise with its neighbour, where a
+    **strength pair (two adjacent partners) is one unit**: moving either member moves both, so
+    their sets keep alternating and a pair is never split by a move. Once a pair is broken
+    (`removeExercise`) each exercise moves alone. Moves may cross block boundaries (the user
+    decides the order); the list shows the new runs of blocks as they fall. Moving doesn't touch
+    sets, current exercise, rest or timer; "what comes next" follows the new order.
+  - **Pure and persisted:** all three are pure functions in `train.ts`; the store actions
+    (`editTrainingSet`, `deleteTrainingSet`, `moveTrainingExercise`) save the draft after each
+    change like the other live actions. The draft shape is unchanged, so no migration and no
+    parser change: pre-5.9 drafts load and can be edited (tested).
+- Consequences: the plan preview can't be reordered yet (the domain function is generic over
+  `SessionPlan`, so it is a UI-only addition later). Only the current exercise's sets are
+  editable in place; to fix another exercise's set, select it in the list first. "Shuffle the
+  plan" stays in the backlog.
+
 ## ADR-046: Replay onboarding in memory only, first completion kept; history rows open the session (PLAN 5.10)
 - Date: 2026-09-29 · Status: Accepted
 - Context: ADR-031 suggested "Replay onboarding" by clearing the `onboarding_completed_at` setting.

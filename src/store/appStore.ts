@@ -22,9 +22,9 @@
  *   `selfUnlock` / `selfUnlockWarnings` (what to acknowledge before the "unlock anyway").
  * - Train flow (PLAN 4.4, ADR-034): `planTraining` turns a generated plan into an editable
  *   `trainPlan` (swap, remove, add, acknowledge its warnings), `startTraining` makes it the
- *   `activeSession`, which is saved to `active_session` after every change (log a set, skip, add,
- *   rest) and read back by `loadAll`, so a killed app resumes it. `finishTraining` logs it as an
- *   ordinary session (deleting the draft in the same transaction); `trainSummary` keeps the result
+ *   `activeSession`, which is saved to `active_session` after every change (log, edit or delete
+ *   a set, skip, add, reorder, rest) and read back by `loadAll`, so a killed app resumes it.
+ *   `finishTraining` logs it as an ordinary session (deleting the draft in the same transaction); `trainSummary` keeps the result
  *   for the summary screen.
  * - Node editor and shared progressions (PLAN 4.7–4.8, ADR-036): `nodeDraft` / `newNodeDraft`
  *   start an editor draft, `nodeDraftIssues` validates it live (the overlay with the draft through
@@ -110,9 +110,12 @@ import {
   addOptions,
   addSessionExercise,
   clearSetTimer,
+  deleteSessionSet,
+  editSessionSet,
   finishedSession,
   logSessionSet,
   markedPerformance,
+  moveExercise,
   pauseSetTimer,
   projectedSets,
   removeExercise,
@@ -127,6 +130,7 @@ import {
   stopSetTimer,
   swapOptions,
   type ActiveSession,
+  type MoveDirection,
   type SessionPlan,
   type SetMark,
 } from '@/domain/train';
@@ -361,6 +365,15 @@ export interface AppState {
   startTraining(): ActiveSession;
   /** Logs one set of exercise `key`: `entered` as marked (`markedPerformance`), then rests. */
   logTrainingSet(key: string, entered: SetPerformance, mark?: SetMark): void;
+  /**
+   * Changes the logged set `setIndex`: `entered` as marked against its own prescription; its
+   * measured time stays (PLAN 5.9, ADR-045).
+   */
+  editTrainingSet(setIndex: number, entered: SetPerformance, mark?: SetMark): void;
+  /** Deletes the logged set `setIndex`; the later sets move up (dense `setIndex`). */
+  deleteTrainingSet(setIndex: number): void;
+  /** Moves live-session exercise `key` one place up or down (a strength pair moves as one). */
+  moveTrainingExercise(key: string, direction: MoveDirection): void;
   skipTrainingExercise(key: string): void;
   selectTrainingExercise(key: string): void;
   skipTrainingRest(): void;
@@ -759,6 +772,22 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         if (!exercise) throw new Error(`No exercise '${key}' in the session`);
         const actual = markedPerformance(exercise.metric, mark, entered, exercise.target);
         saveSession(logSessionSet(session, key, actual, now()));
+      },
+
+      editTrainingSet(setIndex, entered, mark = 'done') {
+        const session = requireSession();
+        const set = session.sets.find((entry) => entry.setIndex === setIndex);
+        if (!set) throw new Error(`No logged set ${setIndex} in the session`);
+        const actual = markedPerformance(set.metric, mark, entered, set.prescribed);
+        saveSession(editSessionSet(session, setIndex, actual));
+      },
+
+      deleteTrainingSet(setIndex) {
+        saveSession(deleteSessionSet(requireSession(), setIndex));
+      },
+
+      moveTrainingExercise(key, direction) {
+        saveSession(moveExercise(requireSession(), key, direction));
       },
 
       skipTrainingExercise(key) {

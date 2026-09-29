@@ -143,6 +143,11 @@
   the past session (onboarding Trials too); Settings → **Replay onboarding** (confirmed) runs the
   intro again from the current hero, equipment and goals without deleting anything; the first
   completion time is kept. Maestro `settings.yaml` extended.
+- Live-session edits (5.9, ADR-045, [PR #31](https://github.com/Herofresh/SkillForge/pull/31)): tap a logged set's line to change it
+  (stepper, Save / Partial / Failed against its own prescription, its time kept) or delete it
+  (confirmed; later sets move up, `setIndex` stays dense). "Reorder" on the session list shows
+  Up / Down per exercise; a strength pair moves as one. Pure functions in `train.ts`, the draft is
+  saved after each change, old drafts load unchanged.
 
 ## Next up
 1. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
@@ -155,6 +160,18 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Live-session edits (task 5.9, ADR-045):**
+  - Domain: `moveExercise` / `canMoveExercise` (units = single or adjacent pair partners),
+    `editSessionSet`, `deleteSessionSet` in `src/domain/train.ts`; `liveView` adds `setIndex` and
+    `editStart` per logged set and `moves` per exercise key.
+  - Store: `editTrainingSet(setIndex, entered, mark?)`, `deleteTrainingSet(setIndex)`,
+    `moveTrainingExercise(key, direction)`.
+  - UI: `src/components/train/EditSetSheet.tsx`; `SetLogger` takes `onEditSet`; the session
+    list's "Reorder" toggle (`session-reorder`, `move-up-<key>` / `move-down-<key>`) in
+    `app/train/session.tsx`. Screen test `src/components/liveSession.test.tsx` (real store).
+  - E2E: `train.yaml` gained an edit + reorder step (screenshots `docs/screenshots/5.9-edit-set.png`,
+    `5.9-reorder.png`); run by the reviewer on the Pixel 8 Pro AVD after merging 5.8 (with the
+    pause / resume steps): passes, and so does `smoke.yaml`.
 - **Timer extras (task 5.8, ADR-044):**
   - Domain: `setTimer.ts` has `pauseTimer`, `resumeTimer`, `stopTimer`, `isPaused`, `TimerCue`,
     `timerCue`, `restCue`, `CUE_MAX_GAP_MS`; `reachedTarget` is gone (replaced by `timerCue`).
@@ -658,6 +675,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 
 #### v0.3.0
 - [x] 5.8 Timer extras: pause/resume, buzz at go and at rest end (ADR-044, [PR #30](https://github.com/Herofresh/SkillForge/pull/30))
+- [x] 5.9 Edit/delete a logged set, reorder exercises in the live session (ADR-045, [PR #31](https://github.com/Herofresh/SkillForge/pull/31))
 - [x] 5.10 Node history opens the past session; replay onboarding from Settings (ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29))
 
 ### Later / Backlog
@@ -677,7 +695,8 @@ compiled into a typed module for the app; users can layer their own changes on t
   countdown
 - Exercise demo animations: pixel-art animations per exercise, possibly generated/created with
   different AI tools (user idea 2026-09-28, not now)
-- Train flow extras: reorder exercises, shuffle the plan (seed), edit or delete a logged set
+- Train flow extras: shuffle the plan (seed); reorder in the plan preview too (`moveExercise` is
+  generic over `SessionPlan`, ADR-045); edit a logged set of another exercise without selecting it
 - Weekly plans and scheduling
 - Notifications and reminders
 - More content: advanced/elite nodes, full flexibility branch

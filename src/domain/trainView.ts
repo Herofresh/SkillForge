@@ -7,6 +7,7 @@ import { formatClock, formatPerformance, formatPrescription, formatRest } from '
 import type { SessionResult } from './recompute';
 import { elapsedSeconds, totalDurationSec } from './setTimer';
 import {
+  canMoveExercise,
   exerciseSets,
   isExerciseDone,
   sessionCounts,
@@ -129,9 +130,20 @@ export function loggedSetText(set: Pick<LoggedSet, 'metric' | 'actual' | 'durati
 
 /** One logged set in the live card: "Set 2 · 8 reps · Success". */
 export interface LoggedSetView {
+  /** 0-based position within its exercise ("Set 1" is 0). */
   index: number;
+  /** Its position in the whole session (`SessionSetLog.setIndex`): what edit / delete take. */
+  setIndex: number;
   text: string;
   outcome: Outcome;
+  /** What the edit stepper starts at: the logged result, or the target for a set logged as 0. */
+  editStart: SetPerformance;
+}
+
+/** Whether a row of the session list can move up / down (`canMoveExercise`). */
+export interface ExerciseMoves {
+  up: boolean;
+  down: boolean;
 }
 
 /** The exercise being trained now. */
@@ -153,6 +165,8 @@ export interface LiveView {
   counts: SessionCounts;
   /** Logged / planned sets, 0–1 (the session bar). */
   setsFraction: number;
+  /** Per exercise key: where it can move in the list (PLAN 5.9). */
+  moves: Readonly<Record<string, ExerciseMoves>>;
 }
 
 export function liveView(session: ActiveSession, lookup: NodeLookup): LiveView {
@@ -170,19 +184,28 @@ export function liveView(session: ActiveSession, lookup: NodeLookup): LiveView {
       plannedSets: exercise.sets,
       sets: sets.map((set, index) => ({
         index,
+        setIndex: set.setIndex,
         text: loggedSetText(set),
         outcome: setOutcome(set),
+        editStart: set.actual.value > 0 ? set.actual : set.prescribed,
       })),
       suggested: lastDone?.actual ?? exercise.target,
     };
   }
   const counts = sessionCounts(session);
+  const moves = Object.fromEntries(
+    session.exercises.map((entry) => [
+      entry.key,
+      { up: canMoveExercise(session, entry.key, -1), down: canMoveExercise(session, entry.key, 1) },
+    ]),
+  );
   return {
     ...(current ? { current } : {}),
     blocks,
     counts,
     setsFraction:
       counts.setsPlanned === 0 ? 0 : Math.min(1, counts.setsLogged / counts.setsPlanned),
+    moves,
   };
 }
 
