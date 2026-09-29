@@ -169,9 +169,9 @@
   - UI: `src/components/train/EditSetSheet.tsx`; `SetLogger` takes `onEditSet`; the session
     list's "Reorder" toggle (`session-reorder`, `move-up-<key>` / `move-down-<key>`) in
     `app/train/session.tsx`. Screen test `src/components/liveSession.test.tsx` (real store).
-  - E2E: `train.yaml` gained an edit + reorder step (screenshots `5.9-edit-set`, `5.9-reorder`),
-    **not run yet** (no emulator in the implementing agent's environment); run it once on the
-    Pixel 8 Pro AVD.
+  - E2E: `train.yaml` gained an edit + reorder step (screenshots `docs/screenshots/5.9-edit-set.png`,
+    `5.9-reorder.png`); run by the reviewer on the Pixel 8 Pro AVD after merging 5.8 (with the
+    pause / resume steps): passes, and so does `smoke.yaml`.
 - **Timer extras (task 5.8, ADR-044):**
   - Domain: `setTimer.ts` has `pauseTimer`, `resumeTimer`, `stopTimer`, `isPaused`, `TimerCue`,
     `timerCue`, `restCue`, `CUE_MAX_GAP_MS`; `reachedTarget` is gone (replaced by `timerCue`).
