@@ -66,9 +66,11 @@ app/                    expo-router screens (UI only, no game logic)
                         streak, SessionResult warnings acknowledged before Done
   (tabs)/character.tsx  character sheet (PLAN 4.5, ADR-035): hero, level + XP, rank crest, pixel
                         radar + stat bars, balance note, streak/totals, goals, recent sessions
-  session/[sessionId].tsx  a past session's summary (SessionResultPanels), from the history
+  session/[sessionId].tsx  a past session's summary (SessionResultPanels), from the Character
+                        history and the node detail's history rows (PLAN 5.10); unknown id → not found
   (tabs)/settings.tsx   Settings (PLAN 4.6, ADR-035): hero name, equipment profiles (rename,
-                        confirmed remove), backup export/import/undo, about/credits, Style Guide
+                        confirmed remove), backup export/import/undo, replay onboarding (5.10,
+                        ADR-046), about/credits, Style Guide
   onboarding/           first-run flow (PLAN 4.1, ADR-031), a Stack; every step saves through the store
     _layout.tsx         Stack; redirects to /tree once onboarding is completed
     index.tsx           1 welcome + "Name your hero" (setHeroName)
@@ -88,7 +90,8 @@ scripts/
                         MAESTRO_CLI_NO_ANALYTICS, runs .maestro/ or the flows passed after `--`
   buildApk.ts           npm run build:apk[:universal] (tsx, ADR-039): prebuild, restore package.json,
                         local.properties, gradlew assembleRelease, copy to builds/ + SHA-256
-  buildApkConfig.ts     its pure parts (args, ABIs, SDK path, APK name, commands), Jest-tested
+  buildApkConfig.ts     its pure parts (args, ABIs, SDK path, APK name, commands, the pinned
+                        release signer RELEASE_SIGNER_SHA256 and its apksigner check), Jest-tested
   appIcon.ts            the app icon as a 32×32 pixel grid (roles → Palette keys), the asset list
                         (paths, sizes, cell size per layer) and the preview sheet (PLAN 5.6, ADR-042)
   iconBuild.ts          npm run icon:build: renders appIcon.ts to assets/images/*.png + the preview
@@ -120,7 +123,8 @@ src/
                         sessions and user actions), ADR-008/021/023
     equipment.ts        HOME_EQUIPMENT, PARK_EQUIPMENT, DEFAULT_EQUIPMENT_PROFILES (seeded),
                         EQUIPMENT_TAG_LABELS, toggleEquipmentTag
-    onboarding.ts       normalizeHeroName, toggleGoal (MAX_GOALS 5), ONBOARDING_STEPS, onboardingSummary
+    onboarding.ts       normalizeHeroName, toggleGoal (MAX_GOALS 5), ONBOARDING_STEPS, onboardingSummary,
+                        parseOnboardingCompletedAt, onboardingCompletionAt (first completion kept)
     assessment.ts       goalPathNodes, assessmentAnchors (≤ 6), searchNodes, trial results +
                         trialSession (a Trial as a session), testOutWarnings, unlockedByTrial
     format.ts           formatPerformance / formatTrial ("3 sets of 8 reps"), METRIC_UNITS,
@@ -136,12 +140,14 @@ src/
                         swapOptions / addOptions, replace/remove/addExercise, startSession,
                         logSessionSet (pairs alternate; takes the timer's durationSec),
                         markedPerformance, skip, rest, start/stop/clearSetTimer (5.4),
-                        moveExercise / canMoveExercise (pairs move as one), editSessionSet,
-                        deleteSessionSet (dense setIndex) (5.9, ADR-045), projectedSets,
-                        finishedSession, warningKey, parseActiveSession
+                        pause/resumeSetTimer (5.8), moveExercise / canMoveExercise (pairs
+                        move as one), editSessionSet, deleteSessionSet (dense setIndex) (5.9,
+                        ADR-045), projectedSets, finishedSession, warningKey, parseActiveSession
     setTimer.ts         exercise timer (PLAN 5.4, ADR-040): timerModeFor (hold countdown with
                         GET_READY_SECONDS, else stopwatch), readTimer (phase, clock, measured
-                        seconds from timestamps), measuredSeconds, reachedTarget, formatTimerClock,
+                        seconds from timestamps, paused time left out), measuredSeconds,
+                        pause/resume/stopTimer + isPaused (5.8, ADR-044), timerCue / restCue
+                        (TimerCue go / target / rest_end, CUE_MAX_GAP_MS), formatTimerClock,
                         timerCaption, spokenTimer, timedPerformance, elapsedSeconds, totalDurationSec
     trainView.ts        Train view models: blockViews, exerciseView, liveView, summaryView (with the
                         stored session: time per exercise, session time), loggedSetText
@@ -179,7 +185,7 @@ src/
                         profile CRUD, generateWorkout(profileId, minutes, seed?), saveOverlay,
                         exportBackup, importBackup, shareBackup, importBackupFromFile; onboarding:
                         onboardingCompletedAt, setHeroName, toggleGoal, logTrial, testOutWarnings,
-                        completeOnboarding; node detail: selfUnlockWarnings; Train (ADR-034):
+                        completeOnboarding, replayOnboarding (in memory only, ADR-046); node detail: selfUnlockWarnings; Train (ADR-034):
                         trainPlan / activeSession / trainSummary, planTraining, swap/remove/add,
                         trainWarnings, acknowledgeTrainWarning, startTraining, logTrainingSet,
                         editTrainingSet / deleteTrainingSet / moveTrainingExercise (5.9),
@@ -212,23 +218,27 @@ src/
                         transform; Focus, zoom −/+, "Switch to list"), MapCanvas (lane bands, edge
                         lines as Views), MapNode (fixed-size state-framed node button)
     node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
-                        NodeHistoryList, AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
+                        NodeHistoryList (rows open the past session), AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
     train/              Train flow parts: ExerciseCard (prescription, rest, markers), SetLogger
                         (timer + stepper + Log / Partial / Failed; logged-set lines open the
                         edit sheet), EditSetSheet (edit / delete a logged set, 5.9), RestPanel
-                        (countdown), SessionClock (elapsed session time), NodeOptionSheet (swap/add picker),
+                        (countdown, buzz at its end),
+                        SessionClock (elapsed session time), NodeOptionSheet (swap/add picker),
                         TrainWarningList (warnings acknowledged by key)
     timer/SetTimerPanel.tsx  the exercise timer of one set (PLAN 5.4): Start hold / Start set →
-                        clock, Stop / Done, Cancel / Reset; vibrates at a hold's target, keeps the
-                        screen awake while it runs (expo-keep-awake). Train SetLogger and the hold
-                        Trials' TrialSetsPanel
+                        clock, Pause / Resume (5.8), Stop / Done, Cancel / Reset; buzzes at "go"
+                        and at a hold's target, keeps the screen awake while it ticks
+                        (expo-keep-awake). Train SetLogger and the hold Trials' TrialSetsPanel
+    timer/vibration.ts  CUE_VIBRATIONS (the pattern per TimerCue, SHORT/LONG_BUZZ_MS, BUZZ_GAP_MS)
+                        and buzz(cue) over React Native's Vibration (ADR-044)
     train/SessionResultPanels.tsx  XP, streak, level-ups, unlocks, exercises of a SessionResult
                         (Train summary and past session)
     character/          AttributeRadar (rasterized pixel radar), RankCrest (RANK_ICONS),
                         SessionHistoryRow, GoalProgressCard
     equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form (onboarding, Settings)
     settings/           BackupPanel (export, import confirm, rejection issues, undo), AboutPanel,
-                        ProgressionsPanel (count of tree changes → My progressions)
+                        ProgressionsPanel (count of tree changes → My progressions),
+                        ReplayOnboardingPanel (confirm → replayOnboarding)
     editor/             node editor (PLAN 4.7–4.8, ADR-036): NodeEditorBody (screen body: live
                         issues, Save/Cancel), NodeEditorForm (sections with inline IssueNotes),
                         PositionSheet, IssueNotes, CustomBadge, OverlayEntryRow, SharePanel;
@@ -239,7 +249,8 @@ src/
     character.test.tsx  component tests: radar, crest, goal card, history row, profile editor,
                         backup panel (real store, fake files)
     train.test.tsx      component tests of the Train parts (SetLogger timer, SetTimerPanel with
-                        fake timers, summary times)
+                        fake timers: pause / resume, buzz at go and target; RestPanel buzz,
+                        summary times)
     liveSession.test.tsx  the live session screen with a real store: edit / delete a logged set,
                         reorder (PLAN 5.9)
     trial.test.tsx      component tests: TrialSetsPanel timers per hold set
@@ -280,7 +291,7 @@ jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
                         cycle error, reset, My progressions share/import/delete, discard-changes
                         sheet; 4.7/4.8/5.2 screenshots), character.yaml (clearState; level/XP after a session, history →
                         past session; 4.5 screenshots), settings.yaml (profile add/remove, export share
-                        sheet, import cancel; 4.6 screenshots), map.yaml (Tree Map: zoom, pan, double tap,
+                        sheet, import cancel, replay onboarding; 4.6 screenshots), map.yaml (Tree Map: zoom, pan, double tap,
                         focus, open a node, back to Columns; 5.1 screenshots), onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
                         proof), styleguide.yaml (UI kit), train.yaml (clearState; plan, live session,
                         kill + resume, edit a logged set, reorder, summary; takes the 4.4 / 5.9 screenshots), tree.yaml (clearState; branch, detail, goal,
@@ -355,7 +366,8 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
 | **Session plan / active session** | The Train flow's editable plan preview (`SessionPlan`, in memory) and the started session (`ActiveSession`, the `active_session` draft) with its logged sets; `finishedSession` turns it into a `LoggedSession` (ADR-034). |
 | **Edit / reorder in the live session** | Tap a logged set's line to change its result (stepper, Save / Partial / Failed against its own prescription; its time stays) or delete it (confirmed; later sets move up, so `setIndex` stays the dense logging position). "Reorder" shows Up / Down per exercise; a strength pair moves as one (PLAN 5.9, ADR-045). |
-| **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics get a stopwatch. Stored as timestamps (`ActiveSession.timer`), so it survives an app kill; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
+| **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics get a stopwatch. It can be paused and resumed (5.8, ADR-044; the paused time is not measured). Stored as timestamps plus the paused time (`ActiveSession.timer`), so it survives an app kill, paused too; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
+| **Timer cue** | A moment the phone buzzes (PLAN 5.8, ADR-044): `go` (a hold's get-ready ends: one short buzz), `target` (the hold reaches its target: two long buzzes), `rest_end` (the rest countdown reaches zero: three short buzzes). Only while the screen sees the moment pass; no sound, no background notification. |
 | **Custom node / custom tag** | A node the user added (`user_` id) or edited through the node editor; shown with a "Custom" tag. "Reset to default" removes the edit; a custom node is deleted instead. Overlays can't clear `straightArm` on, or move, a built-in straight-arm node (ADR-036). |
 | **Shared progressions** | The overlay as YAML (`exportOverlay`), shared from My progressions. Importing one merges it into the user's overlay after a preview (`mergeOverlays`, ADR-036). |
 | **Stored overlay** | The one current overlay in `progression_overlay`; the store's tree is `applyOverlay(ALL_NODES, overlay).nodes`. An overlay with issues is never saved; a stored one that stops applying is kept and reported as `overlayIssues` (ADR-028). |
@@ -391,7 +403,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Streak** | Consecutive sessions at most 72 h apart. Adds a character-XP bonus. |
 | **Engine state** | Derived state rebuilt from history (sessions and user actions): node progress, total XP, streak, last straight-arm session, last applied position (`src/domain/recompute.ts`). |
 | **Tree map** | The Tree tab's Map mode: the whole tree as a pan/zoom graph, layers (longest hard-prerequisite chain) left to right, one lane per branch, hard prerequisites as lines lit gold once met (ADR-037). |
-| **Onboarding** | The first-run flow (hero name, equipment, goals, optional assessment, summary). Shown until the setting `onboarding_completed_at` exists (ADR-031). |
+| **Onboarding** | The first-run flow (hero name, equipment, goals, optional assessment, summary). Shown until the setting `onboarding_completed_at` exists (ADR-031). Settings → Replay onboarding shows it again for the running app, with all data kept (ADR-046). |
 | **Assessment** | Onboarding's optional step: log a Trial for anchor nodes on the goal paths (or any searched node); a passed one is a test-out. Stored as ordinary Trial sessions. |
 | **Anchor node** | One of up to 6 nodes spread evenly (by ogLevel) over the goals and their transitive hard prerequisites (`assessmentAnchors`). |
 | **Legendary node** | An elite node shown as a locked silhouette, there for motivation. |
@@ -639,6 +651,22 @@ build is needed.
   nodes by `testID` while the map is zoomed (`map-node-<id>`; `map-node-.*` for "any visible node").
 - `hideKeyboard` presses back when no keyboard is open, which leaves a tab (4.6). Tabs keep their
   scroll position between flows; scroll up to a known element first.
+
+## Release upgrade check (PLAN 5.7, ADR-043)
+Before publishing a release, check that it installs over the previous one with the data intact.
+1. Build the new APK: `npm run build:apk:universal` (runs on the x86_64 emulator; pass `-- --clean`
+   after plugin, icon or native dependency changes). The script fails if the APK isn't signed with
+   `RELEASE_SIGNER_SHA256` (`scripts/buildApkConfig.ts`): another key can't update existing installs.
+2. Download the previous release's universal APK: `gh release download <tag> -p "*universal*"`.
+3. Start the emulator (see "E2E tests", step 1), then `adb uninstall at.skillforge.app` and
+   `adb install <previous>.apk`.
+4. `npm run e2e -- .maestro/release/upgrade-seed.yaml`: fresh onboarding with a Pull-up test-out.
+5. `adb install -r builds/<new>.apk` (an update: no uninstall, no clearState). It must print
+   `Success`; `INSTALL_FAILED_UPDATE_INCOMPATIBLE` means the signer changed,
+   `INSTALL_FAILED_VERSION_DOWNGRADE` a versionCode that isn't higher.
+6. `npm run e2e -- .maestro/release/upgrade-verify.yaml`: the hero, goal, session and XP are still
+   there and onboarding isn't shown again. The flows take the screenshots `5.7-upgrade-before` /
+   `5.7-upgrade-after` (copy them from Maestro's test folder to `docs/screenshots/`).
 
 ## Gotchas
 - Skill node IDs are permanent, because saved progress references them.

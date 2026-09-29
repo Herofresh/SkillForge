@@ -23,6 +23,8 @@ type Props = {
   onStartTimer: () => void;
   /** Stops the timer and returns what it measured (whole seconds). */
   onStopTimer: () => number | undefined;
+  onPauseTimer: () => void;
+  onResumeTimer: () => void;
   onResetTimer: () => void;
   /** Opens the edit sheet of a logged set (PLAN 5.9); without it the lines are plain text. */
   onEditSet?: (set: LoggedSetView) => void;
@@ -44,6 +46,8 @@ export function SetLogger({
   timer,
   onStartTimer,
   onStopTimer,
+  onPauseTimer,
+  onResumeTimer,
   onResetTimer,
   onEditSet,
 }: Props) {
@@ -111,6 +115,8 @@ export function SetLogger({
         timer={timer}
         onStart={onStartTimer}
         onStop={stopTimer}
+        onPause={onPauseTimer}
+        onResume={onResumeTimer}
         onReset={onResetTimer}
         testID="set-timer"
       />

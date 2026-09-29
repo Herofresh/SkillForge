@@ -14,12 +14,16 @@ SkillForge is Android only for now, and it isn't on the Play Store.
 **Download a preview APK.**
 
 1. Open the [Releases](https://github.com/Herofresh/SkillForge/releases) page on your phone and pick
-   the newest pre-release (e.g. `v0.1.0-preview1`).
+   the newest pre-release (e.g. `v0.2.0`).
 2. Download the **arm64** APK. The **universal** APK also runs on the x86_64 Android emulator; it
    is bigger but works on phones too.
 3. Open the file and allow "Install unknown apps" for your browser or file manager when Android asks.
    Play Protect may warn about an unknown developer, because preview builds are signed with a
    development key.
+
+**Updating:** install the newer APK over the old one, without uninstalling. Your hero, sessions
+and progress stay. Every preview so far uses the same key, and `npm run build:apk` refuses to
+build with another one (ADR-043).
 
 Preview builds are signed with a development key. A later build signed with the real release key
 can't update them in place: you'll have to uninstall first, which deletes the app's data. Export a

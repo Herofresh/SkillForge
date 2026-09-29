@@ -192,6 +192,43 @@ describe('Train flow in the store', () => {
     test.close();
   });
 
+  it('keeps a paused timer across a restart and leaves the pause out (PLAN 5.8)', async () => {
+    const path = join(tempDir, 'app.db');
+    const first = await openTestDatabase(path);
+    const store = storeFor(first);
+    store.getState().planTraining('home', 30);
+    store.getState().startTraining();
+    const key = store.getState().activeSession?.currentKey ?? '';
+    const exercise = store.getState().activeSession?.exercises.find((e) => e.key === key);
+    const start = clock;
+    store.getState().startTrainingTimer(key);
+    clock += 20 * MS_PER_SECOND;
+    store.getState().pauseTrainingTimer();
+    expect(store.getState().activeSession?.timer).toEqual({
+      exerciseKey: key,
+      startedAt: start,
+      pausedAt: clock,
+    });
+    first.close();
+
+    // The app is killed while paused; the timer comes back paused.
+    const second = await openTestDatabase(path);
+    const reopened = storeFor(second);
+    expect(reopened.getState().activeSession?.timer?.pausedAt).toBe(clock);
+    clock += 60 * MS_PER_SECOND;
+    reopened.getState().resumeTrainingTimer();
+    expect(reopened.getState().activeSession?.timer).toEqual({
+      exerciseKey: key,
+      startedAt: start,
+      pausedMs: 60 * MS_PER_SECOND,
+    });
+    clock += 10 * MS_PER_SECOND;
+    const measured = reopened.getState().stopTrainingTimer();
+    // 30 s of timer time; a hold leaves out its 3 s get-ready.
+    expect(measured).toBe(exercise?.metric === 'hold_s' ? 27 : 30);
+    second.close();
+  });
+
   it('records the timed durations of a Trial', async () => {
     const test = await openTestDatabase();
     const store = storeFor(test);

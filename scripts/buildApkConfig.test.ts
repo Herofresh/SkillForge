@@ -1,14 +1,18 @@
 import {
   PHONE_ABIS,
+  RELEASE_SIGNER_SHA256,
   UNIVERSAL_ABIS,
   abiLabel,
+  apksignerPath,
   apkFileName,
   appVersion,
   gradleCommand,
   localPropertiesContent,
   parseBuildArgs,
+  parseSignerDigests,
   prebuildArgs,
   resolveSdkDir,
+  signerProblem,
 } from './buildApkConfig';
 
 describe('parseBuildArgs', () => {
@@ -136,5 +140,36 @@ describe('the real app.json', () => {
     const appJson = require('../app.json');
     expect(() => appVersion(appJson)).not.toThrow();
     expect(appJson.expo.android.package).toBe('at.skillforge.app');
+  });
+});
+
+describe('release signer check (ADR-043)', () => {
+  const output = [
+    'Signer #1 certificate DN: CN=Android Debug, O=Android, C=US',
+    `Signer #1 certificate SHA-256 digest: ${RELEASE_SIGNER_SHA256.toUpperCase()}`,
+    'Signer #1 certificate SHA-1 digest: 5e8f16062ea3cd2c4a0d547876baa6f38cabf625',
+  ].join('\n');
+
+  it('reads the SHA-256 digests from apksigner output', () => {
+    expect(parseSignerDigests(output)).toEqual([RELEASE_SIGNER_SHA256]);
+    expect(parseSignerDigests('nothing here')).toEqual([]);
+  });
+
+  it('accepts the release signer and names any other one', () => {
+    expect(signerProblem([RELEASE_SIGNER_SHA256])).toBeUndefined();
+    const other = 'ab'.repeat(32);
+    expect(signerProblem([other])).toContain(other);
+    expect(signerProblem([other])).toContain('deletes their data');
+    expect(signerProblem([])).toBe('apksigner printed no signer certificate');
+  });
+
+  it('finds apksigner in the newest build-tools', () => {
+    expect(apksignerPath('C:\\Sdk', ['34.0.0', '36.0.0', '35.0.1'], 'win32')).toBe(
+      'C:\\Sdk\\build-tools\\36.0.0\\apksigner.bat',
+    );
+    expect(apksignerPath('/sdk', ['9.0.0', '10.0.0'], 'linux')).toBe(
+      '/sdk/build-tools/10.0.0/apksigner',
+    );
+    expect(apksignerPath('/sdk', ['.DS_Store'], 'darwin')).toBeUndefined();
   });
 });

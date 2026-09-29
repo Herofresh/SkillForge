@@ -16,7 +16,8 @@
  * - Character tab (PLAN 4.5): `sessionResults` keeps every session's `SessionResult`.
  * - Onboarding (PLAN 4.1, ADR-031): `setHeroName`, `toggleGoal`, `logTrial` (assessment test-outs,
  *   logged as ordinary Trial sessions) and `completeOnboarding` (the `onboarding_completed_at`
- *   setting, so it travels with backups).
+ *   setting, so it travels with backups). `replayOnboarding` (PLAN 5.10) re-opens the flow in
+ *   memory only.
  * - Tree and node detail (PLAN 4.2–4.3, 5.1): `setTreeMode` (Columns | Map, a setting), `toggleGoal`, `logTrial` / `testOutWarnings` and
  *   `selfUnlock` / `selfUnlockWarnings` (what to acknowledge before the "unlock anyway").
  * - Train flow (PLAN 4.4, ADR-034): `planTraining` turns a generated plan into an editable
@@ -66,7 +67,12 @@ import {
   workoutWarnings,
   type WorkoutContext,
 } from '@/domain/generator';
-import { normalizeHeroName, toggleGoal } from '@/domain/onboarding';
+import {
+  normalizeHeroName,
+  onboardingCompletionAt,
+  parseOnboardingCompletedAt,
+  toggleGoal,
+} from '@/domain/onboarding';
 import { customNodeId, NEW_NODE_ID, newCustomNode } from '@/domain/nodeEditor';
 import {
   applyOverlay,
@@ -110,9 +116,11 @@ import {
   logSessionSet,
   markedPerformance,
   moveExercise,
+  pauseSetTimer,
   projectedSets,
   removeExercise,
   replaceExercise,
+  resumeSetTimer,
   selectExercise,
   sessionPlan,
   skipExercise,
@@ -289,8 +297,17 @@ export interface AppState {
    * prerequisites of a locked node (`nodeUseWarnings`). Empty when the node isn't locked.
    */
   selfUnlockWarnings(nodeId: string): SafeguardWarning[];
-  /** Marks onboarding as done (the app then opens on the tabs). */
+  /**
+   * Marks onboarding as done (the app then opens on the tabs). After a replay the first completion
+   * time is kept (`onboardingCompletionAt`).
+   */
   completeOnboarding(): void;
+  /**
+   * "Replay onboarding" (PLAN 5.10, ADR-046): shows the first-run flow again without deleting or
+   * resetting anything. It only clears `onboardingCompletedAt` in memory; the steps start from the
+   * stored hero name, equipment and goals, and a test-out logs an ordinary Trial session.
+   */
+  replayOnboarding(): void;
   /** Switches the Tree tab between Columns and Map and remembers it (setting `tree_view_mode`). */
   setTreeMode(mode: TreeMode): void;
   createEquipmentProfile(name: string, tags: readonly EquipmentTag[]): EquipmentProfile;
@@ -364,6 +381,10 @@ export interface AppState {
   startTrainingTimer(key: string): void;
   /** Stops the running timer; returns what it measured (whole seconds), `undefined` without one. */
   stopTrainingTimer(): number | undefined;
+  /** Pauses the running timer (stored in the draft, so it survives an app kill; PLAN 5.8). */
+  pauseTrainingTimer(): void;
+  /** Resumes the paused timer; the paused time is not measured. */
+  resumeTrainingTimer(): void;
   /** Cancels or resets the timer; the set is then logged without a duration. */
   resetTrainingTimer(): void;
   /** Nodes to add to the live session (or the plan): suggestions, or matches for `query`. */
@@ -529,9 +550,10 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const sessions = listStoredSessions(db);
         const userActions = listUserActions(db);
         const { state: engine, results } = recompute(nodes, sessions, userActions);
-        const completedAt = getSetting(db, ONBOARDING_COMPLETED_SETTING);
         commitEngine(engine, {
-          onboardingCompletedAt: typeof completedAt === 'number' ? completedAt : undefined,
+          onboardingCompletedAt: parseOnboardingCompletedAt(
+            getSetting(db, ONBOARDING_COMPLETED_SETTING),
+          ),
           treeMode: parseTreeMode(getSetting(db, TREE_MODE_SETTING)),
           loaded: true,
           nodes,
@@ -622,9 +644,14 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       },
 
       completeOnboarding() {
-        const at = now();
+        const at = onboardingCompletionAt(getSetting(db, ONBOARDING_COMPLETED_SETTING), now());
         setSetting(db, ONBOARDING_COMPLETED_SETTING, at);
         set({ onboardingCompletedAt: at });
+      },
+
+      replayOnboarding() {
+        // In memory only: the stored completion stays, so a restart mid-replay opens the tabs.
+        set({ onboardingCompletedAt: undefined });
       },
 
       setTreeMode(mode) {
@@ -787,6 +814,14 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const at = now();
         saveSession(stopSetTimer(session, at));
         return measuredSeconds(timer, timerModeFor(exercise.metric), at);
+      },
+
+      pauseTrainingTimer() {
+        saveSession(pauseSetTimer(requireSession(), now()));
+      },
+
+      resumeTrainingTimer() {
+        saveSession(resumeSetTimer(requireSession(), now()));
       },
 
       resetTrainingTimer() {

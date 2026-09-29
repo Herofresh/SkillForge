@@ -1,0 +1,36 @@
+# Release upgrade check, step 2 of 2 (PLAN 5.7, ADR-043): run after installing the NEW APK over the
+# previous release seeded by upgrade-seed.yaml (`adb install -r`, no uninstall, no clearState).
+# The hero, the goal, the logged Trial session and its XP must all still be there.
+appId: at.skillforge.app
+name: Upgrade check 2 - data survives the update
+---
+- launchApp
+- extendedWaitUntil:
+    visible: 'Skill Tree'
+    timeout: 60000
+# Onboarding is not shown again: the completed profile survived.
+- assertNotVisible:
+    id: 'onboarding-hero'
+- tapOn: 'Character'
+- extendedWaitUntil:
+    visible:
+      id: 'character-screen'
+    timeout: 20000
+- assertVisible:
+    id: 'hero-name'
+    text: 'Aria'
+# The seed's Pull-up test-out earns 40 XP on v0.1.0; same formulas, so the same total after update.
+- assertVisible:
+    id: 'character-total-xp'
+    text: '40 XP earned in total'
+- scrollUntilVisible:
+    element:
+      id: 'goal-pull_up'
+    direction: DOWN
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: 'recent-session-0'
+    direction: DOWN
+    timeout: 30000
+- takeScreenshot: 5.7-upgrade-after

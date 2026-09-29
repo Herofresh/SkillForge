@@ -1159,6 +1159,70 @@ Template:
   sizes on disk instead. If iOS becomes a target, an Icon Composer bundle (liquid-glass layers)
   may be worth adding by hand.
 
+## ADR-043: Releases stay upgrade-safe: one pinned signer, a rising versionCode, an upgrade check before publishing (PLAN 5.7)
+- Date: 2026-09-29 · Status: Accepted (refines ADR-039)
+- Context: the user asked that installing v0.2.0 on a phone that already has the first preview
+  keeps all progress. Android keeps an app's data on update only when the new APK has the same
+  package (`at.skillforge.app`), the **same signing certificate** and a versionCode that isn't lower;
+  otherwise the install is refused and the only way on is an uninstall, which deletes the
+  database. Our data side is already safe: migrations are additive (0003 only adds a column,
+  ADR-040) and run on start. The weak spot is the signer. Releases are signed with the React Native
+  template's debug keystore, which `expo prebuild --clean` regenerates from the template; if it
+  ever differed (another machine, a template change, a hand-made keystore), a release would
+  silently stop updating existing installs.
+- Decision:
+  - **Pinned signer:** `RELEASE_SIGNER_SHA256` in `scripts/buildApkConfig.ts` is the certificate of
+    every published APK (`fac61745…3b9c`, checked on the v0.1.0-preview1 assets). `npm run
+    build:apk` runs `apksigner verify --print-certs` on the finished APK and **fails** when the
+    signer differs, with a message that says why. Moving to a release key (5.3b) is a deliberate
+    change of this constant plus a migration path for existing installs (export a backup,
+    uninstall, install, import), decided with the user.
+  - **Version:** every release bumps `expo.android.versionCode` by one (v0.2.0 = versionCode 2).
+    The first preview's APK reported versionName "1.0.0" (built before ADR-039 set 0.1.0); only
+    the versionCode matters for updates, so 0.2.0 installs over it as an update.
+  - **Upgrade check before publishing:** `.maestro/release/upgrade-seed.yaml` runs on the previous
+    release's APK (fresh install, onboarding with a Pull-up test-out) and
+    `.maestro/release/upgrade-verify.yaml` runs after `adb install -r` of the new APK (hero, goal,
+    logged session and XP still there, no onboarding again). The flows target the installed app
+    (`appId: at.skillforge.app`), not Expo Go, and live in a subfolder so `npm run e2e` doesn't run
+    them. Runbook: CONTEXT.md → "Release upgrade check".
+- Consequences: a build with the wrong key can't be published by accident; the check costs one
+  apksigner call. The upgrade check needs the previous APK (from its GitHub release) and an
+  emulator, about 5 minutes. Debug signing stays a sideloading-only choice until 5.3b.
+
+## ADR-044: Timer pause from timestamps, vibration cues at "go" and at the rest end (PLAN 5.8)
+- Date: 2026-09-29 · Status: Accepted (extends ADR-040; the number may need a renumber when other
+  ADRs written in parallel land first)
+- Context: the user uses the exercise timer instead of a separate clock app (request 2026-09-28).
+  ADR-040 left out pause, a buzz at "go" and anything at the rest's end, so the user had to look at
+  the phone to know when to start holding or when the rest was over.
+- Decision:
+  - **Pause from timestamps:** `SetTimer` gains two optional fields: `pausedAt` (set while paused)
+    and `pausedMs` (the paused time of pauses already resumed). Readings use
+    `(stoppedAt ?? pausedAt ?? now) − startedAt − pausedMs`, so a paused timer is frozen and the
+    paused time is never measured. `pauseTimer` / `resumeTimer` / `stopTimer` in
+    `src/domain/setTimer.ts` are pure (a stop while paused stops at the pause); `train.ts` wraps
+    them for the live session (`pauseSetTimer`, `resumeSetTimer`, `stopSetTimer`) and the store
+    saves the draft after each (`pauseTrainingTimer`, `resumeTrainingTimer`), so a paused timer
+    survives an app kill. Old drafts (no timer, or a 5.4 timer without the new fields) parse as
+    they are and read as never paused. Trials use the same functions in screen state. Pause works
+    in every phase (get-ready too). The screen stays awake only while the clock ticks, not while
+    paused. The readout is keyed by start and `pausedMs`, so a resume starts a fresh screen clock.
+  - **Cues:** `TimerCue` = `go` | `target` | `rest_end`. `timerCue(previous, next, now)` gives `go`
+    on the step out of get-ready and `target` on holding → overtime; `restCue` gives `rest_end` when
+    the rest seconds left reach 0. Both need the previous reading (value + time) and stay quiet when
+    it is older than `CUE_MAX_GAP_MS` (2.5 s): the screen reads once a second, so a longer gap means
+    the app was in the background when the moment passed and there should be no late buzz on
+    return. A rest that was over before the panel opened stays quiet too.
+  - **Patterns:** named in `src/components/timer/vibration.ts` (`CUE_VIBRATIONS`, `SHORT_BUZZ_MS`
+    200, `LONG_BUZZ_MS` 400, `BUZZ_GAP_MS` 150): `go` one short buzz, `target` two long buzzes (the
+    5.4 pattern, unchanged), `rest_end` three short buzzes, so they can be told apart without
+    looking. React Native's `Vibration`, no new dependency (`VIBRATE` is already in app.json).
+- Consequences: no sound and no background notification (backlog); a cue is only felt while the
+  app is open. Pausing the rest countdown is not built (it would need its own stored pause and a
+  button; left in the backlog, the user can skip the rest or start the timer). Durations stay
+  informational; a paused set's `durationSec` is its unpaused time.
+
 ## ADR-045: Edit or delete a logged set and reorder exercises in the live session (PLAN 5.9)
 - Date: 2026-09-29 · Status: Accepted (extends ADR-034, ADR-040)
 - Context: a mistyped set could only be fixed by abandoning the session, and the order of the plan
@@ -1194,3 +1258,33 @@ Template:
   `SessionPlan`, so it is a UI-only addition later). Only the current exercise's sets are
   editable in place; to fix another exercise's set, select it in the list first. "Shuffle the
   plan" stays in the backlog.
+
+## ADR-046: Replay onboarding in memory only, first completion kept; history rows open the session (PLAN 5.10)
+- Date: 2026-09-29 · Status: Accepted
+- Context: ADR-031 suggested "Replay onboarding" by clearing the `onboarding_completed_at` setting.
+  A replay must not delete or reset anything (hero, equipment, goals, sessions, tree changes), the
+  test-outs must stay ordinary Trial sessions, and finishing again must not duplicate anything.
+  Separately, the node detail's history rows (ADR-033) were plain text, while the Character
+  history already opens `app/session/[sessionId]` (ADR-035).
+- Decision:
+  - **Replay is an in-memory flag flip:** `replayOnboarding()` only sets the store's
+    `onboardingCompletedAt` to `undefined`; the stored setting is not touched. The existing gates
+    (`/`, the tabs layout, the onboarding layout) then show the intro, and "Begin" hands back to the
+    tabs as on the first run. Settings → **Replay onboarding** asks first ("Your data stays. Only
+    the intro runs again ...").
+  - **No prefill code:** every step already reads the store (the hero field starts from the stored
+    name, the equipment editor and goal picker show the stored profiles and goals), so the replay
+    starts from the current data. A test-out is `logTrial` as before: one more Trial session.
+  - **First completion kept:** `completeOnboarding` stores `onboardingCompletionAt(stored, now)`,
+    which keeps an existing timestamp and only takes `now` on the first run. Finishing a replay
+    writes the same value again: nothing new, nothing reset.
+  - **A restart ends a replay:** `loadAll` reads the untouched setting, so an app killed mid-replay
+    opens on the tabs with everything saved so far kept (unlike the first run, which resumes). This
+    avoids a state where an export mid-replay, or a crash, leaves a finished user "not onboarded".
+  - **History rows open the session:** every `NodeHistoryList` row is a button (role button, label
+    "date[, Trial]: sets", hint "Opens the session summary") that pushes `app/session/[sessionId]`;
+    onboarding test-outs are sessions like any other, so they open too. The session screen takes a
+    missing or non-string id as unknown and shows "Session not found".
+- Consequences: no schema, migration or backup change. The hero step has no "back to the app"
+  exit during a replay (Android back leaves the app; a restart ends the replay); a "Skip" on the
+  replay could come later if users ask. ADR-031's "clear the setting" idea is not used.

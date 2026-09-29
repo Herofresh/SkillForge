@@ -12,6 +12,8 @@ const handlers = () => ({
   onStep: jest.fn(),
   onStartTimer: jest.fn(),
   onStopTimer: jest.fn(),
+  onPauseTimer: jest.fn(),
+  onResumeTimer: jest.fn(),
   onResetTimer: jest.fn(),
 });
 
@@ -37,6 +39,26 @@ describe('TrialSetsPanel timers (PLAN 5.4)', () => {
     expect(actions.onStartTimer).toHaveBeenCalledWith(0);
     await user.press(screen.getByTestId('trial-timer-1-reset'));
     expect(actions.onResetTimer).toHaveBeenCalledWith(1);
+  });
+
+  it('pauses and resumes the timer of one set (PLAN 5.8)', async () => {
+    const user = userEvent.setup();
+    const hang = node('dead_hang');
+    const actions = handlers();
+    const now = Date.now();
+    await render(
+      <TrialSetsPanel
+        node={hang}
+        results={defaultTrialResults(hang)}
+        timers={[{ startedAt: now - 10_000 }, { startedAt: now - 20_000, pausedAt: now - 5_000 }]}
+        {...actions}
+      />,
+    );
+    await user.press(screen.getByTestId('trial-timer-0-pause'));
+    expect(actions.onPauseTimer).toHaveBeenCalledWith(0);
+    expect(screen.getByText('Paused')).toBeOnTheScreen();
+    await user.press(screen.getByTestId('trial-timer-1-resume'));
+    expect(actions.onResumeTimer).toHaveBeenCalledWith(1);
   });
 
   it('has no timer for a rep Trial', async () => {

@@ -73,6 +73,8 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
     (nodeId: string) => router.push({ pathname: '/node/[nodeId]', params: { nodeId } }),
     [router],
   );
+  const openSession = (sessionId: string) =>
+    router.push({ pathname: '/session/[sessionId]', params: { sessionId } });
   const onToggleGoal = () => setGoalsFull(!toggleGoal(node.id));
   const onUnlocked = () => {
     setUnlocking(false);
@@ -174,7 +176,7 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
         )}
 
         <DetailSection title="History" icon="scroll" testID="detail-history">
-          <NodeHistoryList history={history} metric={node.metric} />
+          <NodeHistoryList history={history} metric={node.metric} onOpenSession={openSession} />
         </DetailSection>
 
         <CustomizeSection node={node} customization={customization} />

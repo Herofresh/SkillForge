@@ -22,6 +22,20 @@ export function onboardingStepNumber(step: OnboardingStep): number {
   return ONBOARDING_STEPS.indexOf(step) + 1;
 }
 
+/** The stored `onboarding_completed_at` setting as a timestamp, `undefined` when unset or invalid. */
+export function parseOnboardingCompletedAt(stored: unknown): number | undefined {
+  return typeof stored === 'number' && Number.isFinite(stored) ? stored : undefined;
+}
+
+/**
+ * When onboarding counts as completed after "Begin": the first completion is kept, so replaying the
+ * intro from Settings (PLAN 5.10, ADR-046) and finishing it again changes nothing; only a first run
+ * (nothing stored) takes `now`.
+ */
+export function onboardingCompletionAt(stored: unknown, now: number): number {
+  return parseOnboardingCompletedAt(stored) ?? now;
+}
+
 /**
  * The hero name as stored: trimmed, inner whitespace collapsed, at most `HERO_NAME_MAX_LENGTH`
  * characters. `undefined` when nothing is left (the name is required).
