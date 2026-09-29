@@ -153,7 +153,7 @@
   database or backup change since v0.2.0. Upgrade check (CONTEXT.md "Release upgrade check") passed
   on the emulator from the v0.2.0 APK **and** straight from the v0.1.0-preview1 APK: hero, goal,
   session and the 40 XP kept.
-- `build:apk` (5.13, ADR-043 update, PR link below): the signer check runs on Gradle's APK before
+- `build:apk` (5.13, ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35)): the signer check runs on Gradle's APK before
   the copy, so a wrongly signed APK never lands in `builds/`; path and SHA-256 are printed only
   for an APK that passed.
 
@@ -697,7 +697,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.11 v0.3.0 release: version 0.3.0 / versionCode 3, upgrade check from v0.2.0 and straight from v0.1.0 (ADR-043 routine, PR link below)
 
 #### Next
-- [x] 5.13 build:apk checks the signer before copying the APK (ADR-043 update, PR link below)
+- [x] 5.13 build:apk checks the signer before copying the APK (ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35))
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
