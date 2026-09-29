@@ -7,9 +7,10 @@
  *    package.json back byte for byte and warns about any other tracked file prebuild changed.
  * 2. Writes android/local.properties from ANDROID_HOME (or the default SDK location).
  * 3. Runs `gradlew assembleRelease` for the chosen ABIs (signed with the debug keystore).
- * 4. Copies the APK to builds/ with a versioned name and prints its SHA-256.
- * 5. Checks the signer with apksigner: a different key than the published releases' would stop
- *    phones from updating without an uninstall (and data loss), so the build fails (ADR-043).
+ * 4. Checks Gradle's APK's signer with apksigner: a different key than the published releases'
+ *    would stop phones from updating without an uninstall (and data loss), so the build fails
+ *    before anything is copied (ADR-043).
+ * 5. Copies the APK to builds/ with a versioned name and prints its path and SHA-256.
  *
  * Run through tsx (it imports the tested pure module `buildApkConfig.ts`).
  */
@@ -163,6 +164,8 @@ function main(): void {
 
   const built = join(ROOT, ...GRADLE_APK_PATH);
   if (!existsSync(built)) throw new Error(`Gradle finished but ${built} is missing`);
+  // Checked before the copy, so a wrongly signed APK never lands in builds/ (ADR-043).
+  checkSigner(sdkDir, built);
   const outDir = join(ROOT, APK_OUTPUT_DIR);
   mkdirSync(outDir, { recursive: true });
   const target = join(outDir, apkFileName({ version, versionCode, abis: options.abis, commit }));
@@ -171,7 +174,6 @@ function main(): void {
   const sizeMb = (statSync(target).size / (1024 * 1024)).toFixed(1);
   console.log(`\nAPK:     ${target} (${sizeMb} MB)`);
   console.log(`SHA-256: ${sha256(target)}`);
-  checkSigner(sdkDir, target);
   console.log('Signed with the debug keystore: fine for sideloading, not for Play (PLAN 5.3b).');
 }
 

@@ -153,6 +153,9 @@
   database or backup change since v0.2.0. Upgrade check (CONTEXT.md "Release upgrade check") passed
   on the emulator from the v0.2.0 APK **and** straight from the v0.1.0-preview1 APK: hero, goal,
   session and the 40 XP kept.
+- `build:apk` (5.13, ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35)): the signer check runs on Gradle's APK before
+  the copy, so a wrongly signed APK never lands in `builds/`; path and SHA-256 are printed only
+  for an APK that passed.
 
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
@@ -167,6 +170,9 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **build:apk signer order (task 5.13):** only the order in `scripts/buildApk.ts` `main` changed
+  (`checkSigner` on `GRADLE_APK_PATH`, then copy); verified by typecheck, lint and tests, not by a
+  real Gradle build. The next release build is the first real run.
 - **Release v0.3.0 (task 5.11):** same routine as 5.7. Test the upgrade from every release a user
   may still have (0.1.0 and 0.2.0 so far); the seed flow works on both. The emulator got very slow
   after hours of E2E runs (taps ~60 s, adb hanging): cold-boot it and `adb kill-server` when
@@ -690,6 +696,9 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.10 Node history opens the past session; replay onboarding from Settings (ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29))
 - [x] 5.11 v0.3.0 release: version 0.3.0 / versionCode 3, upgrade check from v0.2.0 and straight from v0.1.0 (ADR-043 routine, [PR #32](https://github.com/Herofresh/SkillForge/pull/32); release [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0))
 
+#### Next
+- [x] 5.13 build:apk checks the signer before copying the APK (ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35))
+
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
@@ -717,8 +726,6 @@ compiled into a typed module for the app; users can layer their own changes on t
   (4.7–4.8, ADR-036); keep a changed draft across an app kill (5.2 only asks on leaving)
 - Polish extras (5.2, ADR-038): haptics on level-up/unlock (expo-haptics, optional), animate a
   newly lit edge on the tree map
-- Build script (5.7 review, ADR-043): delete the APK from `builds/` when the signer check fails
-  (today the check runs after the copy, so a wrongly signed APK stays there)
 - Onboarding replay (5.10 review): the equipment step's "Remove" deletes a profile at once; during
   a replay these are the user's real profiles, while Settings asks first. Reuse that confirmation
 - E2E (5.8 review): `train.yaml` asserts the rest panel right after set 1, which races the 30 s rest

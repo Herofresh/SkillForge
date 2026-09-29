@@ -1189,6 +1189,8 @@ Template:
 - Consequences: a build with the wrong key can't be published by accident; the check costs one
   apksigner call. The upgrade check needs the previous APK (from its GitHub release) and an
   emulator, about 5 minutes. Debug signing stays a sideloading-only choice until 5.3b.
+- Update (PLAN 5.13): the signer check runs on Gradle's output before the copy to `builds/`, so a
+  wrongly signed APK is never left there.
 
 ## ADR-044: Timer pause from timestamps, vibration cues at "go" and at the rest end (PLAN 5.8)
 - Date: 2026-09-29 · Status: Accepted (extends ADR-040; the number may need a renumber when other
