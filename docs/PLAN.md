@@ -148,14 +148,14 @@
   (confirmed; later sets move up, `setIndex` stays dense). "Reorder" on the session list shows
   Up / Down per exercise; a strength pair moves as one. Pure functions in `train.ts`, the draft is
   saved after each change, old drafts load unchanged.
-- Release v0.3.0 (5.11, PR link below): timer extras (5.8), edit/delete sets + reorder (5.9), history
+- Release v0.3.0 (5.11, [PR #32](https://github.com/Herofresh/SkillForge/pull/32), release [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0)): timer extras (5.8), edit/delete sets + reorder (5.9), history
   links + replay onboarding (5.10), as the GitHub pre-release `v0.3.0` (arm64 + universal). No
   database or backup change since v0.2.0. Upgrade check (CONTEXT.md "Release upgrade check") passed
   on the emulator from the v0.2.0 APK **and** straight from the v0.1.0-preview1 APK: hero, goal,
   session and the 40 XP kept.
 
 ## Next up
-1. On the user's phone: install v0.3.0 over the installed build (Update, no uninstall) and try the
+1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
 2. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
    `eas init` links the project) and decide the signing key (EAS-managed credentials or an own
@@ -688,7 +688,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.8 Timer extras: pause/resume, buzz at go and at rest end (ADR-044, [PR #30](https://github.com/Herofresh/SkillForge/pull/30))
 - [x] 5.9 Edit/delete a logged set, reorder exercises in the live session (ADR-045, [PR #31](https://github.com/Herofresh/SkillForge/pull/31))
 - [x] 5.10 Node history opens the past session; replay onboarding from Settings (ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29))
-- [x] 5.11 v0.3.0 release: version 0.3.0 / versionCode 3, upgrade check from v0.2.0 and straight from v0.1.0 (ADR-043 routine, PR link below)
+- [x] 5.11 v0.3.0 release: version 0.3.0 / versionCode 3, upgrade check from v0.2.0 and straight from v0.1.0 (ADR-043 routine, [PR #32](https://github.com/Herofresh/SkillForge/pull/32); release [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0))
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
