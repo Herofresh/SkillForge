@@ -89,7 +89,8 @@ scripts/
   e2e.ts                npm run e2e: finds Maestro (MAESTRO_BIN, ~/.maestro install, PATH), sets
                         MAESTRO_CLI_NO_ANALYTICS, runs .maestro/ or the flows passed after `--`
   buildApk.ts           npm run build:apk[:universal] (tsx, ADR-039): prebuild, restore package.json,
-                        local.properties, gradlew assembleRelease, copy to builds/ + SHA-256
+                        local.properties, gradlew assembleRelease, signer check, then copy to
+                        builds/ + SHA-256
   buildApkConfig.ts     its pure parts (args, ABIs, SDK path, APK name, commands, the pinned
                         release signer RELEASE_SIGNER_SHA256 and its apksigner check), Jest-tested
   appIcon.ts            the app icon as a 32×32 pixel grid (roles → Palette keys), the asset list
