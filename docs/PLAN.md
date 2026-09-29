@@ -148,16 +148,19 @@
   (confirmed; later sets move up, `setIndex` stays dense). "Reorder" on the session list shows
   Up / Down per exercise; a strength pair moves as one. Pure functions in `train.ts`, the draft is
   saved after each change, old drafts load unchanged.
-- Release v0.3.0 (5.11, PR link below): timer extras (5.8), edit/delete sets + reorder (5.9), history
+- Release v0.3.0 (5.11, [PR #32](https://github.com/Herofresh/SkillForge/pull/32), release [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0)): timer extras (5.8), edit/delete sets + reorder (5.9), history
   links + replay onboarding (5.10), as the GitHub pre-release `v0.3.0` (arm64 + universal). No
   database or backup change since v0.2.0. Upgrade check (CONTEXT.md "Release upgrade check") passed
   on the emulator from the v0.2.0 APK **and** straight from the v0.1.0-preview1 APK: hero, goal,
   session and the 40 XP kept.
 - Remove confirmation everywhere (5.12, [PR #34](https://github.com/Herofresh/SkillForge/pull/34)): the equipment step of onboarding now asks
   "Remove <name>?" like Settings; the dialog lives in `EquipmentProfileEditor`, so both use one.
+- `build:apk` (5.13, ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35)): the signer check runs on Gradle's APK before
+  the copy, so a wrongly signed APK never lands in `builds/`; path and SHA-256 are printed only
+  for an APK that passed.
 
 ## Next up
-1. On the user's phone: install v0.3.0 over the installed build (Update, no uninstall) and try the
+1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
 2. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
    `eas init` links the project) and decide the signing key (EAS-managed credentials or an own
@@ -173,6 +176,9 @@
   (`remove-dialog`, `remove-confirm`, "Keep it") and always asks, on first run too; the `onRemove`
   prop is gone. Settings only passes `onRename`. No Maestro change needed (`settings.yaml` already
   confirms; `onboarding.yaml` never taps Remove); not run on the emulator by the author.
+- **build:apk signer order (task 5.13):** only the order in `scripts/buildApk.ts` `main` changed
+  (`checkSigner` on `GRADLE_APK_PATH`, then copy); verified by typecheck, lint and tests, not by a
+  real Gradle build. The next release build is the first real run.
 - **Release v0.3.0 (task 5.11):** same routine as 5.7. Test the upgrade from every release a user
   may still have (0.1.0 and 0.2.0 so far); the seed flow works on both. The emulator got very slow
   after hours of E2E runs (taps ~60 s, adb hanging): cold-boot it and `adb kill-server` when
@@ -694,10 +700,11 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.8 Timer extras: pause/resume, buzz at go and at rest end (ADR-044, [PR #30](https://github.com/Herofresh/SkillForge/pull/30))
 - [x] 5.9 Edit/delete a logged set, reorder exercises in the live session (ADR-045, [PR #31](https://github.com/Herofresh/SkillForge/pull/31))
 - [x] 5.10 Node history opens the past session; replay onboarding from Settings (ADR-046, [PR #29](https://github.com/Herofresh/SkillForge/pull/29))
-- [x] 5.11 v0.3.0 release: version 0.3.0 / versionCode 3, upgrade check from v0.2.0 and straight from v0.1.0 (ADR-043 routine, PR link below)
+- [x] 5.11 v0.3.0 release: version 0.3.0 / versionCode 3, upgrade check from v0.2.0 and straight from v0.1.0 (ADR-043 routine, [PR #32](https://github.com/Herofresh/SkillForge/pull/32); release [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0))
 
 #### Next
 - [x] 5.12 Confirm before removing an equipment profile in onboarding ([PR #34](https://github.com/Herofresh/SkillForge/pull/34))
+- [x] 5.13 build:apk checks the signer before copying the APK (ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35))
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
@@ -726,7 +733,5 @@ compiled into a typed module for the app; users can layer their own changes on t
   (4.7–4.8, ADR-036); keep a changed draft across an app kill (5.2 only asks on leaving)
 - Polish extras (5.2, ADR-038): haptics on level-up/unlock (expo-haptics, optional), animate a
   newly lit edge on the tree map
-- Build script (5.7 review, ADR-043): delete the APK from `builds/` when the signer check fails
-  (today the check runs after the copy, so a wrongly signed APK stays there)
 - E2E (5.8 review): `train.yaml` asserts the rest panel right after set 1, which races the 30 s rest
   when the emulator is slow; wait on something that doesn't expire
