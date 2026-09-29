@@ -153,7 +153,7 @@
   database or backup change since v0.2.0. Upgrade check (CONTEXT.md "Release upgrade check") passed
   on the emulator from the v0.2.0 APK **and** straight from the v0.1.0-preview1 APK: hero, goal,
   session and the 40 XP kept.
-- Remove confirmation everywhere (5.12, PR_LINK): the equipment step of onboarding now asks
+- Remove confirmation everywhere (5.12, [PR #34](https://github.com/Herofresh/SkillForge/pull/34)): the equipment step of onboarding now asks
   "Remove <name>?" like Settings; the dialog lives in `EquipmentProfileEditor`, so both use one.
 
 ## Next up
@@ -697,7 +697,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.11 v0.3.0 release: version 0.3.0 / versionCode 3, upgrade check from v0.2.0 and straight from v0.1.0 (ADR-043 routine, PR link below)
 
 #### Next
-- [x] 5.12 Confirm before removing an equipment profile in onboarding (PR_LINK)
+- [x] 5.12 Confirm before removing an equipment profile in onboarding ([PR #34](https://github.com/Herofresh/SkillForge/pull/34))
 
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
