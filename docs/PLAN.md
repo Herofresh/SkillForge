@@ -190,7 +190,7 @@
   it in the merged tree; an og_level that drops next to a user-placed node is a warning (gold
   "Worth a look" note in the editor), not an error. Tested against every position a user could
   pick on v0.3.0.
-- Exercise animations, part 1 (6.4a, ADR-053, PR_LINK): a small looping pixel figure (side-view
+- Exercise animations, part 1 (6.4a, ADR-053, [PR #42](https://github.com/Herofresh/SkillForge/pull/42)): a small looping pixel figure (side-view
   stick figure from joint angles, 32 × 32 grid, stepped 160 ms frames) on top of the node
   detail's About panel and the exercise info sheet (Tree and Train); reduce motion shows a still
   pose. All 10 v_pull nodes plus push-up, squat, freestanding handstand, front lever and full
@@ -209,7 +209,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Exercise animations, part 1 (task 6.4a, ADR-053, PR_LINK):**
+- **Exercise animations, part 1 (task 6.4a, ADR-053, [PR #42](https://github.com/Herofresh/SkillForge/pull/42)):**
   - Engine (pure, `src/lib/`): `figure.ts` (Pose = position + absolute angles, `jointsOf`,
     `interpolatePose`, `solveLimb` IK), `figureRaster.ts` (pose + props → 32 × 32 role rows),
     `figureAnimation.ts` (keyframes → frames). Data in `src/data/animations/` (typed TS, not
@@ -884,7 +884,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   a few nodes, 6.4b the rest).
   - [x] 6.4a Engine + generic pattern poses + one branch fully animated (v_pull) + iconic nodes
     (push-up, squat, handstand, front lever, planche) + display (node detail, info sheet, Style
-    Guide) (ADR-053, PR_LINK)
+    Guide) (ADR-053, [PR #42](https://github.com/Herofresh/SkillForge/pull/42))
   - [ ] 6.4b Per-node animations for all remaining nodes
 - [ ] 6.5 v0.4.0 release (6.1–6.4): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and 0.3.0.
 - [ ] 6.6 Android home-screen widget (like Duolingo): shows whether you trained today, the
