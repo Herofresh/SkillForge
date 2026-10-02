@@ -203,7 +203,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Upgrade-safe overlays (task 6.3c, ADR-052):**
+- **Upgrade-safe overlays (task 6.3c, ADR-052, [PR #41](https://github.com/Herofresh/SkillForge/pull/41)):**
   - `applyOverlay` → `userPlacedIds` (user nodes + edits that set branch/order/og_level) →
     `resolveOrderClashes` (merged tree only; ties sort built-in first, then by id; the user node
     gets the order halfway to the next node, or +1 at the end) → `validateTree(nodes, userPlaced)`
@@ -835,7 +835,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   push-ups, archer rows, shrimp squats). Don't pad: a branch stays under 10 when there's no sourced
   step that fits; write down why in docs/research/progressions.md. Every new node has `sources`,
   `description` (6.2), a `verify:` note where values are inferred, and stable ids.
-- [x] 6.3c Saved overlays survive new built-in nodes (ADR-052, PR link in the handoff notes): found
+- [x] 6.3c Saved overlays survive new built-in nodes (ADR-052, [PR #41](https://github.com/Herofresh/SkillForge/pull/41)): found
   in the 6.3b review. A user node placed between two nodes gets the midpoint `order`; 6.3a/6.3b put
   new built-in nodes on exactly such orders (and with higher og_levels), so a saved overlay failed
   `applyOverlay` after the update and the user's nodes vanished from the tree. Fix: order clashes of
