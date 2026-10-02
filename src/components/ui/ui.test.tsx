@@ -1,10 +1,13 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 
+import { animationFor } from '@/data/animations';
+
 import { Colors, TierColors } from '../theme';
 
 import { EmptyState } from './EmptyState';
 import { LevelBadge } from './LevelBadge';
 import { LevelUpBurst } from './LevelUpBurst';
+import { PixelAnimation } from './PixelAnimation';
 import { PixelButton } from './PixelButton';
 import { PixelFrame } from './PixelFrame';
 import { PixelIcon } from './PixelIcon';
@@ -198,5 +201,20 @@ describe('LevelUpBurst', () => {
     await render(<LevelUpBurst subtitle="Tuck planche" />);
     expect(screen.getByText('LEVEL UP!')).toBeOnTheScreen();
     expect(screen.getByRole('alert', { name: 'LEVEL UP! Tuck planche' })).toBeOnTheScreen();
+  });
+});
+
+describe('PixelAnimation (PLAN 6.4)', () => {
+  it('draws the animation as one decorative SVG of role paths', async () => {
+    await render(
+      <PixelAnimation
+        animation={animationFor({ id: 'pull_up', patterns: ['vertical_pull'] })}
+        size={96}
+        testID="anim"
+      />,
+    );
+    const svg = screen.getByTestId('anim', { includeHiddenElements: true });
+    expect(svg).toHaveProp('width', 96);
+    expect(svg).toHaveProp('importantForAccessibility', 'no-hide-descendants');
   });
 });

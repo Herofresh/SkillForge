@@ -6,6 +6,7 @@ export { BURST_TITLES, LevelUpBurst } from './LevelUpBurst';
 export { useLevelUpKey } from './useLevelUpKey';
 export { useNow } from './useNow';
 export { NumberStepper } from './NumberStepper';
+export { PixelAnimation } from './PixelAnimation';
 export { PixelButton } from './PixelButton';
 export { PixelChip } from './PixelChip';
 export { PixelFrame } from './PixelFrame';

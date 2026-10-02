@@ -851,6 +851,10 @@ upgrade check from every earlier release). Any new table or column is additive a
   node detail and the 6.2 description sheet (Tree and Train). Preview sheet with all animations
   in the dev Style Guide; screenshots for review. Split by branch if needed (6.4a engine +
   a few nodes, 6.4b the rest).
+  - [~] 6.4a Engine + generic pattern poses + one branch fully animated (v_pull) + iconic nodes
+    (push-up, squat, handstand, front lever, planche) + display (node detail, info sheet, Style
+    Guide) (claude-agent)
+  - [ ] 6.4b Per-node animations for all remaining nodes
 - [ ] 6.5 v0.4.0 release (6.1–6.4): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and 0.3.0.
 - [ ] 6.6 Android home-screen widget (like Duolingo): shows whether you trained today, the
   streak, the hero's level and rank, a few stats; tapping it opens the Train tab

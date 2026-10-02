@@ -1,10 +1,12 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
+import { animationFor } from '@/data/animations';
 import { formatDescription } from '@/domain/format';
 import type { ExerciseNode } from '@/domain/types';
 
 import { Spacing } from '../theme';
-import { PixelButton, PixelFrame, PixelIcon, PixelModal, PixelText } from '../ui';
+import { PixelAnimation, PixelButton, PixelFrame, PixelIcon, PixelModal, PixelText } from '../ui';
 
 type Props = {
   node: ExerciseNode;
@@ -17,7 +19,8 @@ type Props = {
 /**
  * The exercise info sheet (PLAN 6.2, ADR-049): what the exercise is (its description) and its
  * cues, over whatever screen opened it. One component for the Tree (column tile, map node) and
- * Train (plan preview, live session), so it reads the same everywhere. Mount it to open it.
+ * Train (plan preview, live session), so it reads the same everywhere. Mount it to open it. The
+ * exercise's pixel animation (PLAN 6.4) leads, so the movement shows before the words.
  */
 export function ExerciseInfoSheet({
   node,
@@ -25,9 +28,17 @@ export function ExerciseInfoSheet({
   onOpenDetail,
   testID = 'exercise-info',
 }: Props) {
+  const animation = useMemo(() => animationFor(node), [node]);
   return (
     <PixelModal visible title={node.name} onClose={onClose} testID={testID}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.body}>
+        <View style={styles.animation}>
+          <PixelAnimation
+            animation={animation}
+            size={ANIMATION_SIZE}
+            testID={`${testID}-animation`}
+          />
+        </View>
         <PixelText testID={`${testID}-description`}>
           {formatDescription(node.description)}
         </PixelText>
@@ -62,6 +73,8 @@ export function ExerciseInfoSheet({
 
 /** Long cue lists scroll inside the sheet so its buttons stay on screen. */
 const BODY_MAX_HEIGHT = 360;
+/** Smaller than the node detail's, so description and cues still fit the sheet. */
+const ANIMATION_SIZE = 96;
 
 const styles = StyleSheet.create({
   scroll: {
@@ -69,6 +82,9 @@ const styles = StyleSheet.create({
   },
   body: {
     gap: Spacing.sm,
+  },
+  animation: {
+    alignItems: 'center',
   },
   heading: {
     flexDirection: 'row',

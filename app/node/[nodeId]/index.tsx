@@ -11,7 +11,8 @@ import { PrerequisiteList } from '@/components/node/PrerequisiteList';
 import { UnlockSheet } from '@/components/node/UnlockSheet';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { Spacing } from '@/components/theme';
-import { EmptyState, PixelButton, PixelText, Screen } from '@/components/ui';
+import { EmptyState, PixelAnimation, PixelButton, PixelText, Screen } from '@/components/ui';
+import { animationFor } from '@/data/animations';
 import {
   formatDescription,
   formatShortDate,
@@ -72,6 +73,7 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
   const [unlockBurstKey, setUnlockBurstKey] = useState<number | undefined>();
   const { tile, prerequisites, attributes, history } = detail;
   const { node, state, isGoal, status } = tile;
+  const animation = useMemo(() => animationFor(node), [node]);
   const locked = state === 'locked' || state === 'legendary';
 
   const openNode = useCallback(
@@ -99,6 +101,9 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
         />
 
         <DetailSection title="About" icon="info" testID="detail-description">
+          <View style={styles.animation}>
+            <PixelAnimation animation={animation} testID="detail-animation" />
+          </View>
           <PixelText testID="detail-description-text">
             {formatDescription(node.description)}
           </PixelText>
@@ -217,6 +222,9 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
 }
 
 const styles = StyleSheet.create({
+  animation: {
+    alignItems: 'center',
+  },
   pair: {
     gap: Spacing.xs,
   },

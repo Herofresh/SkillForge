@@ -61,6 +61,19 @@ export function parsePixelGrid(rows: readonly string[], allowedRoles?: string): 
   return { width, height: rows.length, runs };
 }
 
+/**
+ * One SVG path per role: each run becomes a closed 1-cell-high rectangle, so a whole grid draws
+ * as a handful of `Path`s instead of one `Rect` per run (the exercise animations, PLAN 6.4).
+ * Coordinates are in cells.
+ */
+export function gridPaths(grid: PixelGrid): Record<string, string> {
+  const paths: Record<string, string> = {};
+  for (const run of grid.runs) {
+    paths[run.role] = `${paths[run.role] ?? ''}M${run.x} ${run.y}h${run.width}v1h${-run.width}z`;
+  }
+  return paths;
+}
+
 /** The distinct roles a grid uses, in order of first appearance. */
 export function gridRoles(grid: PixelGrid): string[] {
   return [...new Set(grid.runs.map((run) => run.role))];

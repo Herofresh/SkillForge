@@ -1,4 +1,4 @@
-import { gridRoles, parsePixelGrid } from './pixelGrid';
+import { gridPaths, gridRoles, parsePixelGrid } from './pixelGrid';
 
 describe('parsePixelGrid', () => {
   it('merges horizontal runs of one role and skips transparent cells', () => {
@@ -38,5 +38,18 @@ describe('parsePixelGrid', () => {
 
   it('lists the roles in order of first use', () => {
     expect(gridRoles(parsePixelGrid(['+#', '#o']))).toEqual(['+', '#', 'o']);
+  });
+});
+
+describe('gridPaths', () => {
+  it('draws each role as one path of 1-cell-high run rectangles', () => {
+    expect(gridPaths(parsePixelGrid(['.##+', '#..#']))).toEqual({
+      '#': 'M1 0h2v1h-2zM0 1h1v1h-1zM3 1h1v1h-1z',
+      '+': 'M3 0h1v1h-1z',
+    });
+  });
+
+  it('has no path for an empty grid', () => {
+    expect(gridPaths(parsePixelGrid(['..']))).toEqual({});
   });
 });
