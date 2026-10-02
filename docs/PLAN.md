@@ -200,7 +200,7 @@
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
-2. Phase 6 in order, next 6.4b (per-node animations for the remaining nodes). Phase 7 (Google Play) comes after
+2. Phase 6 in order, next 6.5 (v0.4.0 release; 6.4 animations are done). Phase 7 (Google Play) comes after
    all of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -914,7 +914,7 @@ upgrade check from every earlier release). Any new table or column is additive a
     Guide) (ADR-053, [PR #42](https://github.com/Herofresh/SkillForge/pull/42))
   - [x] 6.4b Per-node animations for all remaining nodes
     - [x] 6.4b-1 bar branches (h_pull, front_lever, back_lever, dynamic, core) ([PR #45](https://github.com/Herofresh/SkillForge/pull/45))
-    - [x] 6.4b-2 push/legs branches (h_push, v_push, planche, handstand, legs)
+    - [x] 6.4b-2 push/legs branches (h_push, v_push, planche, handstand, legs) ([PR #43](https://github.com/Herofresh/SkillForge/pull/43))
     - [x] 6.4b-3 flexibility/mobility/acrobatics (all 41 nodes; generic `mobility` is now a low
       lunge reach; contact sheets `docs/screenshots/6.4b-{flexibility,mobility,acrobatics}.png`)
       ([PR #44](https://github.com/Herofresh/SkillForge/pull/44))
