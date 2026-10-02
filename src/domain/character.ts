@@ -143,12 +143,16 @@ export function branchOgLevels(
 }
 
 /**
- * Branches whose peak ogLevel counts towards the rank median: every branch except `acrobatics`
- * (ADR-041). Acrobatics is an optional side path; counting it would add a 13th value (0 for most
- * people) and could lower an existing user's rank just because the branch was added.
+ * Branches left out of the rank median: optional side paths added after the first release
+ * (`acrobatics`, ADR-041; `mobility`, ADR-050). Counting one would add a value that is 0 for most
+ * people and could lower an existing user's rank just because the branch was added. They still pay
+ * into attributes and the radar.
  */
+export const NON_RANK_BRANCHES: readonly Branch[] = ['acrobatics', 'mobility'];
+
+/** Branches whose peak ogLevel counts towards the rank median: every branch except {@link NON_RANK_BRANCHES}. */
 export const RANK_BRANCHES: readonly Branch[] = BRANCHES.filter(
-  (branch) => branch !== 'acrobatics',
+  (branch) => !NON_RANK_BRANCHES.includes(branch),
 );
 
 export function rankForMedianOgLevel(medianOgLevel: number): RankTitle {

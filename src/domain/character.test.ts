@@ -207,9 +207,12 @@ describe('computeCharacter', () => {
     expect(character.level).toBe(characterLevel(500));
   });
 
-  it('leaves acrobatics out of the rank median, so adding the branch cannot lower a rank', () => {
-    expect(RANK_BRANCHES).toHaveLength(BRANCHES.length - 1);
+  it('leaves acrobatics and mobility out of the rank median, so adding them cannot lower a rank', () => {
+    expect(RANK_BRANCHES).toHaveLength(BRANCHES.length - 2);
     expect(RANK_BRANCHES).not.toContain('acrobatics');
+    expect(RANK_BRANCHES).not.toContain('mobility');
+    // The twelve original branches still count.
+    expect(RANK_BRANCHES).toEqual(BRANCHES.slice(0, 12));
     // Six rank branches at OG 2, six at OG 0: median 1 whether or not acrobatics is proficient.
     const nodes = RANK_BRANCHES.map((branch, index) =>
       makeNode({ id: `n_${branch}`, branch, ogLevel: index < 6 ? 2 : 0, patterns: ['mobility'] }),
@@ -223,6 +226,17 @@ describe('computeCharacter', () => {
     expect(withRoll.medianOgLevel).toBe(1);
     // It still pays into its attributes.
     expect(withRoll.peakOgLevels.balance).toBe(6);
+  });
+
+  it('does not count a proficient mobility node in the rank, but in the mobility attribute (ADR-050)', () => {
+    const nodes = RANK_BRANCHES.map((branch, index) =>
+      makeNode({ id: `n_${branch}`, branch, ogLevel: index < 6 ? 2 : 0, patterns: ['core'] }),
+    );
+    const squat = makeNode({ id: 'squat_hold', branch: 'mobility', ogLevel: 3, patterns: ['mobility'] });
+    const all = [...nodes, squat];
+    const character = computeCharacter(all, passed(...all.map((node) => node.id)), 0);
+    expect(character.medianOgLevel).toBe(1);
+    expect(character.peakOgLevels.mobility).toBe(3);
   });
 });
 

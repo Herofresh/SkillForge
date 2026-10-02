@@ -1384,3 +1384,56 @@ Template:
   the check fails otherwise). The review sheet has a Description column for the coach. Backups
   written by 0.4+ are refused by older apps with their "newer SkillForge" message, shared overlays
   with "'version' must be 1"; everything older still imports into 0.4+.
+
+## ADR-050: Mobility as its own branch, flexibility grown with yoga paths; mobility left out of the rank median (PLAN 6.3a)
+- Date: 2026-10-02 · Status: Accepted (amends ADR-041's rank rule; extends ADR-016's branch list)
+- Context: the user asked to "expand Flexibility and Mobility (maybe more yoga skills like the
+  dove or something)" with at least 10 skills per category where it makes sense. The
+  `flexibility` branch ("Flexibility and mobility") had 5 nodes: two warm-up staples (wrist prep,
+  band dislocates), the pike fold and two bridges. "The dove" is the pigeon pose (kapota = dove or
+  pigeon) and its king pigeon. Joint mobility (CARs, ankle, thoracic, deep squat) could either join
+  `flexibility` or become a branch.
+- Decision:
+  - **Two branches.** Flexibility (passive range: stretches and yoga poses held for time) and
+    mobility (active range: moving a joint through its range under your own control, FRC) are
+    different qualities with different training, the user named both, and one 28-node branch with
+    five unrelated chains would be hard to read as a single Tree column or map lane. A new branch
+    `mobility` ("Mobility") is appended to the end of `BRANCHES`, so the order of the existing
+    tabs, lanes and generated module stays the same; `flexibility` is renamed in the UI only
+    (`BRANCH_NAMES`: "Flexibility"); its id and nodes stay.
+  - **Flexibility: 5 → 17 nodes**, 12 new ids, chained so ogLevel never drops as `order` rises:
+    pike fold → `half_split` → (+ `couch_stretch`) → `front_split`; `butterfly_stretch` →
+    `frog_stretch` → (+ pike fold) → `pancake` → `middle_split`; butterfly → `half_lotus` →
+    `lotus`; `pigeon_pose` → (+ couch stretch, full bridge) → `king_pigeon`; full bridge →
+    `one_leg_wheel`. Sources: GMB splits and hip routines, Wikipedia pose articles (Iyengar /
+    Pattabhi Jois lineage), the BWF chart, Kelly Starrett's couch stretch
+    (docs/research/progressions.md → B12).
+  - **Mobility: 11 new nodes:** `cat_cow` → `open_book` → `three_point_bridge`; `ankle_rocks` →
+    `deep_squat_hold` → `cossack_squat`; `hip_cars` → `hip_90_90_switch`; `shoulder_cars` →
+    `wall_angel`; deep squat hold + wall angel → `overhead_squat` (B14).
+  - **No moves, no renames:** `deep_squat` (legs, a full squat for reps), `german_hang` (back
+    lever, straight-arm with tendon safeguards), `wrist_prep` and `shoulder_dislocate` (flexibility,
+    referenced by the generator's `WARM_UP_PREP_IDS` and several gates) stay where they are; the
+    mobility branch links to them (`squat`, `table_bridge`, `shoulder_dislocate` as recommended
+    gates) instead of duplicating them. `deep_squat_hold` is a resting position held for time, not
+    the strength squat. Saved progress is keyed by id, so every release still upgrades in place.
+  - **Shape:** every new node is `patterns: [mobility]`, `skill: false`, `straight_arm: false`
+    (`cossack_squat` also `trains: [mobility, legs]`); equipment floor, wall or bands (all on the
+    Home profile). **Generator:** no code change. Non-skill `mobility` nodes only fill the
+    goal-driven cool-down slot, `mobility` is exempt from the 48 h rest, and the ADR-010 safeguards
+    do not apply (generator tests added).
+  - **Rank:** `NON_RANK_BRANCHES` = `acrobatics`, `mobility`; `RANK_BRANCHES` stays the 12
+    original branches. A 14th value of 0 for most people could lower an existing rank, as for
+    acrobatics. Flexibility keeps counting (it always did); its new nodes can only raise a peak,
+    and their levels are kept modest (≤ 4) so a split is not a cheap rank boost.
+  - **Color:** `BranchColors.mobility` = new `Palette.lime` `#B9E769` (a yellow-green apart from
+    verdant legs and gold core), contrast-tested on `surface` and `background` like every lane.
+  - **Standards:** OG2 has no flexibility or mobility chart and no source gives pass times or rep
+    standards for these drills, so every ogLevel above 0 and every trial is inferred and carries a
+    `verify:` note (coach review, PLAN 1.10). Distances (knee-to-wall 12.5 cm) are cues, since the
+    app has no distance metric.
+- Consequences: 125 nodes in 14 branches. The Tree tab, the tree map and the onboarding goal
+  picker pick the branch up from `BRANCHES` (one more tab and lane). Mobility work shows up in
+  plans only when it's a goal (cool-down) — the warm-up still uses wrist prep and dislocates. If
+  mobility should count towards the rank, that is a product decision and a one-line change to
+  `NON_RANK_BRANCHES`.

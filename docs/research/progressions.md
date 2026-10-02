@@ -102,13 +102,58 @@ Straddle PL [7] → Half-Lay / One-Leg PL [9] → Full PL [~10] → straight-arm
 - **Human flag:** Tuck Flag [5] → Adv Tuck [~5] → Straddle [6] → Full Flag [~6]
   - Secondary sources put Vertical/Press Flag and Feet-Assisted Flag before the tuck.
 
-### B12. Flexibility and mobility
-This branch is our own synthesis. No single source gives a levelled chain.
+### B12. Flexibility (passive range and yoga poses; extended in PLAN 6.3a, ADR-050)
+This branch is our own synthesis. No single source gives a levelled chain, OG2 has no flexibility
+chart, and no source gives pass times: every ogLevel above 0 is inferred and every trial carries a
+`verify:` note. Stretch holds use GMB's dosage ("3 rounds: 10 contractions followed by a hold of
+15-45 seconds", gmb.io/splits) unless a source says otherwise; the final poses use the RR 3 x 30 s
+hold rule. Levels are kept modest (at most 4) because flexibility counts towards the rank median.
 
-- **Bridge (BWF chart):** Shoulder Bridge → Table → Angled → Head Bridge → Full Bridge → Decline →
-  One-Leg → One-Arm
-- **Others:** German Hang, Skin the Cat, Pike/Pancake compression, Front/Middle Split, Wrist Prep (GMB)
-- **Suggestion:** rate these by a hold or range standard rather than reps.
+- **Bridge (BWF chart):** Shoulder Bridge → Table [0] → Angled → Head Bridge → Full Bridge [2]
+  → Decline → One-Leg [3] → One-Arm. Modelled: table, full, one-leg wheel (yoga eka pada urdhva
+  dhanurasana; Wikipedia "Chakrasana" also names locust, cobra and bow as preparation).
+- **Front split (hanumanasana):** Pike fold [0] → Half split / ardha hanumanasana [0] → Front
+  split [3], with the Couch stretch [1] as a second gate. GMB's front split routine: kneeling lunge,
+  hamstring hinges, kneeling lunge with foot hold. Wikipedia: Anjaneyasana (low lunge) is the
+  preparatory pose; Iyengar rates hanumanasana advanced. Couch stretch: Kelly Starrett, 30-60 s
+  (Garage Gym Reviews) or 1-2 min (Active.com), regressed with the knee further from the wall.
+- **Middle split (samakonasana):** Butterfly / baddha konasana [0] → Frog [1] → Pancake /
+  upavistha konasana [2] (also gated by the pike fold) → Middle split [4]. GMB's side split
+  routine: kneeling lunge, frog, pancake, cossack squat (the cossack squat is in `mobility`).
+  Wikipedia "Splits (gymnastics)": hip pain in the side split usually means poor pelvis alignment.
+- **Pigeon, "the dove" (kapota = dove/pigeon):** Pigeon [0] → King pigeon / eka pada
+  rajakapotasana [4], gated by the couch stretch (quad and hip flexor) and the full bridge
+  (backbend). Wikipedia names supported and sleeping pigeon as easier variations; GMB's hip routine
+  includes the pigeon stretch.
+- **Lotus prep (padmasana):** Butterfly → Half lotus / ardha padmasana [1] → Lotus [3]. Wikipedia:
+  "one of the yoga poses that most commonly causes injury"; the hips must rotate out about 115
+  degrees, so the cues say rotate the thigh, never force the knee.
+- **Warm-up staples (unchanged):** wrist prep and band shoulder dislocates stay here (the generator
+  adds them to every warm-up by id).
+- **Not modelled:** sleeping pigeon, mermaid, standing splits and oversplits, drop-backs to wheel,
+  the one-arm bridge.
+
+### B14. Mobility (active joint range; PLAN 6.3a, ADR-050)
+Our own synthesis from physiotherapy and coaching sources. Mobility here means moving a joint
+through its range under your own control (FRC: "under muscular and neurological control instead of
+simply holding a static stretch"). None of the sources gives rep standards, so every trial is a
+placeholder with a `verify:` note; levels are 0-1 and the branch is left out of the rank median.
+
+- **Spine:** Cat-cow [0] (Wikipedia "Cat/Cow pose") → Open book [0] (side-lying thoracic rotation,
+  Physitrack) → Three-point bridge [1] (GMB shoulder routine: 5-10 s each side, alternating).
+- **Ankle and hip:** Knee-to-wall ankle rocks [0] → Deep squat hold [0] → Cossack squat [1].
+  Weight-bearing lunge test: at least 12.5 cm toe-to-wall is normal, 1.9 cm is the minimal
+  detectable change (Physiotutors); the app has no distance metric, so the test is a cue. Deep squat
+  hold: Ido Portal's challenge accumulates 30 min a day for 30 days (Antranik). Hip CARs [0] →
+  90/90 hip switch [0] (Cleveland Clinic: 20-60 s per side for the static 90/90; avoid it with hip
+  impingement or meniscus problems).
+- **Shoulder:** Shoulder CARs [0] → Wall angel [0] (Squat University's overhead screen: back, head,
+  elbows, forearms and hands flat on the wall).
+- **Capstone:** Deep squat hold + Wall angel → Overhead squat [1] (World Rugby's screen: upright
+  torso, arms overhead, depth, no compensation; hands behind the head isolates the upper body).
+- **Already elsewhere (not duplicated):** `deep_squat` (legs, the full squat for reps),
+  `german_hang` (back lever; straight-arm, safeguarded), `wrist_prep` and `shoulder_dislocate`
+  (flexibility).
 
 ### B13. Acrobatics (tumbling and safe falling; PLAN 5.5, ADR-041)
 Our own synthesis. OG2 has no tumbling chart, so every level is inferred, and none of the sources
@@ -285,9 +330,33 @@ are placeholders with a `verify:` note.
 - [Pinn Gymnastics: backward roll progressions](https://www.pinngym.com/favorite-backward-roll-progressions)
 - [RecGymPros: drills for teaching back rolls](https://recgympros.com/drills-for-teaching-back-rolls/)
 - [Wikipedia: Aerial cartwheel](https://en.wikipedia.org/wiki/Aerial_cartwheel)
+- [GMB: Splits (front and side split routines)](https://gmb.io/splits/)
+- [GMB: Hip mobility](https://gmb.io/hip-mobility/)
+- [GMB: Shoulder mobility](https://gmb.io/shoulder-mobility/)
+- [Wikipedia: Eka Pada Rajakapotasana (pigeon, king pigeon)](https://en.wikipedia.org/wiki/Eka_Pada_Rajakapotasana)
+- [Wikipedia: Hanumanasana](https://en.wikipedia.org/wiki/Hanumanasana)
+- [Wikipedia: Anjaneyasana](https://en.wikipedia.org/wiki/Anjaneyasana)
+- [Wikipedia: Splits (gymnastics)](https://en.wikipedia.org/wiki/Splits_(gymnastics))
+- [Wikipedia: Baddha Konasana](https://en.wikipedia.org/wiki/Baddha_Konasana)
+- [Wikipedia: Paschimottanasana (incl. upavistha konasana)](https://en.wikipedia.org/wiki/Paschimottanasana)
+- [Wikipedia: Lotus position](https://en.wikipedia.org/wiki/Lotus_position)
+- [Wikipedia: Chakrasana (wheel)](https://en.wikipedia.org/wiki/Chakrasana)
+- [Wikipedia: Cat/Cow pose](https://en.wikipedia.org/wiki/Bitilasana)
+- [Garage Gym Reviews: Couch stretch](https://www.garagegymreviews.com/couch-stretch)
+- [Active.com: The couch stretch](https://www.active.com/triathlon/articles/the-stretch-that-could-be-the-key-to-saving-your-knees)
+- [The Prehab Guys: Intro to FRC (CARs)](https://library.theprehabguys.com/intro-to-frc/)
+- [The Prehab Guys: Knee-to-wall ankle dorsiflexion assessment](https://library.theprehabguys.com/vimeo-video/knee-to-wall-ankle-dorsiflexion-assessment)
+- [The Prehab Guys: 90/90 hip lift-off](https://library.theprehabguys.com/vimeo-video/90-90-hip-lift-off/)
+- [Physiotutors: Weight-bearing lunge test](https://www.physiotutors.com/wiki/weight-bearing-lunge-test)
+- [Physitrack: Thoracic rotation in side lying (open book)](https://us.physitrack.com/home-exercise-video/thoracic-rotation-in-side-lying)
+- [Squat University: Screening overhead mobility (wall angel)](https://squatuniversity.com/2016/07/29/the-squat-fix-screening-overhead-mobility/)
+- [Cleveland Clinic: 90/90 stretch](https://health.clevelandclinic.org/90-90-stretch/)
+- [Antranik: The 30 minutes a day squat challenge](https://antranik.org/the-30-minutes-a-day-squat-challenge/)
+- [World Rugby: Progressing the overhead squat](https://passport.world.rugby/conditioning-for-rugby/introduction-to-conditioning-youth/functional-screening/progressing-the-overhead-squat/)
 
 **Caveats:**
 - The `~` levels and the tier band boundaries are inferred.
 - The muscle-up, front lever, planche and flag thresholds come from secondary coaching sites.
-- The flexibility branch is our own synthesis.
+- The flexibility and mobility branches are our own synthesis; their OG levels and hold/rep
+  standards are inferred.
 - The acrobatics branch is our own synthesis; its OG levels and rep standards are all inferred.

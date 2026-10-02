@@ -154,6 +154,45 @@ describe('acrobatics branch (PLAN 5.5, ADR-041)', () => {
   });
 });
 
+describe('flexibility and mobility branches (PLAN 6.3a, ADR-050)', () => {
+  const flexibility = ALL_NODES.filter((n) => n.branch === 'flexibility');
+  const mobility = ALL_NODES.filter((n) => n.branch === 'mobility');
+
+  it('have at least 10 nodes each', () => {
+    expect(flexibility.length).toBeGreaterThanOrEqual(10);
+    expect(mobility.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('chain the yoga paths: pigeon to king pigeon, splits, lotus and the wheel', () => {
+    expect(directPrerequisites('king_pigeon', 'hard')).toEqual(
+      expect.arrayContaining(['pigeon_pose', 'couch_stretch', 'full_bridge']),
+    );
+    expect(allPrerequisites('front_split', 'hard')).toEqual(
+      new Set(['half_split', 'pike_fold', 'couch_stretch']),
+    );
+    expect(allPrerequisites('middle_split', 'hard')).toEqual(
+      new Set(['pancake', 'pike_fold', 'frog_stretch', 'butterfly_stretch']),
+    );
+    expect(directPrerequisites('lotus', 'hard')).toEqual(['half_lotus']);
+    expect(directPrerequisites('one_leg_wheel', 'hard')).toEqual(['full_bridge']);
+  });
+
+  it('keep the existing deep squat and German hang where they are', () => {
+    expect(node('deep_squat').branch).toBe('legs');
+    expect(node('german_hang').branch).toBe('back_lever');
+    expect(allPrerequisites('overhead_squat', 'hard')).toEqual(
+      new Set(['deep_squat_hold', 'ankle_rocks', 'wall_angel', 'shoulder_cars']),
+    );
+  });
+
+  it('is plain mobility work: no skill or straight-arm flags, nothing that trips the 48 h rest', () => {
+    for (const n of [...flexibility, ...mobility]) {
+      expect([n.id, n.isSkill, n.straightArm]).toEqual([n.id, false, false]);
+      expect([n.id, n.patterns]).toEqual([n.id, ['mobility']]);
+    }
+  });
+});
+
 describe('Home profile (floor, wall, bar, parallettes, bands)', () => {
   const reachable = homeReachable();
 

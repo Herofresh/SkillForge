@@ -215,7 +215,7 @@ nodes:
 
   - id: wall_handstand_push_up
     name: Wall handstand push-up (full range)
-    description: A handstand push-up against the wall with the hands on parallettes, so the head can sink below hand level. You lower until the shoulders are near the hands and press back to straight arms.
+    description: A handstand push-up against the wall with the hands raised on parallettes, so the head can travel below hand level. It is the full-range version of the wall headstand push-up, which stops when the head touches the floor.
     order: 70
     og_level: 5 # OG2: wall HSPU full range of motion [5]
     metric: reps

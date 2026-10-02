@@ -110,7 +110,7 @@ nodes:
   # --- Elbow lever ---
   - id: elbow_lever
     name: Elbow lever
-    description: Balancing the body horizontally on the hands, with the bent elbows dug into the hips as a support. A balance skill that looks impressive but needs more technique than strength.
+    description: Balancing the body horizontally on the hands, with the bent elbows dug into the hips as a support. A balance skill that usually follows the frog stand.
     order: 40
     og_level: 5
     metric: hold_s

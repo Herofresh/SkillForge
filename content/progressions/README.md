@@ -23,8 +23,9 @@ to be a programmer to read or change them.
 | `core.yaml` | Core and compression |
 | `legs.yaml` | Legs |
 | `dynamic.yaml` | Muscle-up, elbow lever, human flag |
-| `flexibility.yaml` | Flexibility and mobility |
+| `flexibility.yaml` | Flexibility: stretches and yoga poses (splits, pancake, pigeon, lotus, bridge) |
 | `acrobatics.yaml` | Acrobatics: rolls, judo breakfalls, cartwheel to aerial |
+| `mobility.yaml` | Mobility: active joint range (CARs, ankle, hips, thoracic spine, overhead squat) |
 
 ## A complete example
 

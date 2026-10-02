@@ -171,11 +171,19 @@
   has a Description section; a user node needs one to be saved, but old overlays/backups without
   one still load (shown as "No description yet…"). Overlay layout version 2, backup
   `schemaVersion` 3 (older ones still read); no database change.
+- Flexibility + mobility (6.3a, ADR-050, [PR #PRNUM](https://github.com/Herofresh/SkillForge/pull/PRNUM)): **125 nodes in 14 branches.** `flexibility`
+  grew from 5 to 17 (yoga paths: pigeon → king pigeon "the dove", half split → front split,
+  butterfly → frog → pancake → middle split, half lotus → lotus, full bridge → one-leg wheel). New
+  branch `mobility` (11 nodes: CARs, ankle rocks, open book, wall angel, 90/90, deep squat hold,
+  cossack squat, three-point bridge, overhead squat), appended to `BRANCHES`, lime lane, left out of
+  the rank median (`NON_RANK_BRANCHES`). Only new ids; no data or database change. The
+  `wall_handstand_push_up` and `elbow_lever` descriptions were reworded (6.2 review).
 
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
-2. Phase 6 in order, next 6.3 (more content; every new node needs a `description`). Phase 7 (Google Play) comes after all
+2. Phase 6 in order, next 6.3b (fill the other branches under 10 nodes; every new node needs a
+   `description`). Phase 7 (Google Play) comes after all
    of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -184,6 +192,19 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Flexibility + mobility (task 6.3a, ADR-050):**
+  - Content only plus the branch plumbing: `BRANCHES` (+ `mobility`, last), `BRANCH_NAMES`,
+    `BranchColors.mobility` = `Palette.lime`, `NON_RANK_BRANCHES` in `character.ts`. Any new
+    `Record<Branch, …>` needs a `mobility` key.
+  - All new flexibility/mobility nodes are `patterns: [mobility]`, `skill: false`; the generator
+    only plans them in the goal-driven cool-down (tests in `generator.test.ts` → "flexibility and
+    mobility"). Content checks in `crossBranchGates.test.ts`.
+  - Every ogLevel > 0 and every trial in both branches is inferred (`verify:` notes); unilateral
+    holds/reps are per side (YAML comment on the trial line only, the app has no per-side flag).
+  - Verified by typecheck, lint, the full Jest suite and `progressions:check`; the new tab, lane
+    and goal-picker tab are covered by component tests (`treeMap.test.tsx`), not by an emulator
+    run or screenshot.
+  - 6.3b (other branches) is next; ADR-050 may need renumbering if another ADR lands first.
 - **Exercise descriptions (task 6.2, ADR-049):**
   - Format: `description` has fallback `''` in `progressionFormat.ts` (so v1 overlays and
     pre-6.2 backups read); `validateNodes` requires it on `core` nodes only. The editor's own
@@ -755,20 +776,21 @@ upgrade check from every earlier release). Any new table or column is additive a
   without leaving the session. The overlay/editor can edit a node's description (custom nodes
   need one). Maestro: open the sheet in `train.yaml` and `tree.yaml`. Screenshots
   `docs/screenshots/6.2-*.png`.
-- [ ] 6.3 More content, at least 10 nodes per branch where it makes sense:
+- [x] 6.3a More content: flexibility + mobility (ADR-050, [PR #PRNUM](https://github.com/Herofresh/SkillForge/pull/PRNUM)):
   - **Flexibility** (5 today) grows to ≥ 10 with yoga-based skills, e.g. pigeon → king pigeon (the
     "dove"), splits (front and middle) progressions, pancake, wheel/bridge variations, lotus prep.
   - **Mobility:** decide in the ADR whether joint mobility (deep squat, ankle, hip CARs, thoracic,
     shoulder flexion, German hang) becomes its own branch `mobility` (≥ 10 nodes, left out of the
     rank median like acrobatics) or stays inside flexibility.
-  - **Other branches under 10** (back lever 7, front lever 5, planche 6, h_pull 6, h_push 8,
-    handstand 8, legs 8, dynamic 8, v_pull 9, v_push 9): add real, sourced intermediate or
-    accessory steps (e.g. front lever raises / rows, planche leans / pseudo planche push-ups,
-    archer rows, shrimp squats). Don't pad: a branch stays under 10 when there's no sourced
-    step that fits; write down why in docs/research/progressions.md.
+  - Also: reword the `wall_handstand_push_up` and `elbow_lever` descriptions (6.2 review nits).
   - Every new node has `sources`, `description` (6.2), a `verify:` note where values are
-    inferred, and stable ids. Split into 6.3a (flexibility + mobility) and 6.3b (other branches)
-    if the PR gets large.
+    inferred, and stable ids.
+- [ ] 6.3b More content: other branches under 10 (back lever 7, front lever 5, planche 6,
+  h_pull 6, h_push 8, handstand 8, legs 8, dynamic 8, v_pull 9, v_push 9): add real, sourced
+  intermediate or accessory steps (e.g. front lever raises / rows, planche leans / pseudo planche
+  push-ups, archer rows, shrimp squats). Don't pad: a branch stays under 10 when there's no sourced
+  step that fits; write down why in docs/research/progressions.md. Every new node has `sources`,
+  `description` (6.2), a `verify:` note where values are inferred, and stable ids.
 - [ ] 6.4 Pixel animations per exercise: a small looping pixel-art figure showing the general
   movement (not anatomically perfect). Proposed approach (confirm in the ADR): a shared
   stick-figure skeleton with joint angles, 2–4 keyframe poses per node defined in data

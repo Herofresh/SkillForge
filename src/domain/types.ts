@@ -5,7 +5,7 @@
  * them, so the content parser and validator can check values against the same list the type uses.
  */
 
-/** The 13 progression families. Each one has a content file `content/progressions/<branch>.yaml`. */
+/** The 14 progression families. Each one has a content file `content/progressions/<branch>.yaml`. */
 export const BRANCHES = [
   'h_push',
   'v_push',
@@ -20,6 +20,7 @@ export const BRANCHES = [
   'dynamic',
   'flexibility',
   'acrobatics',
+  'mobility',
 ] as const;
 export type Branch = (typeof BRANCHES)[number];
 

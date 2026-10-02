@@ -799,7 +799,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "id": "wall_handstand_push_up",
     "branch": "v_push",
     "name": "Wall handstand push-up (full range)",
-    "description": "A handstand push-up against the wall with the hands on parallettes, so the head can sink below hand level. You lower until the shoulders are near the hands and press back to straight arms.",
+    "description": "A handstand push-up against the wall with the hands raised on parallettes, so the head can travel below hand level. It is the full-range version of the wall headstand push-up, which stops when the head touches the floor.",
     "chainOrder": 70,
     "ogLevel": 5,
     "metric": "reps",
@@ -4252,7 +4252,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "id": "elbow_lever",
     "branch": "dynamic",
     "name": "Elbow lever",
-    "description": "Balancing the body horizontally on the hands, with the bent elbows dug into the hips as a support. A balance skill that looks impressive but needs more technique than strength.",
+    "description": "Balancing the body horizontally on the hands, with the bent elbows dug into the hips as a support. A balance skill that usually follows the frog stand.",
     "chainOrder": 40,
     "ogLevel": 5,
     "metric": "hold_s",
@@ -4576,6 +4576,49 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "butterfly_stretch",
+    "branch": "flexibility",
+    "name": "Butterfly stretch",
+    "description": "Sitting upright with the soles of the feet together and the knees falling out to the sides, you let the inner thighs open. Called bound angle pose (baddha konasana) in yoga; it opens the groin and hips.",
+    "chainOrder": 15,
+    "ogLevel": 0,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 15,
+      "max": 45
+    },
+    "trial": {
+      "sets": 3,
+      "target": 45
+    },
+    "prerequisites": [],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Sit tall on the sitting bones; put a cushion under the hips if the back rounds.",
+      "Hold the ankles, not the toes, and draw the heels in as far as is comfortable.",
+      "Let the knees sink by relaxing; press them down gently with the elbows, never bounce."
+    ],
+    "sourceUrls": [
+      "https://en.wikipedia.org/wiki/Baddha_Konasana",
+      "https://gmb.io/hip-mobility/"
+    ],
+    "verify": "OG level 0 is assumed. The trial uses the top of GMB's 15-45 s stretch hold; no source sets a pass standard, and a range goal (knees near the floor) may suit better than a time.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "shoulder_dislocate",
     "branch": "flexibility",
     "name": "Band shoulder dislocate",
@@ -4661,6 +4704,99 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "half_split",
+    "branch": "flexibility",
+    "name": "Half split",
+    "description": "Kneeling on one knee with the front leg straight out in front and the heel on the floor, you hinge forward from the hips over the front leg. Called ardha hanumanasana in yoga; it stretches the hamstrings on the way to the front split.",
+    "chainOrder": 32,
+    "ogLevel": 0,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 15,
+      "max": 45
+    },
+    "trial": {
+      "sets": 3,
+      "target": 45
+    },
+    "prerequisites": [
+      {
+        "nodeId": "pike_fold",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "pike_fold",
+    "cues": [
+      "Back knee under the hip, front heel on the floor, front toes pointing up.",
+      "Hinge from the hips with a long, flat back; reach the chest towards the toes.",
+      "Hold each side; use blocks or books under the hands if the floor is too far."
+    ],
+    "sourceUrls": [
+      "https://gmb.io/splits/",
+      "https://en.wikipedia.org/wiki/Hanumanasana"
+    ],
+    "verify": "GMB's front split routine uses hamstring hinges like this one but does not name the pose. OG level 0 is assumed; the trial uses the top of GMB's 15-45 s hold.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "pigeon_pose",
+    "branch": "flexibility",
+    "name": "Pigeon pose",
+    "description": "The front leg is folded across in front of you with the shin on the floor, the back leg stretched long behind, and the hips sink towards the floor. A deep hip opener from yoga (kapota means dove or pigeon) and the first step towards the king pigeon.",
+    "chainOrder": 35,
+    "ogLevel": 0,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 15,
+      "max": 45
+    },
+    "trial": {
+      "sets": 3,
+      "target": 45
+    },
+    "prerequisites": [],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Keep the hips square to the front; pad under the front hip if it floats high.",
+      "Front foot flexed to protect the knee; ease off at any pain in the knee.",
+      "Stay upright on the hands, or walk them forward to fold over the front leg."
+    ],
+    "sourceUrls": [
+      "https://en.wikipedia.org/wiki/Eka_Pada_Rajakapotasana",
+      "https://gmb.io/hip-mobility/"
+    ],
+    "verify": "OG level 0 is assumed. The trial uses the top of GMB's 15-45 s stretch hold; no source sets a pass standard.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "table_bridge",
     "branch": "flexibility",
     "name": "Table bridge",
@@ -4697,6 +4833,162 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
     ],
     "verify": "Our synthesis; 0 is assumed and the 3 x 30 s trial follows the general RR hold rule.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "frog_stretch",
+    "branch": "flexibility",
+    "name": "Frog stretch",
+    "description": "On hands or forearms and knees, the knees slide wide apart with the shins parallel and the feet turned out, and the hips sink back between them. A weight-bearing stretch for the inner thighs and the middle split.",
+    "chainOrder": 42,
+    "ogLevel": 1,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 15,
+      "max": 45
+    },
+    "trial": {
+      "sets": 3,
+      "target": 45
+    },
+    "prerequisites": [
+      {
+        "nodeId": "butterfly_stretch",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "butterfly_stretch",
+    "cues": [
+      "Knees in line with the hips, ankles in line with the knees; pad under the knees.",
+      "Rock the hips slowly back and forward, then hold where the stretch builds.",
+      "Keep the back flat; widen the knees only a little at a time."
+    ],
+    "sourceUrls": [
+      "https://gmb.io/hip-mobility/",
+      "https://gmb.io/splits/"
+    ],
+    "verify": "Part of GMB's hip routine and middle split routine. OG level 1 is inferred (a deeper stretch than the butterfly); the trial uses the top of GMB's 15-45 s hold.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "couch_stretch",
+    "branch": "flexibility",
+    "name": "Couch stretch",
+    "description": "Kneeling in a lunge with the back knee close to a wall or couch and the back shin running up it, you lift the chest until the front of the hip and thigh are stretched. A strong hip flexor and quad stretch, used before the front split and the king pigeon.",
+    "chainOrder": 44,
+    "ogLevel": 1,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 30,
+      "max": 60
+    },
+    "trial": {
+      "sets": 3,
+      "target": 60
+    },
+    "prerequisites": [
+      {
+        "nodeId": "pigeon_pose",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "Open hips make the upright position easier to reach."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "wall"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Start in a low lunge with the hands on the floor and the back knee a little away from the wall.",
+      "Squeeze the glutes and tuck the pelvis under before lifting the chest.",
+      "Move the knee closer to the wall only when upright feels easy; it should not hurt."
+    ],
+    "sourceUrls": [
+      "https://www.garagegymreviews.com/couch-stretch",
+      "https://www.active.com/triathlon/articles/the-stretch-that-could-be-the-key-to-saving-your-knees"
+    ],
+    "verify": "Popularised by Kelly Starrett; the guides give 30-60 s or 1-2 min holds, so the 3 x 60 s trial is a placeholder. OG level 1 is inferred.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "half_lotus",
+    "branch": "flexibility",
+    "name": "Half lotus",
+    "description": "Sitting cross-legged, one foot rests high on the opposite thigh with its sole turned up while the other leg stays folded under. Called ardha padmasana in yoga; the step before the full lotus.",
+    "chainOrder": 46,
+    "ogLevel": 1,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 30,
+      "max": 60
+    },
+    "trial": {
+      "sets": 3,
+      "target": 60
+    },
+    "prerequisites": [
+      {
+        "nodeId": "butterfly_stretch",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "pigeon_pose",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "The lotus needs a lot of outward hip rotation; the pigeon trains it."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "butterfly_stretch",
+    "cues": [
+      "Turn the whole thigh out from the hip first, then lift the foot with the hands.",
+      "Never force it from the knee; stop at any pinch inside the knee.",
+      "Sit on a cushion so the knees can drop below the hips."
+    ],
+    "sourceUrls": [
+      "https://en.wikipedia.org/wiki/Lotus_position",
+      "https://en.wikipedia.org/wiki/Baddha_Konasana"
+    ],
+    "verify": "The lotus is one of the yoga poses that most often injures the knee (Wikipedia: the medial meniscus); OG level 1 and the 3 x 60 s trial are inferred placeholders.",
     "review": {
       "status": "draft"
     },
@@ -4752,6 +5044,329 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
     ],
     "verify": "Our synthesis; the OG2 level 2 is inferred and the 3 x 30 s trial follows the general RR hold rule. The BWF chart has angled and head bridge steps in between that are not modelled.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "pancake",
+    "branch": "flexibility",
+    "name": "Pancake",
+    "description": "Sitting with the legs straight and spread wide, you fold the upper body forward from the hips towards the floor between the legs. Called upavistha konasana in yoga; it stretches the inner thighs and hamstrings together.",
+    "chainOrder": 60,
+    "ogLevel": 2,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 15,
+      "max": 45
+    },
+    "trial": {
+      "sets": 3,
+      "target": 45
+    },
+    "prerequisites": [
+      {
+        "nodeId": "pike_fold",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "frog_stretch",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "pike_fold",
+    "cues": [
+      "Sit on a cushion if the pelvis tips back; knees and toes point up.",
+      "Tilt the pelvis forward and lead with the chest, not the head.",
+      "Press the heels into the floor while folding, then relax deeper."
+    ],
+    "sourceUrls": [
+      "https://gmb.io/splits/",
+      "https://en.wikipedia.org/wiki/Paschimottanasana"
+    ],
+    "verify": "Part of GMB's side split routine. OG level 2 is inferred; the trial uses the top of GMB's 15-45 s hold, and a range goal (chest towards the floor) may suit better than a time.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "front_split",
+    "branch": "flexibility",
+    "name": "Front split",
+    "description": "One leg stretched straight forward and the other straight back, with the hips square and sinking to the floor. Called hanumanasana in yoga; blocks under the hands or hips support the way down.",
+    "chainOrder": 70,
+    "ogLevel": 3,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 10,
+      "max": 30
+    },
+    "trial": {
+      "sets": 3,
+      "target": 30
+    },
+    "prerequisites": [
+      {
+        "nodeId": "half_split",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "couch_stretch",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "half_split",
+    "cues": [
+      "Square the hips to the front; the back knee points down, not out.",
+      "Slide down slowly with hands or blocks beside the hips to take weight.",
+      "Hold at a strong but calm stretch; flat on the floor comes over months."
+    ],
+    "sourceUrls": [
+      "https://gmb.io/splits/",
+      "https://en.wikipedia.org/wiki/Hanumanasana",
+      "https://en.wikipedia.org/wiki/Splits_(gymnastics)"
+    ],
+    "verify": "No source gives a pass time; the trial follows the general RR 3 x 30 s hold rule (with or without blocks is the user's call). OG level 3 is inferred, kept modest because flexibility counts towards the rank median.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "lotus",
+    "branch": "flexibility",
+    "name": "Lotus",
+    "description": "Sitting cross-legged with each foot resting high on the opposite thigh, soles turned up. The classic yoga meditation seat (padmasana); it needs very open hips.",
+    "chainOrder": 80,
+    "ogLevel": 3,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 30,
+      "max": 60
+    },
+    "trial": {
+      "sets": 3,
+      "target": 60
+    },
+    "prerequisites": [
+      {
+        "nodeId": "half_lotus",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "half_lotus",
+    "cues": [
+      "Set the first foot in half lotus, then rotate the second thigh out from the hip.",
+      "Lift the second foot over with the hands; never lever it in with the knee.",
+      "Switch which leg goes on top between sets."
+    ],
+    "sourceUrls": [
+      "https://en.wikipedia.org/wiki/Lotus_position"
+    ],
+    "verify": "Wikipedia notes about 115 degrees of outward hip rotation is needed and warns of meniscus injury from forcing it. OG level 3 and the 3 x 60 s trial are inferred placeholders.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "one_leg_wheel",
+    "branch": "flexibility",
+    "name": "One-leg wheel",
+    "description": "From a full bridge, one leg lifts and points straight up while the arms and the other leg hold the arch. Called eka pada urdhva dhanurasana in yoga; the next bridge step on the BWF chart.",
+    "chainOrder": 90,
+    "ogLevel": 3,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 5,
+      "max": 15
+    },
+    "trial": {
+      "sets": 3,
+      "target": 15
+    },
+    "prerequisites": [
+      {
+        "nodeId": "full_bridge",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "full_bridge",
+    "cues": [
+      "Shift the weight over the standing foot and the hands before lifting the leg.",
+      "Keep the shoulders pushed over the hands while the leg rises.",
+      "Lower the leg slowly; switch legs between sets."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://en.wikipedia.org/wiki/Chakrasana"
+    ],
+    "verify": "The BWF chart lists the one-leg bridge after the full and decline bridge without a standard; OG level 3 and the 3 x 15 s trial are inferred.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "middle_split",
+    "branch": "flexibility",
+    "name": "Middle split",
+    "description": "Both legs stretched straight out to the sides, with the hips sinking to the floor between them. Also called a side or straddle split (samakonasana in yoga).",
+    "chainOrder": 100,
+    "ogLevel": 4,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 10,
+      "max": 30
+    },
+    "trial": {
+      "sets": 3,
+      "target": 30
+    },
+    "prerequisites": [
+      {
+        "nodeId": "pancake",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "pancake",
+    "cues": [
+      "Tilt the pelvis forward and keep the knees and toes pointing up or forward.",
+      "Take weight on the hands or forearms and slide the feet apart a little at a time.",
+      "Stop at any pain in the hip joint or the inside of the knee."
+    ],
+    "sourceUrls": [
+      "https://gmb.io/splits/",
+      "https://en.wikipedia.org/wiki/Splits_(gymnastics)"
+    ],
+    "verify": "No source gives a pass time; the trial follows the general RR 3 x 30 s hold rule. OG level 4 is inferred (harder for most adults than the front split), kept modest because flexibility counts towards the rank median.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "king_pigeon",
+    "branch": "flexibility",
+    "name": "King pigeon",
+    "description": "From pigeon pose, the back knee bends and both hands reach back over the head to hold the back foot, with the chest lifted in a deep backbend. Called eka pada rajakapotasana in yoga, the king of the pigeon poses.",
+    "chainOrder": 110,
+    "ogLevel": 4,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 5,
+      "max": 20
+    },
+    "trial": {
+      "sets": 3,
+      "target": 20
+    },
+    "prerequisites": [
+      {
+        "nodeId": "pigeon_pose",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "couch_stretch",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "full_bridge",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ],
+      [
+        "bands"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "pigeon_pose",
+    "cues": [
+      "Start with a strap or band around the back foot and walk the hands down it.",
+      "Lift the chest and lengthen the spine before bending back.",
+      "Elbows point up; come out slowly the way you went in."
+    ],
+    "sourceUrls": [
+      "https://en.wikipedia.org/wiki/Eka_Pada_Rajakapotasana",
+      "https://www.garagegymreviews.com/couch-stretch"
+    ],
+    "verify": "No source gives a pass time; the 3 x 20 s trial is a placeholder (yoga holds poses for a few breaths). OG level 4 is inferred. The prerequisites (pigeon for the hips, couch stretch for the quad, full bridge for the backbend) are our synthesis.",
     "review": {
       "status": "draft"
     },
@@ -5462,6 +6077,548 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://en.wikipedia.org/wiki/Aerial_cartwheel"
     ],
     "verify": "Not levelled in OG2; 6 (FIG A range) is inferred. The 3 x 3 trial is a placeholder. The sources advise a spotter and mats, which this app cannot check.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "cat_cow",
+    "branch": "mobility",
+    "name": "Cat-cow",
+    "description": "On hands and knees, you slowly round the whole back up towards the ceiling (cat) and then let it sink into an arch with the chest forward (cow). A gentle warm-up that moves the spine through flexion and extension.",
+    "chainOrder": 10,
+    "ogLevel": 0,
+    "metric": "reps",
+    "workingRange": {
+      "min": 8,
+      "max": 12
+    },
+    "trial": {
+      "sets": 3,
+      "target": 12
+    },
+    "prerequisites": [],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Hands under the shoulders, knees under the hips.",
+      "Move one segment at a time, from the tailbone up to the head and back.",
+      "Breathe out as you round, in as you arch; slow and smooth."
+    ],
+    "sourceUrls": [
+      "https://en.wikipedia.org/wiki/Bitilasana"
+    ],
+    "verify": "A yoga warm-up with no rep standard; OG level 0 and the 3 x 12 trial (like wrist prep) are placeholders.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "ankle_rocks",
+    "branch": "mobility",
+    "name": "Knee-to-wall ankle rocks",
+    "description": "Standing in a short lunge facing a wall, you rock the front knee forward over the toes to touch the wall while the heel stays down. It trains ankle dorsiflexion for deep squats and pistols.",
+    "chainOrder": 20,
+    "ogLevel": 0,
+    "metric": "reps",
+    "workingRange": {
+      "min": 8,
+      "max": 12
+    },
+    "trial": {
+      "sets": 3,
+      "target": 12
+    },
+    "prerequisites": [],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "wall"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Front heel stays flat; the knee travels over the middle toes, not inwards.",
+      "Move the foot back a little once the knee touches the wall easily.",
+      "Test: toe to wall at 12.5 cm or more with the knee touching counts as normal range."
+    ],
+    "sourceUrls": [
+      "https://www.physiotutors.com/wiki/weight-bearing-lunge-test",
+      "https://library.theprehabguys.com/vimeo-video/knee-to-wall-ankle-dorsiflexion-assessment"
+    ],
+    "verify": "The weight-bearing lunge test calls 12.5 cm toe-to-wall normal (Physiotutors), but the app has no distance metric, so the trial counts controlled reps; 3 x 12 is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "hip_cars",
+    "branch": "mobility",
+    "name": "Hip CARs",
+    "description": "Standing on one leg (or on hands and knees), you draw the biggest slow circle you can with the other knee, keeping the rest of the body still. Controlled articular rotations from Functional Range Conditioning; they keep the hip's full range under your control.",
+    "chainOrder": 30,
+    "ogLevel": 0,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 5
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Brace the whole body so only the hip moves; hold a wall if balance is the limit.",
+      "Go slowly and make the circle as large as you can control.",
+      "Circle forward, then backward, on each side."
+    ],
+    "sourceUrls": [
+      "https://library.theprehabguys.com/intro-to-frc/"
+    ],
+    "verify": "FRC describes how to do CARs but gives no rep standard; OG level 0 and the 3 x 5 trial are placeholders.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "shoulder_cars",
+    "branch": "mobility",
+    "name": "Shoulder CARs",
+    "description": "Standing tall with one arm straight, you move it in the biggest slow circle you can, forward, up past the ear, behind and back down, without twisting the body. Controlled articular rotations for the shoulder.",
+    "chainOrder": 40,
+    "ogLevel": 0,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 5
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Make a fist and tense the whole body so the ribs and hips stay still.",
+      "Turn the palm as the arm passes overhead so the circle stays smooth.",
+      "Slow is the point; circle both ways on each side."
+    ],
+    "sourceUrls": [
+      "https://library.theprehabguys.com/intro-to-frc/"
+    ],
+    "verify": "FRC describes how to do CARs but gives no rep standard; OG level 0 and the 3 x 5 trial are placeholders.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "open_book",
+    "branch": "mobility",
+    "name": "Open book",
+    "description": "Lying on your side with the knees bent and both arms straight in front, you lift the top arm up and over to the other side, letting the chest turn while the knees stay together. It mobilises the upper back in rotation.",
+    "chainOrder": 50,
+    "ogLevel": 0,
+    "metric": "reps",
+    "workingRange": {
+      "min": 8,
+      "max": 12
+    },
+    "trial": {
+      "sets": 3,
+      "target": 12
+    },
+    "prerequisites": [
+      {
+        "nodeId": "cat_cow",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Keep the knees stacked and on the floor so the turn comes from the upper back.",
+      "Follow the hand with your eyes; breathe out as you open.",
+      "Pause where it stretches, then close the book slowly."
+    ],
+    "sourceUrls": [
+      "https://us.physitrack.com/home-exercise-video/thoracic-rotation-in-side-lying"
+    ],
+    "verify": "A physiotherapy exercise with no rep standard; OG level 0 and the 3 x 12 trial are placeholders.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "wall_angel",
+    "branch": "mobility",
+    "name": "Wall angel",
+    "description": "Standing with the head, back and arms against a wall, arms bent like a goal post, you slide the arms up overhead and back down without anything leaving the wall. It trains overhead shoulder and upper back mobility.",
+    "chainOrder": 60,
+    "ogLevel": 0,
+    "metric": "reps",
+    "workingRange": {
+      "min": 8,
+      "max": 12
+    },
+    "trial": {
+      "sets": 3,
+      "target": 12
+    },
+    "prerequisites": [
+      {
+        "nodeId": "shoulder_cars",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "wall"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Feet a hand's width from the wall; keep the lower back from arching off it.",
+      "Elbows, wrists and the backs of the hands stay touching the wall.",
+      "Slide only as high as you can without losing contact."
+    ],
+    "sourceUrls": [
+      "https://squatuniversity.com/2016/07/29/the-squat-fix-screening-overhead-mobility/"
+    ],
+    "verify": "Squat University uses the start position as a pass/fail screen (everything flat on the wall); the 3 x 12 trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "hip_90_90_switch",
+    "branch": "mobility",
+    "name": "90/90 hip switch",
+    "description": "Sitting with both knees bent to 90 degrees, one leg in front and one to the side, you swing both knees over to the other side without using the hands. It trains inward and outward hip rotation.",
+    "chainOrder": 70,
+    "ogLevel": 0,
+    "metric": "reps",
+    "workingRange": {
+      "min": 6,
+      "max": 10
+    },
+    "trial": {
+      "sets": 3,
+      "target": 10
+    },
+    "prerequisites": [
+      {
+        "nodeId": "hip_cars",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Sit tall; lean back on the hands at first, then take them away.",
+      "Lift the knees and rotate from the hips, keeping the feet roughly in place.",
+      "Pause in each 90/90 position with the chest over the front shin."
+    ],
+    "sourceUrls": [
+      "https://health.clevelandclinic.org/90-90-stretch/",
+      "https://library.theprehabguys.com/vimeo-video/90-90-hip-lift-off/"
+    ],
+    "verify": "Cleveland Clinic gives 20-60 s holds for the static 90/90 and warns against it with hip impingement or knee problems; the 3 x 10 switches trial is a placeholder.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "deep_squat_hold",
+    "branch": "mobility",
+    "name": "Deep squat hold",
+    "description": "Resting at the bottom of a squat, hips low between the heels and the feet flat, the arms relaxed in front. A resting position rather than a lift; it opens the ankles, hips and lower back.",
+    "chainOrder": 80,
+    "ogLevel": 0,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 30,
+      "max": 60
+    },
+    "trial": {
+      "sets": 3,
+      "target": 60
+    },
+    "prerequisites": [
+      {
+        "nodeId": "ankle_rocks",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "squat",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "The bodyweight squat teaches the way down and back up."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Feet a little wider than the hips and turned out; heels stay down.",
+      "Press the knees out with the elbows and let the back relax.",
+      "Hold a door frame or a post at first if you tip backwards."
+    ],
+    "sourceUrls": [
+      "https://antranik.org/the-30-minutes-a-day-squat-challenge/"
+    ],
+    "verify": "Ido Portal's squat challenge accumulates 30 minutes a day in this position (via Antranik), not a set standard; the 3 x 60 s trial and OG level 0 are placeholders.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "cossack_squat",
+    "branch": "mobility",
+    "name": "Cossack squat",
+    "description": "From a wide stance, you sink sideways into a deep squat over one leg while the other stays straight with the toes pointing up, then shift across to the other side. Strength and mobility for the hips, inner thighs and ankles.",
+    "chainOrder": 90,
+    "ogLevel": 1,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "deep_squat_hold",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "hip_90_90_switch",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "Hip rotation helps the bent leg stay in line."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "trains": [
+      "mobility",
+      "legs"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Bent-leg heel stays flat and the knee follows the toes.",
+      "Chest up; hold the hands in front as a counterweight.",
+      "Go only as deep as you can control, and shift across slowly."
+    ],
+    "sourceUrls": [
+      "https://gmb.io/splits/"
+    ],
+    "verify": "Part of GMB's side split routine; OG level 1 and the 3 x 8 trial are inferred (rep range from the RR strength rule).",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "three_point_bridge",
+    "branch": "mobility",
+    "name": "Three-point bridge",
+    "description": "From sitting with the hands behind you, you lift the hips and turn onto one hand and both feet, reaching the other arm over the head so the chest opens to the ceiling. A rotating bridge that mobilises the upper back and shoulders.",
+    "chainOrder": 100,
+    "ogLevel": 1,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "open_book",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "table_bridge",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "The table bridge teaches the hip lift."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Push the hips high and squeeze the glutes as you turn.",
+      "Reach the free arm long over the head and look under it.",
+      "Hold 5-10 s at the top, then sit back down and switch sides."
+    ],
+    "sourceUrls": [
+      "https://gmb.io/shoulder-mobility/"
+    ],
+    "verify": "GMB's shoulder routine holds it 5-10 s each side, alternating; OG level 1 and the 3 x 8 trial are inferred placeholders.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "overhead_squat",
+    "branch": "mobility",
+    "name": "Overhead squat",
+    "description": "A bodyweight squat to full depth with the arms held straight overhead, often holding a broomstick or a band wide. It checks ankles, hips, upper back and shoulders together, a common movement screen.",
+    "chainOrder": 110,
+    "ogLevel": 1,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "deep_squat_hold",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "wall_angel",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "shoulder_dislocate",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "Open shoulders keep the arms from drifting forward."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "mobility"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ],
+      [
+        "bands"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Arms stay in line with the ears all the way down; don't let them drift forward.",
+      "Heels down, knees out over the toes, chest up.",
+      "Clasp the hands behind the head instead if the arms are the limit."
+    ],
+    "sourceUrls": [
+      "https://passport.world.rugby/conditioning-for-rugby/introduction-to-conditioning-youth/functional-screening/progressing-the-overhead-squat/"
+    ],
+    "verify": "World Rugby screens the shape (upright torso, arms overhead, depth, no compensations) without a rep standard; OG level 1 and the 3 x 8 trial are placeholders.",
     "review": {
       "status": "draft"
     },

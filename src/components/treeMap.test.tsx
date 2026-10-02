@@ -5,8 +5,9 @@ import { render, screen, userEvent } from '@testing-library/react-native';
 import { ALL_NODES } from '@/data/skills';
 import { PROFICIENT_LEVEL, xpForLevel } from '@/domain/progression';
 import { mapFocus, mapLayout, mapTiles } from '@/domain/treeMap';
-import type { NodeProgress } from '@/domain/types';
+import { BRANCHES, type NodeProgress } from '@/domain/types';
 
+import { BranchTabs } from './BranchTabs';
 import { TreeMap } from './tree/map/TreeMap';
 import { TreeModeTabs } from './tree/TreeModeTabs';
 
@@ -71,6 +72,16 @@ describe('TreeMap', () => {
     expect(onSwitchToList).toHaveBeenCalled();
   });
 
+  it('draws a lane for every branch, the new Flexibility and Mobility ones too (PLAN 6.3a)', async () => {
+    await renderMap();
+    for (const title of ['Flexibility', 'Mobility', 'Acrobatics']) {
+      // Lane titles are decorative (hidden from screen readers), like the chains.
+      expect(screen.getByText(title, { includeHiddenElements: true })).toBeOnTheScreen();
+    }
+    expect(screen.getByRole('button', { name: /^King pigeon, Locked/ })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: /^Cat-cow, Ready/ })).toBeOnTheScreen();
+  });
+
   it('focuses what can be trained when there are no goals', async () => {
     await renderMap();
     expect(screen.getByRole('button', { name: 'Focus on what you can train' })).toBeOnTheScreen();
@@ -85,5 +96,19 @@ describe('TreeModeTabs', () => {
     const user = userEvent.setup();
     await user.press(screen.getByRole('tab', { name: /^Map/ }));
     expect(onChange).toHaveBeenCalledWith('map');
+  });
+});
+
+describe('BranchTabs', () => {
+  it('has a tab per branch, Mobility last (PLAN 6.3a), and switches to it', async () => {
+    const onChange = jest.fn();
+    await render(<BranchTabs value="flexibility" onChange={onChange} />);
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(BRANCHES.length);
+    expect(tabs.at(-1)).toHaveTextContent('Mobility');
+    expect(screen.getByRole('tab', { name: 'Flexibility', selected: true })).toBeOnTheScreen();
+    const user = userEvent.setup();
+    await user.press(screen.getByRole('tab', { name: 'Mobility' }));
+    expect(onChange).toHaveBeenCalledWith('mobility');
   });
 });
