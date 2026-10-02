@@ -6,7 +6,7 @@
  * fill (scroll, shield) keeps its outline instead of turning into a solid block (PLAN 5.2).
  * Add an icon by adding a grid here: icons.test.ts checks its shape.
  */
-import { parsePixelGrid, type PixelGrid } from '@/lib/pixelGrid';
+import { gridSvg, parsePixelGrid, type PixelGrid } from '@/lib/pixelGrid';
 
 import { Colors } from '../theme';
 
@@ -394,4 +394,12 @@ export function iconCellColor<T>(name: IconName, role: IconRole, tint?: T): T | 
   const def: IconDef = ICONS[name];
   if (tint === undefined) return def.colors[role];
   return def.knockout?.includes(role) ? undefined : tint;
+}
+
+/**
+ * An icon as a standalone SVG document, for places that take an SVG string instead of React
+ * components (the home-screen widget, PLAN 6.6). Same colors and tinting as `PixelIcon`.
+ */
+export function iconSvg(name: IconName, sizePx: number, tint?: string): string {
+  return gridSvg(iconGrid(name), sizePx, (role) => iconCellColor(name, role as IconRole, tint));
 }

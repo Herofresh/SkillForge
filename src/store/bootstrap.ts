@@ -6,6 +6,7 @@
 import { ALL_NODES } from '@/data/skills';
 import { migrateDatabase } from '@/db/migrate';
 import { openAppDatabase } from '@/db/openAppDatabase';
+import { startWidgetSync } from '@/widget/widgetSync';
 
 import { createAppStore, type AppStore } from './appStore';
 import { deviceBackupFiles } from './backupFiles';
@@ -25,5 +26,6 @@ async function boot(): Promise<AppStore> {
   const store = createAppStore({ db, baseNodes: ALL_NODES, files: deviceBackupFiles });
   store.getState().loadAll();
   setAppStore(store);
+  startWidgetSync(store);
   return store;
 }

@@ -6,6 +6,7 @@ import {
   ICONS,
   iconCellColor,
   iconGrid,
+  iconSvg,
   type IconDef,
   type IconRole,
 } from './icons';
@@ -61,5 +62,14 @@ describe('pixel icon set', () => {
 
   it('caches parsed grids', () => {
     expect(iconGrid('sword')).toBe(iconGrid('sword'));
+  });
+});
+
+describe('iconSvg', () => {
+  it('uses the icon colors, or the tint without the knockout roles', () => {
+    expect(iconSvg('flame', 24)).toContain(`fill="${ICONS.flame.colors['#']}"`);
+    const tinted = iconSvg('shield', 24, '#123456');
+    expect(tinted).toContain('fill="#123456"');
+    expect(tinted).not.toContain(ICONS.shield.colors['+']);
   });
 });

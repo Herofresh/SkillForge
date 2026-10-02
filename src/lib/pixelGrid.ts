@@ -74,6 +74,28 @@ export function gridPaths(grid: PixelGrid): Record<string, string> {
   return paths;
 }
 
+/**
+ * The grid as a standalone SVG document `sizePx` wide (height in proportion), one path per role
+ * filled with `fillOf(role)`; a role without a fill stays empty. Crisp edges keep the pixels sharp
+ * when the SVG is scaled (the home-screen widget draws icons from SVG strings, PLAN 6.6).
+ */
+export function gridSvg(
+  grid: PixelGrid,
+  sizePx: number,
+  fillOf: (role: string) => string | undefined,
+): string {
+  const heightPx = (sizePx * grid.height) / grid.width;
+  const paths = Object.entries(gridPaths(grid))
+    .map(([role, d]) => ({ fill: fillOf(role), d }))
+    .filter((path): path is { fill: string; d: string } => path.fill !== undefined)
+    .map((path) => `<path fill="${path.fill}" d="${path.d}"/>`)
+    .join('');
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${heightPx}" ` +
+    `viewBox="0 0 ${grid.width} ${grid.height}" shape-rendering="crispEdges">${paths}</svg>`
+  );
+}
+
 /** The distinct roles a grid uses, in order of first appearance. */
 export function gridRoles(grid: PixelGrid): string[] {
   return [...new Set(grid.runs.map((run) => run.role))];
