@@ -28,7 +28,7 @@
  *   for the summary screen.
  * - Node editor and shared progressions (PLAN 4.7–4.8, ADR-036): `nodeDraft` / `newNodeDraft`
  *   start an editor draft, `nodeDraftIssues` validates it live (the overlay with the draft through
- *   `applyOverlay`), `saveNodeDraft`, `resetNode` and `setNodeHidden` change the overlay through
+ *   `applyOverlay`; `nodeDraftWarnings` gives the advice that doesn't stop a save), `saveNodeDraft`, `resetNode` and `setNodeHidden` change the overlay through
  *   `saveOverlay` (so a broken tree is never saved). `exportOverlay` / `shareOverlay` hand out the
  *   overlay as YAML; `previewOverlayImport` / `importOverlay` merge a shared one after a preview.
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
@@ -339,6 +339,11 @@ export interface AppState {
    * the `applyOverlay` issues the tree would have with it saved (empty = it can be saved).
    */
   nodeDraftIssues(draft: ExerciseNode): ValidationIssue[];
+  /**
+   * The `applyOverlay` warnings the tree would have with `draft` saved (ADR-052, e.g. an og_level
+   * below the node above it). Advice only: they don't stop a save.
+   */
+  nodeDraftWarnings(draft: ExerciseNode): ValidationIssue[];
   /**
    * Saves `draft` into the overlay (a new node gets its `user_` id from its name). Writes nothing
    * and returns the issues while `nodeDraftIssues` has any.
@@ -897,12 +902,18 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       },
 
       nodeDraft(nodeId) {
-        const { overlay } = get();
-        const added = overlay.added.find((node) => node.id === nodeId);
-        if (added) return added;
+        const { overlay, nodes } = get();
         const base = baseNodes.find((node) => node.id === nodeId);
-        if (!base) return undefined;
-        return { ...base, ...overlay.edited[nodeId], id: base.id, source: base.source };
+        const stored =
+          overlay.added.find((node) => node.id === nodeId) ??
+          (base && { ...base, ...overlay.edited[nodeId], id: base.id, source: base.source });
+        if (!stored) return undefined;
+        // The order the merged tree gives it (an order clash after an update is resolved there,
+        // ADR-052), so the editor shows and saves the place the tree shows.
+        const placed = nodes.find((node) => node.id === nodeId);
+        return placed && placed.chainOrder !== stored.chainOrder
+          ? { ...stored, chainOrder: placed.chainOrder }
+          : stored;
       },
 
       newNodeDraft(branch, afterId) {
@@ -912,6 +923,15 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       nodeDraftIssues(draft) {
         const overlay = withNode(get().overlay, baseNodes, withDraftId(finalizeDraft(draft)));
         return [...draftIssues(draft), ...applyOverlay(baseNodes, overlay).issues];
+      },
+
+      nodeDraftWarnings(draft) {
+        const node = withDraftId(finalizeDraft(draft));
+        const overlay = withNode(get().overlay, baseNodes, node);
+        // A new draft's warnings name the draft (its id is only given on save).
+        return applyOverlay(baseNodes, overlay).warnings.map((warning) =>
+          warning.nodeId === node.id ? { ...warning, nodeId: draft.id } : warning,
+        );
       },
 
       saveNodeDraft(draft) {

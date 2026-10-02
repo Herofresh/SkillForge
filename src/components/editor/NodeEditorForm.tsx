@@ -16,6 +16,7 @@ import {
   addPrerequisite,
   chainNodes,
   clearTrains,
+  editorIssueText,
   issuesBySection,
   MAX_CUE_LENGTH,
   MAX_NODE_NAME_LENGTH,
@@ -69,6 +70,8 @@ type Props = {
   onChange: (next: ExerciseNode) => void;
   /** The live `applyOverlay` issues of the draft (`nodeDraftIssues`). */
   issues: readonly ValidationIssue[];
+  /** The live `applyOverlay` warnings of the draft (`nodeDraftWarnings`); never stop a save. */
+  warnings?: readonly ValidationIssue[];
   /** The user's tree (names, pickers and positions). */
   nodes: readonly ExerciseNode[];
   /** A user node: its name, metric, position, difficulty and straight-arm flag can change too. */
@@ -77,16 +80,29 @@ type Props = {
 
 type Sheet = 'prerequisite' | 'position';
 
+const NO_WARNINGS: readonly ValidationIssue[] = [];
+
 /**
  * The node editor form (PLAN 4.7, ADR-036): every change goes through a pure draft function
  * (`src/domain/nodeEditor.ts`) and the validator's issues show inline in the section they are
  * about. The screen owns the draft and the Save button.
  */
-export function NodeEditorForm({ draft, onChange, issues, nodes, custom }: Props) {
+export function NodeEditorForm({
+  draft,
+  onChange,
+  issues,
+  warnings = NO_WARNINGS,
+  nodes,
+  custom,
+}: Props) {
   const [sheet, setSheet] = useState<Sheet | undefined>();
   const grouped = useMemo(
     () => issuesBySection(issues, draft.id, nodes),
     [issues, draft.id, nodes],
+  );
+  const advice = useMemo(
+    () => warnings.map((warning) => editorIssueText(warning, draft.id, nodes)),
+    [warnings, draft.id, nodes],
   );
   const names = useMemo(() => new Map(nodes.map((node) => [node.id, node.name])), [nodes]);
   const above = nodeAbove(draft, nodes);
@@ -145,8 +161,8 @@ export function NodeEditorForm({ draft, onChange, issues, nodes, custom }: Props
             variant="small"
             tone="textMuted"
             accessibilityLabel={spokenOgLevel(draft.ogLevel)}>
-            Overcoming Gravity level; it sets the tier and the XP. It can’t be below the exercise
-            above it.
+            Overcoming Gravity level; it sets the tier and the XP. It shouldn’t be below the
+            exercise above it.
           </PixelText>
           {!STRAIGHT_ARM_BRANCHES.includes(draft.branch) && (
             <PixelChip
@@ -157,6 +173,7 @@ export function NodeEditorForm({ draft, onChange, issues, nodes, custom }: Props
             />
           )}
           <IssueNotes messages={grouped.position} testID="editor-issues-position" />
+          <IssueNotes messages={advice} advice testID="editor-advice-position" />
         </DetailSection>
       )}
 
@@ -350,6 +367,7 @@ export function NodeEditorForm({ draft, onChange, issues, nodes, custom }: Props
       </DetailSection>
 
       <IssueNotes messages={general} testID="editor-issues-other" />
+      {!custom && <IssueNotes messages={advice} advice testID="editor-advice-other" />}
 
       {sheet === 'prerequisite' && (
         <NodeOptionSheet

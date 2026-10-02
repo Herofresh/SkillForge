@@ -31,10 +31,12 @@ type Props = {
 export function NodeEditorBody({ initial, title, saveLabel, onSaved, onCancel }: Props) {
   const nodes = useAppStore((state) => state.nodes);
   const nodeDraftIssues = useAppStore((state) => state.nodeDraftIssues);
+  const nodeDraftWarnings = useAppStore((state) => state.nodeDraftWarnings);
   const saveNodeDraft = useAppStore((state) => state.saveNodeDraft);
   const [draft, setDraft] = useState(initial);
   const [touched, setTouched] = useState(false);
   const issues = useMemo(() => nodeDraftIssues(draft), [nodeDraftIssues, draft]);
+  const warnings = useMemo(() => nodeDraftWarnings(draft), [nodeDraftWarnings, draft]);
   const custom = draft.source === 'user';
   const navigation = useNavigation();
   const dirty = draftChanged(initial, draft);
@@ -84,6 +86,7 @@ export function NodeEditorBody({ initial, title, saveLabel, onSaved, onCancel }:
           draft={draft}
           onChange={change}
           issues={issues}
+          warnings={warnings}
           nodes={nodes}
           custom={custom}
         />

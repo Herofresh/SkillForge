@@ -1,5 +1,5 @@
 import { makeChain, makeNode } from '@/data/testFixtures';
-import { formatIssue, MAX_DESCRIPTION_LENGTH, validateNodes } from '@/data/validate';
+import { formatIssue, MAX_DESCRIPTION_LENGTH, validateNodes, validateTree } from '@/data/validate';
 import type { ExerciseNode } from '@/domain/types';
 
 /** Messages of all issues, for readable assertions. */
@@ -142,6 +142,65 @@ describe('validateNodes', () => {
         makeNode({ id: 'row', branch: 'h_pull', chainOrder: 10, patterns: ['horizontal_pull'] }),
       ];
       expect(messages(otherBranch)).toEqual([]);
+    });
+
+    describe('validateTree with user-placed nodes (ADR-052)', () => {
+      const userStep = makeNode({
+        id: 'user_band_pull_up',
+        source: 'user',
+        sourceUrls: [],
+        chainOrder: 25,
+        ogLevel: 1,
+      });
+
+      it('makes an og_level drop next to a user-placed node a warning', () => {
+        const { issues, warnings } = validateTree(
+          [...makeChain(), userStep],
+          new Set([userStep.id]),
+        );
+        expect(issues).toEqual([]);
+        expect(warnings.map(formatIssue)).toEqual([
+          "user_band_pull_up: og_level 1 is lower than 'pull_up_negative' (og_level 2), which " +
+            'comes before it in v_pull; raise it or move the node earlier',
+        ]);
+      });
+
+      it('words the warning about a user-placed node above a lower one', () => {
+        const high = { ...userStep, chainOrder: 15, ogLevel: 3 };
+        const { warnings } = validateTree([...makeChain(), high], new Set([high.id]));
+        expect(warnings.map(formatIssue)).toEqual([
+          "user_band_pull_up: og_level 3 is higher than 'pull_up_negative' (og_level 2), which " +
+            'comes after it in v_pull; lower it or move the node later',
+        ]);
+      });
+
+      it('still rejects a drop between built-in nodes, even with a user node between them', () => {
+        const broken = chainWith('pull_up', { ogLevel: 1 });
+        const { issues } = validateTree([...broken, userStep], new Set([userStep.id]));
+        expect(issues.map(formatIssue)).toEqual([
+          expect.stringMatching(/^pull_up: og_level 1 is lower than 'pull_up_negative'/),
+        ]);
+      });
+
+      it('keeps every other rule an error', () => {
+        const dangling: ExerciseNode = {
+          ...userStep,
+          ogLevel: 2,
+          prerequisites: [{ nodeId: 'nope', minLevel: 5, kind: 'hard' }],
+        };
+        const { issues } = validateTree([...makeChain(), dangling], new Set([userStep.id]));
+        expect(issues.map(formatIssue)).toEqual([
+          "user_band_pull_up: prerequisite 'nope' does not exist",
+        ]);
+      });
+
+      it('equals validateNodes without user-placed nodes', () => {
+        const broken = chainWith('pull_up', { ogLevel: 1 });
+        expect(validateTree(broken, new Set())).toEqual({
+          issues: validateNodes(broken),
+          warnings: [],
+        });
+      });
     });
 
     it('checks ogLevel range and a positive order', () => {

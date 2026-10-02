@@ -161,6 +161,29 @@ describe('NodeEditorBody', () => {
     expect(onSaved).toHaveBeenCalledWith('dead_hang');
     expect(Object.keys(store.getState().overlay.edited)).toEqual(['dead_hang']);
   });
+
+  it('shows a lower difficulty than the node above as advice and still saves (ADR-052)', async () => {
+    saveTowelHang();
+    const onSaved = jest.fn();
+    const user = userEvent.setup();
+    await render(
+      <NodeEditorBody
+        initial={store.getState().nodeDraft('user_towel_hang')!}
+        title="Edit Towel hang"
+        saveLabel="Save changes"
+        onSaved={onSaved}
+        onCancel={jest.fn()}
+      />,
+    );
+    expect(screen.queryByTestId('editor-advice-position')).toBeNull();
+    // Towel hang sits between Dead hang and Scapular pull-ups (both og 0): one step up is above
+    // the node after it.
+    await user.press(screen.getByTestId('editor-og-level-plus'));
+    expect(screen.getByTestId('editor-advice-position')).toHaveTextContent(/is higher than/);
+    expect(screen.getByTestId('editor-save')).toBeEnabled();
+    await user.press(screen.getByTestId('editor-save'));
+    expect(onSaved).toHaveBeenCalledWith('user_towel_hang');
+  });
 });
 
 describe('custom markers', () => {

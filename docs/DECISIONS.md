@@ -1477,3 +1477,39 @@ Template:
   ring shoulder stand) and one a pole, so they are out of reach on the Home profile. No code or
   data-format change; the generator picks the new nodes up from their flags and patterns (tests
   for the budget and the 48 h rest on the new straight-arm nodes).
+
+## ADR-052: Content updates can't invalidate a saved overlay: user-placed order clashes are resolved, og_level drops next to them are warnings (PLAN 6.3c)
+- Date: 2026-10-02 · Status: Accepted (refines ADR-016/036 for overlays; keeps ADR-010/036's
+  straight-arm rules; serves ADR-043 and ADR-023)
+- Context: `applyOverlay` validated the user's overlay and the built-in tree together, all or
+  nothing, with the build's rules. The editor places a node between two others at the midpoint
+  `order` and clamps its og_level between theirs. 6.3a/6.3b added built-in nodes at exactly such
+  midpoints (e.g. `tuck_front_lever_raise` at 15) and with higher og_levels, so an overlay that was
+  valid on v0.3.0 failed after the update ("order 15 is also used by", "og_level is lower than")
+  and the app fell back to the built-in tree: the user's nodes vanished. About 30 of the positions
+  a user could pick on v0.3.0 were affected. Every release must install over the old one with all
+  data working (ADR-043), and the user's own data is not rejected (ADR-023).
+- Decision:
+  - **User-placed nodes:** every user node, and a built-in node whose edit sets `branch`, `order`
+    or `og_level` (`userPlacedIds`).
+  - **Order clashes are resolved, not reported:** in the merged tree, a user-placed node that
+    shares its order with other nodes of its branch sorts after them (built-in nodes first, then
+    by id) and gets the order halfway to the next node (+1 at the end of the column). Built-in
+    nodes keep their order. The stored overlay is not rewritten on load; the editor's draft starts
+    from the resolved order, so a save stores the place the tree shows (same position, lossless).
+    Two built-in nodes with one order stay an error (a dataset bug).
+  - **og_level monotonicity next to a user-placed node is a warning**, shown in the editor as a
+    gold "Worth a look (you can still save)" note; it never stops loading or saving. Between
+    nodes the user didn't place it stays an error, checked on that subsequence so a user node in
+    between can't hide a broken built-in chain.
+  - **Everything else stays an error:** references, cycles, the straight-arm branch rule and the
+    ADR-036 edit rules, trials, ranges, ids. `validateNodes` (build and dataset tests) is
+    `validateTree` with no user-placed nodes, so the dataset rules are unchanged.
+  - **Test:** `RELEASED_POSITIONS` keeps where every built-in node sat in the last release users
+    have (v0.3.0; v0.2.0 the same, v0.1.0-preview1 without acrobatics). The upgrade test rebuilds
+    that tree and applies every user node position and every built-in move the old editor allowed
+    to the current dataset. A release that changes content adds its positions.
+- Consequences: a user node can end up easier than a new built-in node above it; that is advice,
+  as the user chose the place. The XP of a node follows its own og_level, so nothing else changes.
+  Not covered: a new built-in prerequisite that closes a cycle with a user's edited prerequisites
+  (no release does that today; Backlog).
