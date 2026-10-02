@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { AttributeRadar } from '@/components/character/AttributeRadar';
 import { GoalProgressCard } from '@/components/character/GoalProgressCard';
 import { RankCrest } from '@/components/character/RankCrest';
+import { RankLadderSheet } from '@/components/character/RankLadderSheet';
 import { SessionHistoryRow } from '@/components/character/SessionHistoryRow';
 import { ATTRIBUTE_LABELS } from '@/components/node/AttributeChips';
 import { AttributeColors, Colors, PIXEL, Spacing } from '@/components/theme';
@@ -27,9 +28,9 @@ import { characterSheet, type CharacterSheet } from '@/domain/characterView';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
- * The character sheet (PLAN 4.5): hero, level and XP, rank crest, the attribute radar with the
- * push/pull balance note, streak and totals, goals along their paths and the recent sessions (each
- * opens its summary). Everything comes from `characterSheet` over the store's state.
+ * The character sheet (PLAN 4.5): hero, level and XP, rank crest (opens the rank ladder, PLAN 6.7),
+ * the attribute radar with the push/pull balance note, streak and totals, goals along their paths
+ * and the recent sessions (each opens its summary). Everything comes from `characterSheet` over the store's state.
  */
 export default function CharacterScreen() {
   const nodes = useAppStore((state) => state.nodes);
@@ -87,6 +88,7 @@ function Stat({
 function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
   const router = useRouter();
   const [balanceAcknowledged, setBalanceAcknowledged] = useState(false);
+  const [ladderOpen, setLadderOpen] = useState(false);
   const levelUpKey = useLevelUpKey(sheet.level.level);
   const largest = Math.max(1, ...sheet.radar.map((axis) => axis.value));
   const openNode = (nodeId: string) =>
@@ -129,8 +131,14 @@ function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
       </PixelFrame>
 
       <PixelFrame contentStyle={styles.gap}>
-        <RankCrest rank={sheet.rank} hint={sheet.rankHint} testID="character-rank" />
+        <RankCrest
+          rank={sheet.rank}
+          hint={sheet.rankHint}
+          onPress={() => setLadderOpen(true)}
+          testID="character-rank"
+        />
       </PixelFrame>
+      {ladderOpen && <RankLadderSheet ladder={sheet.ladder} onClose={() => setLadderOpen(false)} />}
 
       <PixelFrame contentStyle={styles.gap} testID="character-attributes">
         <PixelText variant="label" tone="rune" accessibilityRole="header">

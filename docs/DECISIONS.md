@@ -1584,3 +1584,33 @@ Template:
   remaining ~140 nodes.
 - Update (PLAN 6.4b-3): the generic mobility animation is now a low lunge with an overhead arm
   sweep; the seated forward fold became the pike fold's own animation.
+
+## ADR-054: Rank ladder: a sheet from the rank crest, "branches at the level" as the progress measure (PLAN 6.7)
+- Date: 2026-10-03 · Status: Accepted
+- Context: The user asked to see the still locked ranks by tapping the rank (2026-10-02). The rank
+  is the median over the 12 `RANK_BRANCHES` of each branch's peak ogLevel (ADR-021, ADR-041,
+  ADR-050), and `rankHint` only says the next threshold ("Adept at OG 6"), which doesn't tell a
+  hero what to train.
+- Decision:
+  - **Sheet, not a screen:** the crest (now a button) opens `RankLadderSheet` in the shared
+    `PixelModal`, like the exercise info sheet: the ladder is a quick look, not a place to work.
+  - **Pure view model:** `rankLadder(branchOgLevels(...))` in `src/domain/rankLadder.ts` returns
+    every rank (lowest first) with its status (`reached` / `current` / `next` / `locked`), how many
+    rank branches already have a peak at its level, how many more are needed, and, for ranks not
+    yet reached, the branches below its level, closest first. Thresholds come from
+    `RANK_MIN_MEDIAN_OG_LEVEL`, the branch list from `RANK_BRANCHES`, the median and rank from the
+    new `rankMedianOgLevel` + `rankForMedianOgLevel` that `computeCharacter` uses too, so nothing
+    is copied. `characterSheet` adds it as `ladder`.
+  - **Progress measure:** "n of 7 branches at OG x or higher". `branchesForMedian(count)` = more
+    than half the branches is the number that always lifts the median to the level, whatever the
+    others are. With 12 branches the median is the mean of the 6th and 7th value, so a rank can
+    also come with 6 branches if a higher one makes up the difference; the ladder still shows the
+    rule that always works (it stays honest: the status itself uses the real median). Tests check
+    that 7 at the level gives the rank and 6 with the rest at 0 does not, for every rank.
+  - **Only the next rank lists branches** (all branches below it, closest first); further locked
+    ranks show the requirement and the count, so the sheet stays short.
+  - **Look:** rows reuse the Tree's tile frames (reached = proficient gold, next = ready rune glow,
+    locked = legendary silhouette with a gold-dark emblem), the hero's rank wears its crest frame.
+- Consequences: no data, schema or backup change. If the rank rule changes (e.g. a weighted mean),
+  `branchesForMedian` and the progress text must change with it; the ladder test fails loudly
+  when the thresholds and the count disagree.

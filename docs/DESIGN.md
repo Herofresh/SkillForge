@@ -236,6 +236,17 @@ About) and the shared `EquipmentProfileEditor`; destructive steps (remove a prof
 confirm in a `PixelModal` with a danger button. Screenshots: `docs/screenshots/4.5-*.png`,
 `4.6-*.png`.
 
+**Rank ladder (PLAN 6.7, ADR-054):** the `RankCrest` is a button (rune caps "See all ranks") that
+opens `RankLadderSheet`, a `PixelModal` "Rank ladder": a short muted intro (the rank rule in words,
+the current median, which branches don't count), then one framed row per rank, lowest first, in a
+scroll area. Rows reuse the Tree's tile frames so the states read the same: reached = proficient
+gold frame (gold "Reached"), the hero's rank = its crest's double frame in `RankColors` ("Your
+rank"), the next rank = the ready rune glow ("Next rank", a rune `SegmentedBar` with one segment
+per branch the rank needs, and the branches still below its level, closest first, with their OG
+level), locked = the legendary silhouette (ink fill, gold-dark line, the emblem tinted gold-dark,
+name muted, a gold-dark bar of the branches already there). Each row is one accessible text with
+rank, state, requirement and progress. Screenshots: `docs/screenshots/6.7-*.png`.
+
 **Node editor and shared progressions (PLAN 4.7–4.8, ADR-036)** in `src/components/editor/`: the
 editor is a stack of `DetailSection` panels (an arcane "Exercise" panel for a custom node: name,
 metric chips, "Comes after" + `PositionSheet`, difficulty stepper, straight-arm chip; then

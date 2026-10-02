@@ -200,5 +200,11 @@ describe('characterSheet', () => {
     expect(sheet.level.level).toBe(2);
     expect(sheet.streak).toBe(1);
     expect(sheet.radar.find((axis) => axis.attribute === 'push')?.fraction).toBe(1);
+    // The ladder (PLAN 6.7) agrees with the sheet's rank and sees the planche peak.
+    expect(sheet.ladder.rank).toBe(sheet.rank);
+    expect(sheet.ladder.medianOgLevel).toBe(sheet.medianOgLevel);
+    const adept = sheet.ladder.steps.find((step) => step.rank === 'Adept');
+    expect(adept?.branchesAtLevel).toBe(1);
+    expect(adept?.branchesBelow.map((peak) => peak.branch)).not.toContain('planche');
   });
 });
