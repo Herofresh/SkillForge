@@ -196,7 +196,7 @@
   pose. All 10 v_pull nodes plus push-up, squat, freestanding handstand, front lever and full
   planche have their own; every other node shows its first pattern's generic animation. Dev Style
   Guide → Exercise animations; contact sheets and emulator screenshots `docs/screenshots/6.4a-*.png`.
-- Rank ladder (6.7, ADR-054, PR_LINK): tapping the rank crest opens a sheet with every rank
+- Rank ladder (6.7, ADR-054, [PR #47](https://github.com/Herofresh/SkillForge/pull/47)): tapping the rank crest opens a sheet with every rank
   (reached, yours, next, locked) and, per rank, how many branches are at its level; the next rank
   lists the branches still below. Screenshots `docs/screenshots/6.7-*.png`.
 
@@ -212,7 +212,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Rank ladder (task 6.7, ADR-054, PR_LINK):** the rank crest on the Character tab is a button
+- **Rank ladder (task 6.7, ADR-054, [PR #47](https://github.com/Herofresh/SkillForge/pull/47)):** the rank crest on the Character tab is a button
   that opens `RankLadderSheet` (`src/components/character/`), built from `rankLadder` in
   `src/domain/rankLadder.ts` (via `characterSheet().ladder`). `character.ts` gained
   `rankMedianOgLevel` (the one median, also used by `computeCharacter`). Progress is "n of 7
@@ -953,7 +953,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   Go: verify on the emulator with the release APK and add a screenshot.
 - [x] 6.7 Rank ladder: tapping the rank crest on the Character tab opens all ranks, the reached
   ones and the still locked ones with what each needs (from `character.ts`, no copied
-  thresholds) (ADR-054, PR_LINK)
+  thresholds) (ADR-054, [PR #47](https://github.com/Herofresh/SkillForge/pull/47))
 - [ ] 6.8 v0.5.0 release (6.6–6.7), same routine.
 - [ ] 6.9 Classes (user idea): classes the hero unlocks at certain levels, ranks or attribute
   profiles (e.g. a pull-strong hero unlocks a "Climber" class) and can pick one to display.
