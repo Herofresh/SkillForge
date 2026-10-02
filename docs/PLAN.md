@@ -158,7 +158,7 @@
 - `build:apk` (5.13, ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35)): the signer check runs on Gradle's APK before
   the copy, so a wrongly signed APK never lands in `builds/`; path and SHA-256 are printed only
   for an APK that passed.
-- Readable numbers (6.1, ADR-048, PR_LINK): the pixel font is now **Jersey 15** (titles,
+- Readable numbers (6.1, ADR-048, [PR #37](https://github.com/Herofresh/SkillForge/pull/37)): the pixel font is now **Jersey 15** (titles,
   headings, buttons, header titles; sizes 36/28/21/23) instead of Pixelify Sans, whose 5 read as
   an S or an 8. Silkscreen and Alegreya Sans stay (their digits were already clear). The Style
   Guide has a **Digits** section (0–9 per variant); `fonts.test.ts` pins every role to a checked
@@ -725,7 +725,7 @@ upgrade check from every earlier release). Any new table or column is additive a
 `schemaVersion` bump that still reads the older versions.
 
 - [x] 6.1 Readable numbers: Jersey 15 replaces Pixelify Sans in the pixel roles, so every digit
-  is distinct; Style Guide → Digits; screenshots `docs/screenshots/6.1-*.png` (ADR-048, PR_LINK)
+  is distinct; Style Guide → Digits; screenshots `docs/screenshots/6.1-*.png` (ADR-048, [PR #37](https://github.com/Herofresh/SkillForge/pull/37))
 - [ ] 6.2 Exercise descriptions: a short plain-language text per node (what the exercise is and
   how it looks, 1–3 sentences, not the cues), new required YAML field `description` for all nodes,
   validator + generated module + contributor guide. Show it (a) in the node detail on top,
