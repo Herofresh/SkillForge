@@ -200,7 +200,7 @@
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
-2. Phase 6 in order, next 6.4b (per-node animations for the remaining nodes). Phase 7 (Google Play) comes after
+2. Phase 6 in order, next 6.5 (v0.4.0 release; 6.4 animations are done). Phase 7 (Google Play) comes after
    all of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -242,6 +242,13 @@
     `scripts/animationSheetBuild.ts` (e.g. `6.4b-<branch>.png`), run `npm run animations:sheet --
     --only <id> --cell 8 --out <scratch png>` and look at it until the exercise is recognisable.
     Then extend the coverage test in `animations.test.ts` (today: v_pull + `ICONIC_IDS`).
+  - **6.4b-3 (flexibility, mobility, acrobatics) done:** `flexibility.ts`, `mobility.ts`,
+    `acrobatics.ts`, plus `floorPoses.ts` (data-side helpers, no engine change: `legVia`/`armVia`
+    aim a limb through a knee/elbow for front views, `turned` rotates a whole shape, `resting`
+    sets it down on the floor, used for rolls). Front views: butterfly, lotus seats, pancake,
+    middle split, wall angel, 90/90, cossack, cartwheels; the open book is seen from above. A last
+    keyframe with `steps: 1` cuts back to the start, so rolls and cartwheels travel across the
+    frame. Weakest (small front-view seats): half lotus vs lotus, butterfly, 90/90, open book, frog.
   - Gotchas: angles interpolate the short way, so a roll needs keyframes < 180° apart. A head or
     hand that leaves the grid fails the bounds test (that is why the pull-up bar is at row 6 and
     the chest-to-bar one at row 7). A `bar` prop draws its rig (post + beam) itself; `postX` moves
@@ -905,10 +912,12 @@ upgrade check from every earlier release). Any new table or column is additive a
   - [x] 6.4a Engine + generic pattern poses + one branch fully animated (v_pull) + iconic nodes
     (push-up, squat, handstand, front lever, planche) + display (node detail, info sheet, Style
     Guide) (ADR-053, [PR #42](https://github.com/Herofresh/SkillForge/pull/42))
-  - [ ] 6.4b Per-node animations for all remaining nodes
+  - [x] 6.4b Per-node animations for all remaining nodes
     - [x] 6.4b-1 bar branches (h_pull, front_lever, back_lever, dynamic, core) ([PR #45](https://github.com/Herofresh/SkillForge/pull/45))
-    - [x] 6.4b-2 push/legs branches (h_push, v_push, planche, handstand, legs)
-    - [ ] 6.4b-3 flexibility/mobility/acrobatics
+    - [x] 6.4b-2 push/legs branches (h_push, v_push, planche, handstand, legs) ([PR #43](https://github.com/Herofresh/SkillForge/pull/43))
+    - [x] 6.4b-3 flexibility/mobility/acrobatics (all 41 nodes; generic `mobility` is now a low
+      lunge reach; contact sheets `docs/screenshots/6.4b-{flexibility,mobility,acrobatics}.png`)
+      ([PR #44](https://github.com/Herofresh/SkillForge/pull/44))
 - [ ] 6.5 v0.4.0 release (6.1–6.4): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and 0.3.0.
 - [ ] 6.6 Android home-screen widget (like Duolingo): shows whether you trained today, the
   streak, the hero's level and rank, a few stats; tapping it opens the Train tab

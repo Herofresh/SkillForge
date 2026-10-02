@@ -9,15 +9,18 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join } from 'node:path';
 
 import { NODE_ANIMATIONS, PATTERN_ANIMATIONS } from '@/data/animations';
+import { ACROBATICS_ANIMATIONS } from '@/data/animations/acrobatics';
 import { BACK_LEVER_ANIMATIONS } from '@/data/animations/back_lever';
 import { CORE_ANIMATIONS } from '@/data/animations/core';
 import { DYNAMIC_ANIMATIONS } from '@/data/animations/dynamic';
+import { FLEXIBILITY_ANIMATIONS } from '@/data/animations/flexibility';
 import { FRONT_LEVER_ANIMATIONS } from '@/data/animations/front_lever';
 import { H_PULL_ANIMATIONS } from '@/data/animations/h_pull';
 import { H_PUSH_ANIMATIONS } from '@/data/animations/h_push';
 import { HANDSTAND_ANIMATIONS } from '@/data/animations/handstand';
 import { ICONIC_ANIMATIONS } from '@/data/animations/iconic';
 import { LEGS_ANIMATIONS } from '@/data/animations/legs';
+import { MOBILITY_ANIMATIONS } from '@/data/animations/mobility';
 import { PLANCHE_ANIMATIONS } from '@/data/animations/planche';
 import { V_PULL_ANIMATIONS } from '@/data/animations/v_pull';
 import { V_PUSH_ANIMATIONS } from '@/data/animations/v_push';
@@ -68,6 +71,9 @@ if (only !== undefined) {
   write('docs/screenshots/6.4b-back_lever.png', entries(BACK_LEVER_ANIMATIONS), SHEET_CELL);
   write('docs/screenshots/6.4b-dynamic.png', entries(DYNAMIC_ANIMATIONS), SHEET_CELL);
   write('docs/screenshots/6.4b-core.png', entries(CORE_ANIMATIONS), SHEET_CELL);
+  write('docs/screenshots/6.4b-flexibility.png', entries(FLEXIBILITY_ANIMATIONS), SHEET_CELL);
+  write('docs/screenshots/6.4b-mobility.png', entries(MOBILITY_ANIMATIONS), SHEET_CELL);
+  write('docs/screenshots/6.4b-acrobatics.png', entries(ACROBATICS_ANIMATIONS), SHEET_CELL);
   write('docs/screenshots/6.4a-patterns.png', entries(PATTERN_ANIMATIONS, 'pattern:'), SHEET_CELL);
   write('docs/screenshots/6.4b-h_push.png', entries(H_PUSH_ANIMATIONS), SHEET_CELL);
   write('docs/screenshots/6.4b-v_push.png', entries(V_PUSH_ANIMATIONS), SHEET_CELL);

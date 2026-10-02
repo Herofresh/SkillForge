@@ -1578,3 +1578,5 @@ Template:
   planks, cartwheels need a front view like the archer pull-up). The figure has one build; the
   6.10 companion can reuse the skeleton and raster with its own proportions. 6.4b fills in the
   remaining ~140 nodes.
+- Update (PLAN 6.4b-3): the generic mobility animation is now a low lunge with an overhead arm
+  sweep; the seated forward fold became the pike fold's own animation.

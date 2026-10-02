@@ -183,6 +183,8 @@ src/
       pose.ts           authoring helpers: figure({ hip, torso, hands, feet, pin }) solves limbs (IK)
       generic.ts        one generic animation per Pattern; iconic.ts; v_pull.ts (whole branch)
       h_push.ts …       h_push, v_push, planche, handstand, legs.ts: whole branches (6.4b-2)
+      flexibility.ts, mobility.ts, acrobatics.ts  whole branches (6.4b-3); floorPoses.ts: legVia/armVia
+                        (front views), turned + resting (rolls)
       animations.test.ts  ids exist, v_pull + iconic covered, every node resolves, frames in bounds,
                         pinned hands stay on their bar
   db/                   persistence (ADR-026): stores and loads, maps rows <-> domain types
