@@ -178,7 +178,7 @@
   cossack squat, three-point bridge, overhead squat), appended to `BRANCHES`, lime lane, left out of
   the rank median (`NON_RANK_BRANCHES`). Only new ids; no data or database change. The
   `wall_handstand_push_up` and `elbow_lever` descriptions were reworded (6.2 review).
-- Branch fill-ups (6.3b, ADR-051, PR_LINK): **155 nodes**, every branch has 10–17. 30 new ids from
+- Branch fill-ups (6.3b, ADR-051, [PR #40](https://github.com/Herofresh/SkillForge/pull/40)): **155 nodes**, every branch has 10–17. 30 new ids from
   the printed OG2 chart and the BWF Progressions chart (lever / planche variants and pulls, lever
   rows, planche push-ups, ring push-ups / dips / muscle-up / shoulder stand, one-arm push-up and
   row, L-sit pull-up, shrimp squats, nordic curl, elevated straddle press, chest-to-wall shoulder
@@ -805,7 +805,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   - Also: reword the `wall_handstand_push_up` and `elbow_lever` descriptions (6.2 review nits).
   - Every new node has `sources`, `description` (6.2), a `verify:` note where values are
     inferred, and stable ids.
-- [x] 6.3b More content (ADR-051, PR_LINK): other branches under 10 (back lever 7, front lever 5, planche 6,
+- [x] 6.3b More content (ADR-051, [PR #40](https://github.com/Herofresh/SkillForge/pull/40)): other branches under 10 (back lever 7, front lever 5, planche 6,
   h_pull 6, h_push 8, handstand 8, legs 8, dynamic 8, v_pull 9, v_push 9): add real, sourced
   intermediate or accessory steps (e.g. front lever raises / rows, planche leans / pseudo planche
   push-ups, archer rows, shrimp squats). Don't pad: a branch stays under 10 when there's no sourced
