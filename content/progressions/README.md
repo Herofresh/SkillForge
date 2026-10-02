@@ -31,6 +31,7 @@ to be a programmer to read or change them.
 ```yaml
   - id: pull_up                       # permanent name, lowercase_with_underscores
     name: Pull-up                     # what people see in the app
+    description: Hanging from a bar or rings, you pull the body up until the chin is over the bar and lower back to straight arms.
     order: 50                         # position in the branch (easiest = smallest)
     og_level: 2                       # difficulty 0-17 (Overcoming Gravity 2 scale)
     metric: reps                      # reps | hold_s | eccentric_s | load_xbw
@@ -71,6 +72,7 @@ to be a programmer to read or change them.
 |---|---|---|
 | `id` | Permanent name of the exercise. **Never rename it** once released: people's saved progress points to it. | lowercase letters, digits and `_`, e.g. `tuck_front_lever`. Don't start with `user_` (reserved for users' own nodes). |
 | `name` | Name shown in the app. | any text |
+| `description` | What the exercise is and what it looks like, for someone who has never seen it. The app shows it on the skill page and in the info sheet ("i") in the tree and during training. Not the cues: how to do it well goes in `cues`. | 1–3 short plain sentences, at most 300 characters. Put it in quotes if it contains a `:` or `#`. |
 | `order` | Position in the branch, easiest first. Must be different for every node in the file. Only used for ordering, so changing it is safe. | a positive number. Use steps of 10 (10, 20, 30…) so you can put a new node in between (e.g. 25). |
 | `og_level` | Difficulty on the Overcoming Gravity 2 scale. Must never go **down** as `order` goes up. | whole number 0–17. `0` = foundation exercise, easier than OG level 1 (e.g. wall push-up). |
 | `metric` | What is measured. | `reps` (repetitions), `hold_s` (seconds held), `eccentric_s` (seconds of one slow lowering), `load_xbw` (total load as a multiple of bodyweight, e.g. 1.2) |
@@ -163,5 +165,6 @@ printout, or as comments on the pull request, and a contributor copies them into
 
 People can also add, change or hide exercises inside the app without touching these files (a "user
 overlay"). Their custom exercises use the same fields plus a `branch:` line, and their ids start with
-`user_`. They can export them as YAML and send them in as a suggestion; a contributor then copies the
+`user_`. Exercises people made before descriptions existed may have no `description` yet; add one
+before copying such a block here. They can export them as YAML and send them in as a suggestion; a contributor then copies the
 blocks into the right file here (dropping the `branch:` line and the `user_` prefix).

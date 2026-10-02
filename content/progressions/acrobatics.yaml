@@ -20,6 +20,7 @@ nodes:
   # --- Rolls and breakfalls ---
   - id: tuck_rock
     name: Tuck rock
+    description: Sitting in a tight ball, you rock back onto the shoulder blades and forward again onto the feet. The rolling shape behind every roll and breakfall.
     order: 10
     og_level: 0
     metric: reps
@@ -45,6 +46,7 @@ nodes:
 
   - id: back_breakfall
     name: Back breakfall (ushiro ukemi)
+    description: "A judo fall backwards: you sit down low, roll back on a rounded back and slap the floor with both arms to spread the impact. Teaches you to fall backwards without hitting the head."
     order: 20
     og_level: 0
     metric: reps
@@ -75,6 +77,7 @@ nodes:
 
   - id: forward_roll
     name: Forward roll
+    description: From a squat with the hands on the floor, you tuck the chin and roll forward over the back of the shoulders into a squat again. The classic somersault.
     order: 30
     og_level: 1
     metric: reps
@@ -101,6 +104,7 @@ nodes:
 
   - id: side_breakfall
     name: Side breakfall (yoko ukemi)
+    description: "A judo fall to the side: one leg swings across, you sit down and land on your side while one arm slaps the floor. Teaches you to fall sideways safely."
     order: 40
     og_level: 1
     metric: reps
@@ -131,6 +135,7 @@ nodes:
 
   - id: forward_shoulder_roll
     name: Forward shoulder roll (zenpo kaiten ukemi)
+    description: A judo forward roll that goes diagonally over one arm and shoulder to the opposite hip, so the head never touches the floor. It turns a forward fall into a roll back to your feet.
     order: 50
     og_level: 1
     metric: reps
@@ -166,6 +171,7 @@ nodes:
 
   - id: backward_shoulder_roll
     name: Backward shoulder roll
+    description: A roll backwards over one shoulder instead of over the head, ending on the knees or feet. A gentler way to roll backwards that keeps the neck free.
     order: 60
     og_level: 1
     metric: reps
@@ -198,6 +204,7 @@ nodes:
   # --- Cartwheel path (starts from the wall plank; see handstand.yaml) ---
   - id: bunny_hop_cartwheel
     name: Bunny-hop cartwheel
+    description: Standing sideways to a line, you place both hands on it and hop both feet together over to the other side. A small, low cartwheel that teaches putting weight on the hands.
     order: 70
     og_level: 1
     metric: reps
@@ -230,6 +237,7 @@ nodes:
 
   - id: backward_roll
     name: Backward roll
+    description: From a squat, you roll backwards over the back with the hands by the ears, push through the hands and land on the feet. The backwards somersault.
     order: 80
     og_level: 2
     metric: reps
@@ -262,6 +270,7 @@ nodes:
 
   - id: cartwheel
     name: Cartwheel
+    description: From standing, you turn sideways onto one hand, then the other, the legs passing wide overhead, and land one foot after the other along a line. A wheel-like turn through a side handstand.
     order: 90
     og_level: 2
     metric: reps
@@ -295,6 +304,7 @@ nodes:
 
   - id: quarter_turn_cartwheel
     name: Cartwheel with a quarter turn (front to back)
+    description: A cartwheel that starts facing along the line and turns a quarter on the second hand, so you land facing back the way you came. The bridge from the cartwheel to the round-off.
     order: 100
     og_level: 2
     metric: reps
@@ -323,6 +333,7 @@ nodes:
 
   - id: one_handed_cartwheel
     name: One-handed cartwheel
+    description: A cartwheel done on a single hand, the free arm sweeping out to the side. The legs pass over the top with only one hand on the floor.
     order: 110
     og_level: 3
     metric: reps
@@ -353,6 +364,7 @@ nodes:
 
   - id: round_off
     name: Round-off
+    description: Like a cartwheel, but the legs snap together above the hands and you land on both feet at once, facing back the way you came. The entry to most tumbling passes.
     order: 120
     og_level: 3
     metric: reps
@@ -389,6 +401,7 @@ nodes:
   # --- Top (legendary) ---
   - id: aerial_cartwheel
     name: Aerial cartwheel
+    description: "A cartwheel with no hands: a strong kick throws the body sideways through the air and you land one foot after the other. An advanced acrobatic skill."
     order: 130
     og_level: 6
     metric: reps

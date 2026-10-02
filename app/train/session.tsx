@@ -2,6 +2,7 @@ import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { ExerciseInfoSheet } from '@/components/node/ExerciseInfoSheet';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { Colors, Frames, Spacing, TOUCH_TARGET } from '@/components/theme';
 import { EditSetSheet } from '@/components/train/EditSetSheet';
@@ -25,13 +26,14 @@ import { allAcknowledged, type ActiveSession, type MoveDirection } from '@/domai
 import { liveView, type ExerciseMoves, type ExerciseView } from '@/domain/trainView';
 import { useAppStore } from '@/store/useAppStore';
 
-type Dialog = 'finish' | 'abandon' | 'add';
+type Dialog = 'finish' | 'abandon' | 'add' | 'info';
 
 const ACKNOWLEDGE_TO_LOG_NOTE = 'Read and acknowledge the notes above to log. It is your call.';
 
 /**
  * The live session (PLAN 4.4): the current exercise with per-set logging (stepper, log / partial /
- * failed; tap a logged set to edit or delete it, PLAN 5.9), the rest countdown, the whole session
+ * failed; tap a logged set to edit or delete it, PLAN 5.9), the "i" for what the exercise is and
+ * its cues without leaving the session (PLAN 6.2), the rest countdown, the whole session
  * as a list to jump around or reorder, skip, add, finish or abandon. Every action goes through the
  * store, which saves the session after each change.
  */
@@ -126,7 +128,11 @@ function LiveSession({ session }: { session: ActiveSession }) {
         <RestPanel key={session.restEndsAt ?? 'none'} session={session} onSkip={skipRest} />
 
         {current && currentNode ? (
-          <ExerciseCard exercise={current.exercise} highlighted testID="current-exercise">
+          <ExerciseCard
+            exercise={current.exercise}
+            highlighted
+            onInfo={() => setDialog('info')}
+            testID="current-exercise">
             <SetLogger
               key={`${current.exercise.key}-${current.setNumber}`}
               node={currentNode}
@@ -258,6 +264,10 @@ function LiveSession({ session }: { session: ActiveSession }) {
           }}
           onClose={() => setEditing(undefined)}
         />
+      )}
+
+      {dialog === 'info' && currentNode && (
+        <ExerciseInfoSheet node={currentNode} onClose={() => setDialog(undefined)} />
       )}
 
       {dialog === 'add' && (

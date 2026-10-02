@@ -9,6 +9,7 @@ nodes:
   # --- Tuck positions (hold standard: RR 3 x 30 s) ---
   - id: tuck_front_lever
     name: Tuck front lever
+    description: Hanging below a bar on straight arms with the back facing the floor and the body horizontal, knees tucked to the chest. The first hold of the front lever.
     order: 10
     og_level: 4
     metric: hold_s
@@ -43,6 +44,7 @@ nodes:
 
   - id: advanced_tuck_front_lever
     name: Advanced tuck front lever
+    description: A tuck front lever with the hips opened and the back flat, thighs at about a right angle to the body. The longer shape makes the horizontal hold harder.
     order: 20
     og_level: 4
     metric: hold_s
@@ -74,6 +76,7 @@ nodes:
   # --- Leg-extended positions ---
   - id: one_leg_front_lever
     name: One-leg front lever
+    description: A front lever with one leg straight out in line with the body and the other tucked in. It sits between the advanced tuck and the straddle.
     order: 30
     og_level: 6
     metric: hold_s
@@ -107,6 +110,7 @@ nodes:
   # --- Advanced holds (standard: about 15 s, Antranik / Steven Low) ---
   - id: straddle_front_lever
     name: Straddle front lever
+    description: A front lever with both legs straight and spread wide, the body horizontal below the bar. The wide legs shorten the lever compared with the full version.
     order: 40
     og_level: 6
     metric: hold_s
@@ -136,6 +140,7 @@ nodes:
 
   - id: front_lever
     name: Front lever
+    description: Hanging below a bar or rings on straight arms with the whole body rigid and horizontal, face up and legs together. An iconic straight-arm pulling skill.
     order: 50
     og_level: 7
     metric: hold_s

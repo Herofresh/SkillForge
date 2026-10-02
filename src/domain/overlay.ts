@@ -31,7 +31,11 @@ import type {
 export const OVERLAY_FILE = 'overlay';
 /** Header that marks exported text as a SkillForge overlay. */
 export const OVERLAY_FORMAT = 'skillforge-progression-overlay';
-export const OVERLAY_VERSION = 1;
+/**
+ * The overlay layout this build writes. 2: nodes and edits may carry `description` (PLAN 6.2,
+ * ADR-049). Every version up to it is read (a version 1 user node loads with an empty description).
+ */
+export const OVERLAY_VERSION = 2;
 /** File name prefix and type of a shared overlay (`exportOverlay` text as a `.yaml` file). */
 export const OVERLAY_FILE_PREFIX = 'skillforge-progressions';
 export const OVERLAY_FILE_EXTENSION = 'yaml';
@@ -243,7 +247,15 @@ export function overlayFromRaw(raw: unknown): OverlayImport {
     if (!allowed.includes(key)) fail(`unknown field '${key}' (allowed: ${allowed.join(', ')})`);
   }
   if (record.format !== OVERLAY_FORMAT) fail(`'format' must be '${OVERLAY_FORMAT}'`);
-  if (record.version !== OVERLAY_VERSION) fail(`'version' must be ${OVERLAY_VERSION}`);
+  const { version } = record;
+  if (!(typeof version === 'number' && Number.isInteger(version)) || version < 1) {
+    fail(`'version' must be a whole number from 1 to ${OVERLAY_VERSION}`);
+  } else if (version > OVERLAY_VERSION) {
+    fail(
+      `was made by a newer SkillForge (overlay version ${version}; this app reads up to ` +
+        `${OVERLAY_VERSION}). Update the app, then import it again.`,
+    );
+  }
 
   const added: ExerciseNode[] = [];
   const rawAdded = record.added ?? [];

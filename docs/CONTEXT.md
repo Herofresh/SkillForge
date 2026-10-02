@@ -44,10 +44,12 @@ app/                    expo-router screens (UI only, no game logic)
                         redirects to /onboarding while `onboardingCompletedAt` is unset
   (tabs)/tree.tsx       skill tree (PLAN 4.2, ADR-033): Columns | Map tabs (TreeModeTabs, the `treeMode`
                         setting); Columns = branch tabs + one FlatList column of NodeTiles with
-                        chains/linked chips, Legend sheet; Map = TreeMap of the whole tree (5.1, ADR-037)
+                        chains/linked chips, Legend sheet; Map = TreeMap of the whole tree (5.1, ADR-037);
+                        a tile's "i" / long press (map: long press) opens ExerciseInfoSheet (6.2)
   node/[nodeId]/        node detail stack screens (PLAN 4.3, ADR-033)
-    index.tsx           header (state, level, XP), actions (goal, Attempt Trial, Unlock anyway sheet),
-                        prerequisites ✓/✗ + alternatives, trains, standards, cues, history, review
+    index.tsx           header (state, level, XP), About (the description, 6.2), actions (goal,
+                        Attempt Trial, Unlock anyway sheet), prerequisites ✓/✗ + alternatives,
+                        trains, standards, cues, history, review
     trial.tsx           Trial attempt: warnings to acknowledge, steppers, logTrial, outcome + burst
     edit.tsx            "Edit progression" (PLAN 4.7, ADR-036): NodeEditorBody on nodeDraft(nodeId)
   progressions/         the user's tree changes (PLAN 4.7–4.8, ADR-036), stack screens
@@ -219,8 +221,11 @@ src/
                         transform; Focus, zoom −/+, "Switch to list"), MapCanvas (lane bands, edge
                         lines as Views), MapNode (fixed-size state-framed node button)
     node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
-                        NodeHistoryList (rows open the past session), AttributeChips (ATTRIBUTE_LABELS), UnlockSheet
-    train/              Train flow parts: ExerciseCard (prescription, rest, markers), SetLogger
+                        NodeHistoryList (rows open the past session), AttributeChips (ATTRIBUTE_LABELS), UnlockSheet;
+                        ExerciseInfoSheet (description + cues, the one sheet for Tree and Train, 6.2)
+                        and InfoButton (the "i" that opens it)
+    train/              Train flow parts: ExerciseCard (prescription, rest, markers, "i" via
+                        onInfo), SetLogger
                         (timer + stepper + Log / Partial / Failed; logged-set lines open the
                         edit sheet), EditSetSheet (edit / delete a logged set, 5.9), RestPanel
                         (countdown, buzz at its end),
@@ -375,6 +380,8 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Stored overlay** | The one current overlay in `progression_overlay`; the store's tree is `applyOverlay(ALL_NODES, overlay).nodes`. An overlay with issues is never saved; a stored one that stops applying is kept and reported as `overlayIssues` (ADR-028). |
 | **Backup** | A JSON file of all user data (`skillforge-backup`, `schemaVersion`). Import validates the whole file first and then replaces all data in one transaction; never a merge or a partial import (ADR-028). |
 | **Safety copy** | The backup of the current data that `importBackup` writes to `documents/backups/skillforge-before-import-<UTC>.json` before it replaces anything; importing it undoes the import. |
+| **Description** | A node's 1–3 plain sentences on what the exercise is and what it looks like (not the cues; PLAN 6.2, ADR-049). Required on built-in nodes (`validateNodes`), at most `MAX_DESCRIPTION_LENGTH` (300) characters; a user node saved before 6.2 may have `''` (shown as "No description yet…") and the editor asks for one on its next save. |
+| **Exercise info sheet** | `ExerciseInfoSheet`: name, description and cues over the current screen. Opened by the "i" (`InfoButton`) on Tree tiles, plan-preview cards and the live session's current exercise, or a long press on a tile / map node. Never navigates in Train; adds "Open skill" in the Tree. |
 | **Source** | `core` (built-in YAML) or `user` (from the overlay). |
 | **Review status** | `draft` or `coach_reviewed`, per node, with free-text `review.notes`. |
 | **Verify note** | A node's `verify:` text: something still uncertain (the `TODO(verify)` flag, ⚠ on the review sheet). |
@@ -543,9 +550,13 @@ Schema in `src/db/schema.ts`; timestamps are integers in ms since the Unix epoch
 - **Migrations:** `src/db/migrations/`, generated from the schema by `npm run db:generate`,
   additive only, applied by Drizzle (`__drizzle_migrations`) in one transaction on every start.
 - **Backups** (ADR-028): all tables above except `meta`, `node_progress` and `active_session`, as one JSON file with
-  `format: 'skillforge-backup'` and `schemaVersion` (`BACKUP_SCHEMA_VERSION` = 2, independent of the
-  database schema version; 2 adds an optional `durationSec` per set, ADR-040; version 1 files still
-  import). Import replaces everything; a newer `schemaVersion` is refused.
+  `format: 'skillforge-backup'` and `schemaVersion` (`BACKUP_SCHEMA_VERSION` = 3, independent of the
+  database schema version; 2 adds an optional `durationSec` per set, ADR-040; 3 lets the overlay's
+  nodes and edits carry `description`, ADR-049; version 1 and 2 files still import). Import replaces
+  everything; a newer `schemaVersion` is refused.
+- **Overlay layout** (`OVERLAY_VERSION` = 2 in `src/domain/overlay.ts`, ADR-049): the same raw shape
+  in the `progression_overlay` row, backups and shared files; version 1 (no descriptions) still
+  reads, a newer version is refused.
 - Not stored (derived): node states, character level/attributes, session XP and outcome, streak.
 
 ## Equipment tags

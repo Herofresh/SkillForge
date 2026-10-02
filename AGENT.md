@@ -138,7 +138,7 @@ agent didn't write the code and starts with no context from the author.
 - **Adding a skill node:**
   1. Add a block to the correct `content/progressions/<branch>.yaml` (field guide:
      `content/progressions/README.md`, ADR-016).
-  2. Set its `prerequisites`, `og_level`, `trial`, `equipment` and `sources`.
+  2. Set its `description`, `prerequisites`, `og_level`, `trial`, `equipment` and `sources`.
   3. Run `npm run progressions:build` and commit the YAML together with the regenerated files.
   4. If the change is non-obvious, note it in `docs/research/progressions.md`.
 - **Content accuracy:** exercise standards must trace back to a source. Don't invent thresholds.

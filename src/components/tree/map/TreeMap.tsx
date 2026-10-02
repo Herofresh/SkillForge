@@ -33,6 +33,8 @@ type Props = {
   /** Node ids the user added or changed (PLAN 4.7): the quill mark. */
   customized: ReadonlySet<string>;
   onOpen: (nodeId: string) => void;
+  /** Long press on a node: the exercise info sheet (PLAN 6.2). */
+  onInfo?: (nodeId: string) => void;
   /** The screen-reader-friendly path: back to the branch columns. */
   onSwitchToList: () => void;
 };
@@ -57,7 +59,15 @@ const CAMERA_MS = 180;
  * it. Controls: Focus (goals, else what's trainable now), zoom out / in, and "List" back to the
  * columns. Opens on the focus once it knows its size.
  */
-export function TreeMap({ layout, state, focus, customized, onOpen, onSwitchToList }: Props) {
+export function TreeMap({
+  layout,
+  state,
+  focus,
+  customized,
+  onOpen,
+  onInfo,
+  onSwitchToList,
+}: Props) {
   const reduceMotion = useReducedMotion();
   const [screen, setScreen] = useState<Size | undefined>();
   const opened = useRef(false);
@@ -216,6 +226,7 @@ export function TreeMap({ layout, state, focus, customized, onOpen, onSwitchToLi
                   tile={tile}
                   place={place}
                   onOpen={onOpen}
+                  onInfo={onInfo}
                   custom={customized.has(place.id)}
                 />
               ) : null;

@@ -1,8 +1,8 @@
-import { act, render, screen, userEvent } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 
 import { ALL_NODES } from '@/data/skills';
 import { openTestDatabase, type TestDatabase } from '@/db/testing/testDatabase';
-import { addPrerequisite, setName } from '@/domain/nodeEditor';
+import { addPrerequisite, setDescription, setName } from '@/domain/nodeEditor';
 import { branchColumn } from '@/domain/treeView';
 import { createAppStore, type AppStore } from '@/store/appStore';
 import { setAppStore } from '@/store/useAppStore';
@@ -57,7 +57,10 @@ afterEach(() => test.close());
 function saveTowelHang(): void {
   const state = store.getState();
   const draft = addPrerequisite(
-    setName(state.newNodeDraft('v_pull', 'dead_hang'), 'Towel hang'),
+    setDescription(
+      setName(state.newNodeDraft('v_pull', 'dead_hang'), 'Towel hang'),
+      'A dead hang gripping a towel over the bar.',
+    ),
     'dead_hang',
   );
   expect(state.saveNodeDraft(draft).issues).toEqual([]);
@@ -107,12 +110,28 @@ describe('NodeEditorBody', () => {
     await user.press(screen.getByTestId('option-dead_hang'));
     expect(screen.getByTestId('editor-prereq-dead_hang')).toHaveTextContent(/Dead hang/);
 
+    // A custom exercise needs a description (PLAN 6.2): Save stays off until it has one.
+    expect(screen.getByTestId('editor-issues-description')).toHaveTextContent(
+      /description is missing/,
+    );
+    expect(screen.getByTestId('editor-save')).toBeDisabled();
+    // changeText: typing a whole sentence key by key re-renders the form too often for a test.
+    await act(async () => {
+      fireEvent.changeText(
+        screen.getByTestId('editor-description-input'),
+        'A dead hang gripping a towel over the bar.',
+      );
+    });
+    expect(screen.queryByTestId('editor-issues-description')).toBeNull();
+
     await user.press(screen.getByTestId('editor-save'));
     expect(onSaved).toHaveBeenCalledWith('user_towel_hang');
     expect(store.getState().nodes.find((node) => node.id === 'user_towel_hang')).toMatchObject({
+      description: 'A dead hang gripping a towel over the bar.',
       prerequisites: [{ nodeId: 'dead_hang', kind: 'hard' }],
     });
-  });
+    // Types a name key by key through the whole form: slow when the full suite runs in parallel.
+  }, 20_000);
 
   it('shows a cycle inline, keeps Save off, and saves once it is removed', async () => {
     saveTowelHang();

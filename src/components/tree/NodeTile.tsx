@@ -8,6 +8,8 @@ import type { TreeTile } from '@/domain/treeView';
 import { Border, Colors, Spacing, TileFrames, TOUCH_TARGET } from '../theme';
 import { PixelFrame, PixelIcon, PixelText, TierChip, XPBar } from '../ui';
 
+import { InfoButton } from '../node/InfoButton';
+
 import { CHAIN_HEIGHT, CHAIN_WIDTH, ChainLink } from './ChainLink';
 import { PrereqChip } from './PrereqChip';
 import {
@@ -23,6 +25,8 @@ type Props = {
   onOpen: (nodeId: string) => void;
   /** The user added or changed this node (PLAN 4.7): a "Custom" tag. */
   custom?: boolean;
+  /** Opens the exercise info sheet (PLAN 6.2): the "i" button, or a long press on the tile. */
+  onInfo?: (nodeId: string) => void;
 };
 
 /** "GOAL" with a star in a small gold frame. */
@@ -44,10 +48,12 @@ export function GoalMarker({ testID }: { testID?: string }) {
 /**
  * One skill node in the tree column (PLAN 4.2): an optional chain to the tile above, then a pixel
  * panel framed by its state (`TileFrames`) with the state icon, name, tier, OG level, a goal
- * marker, a "Custom" tag for the user's own changes, the level and XP bar once trained, and linked chips for its other prerequisites.
+ * marker, a "Custom" tag for the user's own changes, an "i" for the exercise info sheet (PLAN 6.2,
+ * also on long press), the level and XP bar once trained, and linked chips for its other
+ * prerequisites.
  * Memoized: the column re-renders only the tiles whose data changed.
  */
-export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false }: Props) {
+export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false, onInfo }: Props) {
   const { node, state, level, isGoal, chainAbove, links } = tile;
   const look = TILE_LOOKS[state];
   const trained = TRAINED_TILE_STATES.includes(state);
@@ -59,6 +65,7 @@ export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false }:
       <View style={styles.chainSlot}>{chainAbove && <ChainLink met={chainAbove.met} />}</View>
       <Pressable
         onPress={() => onOpen(node.id)}
+        onLongPress={onInfo && (() => onInfo(node.id))}
         accessibilityRole="button"
         accessibilityLabel={label}
         accessibilityHint="Opens the skill"
@@ -92,6 +99,13 @@ export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false }:
                 </View>
               </View>
               {isGoal && <GoalMarker testID={`tile-goal-${node.id}`} />}
+              {onInfo && (
+                <InfoButton
+                  name={node.name}
+                  onPress={() => onInfo(node.id)}
+                  testID={`tile-info-${node.id}`}
+                />
+              )}
             </View>
             <View style={styles.status}>
               {trained ? (

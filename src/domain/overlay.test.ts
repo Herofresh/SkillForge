@@ -138,6 +138,27 @@ describe('exportOverlay / importOverlay', () => {
     ]);
   });
 
+  it('loads an overlay saved before descriptions existed (version 1, PLAN 6.2)', () => {
+    const old = exportOverlay(full)
+      .replace(/^ {4}description: .*\n/m, '')
+      .replace('version: 2', 'version: 1');
+    expect(old).toContain('version: 1');
+    expect(old).not.toContain('description:');
+    const result = importOverlay(old);
+    expect(result.issues).toEqual([]);
+    const added = result.overlay?.added[0];
+    expect(added?.description).toBe('');
+    expect(applyOverlay(base, result.overlay ?? EMPTY_OVERLAY).issues).toEqual([]);
+  });
+
+  it('refuses an overlay from a newer app version', () => {
+    const newer = exportOverlay(full).replace('version: 2', 'version: 3');
+    expect(importOverlay(newer).issues.map(formatIssue)).toEqual([
+      'overlay: was made by a newer SkillForge (overlay version 3; this app reads up to 2). ' +
+        'Update the app, then import it again.',
+    ]);
+  });
+
   it('reports field problems in added nodes and edits', () => {
     const text = [
       'format: skillforge-progression-overlay',

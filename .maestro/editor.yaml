@@ -1,5 +1,5 @@
 # Node editor and shared progressions (PLAN 4.7, 4.8): from a fresh install, add a custom exercise
-# "Towel hang" after Dead hang with Dead hang as its prerequisite, see it with its Custom tag in the
+# "Towel hang" after Dead hang with a description (6.2) and Dead hang as its prerequisite, see it with its Custom tag in the
 # tree, try to make Dead hang need it (a cycle: the inline error shows and Save stays off), save a
 # valid edit instead and reset it to the default, then open My progressions (share sheet, import
 # screen) and delete the custom exercise. Leaving the new form with changes asks first (5.2).
@@ -80,6 +80,23 @@ name: Editor - custom exercise, cycle error, reset, share
 - assertVisible:
     id: 'editor-position'
     text: 'Dead hang'
+# 6.2: a custom exercise needs a description before it can be saved
+- scrollUntilVisible:
+    element:
+      id: 'editor-issues-description'
+    direction: DOWN
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'editor-description-input'
+    direction: UP
+    timeout: 60000
+- tapOn:
+    id: 'editor-description-input'
+- inputText: 'A dead hang gripping a towel thrown over the bar.'
+- hideKeyboard
+- assertNotVisible:
+    id: 'editor-issues-description'
 - scrollUntilVisible:
     element:
       id: 'editor-add-prerequisite'

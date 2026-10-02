@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View, type ListRenderItem } from 'react-native';
 
 import { BranchTabs } from '@/components/BranchTabs';
+import { ExerciseInfoSheet } from '@/components/node/ExerciseInfoSheet';
 import { Colors, Spacing } from '@/components/theme';
 import { TreeLegend } from '@/components/tree/TreeLegend';
 import { NodeTile } from '@/components/tree/NodeTile';
@@ -18,7 +19,8 @@ import { useAppStore } from '@/store/useAppStore';
 
 /**
  * The Tree tab (PLAN 4.2): pick a branch, see its column of skill tiles in chain order with pixel
- * chains to their prerequisites, and tap a tile for the node detail. One branch at a time in a
+ * chains to their prerequisites, and tap a tile for the node detail; its "i" (or a long press, also
+ * on the map) opens the exercise info sheet (PLAN 6.2). One branch at a time in a
  * FlatList of memoized tiles, so the 89-node tree stays light. "Add exercise" opens the editor for a
  * custom node in the branch (PLAN 4.7); the user's own changes carry a "Custom" tag.
  *
@@ -37,6 +39,9 @@ export default function TreeScreen() {
   const customized = useMemo(() => customizedNodeIds(overlay), [overlay]);
   const [branch, setBranch] = useState<Branch>(() => defaultBranch(nodes, goals));
   const [legendOpen, setLegendOpen] = useState(false);
+  /** The node whose info sheet is open (PLAN 6.2): from a tile's "i" or a long press. */
+  const [infoId, setInfoId] = useState<string | undefined>();
+  const infoNode = infoId === undefined ? undefined : nodes.find((node) => node.id === infoId);
   const tiles = useMemo(
     () => branchColumn(nodes, branch, progress, goals),
     [nodes, branch, progress, goals],
@@ -47,9 +52,27 @@ export default function TreeScreen() {
     (nodeId: string) => router.push({ pathname: '/node/[nodeId]', params: { nodeId } }),
     [router],
   );
+  const openInfo = useCallback((nodeId: string) => setInfoId(nodeId), []);
   const renderTile = useCallback<ListRenderItem<TreeTile>>(
-    ({ item }) => <NodeTile tile={item} onOpen={openNode} custom={customized.has(item.node.id)} />,
-    [openNode, customized],
+    ({ item }) => (
+      <NodeTile
+        tile={item}
+        onOpen={openNode}
+        onInfo={openInfo}
+        custom={customized.has(item.node.id)}
+      />
+    ),
+    [openNode, openInfo, customized],
+  );
+  const infoSheet = infoNode && (
+    <ExerciseInfoSheet
+      node={infoNode}
+      onClose={() => setInfoId(undefined)}
+      onOpenDetail={() => {
+        setInfoId(undefined);
+        openNode(infoNode.id);
+      }}
+    />
   );
 
   const header = (
@@ -92,7 +115,8 @@ export default function TreeScreen() {
         <View style={styles.tabs}>
           <TreeModeTabs value={treeMode} onChange={setTreeMode} />
         </View>
-        <TreeMapMode openNode={openNode} customized={customized} />
+        <TreeMapMode openNode={openNode} openInfo={openInfo} customized={customized} />
+        {infoSheet}
       </View>
     );
   }
@@ -114,6 +138,7 @@ export default function TreeScreen() {
         testID="tree-column"
       />
       <TreeLegend visible={legendOpen} onClose={() => setLegendOpen(false)} />
+      {infoSheet}
     </View>
   );
 }
@@ -121,9 +146,11 @@ export default function TreeScreen() {
 /** Map mode: the layout (once per tree), the node states and the focus, memoized over store state. */
 function TreeMapMode({
   openNode,
+  openInfo,
   customized,
 }: {
   openNode: (nodeId: string) => void;
+  openInfo: (nodeId: string) => void;
   customized: ReadonlySet<string>;
 }) {
   const nodes = useAppStore((state) => state.nodes);
@@ -140,6 +167,7 @@ function TreeMapMode({
       focus={focus}
       customized={customized}
       onOpen={openNode}
+      onInfo={openInfo}
       onSwitchToList={() => setTreeMode('columns')}
     />
   );

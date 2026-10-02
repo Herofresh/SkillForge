@@ -26,6 +26,7 @@ import {
   removeCue,
   removeEquipmentOption,
   removePrerequisite,
+  setDescription,
   setMetric,
   setName,
   stepOgLevel,
@@ -37,6 +38,7 @@ import {
   toggleStraightArm,
   toggleTrains,
 } from '@/domain/nodeEditor';
+import { MAX_DESCRIPTION_LENGTH } from '@/data/validate';
 import {
   ATTRIBUTES,
   EQUIPMENT_TAGS,
@@ -157,6 +159,23 @@ export function NodeEditorForm({ draft, onChange, issues, nodes, custom }: Props
           <IssueNotes messages={grouped.position} testID="editor-issues-position" />
         </DetailSection>
       )}
+
+      <DetailSection title="Description" icon="info" testID="editor-description">
+        <PixelText variant="small" tone="textMuted">
+          What the exercise is and what it looks like, in 1–3 sentences. The cues go below.
+        </PixelText>
+        <PixelTextInput
+          label="Description"
+          value={draft.description}
+          onChangeText={(description) => onChange(setDescription(draft, description))}
+          maxLength={MAX_DESCRIPTION_LENGTH}
+          multiline
+          autoCapitalize="sentences"
+          placeholder="e.g. Hanging from a towel thrown over the bar, arms straight."
+          testID="editor-description-input"
+        />
+        <IssueNotes messages={grouped.description} testID="editor-issues-description" />
+      </DetailSection>
 
       <DetailSection title="Standards" icon="shield" testID="editor-standards">
         <PixelText variant="small" tone="textMuted">

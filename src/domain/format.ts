@@ -147,3 +147,11 @@ export function formatRest(seconds: number): string {
   }
   return `${seconds} s rest`;
 }
+
+/** Shown for a user node saved before descriptions existed (PLAN 6.2, ADR-049). */
+export const NO_DESCRIPTION_TEXT = 'No description yet. Edit this exercise to add one.';
+
+/** A node's description, or `NO_DESCRIPTION_TEXT` when it has none. */
+export function formatDescription(description: string): string {
+  return description.trim() === '' ? NO_DESCRIPTION_TEXT : description;
+}

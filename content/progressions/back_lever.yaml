@@ -9,6 +9,7 @@ nodes:
   # --- Shoulder preparation ---
   - id: german_hang
     name: German hang
+    description: Hanging from rings or a bar with the arms behind you and the body turned upside down past vertical, so the front of the shoulders is stretched. It prepares the shoulders for the back lever.
     order: 10
     og_level: 1
     metric: hold_s
@@ -36,6 +37,7 @@ nodes:
 
   - id: skin_the_cat
     name: Skin the cat
+    description: From a hang, tuck the knees and roll the body backwards through the arms into a German hang, then roll back out. A slow rotation that takes the shoulders through a big range.
     order: 20
     og_level: 2
     metric: reps
@@ -67,6 +69,7 @@ nodes:
   # --- Back lever holds (tuck positions: RR 3 x 30 s) ---
   - id: tuck_back_lever
     name: Tuck back lever
+    description: Hanging on straight arms below rings or a bar, face down with the body horizontal and the knees tucked to the chest. The first hold of the back lever.
     order: 30
     og_level: 2
     metric: hold_s
@@ -97,6 +100,7 @@ nodes:
 
   - id: advanced_tuck_back_lever
     name: Advanced tuck back lever
+    description: A tuck back lever with the hips opened and the back flat, thighs at about a right angle to the body. The longer shape loads the shoulders and arms more.
     order: 40
     og_level: 4
     metric: hold_s
@@ -127,6 +131,7 @@ nodes:
   # --- Advanced holds (standard: about 15 s, Antranik / Steven Low) ---
   - id: straddle_back_lever
     name: Straddle back lever
+    description: A back lever with the legs straight and spread wide, the body horizontal and face down below the rings or bar. The step before the full back lever.
     order: 50
     og_level: 5
     metric: hold_s
@@ -156,6 +161,7 @@ nodes:
 
   - id: back_lever
     name: Back lever
+    description: Hanging below rings or a bar on straight arms, face down, with the whole body straight and horizontal behind the hands. A classic straight-arm gymnastics hold.
     order: 60
     og_level: 6
     metric: hold_s
@@ -187,6 +193,7 @@ nodes:
   # --- Rings strength (legendary) ---
   - id: iron_cross
     name: Iron cross
+    description: Holding yourself up between two rings with the arms straight out to the sides in a T, the body hanging vertically below. One of the hardest rings strength holds.
     order: 70
     og_level: 10
     metric: hold_s

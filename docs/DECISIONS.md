@@ -1345,3 +1345,42 @@ Template:
 - Consequences: no layout height changes; headings look slightly more condensed. Only bundled font
   files change (no data), so the release stays upgrade-safe. Credits list Jersey 15 instead of
   Pixelify Sans.
+
+## ADR-049: Exercise descriptions as a node field, one info sheet for Tree and Train (PLAN 6.2)
+- Date: 2026-10-02 · Status: Accepted (extends the node format of ADR-016 and the views of
+  ADR-033, ADR-034, ADR-036, ADR-037)
+- Context: the user wants to "pull up a short text description of skills / exercises while in
+  training and in the skill overview". Nodes had a name and coaching cues, but nothing that says
+  what the exercise *is* or what it looks like. Users' own nodes (overlays) and backups were saved
+  without such a field and must keep loading (upgrade-safe releases, ADR-043).
+- Decision:
+  - **Data:** `ExerciseNode.description: string`, YAML key `description` right after `name`: 1–3
+    plain sentences on what the exercise is and what it looks like, not a copy of the cues
+    (`dataset.test.ts` checks ≤ 3 sentences and no cue inside). All 102 built-in nodes have one,
+    written from their cues, equipment and `docs/research/progressions.md`.
+  - **Required where it can be, defaulted where it must be:** the format parses a missing
+    `description` as `''` (so a version 1 overlay or a pre-6.2 backup still reads), and
+    `validateNodes` requires a non-empty one on **built-in** nodes (so `progressions:check` fails
+    without it) and caps every description at `MAX_DESCRIPTION_LENGTH` (300) characters. A user
+    node may be empty in storage; the editor asks for one (`draftIssues` in `nodeEditor.ts`, shown
+    in the editor's new Description section, Save off) whenever the user saves a user node, so
+    new custom nodes always get one and old ones on their next edit. Rejecting the old data or
+    inventing text for it ("Your own exercise…") were the alternatives; the first breaks saved
+    user data, the second stores made-up content. The UI shows `NO_DESCRIPTION_TEXT` ("No
+    description yet. Edit this exercise to add one.") for an empty one.
+  - **Versions:** the overlay layout is version 2 (`OVERLAY_VERSION`; reads 1–2, refuses a newer
+    one with "made by a newer SkillForge") and the backup `schemaVersion` is 3 (reads 1–3). No
+    database change: the overlay row stores the same raw shape with the new optional key.
+  - **Editing:** `description` is an editable overlay field (`EDITABLE_NODE_FIELDS`), so a
+    built-in node's description can be changed but not cleared (the validator reports it).
+  - **UI:** one `ExerciseInfoSheet` (`src/components/node/`, a `PixelModal` with the name,
+    description and the cues on parchment) everywhere: the Tree column tile has an `InfoButton`
+    ("i", 48 dp target, a raised pixel face with the press drop) and a long press; map nodes are
+    too small for a button, so they open it on long press (the Legend says so); the plan preview
+    and the live session's current exercise card have the "i". In Train the sheet has no
+    navigation, so the session (and a running timer, which is timestamps) is never left; in the
+    Tree it adds "Open skill". The node detail shows the description first, in an "About" panel.
+- Consequences: contributors must write a description for every new node (README field guide;
+  the check fails otherwise). The review sheet has a Description column for the coach. Backups
+  written by 0.4+ are refused by older apps with their "newer SkillForge" message, shared overlays
+  with "'version' must be 1"; everything older still imports into 0.4+.

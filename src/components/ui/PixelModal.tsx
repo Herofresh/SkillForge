@@ -20,7 +20,7 @@ type Props = {
 
 /**
  * A bottom sheet in a raised pixel frame over a dimmed backdrop. Tapping the backdrop, the close
- * button or Android back closes it. Slides in unless the user asked for reduced motion.
+ * button (`<testID>-close`) or Android back closes it. Slides in unless the user asked for reduced motion.
  */
 export function PixelModal({
   visible,
@@ -52,7 +52,12 @@ export function PixelModal({
               {title}
             </PixelText>
             {children}
-            <PixelButton label={closeLabel} variant="secondary" onPress={onClose} />
+            <PixelButton
+              label={closeLabel}
+              variant="secondary"
+              onPress={onClose}
+              testID={testID && `${testID}-close`}
+            />
           </PixelFrame>
         </View>
       </View>

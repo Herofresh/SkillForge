@@ -19,6 +19,8 @@ type Props = {
   place: MapNodePlacement;
   onOpen: (nodeId: string) => void;
   custom: boolean;
+  /** Long press opens the exercise info sheet (PLAN 6.2); the node is too small for an "i". */
+  onInfo?: (nodeId: string) => void;
 };
 
 /** Map text may grow with the system font a little; the map node has a fixed size (the column view scales fully). */
@@ -28,9 +30,10 @@ const TIER_PIP = 4 * PIXEL;
 /**
  * One node on the tree map (PLAN 5.1): the column tile's look in a fixed-size card, framed by its
  * state (`TileFrames`), with the state icon, a goal star (else the quill of a custom node), the name, a tier pip and the state or
- * level line. Same accessible label as the column tile. Memoized: panning never re-renders it.
+ * level line. A long press opens the exercise info sheet (PLAN 6.2). Same accessible label as the
+ * column tile. Memoized: panning never re-renders it.
  */
-export const MapNode = memo(function MapNode({ tile, place, onOpen, custom }: Props) {
+export const MapNode = memo(function MapNode({ tile, place, onOpen, custom, onInfo }: Props) {
   const { node, state, level, isGoal } = tile;
   const look = TILE_LOOKS[state];
   const silhouette = state === 'legendary';
@@ -40,9 +43,12 @@ export const MapNode = memo(function MapNode({ tile, place, onOpen, custom }: Pr
   return (
     <Pressable
       onPress={() => onOpen(node.id)}
+      onLongPress={onInfo && (() => onInfo(node.id))}
       accessibilityRole="button"
       accessibilityLabel={tileAccessibilityLabel(tile, custom)}
-      accessibilityHint="Opens the skill"
+      accessibilityHint={
+        onInfo ? 'Opens the skill. Long press shows what the exercise is.' : 'Opens the skill'
+      }
       testID={`map-node-${node.id}`}
       style={[
         styles.slot,

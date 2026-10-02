@@ -205,12 +205,30 @@ function parseReview(value: unknown, fail: Fail): Review | undefined {
   return notes === undefined ? { status } : { status, notes };
 }
 
+/**
+ * A description is any text; empty is allowed here so a user node saved before PLAN 6.2 (no
+ * description) still loads. `validateNodes` requires one on built-in nodes, the editor on user
+ * nodes it saves (ADR-049).
+ */
+function parseDescription(value: unknown, fail: Fail): string | undefined {
+  if (typeof value === 'string') return value.trim();
+  fail(`description must be some text, got ${describe(value)}`);
+  return undefined;
+}
+
 const DRAFT_REVIEW: Review = { status: 'draft' };
 const same = <T>(value: T): T => value;
 
 /** The node fields in the order they are written to YAML. */
 const FIELDS: readonly FieldSpec[] = [
   { key: 'name', prop: 'name', parse: text('name'), toRaw: (v: string) => v },
+  {
+    key: 'description',
+    prop: 'description',
+    fallback: () => '',
+    parse: parseDescription,
+    toRaw: (v: string) => v,
+  },
   { key: 'order', prop: 'chainOrder', parse: number('order'), toRaw: (v: number) => v },
   { key: 'og_level', prop: 'ogLevel', parse: number('og_level'), toRaw: (v: number) => v },
   { key: 'metric', prop: 'metric', parse: oneOf('metric', METRICS), toRaw: (v: string) => v },

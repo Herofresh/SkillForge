@@ -9,6 +9,7 @@ nodes:
   # --- Body line (floor) ---
   - id: hollow_hold
     name: Hollow body hold
+    description: Lying on your back with the lower back pressed into the floor and the arms and legs held straight just above it, the body curved like a shallow banana. The base body shape for most calisthenics skills.
     order: 10
     og_level: 0
     metric: hold_s
@@ -31,6 +32,7 @@ nodes:
 
   - id: side_plank
     name: Side plank
+    description: Lying on one side and lifting the hips off the floor so the body is a straight line, held up by the forearm and the side of the bottom foot. It trains the sides of the trunk.
     order: 20
     og_level: 0
     metric: hold_s
@@ -56,6 +58,7 @@ nodes:
   # --- L-sit chain (compression): foot-supported, tuck, L-sit, straddle, V-sit, manna ---
   - id: foot_supported_l_sit
     name: Foot-supported L-sit
+    description: Sitting between parallettes, bars or with the hands on the floor, you press up on straight arms and lift the hips while the heels stay on the floor. The first step to the L-sit.
     order: 30
     og_level: 0
     metric: hold_s
@@ -86,6 +89,7 @@ nodes:
 
   - id: tuck_l_sit
     name: Tuck L-sit
+    description: Supported on straight arms with the hips lifted and the knees pulled up to the chest, feet off the floor. An L-sit with bent legs.
     order: 40
     og_level: 1
     metric: hold_s
@@ -115,6 +119,7 @@ nodes:
   # --- Hanging (bar) ---
   - id: hanging_knee_raise
     name: Hanging knee raise
+    description: Hanging from a bar, you bring the knees up towards the chest by curling the pelvis, then lower them slowly. It trains the abs and hip flexors.
     order: 50
     og_level: 1
     metric: reps
@@ -142,6 +147,7 @@ nodes:
   # --- L-sit chain (continued) ---
   - id: l_sit
     name: L-sit
+    description: Supported on straight arms with the legs held straight out in front, level with the floor, so the body forms an L. A classic core and compression hold.
     order: 60
     og_level: 2
     metric: hold_s
@@ -172,6 +178,7 @@ nodes:
   # --- Hanging (continued) ---
   - id: toes_to_bar
     name: Toes-to-bar
+    description: Hanging from a bar, you lift the legs as straight as you can until the toes touch the bar, then lower them. A hard hanging core exercise.
     order: 70
     og_level: 3
     metric: reps
@@ -203,6 +210,7 @@ nodes:
   # --- L-sit chain (continued) ---
   - id: straddle_l_sit
     name: Straddle L-sit
+    description: Like the L-sit, but the legs are straight and spread wide with the hands on the floor between them. It needs more compression and hip flexibility than the L-sit.
     order: 80
     og_level: 4
     metric: hold_s
@@ -231,6 +239,7 @@ nodes:
 
   - id: v_sit
     name: V-sit
+    description: Supported on straight arms with the legs raised well above horizontal, so the body forms a V. A big step past the L-sit.
     order: 90
     og_level: 6
     metric: hold_s
@@ -263,6 +272,7 @@ nodes:
   # --- Legendary teaser ---
   - id: manna
     name: Manna
+    description: Supported on straight arms with the hands behind the hips, the hips lifted high and the straight legs folded up towards the face. An elite compression and shoulder-flexibility hold.
     order: 100
     og_level: 13
     metric: hold_s

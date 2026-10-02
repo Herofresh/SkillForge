@@ -43,8 +43,10 @@ export const BACKUP_FORMAT = 'skillforge-backup';
  * - 2: a set may carry `durationSec`, the time the exercise timer measured (PLAN 5.4, ADR-040).
  *   Version 1 files are still read (they have no durations); an app that reads only version 1
  *   refuses a version 2 file with "made by a newer SkillForge" instead of an unknown-field error.
+ * - 3: the overlay's nodes and edits may carry `description` (PLAN 6.2, ADR-049). Versions 1 and
+ *   2 are still read: a user node without a description loads with an empty one.
  */
-export const BACKUP_SCHEMA_VERSION = 2;
+export const BACKUP_SCHEMA_VERSION = 3;
 /** The first version whose sets may carry `durationSec`. */
 const DURATION_SCHEMA_VERSION = 2;
 /** Label used as `file` in backup issues. */

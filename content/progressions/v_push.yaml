@@ -9,6 +9,7 @@ nodes:
   # --- Foundation: support on straight arms ---
   - id: support_hold
     name: Support hold
+    description: Holding yourself up on straight arms above dip bars, parallettes or rings, feet off the ground. It is the top position of a dip and the base for most pushing skills.
     order: 10
     og_level: 0
     metric: hold_s
@@ -36,6 +37,7 @@ nodes:
   # --- Pike push-ups and dips (the two lines run side by side) ---
   - id: pike_push_up
     name: Pike push-up
+    description: A push-up from an upside-down V, hips high and legs straight, lowering the head towards the floor in front of the hands. It moves the push overhead, like a handstand push-up with the feet on the floor.
     order: 20
     og_level: 1 # OG2: pike headstand push-up [1]
     metric: reps
@@ -63,6 +65,7 @@ nodes:
 
   - id: dip_negative
     name: Dip negative
+    description: "Only the lowering half of a dip: start up on straight arms on the bars and sink down slowly until the shoulders are below the elbows. You step or jump back up instead of pressing."
     order: 30
     og_level: 2 # OG2: dip negatives [2]
     metric: eccentric_s
@@ -93,6 +96,7 @@ nodes:
 
   - id: elevated_pike_push_up
     name: Elevated pike push-up
+    description: A pike push-up with the feet up on a box or chair, so the hips sit higher over the hands. More of your weight is on the arms, which brings it closer to a handstand push-up.
     order: 40
     og_level: 2 # OG2: box / elevated pike headstand push-up [2]
     metric: reps
@@ -120,6 +124,7 @@ nodes:
 
   - id: parallel_bar_dip
     name: Parallel bar dip
+    description: From a support hold on two parallel bars, bend the arms to lower the body until the shoulders dip below the elbows, then press back up. A key strength move for chest, shoulders and triceps.
     order: 50
     og_level: 3 # OG2: parallel bar dips [3]
     metric: reps
@@ -148,6 +153,7 @@ nodes:
   # bar muscle-up gate.
   - id: straight_bar_dip
     name: Straight bar dip
+    description: "A dip on top of a single bar: the bar sits at the hips, the chest leans over it and the body lowers until the bar meets the upper belly. It is the finishing push of the bar muscle-up."
     order: 55
     og_level: 3
     metric: reps
@@ -180,6 +186,7 @@ nodes:
   # --- Upside down: headstand and handstand push-ups ---
   - id: wall_headstand_push_up
     name: Wall headstand push-up
+    description: Upside down in a handstand against a wall, you bend the arms until the head touches the floor and press back up. The range ends at the head, so it is the shorter version of the handstand push-up.
     order: 60
     og_level: 4 # OG2: wall headstand push-up [4]
     metric: reps
@@ -208,6 +215,7 @@ nodes:
 
   - id: wall_handstand_push_up
     name: Wall handstand push-up (full range)
+    description: A handstand push-up against the wall with the hands on parallettes, so the head can sink below hand level. You lower until the shoulders are near the hands and press back to straight arms.
     order: 70
     og_level: 5 # OG2: wall HSPU full range of motion [5]
     metric: reps
@@ -233,6 +241,7 @@ nodes:
 
   - id: freestanding_handstand_push_up
     name: Freestanding handstand push-up
+    description: "A handstand push-up with no wall: from a balanced handstand you lower the head towards the floor and press back up while staying on balance. It joins handstand balance with strong overhead pressing."
     order: 80
     og_level: 7
     metric: reps

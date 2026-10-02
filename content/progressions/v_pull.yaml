@@ -9,6 +9,7 @@ nodes:
   # --- Foundation: hanging ---
   - id: dead_hang
     name: Dead hang
+    description: Simply hanging from a bar or rings with straight arms and the feet off the ground. It builds grip and gets the shoulders used to carrying your weight overhead.
     order: 10
     og_level: 0
     metric: hold_s
@@ -33,6 +34,7 @@ nodes:
   # --- Beginner pulls: move the shoulder blades, then assisted pull-ups ---
   - id: scapular_pull
     name: Scapular pull
+    description: From a dead hang, the arms stay straight while the shoulder blades pull down and lift the body a few centimetres. It teaches the first part of every pull-up.
     order: 20
     og_level: 0
     metric: reps
@@ -59,6 +61,7 @@ nodes:
 
   - id: jump_pull_up
     name: Jumping pull-up
+    description: A pull-up where a jump from the floor or a box helps you get the chin over the bar, followed by a slow lowering. The legs give only as much help as you need.
     order: 30
     og_level: 1
     metric: reps
@@ -84,6 +87,7 @@ nodes:
   # --- First strict pull-ups ---
   - id: pull_up_negative
     name: Pull-up negative
+    description: "Only the lowering half of a pull-up: start with the chin over the bar and lower yourself slowly to a full hang. It builds pull-up strength before you can pull all the way up."
     order: 40
     og_level: 2
     metric: eccentric_s
@@ -111,6 +115,7 @@ nodes:
 
   - id: pull_up
     name: Pull-up
+    description: Hanging from a bar or rings, you pull the body up until the chin is over the bar and lower back to straight arms. The basic test of upper-body pulling strength.
     order: 50
     og_level: 2
     metric: reps
@@ -138,6 +143,7 @@ nodes:
   # --- Harder pull-ups ---
   - id: chest_to_bar_pull_up
     name: Chest-to-bar pull-up
+    description: A higher, more explosive pull-up where the chest touches the bar instead of only the chin clearing it. It builds the pulling height needed for the muscle-up.
     order: 60
     og_level: 4
     metric: reps
@@ -164,6 +170,7 @@ nodes:
 
   - id: archer_pull_up
     name: Archer pull-up
+    description: A wide-grip pull-up where you pull towards one hand while the other arm stays almost straight along the bar. One arm does most of the work, a step towards the one-arm chin-up.
     order: 70
     og_level: 6
     metric: reps
@@ -192,6 +199,7 @@ nodes:
   # --- One-arm chin-up ---
   - id: one_arm_chin_up_negative
     name: One-arm chin-up negative
+    description: Get the chin over the bar with both hands, let go with one and lower yourself slowly on the other arm, palm facing you. It is the lowering half of the one-arm chin-up.
     order: 80
     og_level: 7
     metric: eccentric_s
@@ -218,6 +226,7 @@ nodes:
 
   - id: one_arm_chin_up
     name: One-arm chin-up
+    description: Pulling your whole body up with one arm until the chin is over the bar, palm facing you, the other hand free. One of the hardest pulling feats in calisthenics.
     order: 90
     og_level: 9
     metric: reps

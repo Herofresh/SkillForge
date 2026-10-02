@@ -281,6 +281,24 @@ export const ICONS = {
     ],
     colors: { '#': Colors.danger },
   },
+  /** "What is this exercise?": an "i" in a round rune frame (PLAN 6.2, the description sheet). */
+  info: {
+    rows: [
+      '....####....',
+      '..##....##..',
+      '.#...++...#.',
+      '.#...++...#.',
+      '#..........#',
+      '#...+++....#',
+      '#....++....#',
+      '#....++....#',
+      '.#...++...#.',
+      '.#..++++..#.',
+      '..##....##..',
+      '....####....',
+    ],
+    colors: { '#': Colors.rune, '+': Colors.text },
+  },
   // Tab bar icons: one role each, so a tint recolors them cleanly.
   quill: {
     rows: [

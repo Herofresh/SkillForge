@@ -12,7 +12,12 @@ import { UnlockSheet } from '@/components/node/UnlockSheet';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { Spacing } from '@/components/theme';
 import { EmptyState, PixelButton, PixelText, Screen } from '@/components/ui';
-import { formatShortDate, formatTrial, formatWorkingRange } from '@/domain/format';
+import {
+  formatDescription,
+  formatShortDate,
+  formatTrial,
+  formatWorkingRange,
+} from '@/domain/format';
 import { MAX_GOALS } from '@/domain/onboarding';
 import { customizationOf } from '@/domain/overlayEdit';
 import { nodeDetail, type NodeDetail } from '@/domain/treeView';
@@ -25,7 +30,7 @@ const REVIEW_TEXT: Readonly<Record<ReviewStatus, string>> = {
 };
 
 /**
- * The node detail (PLAN 4.3): everything about one skill, from the user's tree with the overlay
+ * The node detail (PLAN 4.3): everything about one skill (what it is first, PLAN 6.2), from the user's tree with the overlay
  * applied (`state.nodes`), and its actions: set/remove goal, attempt the Trial, and "unlock anyway"
  * for a locked node (ADR-023: advisory, acknowledged, never blocked), and "Your tree": edit, add after,
  * reset, hide or delete (PLAN 4.7, ADR-036).
@@ -92,6 +97,12 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
             customization === 'added' || customization === 'edited' ? customization : undefined
           }
         />
+
+        <DetailSection title="About" icon="info" testID="detail-description">
+          <PixelText testID="detail-description-text">
+            {formatDescription(node.description)}
+          </PixelText>
+        </DetailSection>
 
         <DetailSection title="Actions" icon="sword" variant="raised" testID="detail-actions">
           <PixelButton
