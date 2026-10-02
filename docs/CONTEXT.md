@@ -283,7 +283,7 @@ docs/                   PLAN, DECISIONS, CONTEXT, DESIGN (visual language), rese
 app.json                Expo config: version + android.versionCode (the one version source,
                         ADR-039), package at.skillforge.app, adaptive icon, plugins
 eas.json                EAS profiles development / preview (APK) / production (AAB), version
-                        source local; not used until 5.3b (Expo login)
+                        source local; unused (no EAS, ADR-047)
 android/, builds/       GENERATED, gitignored: prebuild's native project and the copied APKs
 drizzle.config.ts       drizzle-kit config (sqlite, expo driver, schema -> src/db/migrations)
 babel.config.js         babel-preset-expo + inline-import for .sql (also used by Jest)
@@ -597,7 +597,7 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
     - Stop the adb server (`adb kill-server`) before updating platform-tools, because a running
       `adb.exe` is locked.
   - Build APKs locally with `npm run build:apk` (5.3a, ADR-039); it writes `android/local.properties`
-    from `ANDROID_HOME` or this default path. EAS cloud builds are 5.3b.
+    from `ANDROID_HOME` or this default path. There are no EAS cloud builds (ADR-047).
 - **Maestro** 2.10 is installed at `%USERPROFILE%\.maestro\maestro\bin`. It isn't on PATH;
   `npm run e2e` finds it there (5.2).
 
@@ -703,7 +703,7 @@ Before publishing a release, check that it installs over the previous one with t
 - **Local APK builds (ADR-039):**
   - Release APKs are signed with the **debug keystore** (the React Native template's). Fine for
     sideloading; Play rejects it, and a later release-key APK can't update it in place (uninstall,
-    which wipes the data; export a backup first). The release keystore is 5.3b.
+    which wipes the data; export a backup first). The Play upload key comes in PLAN 7.1 (ADR-047).
   - **ABI quirk:** the arm64-only APK installs on the x86_64 emulator but crashes at start with
     `SoLoaderDSONotFoundError` (libreactnative.so). Not an app bug; use `build:apk:universal` there.
   - `expo prebuild` rewrites package.json's `android`/`ios` scripts to `expo run:*`. The script

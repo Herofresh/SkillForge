@@ -16,7 +16,7 @@ Template:
 ---
 
 ## ADR-001: Expo (React Native + TypeScript), Android first
-- Date: 2026-09-27 · Status: Accepted
+- Date: 2026-09-27 · Status: Accepted (EAS cloud builds superseded by ADR-047)
 - Context: The app is used at the gym or park on a phone. The user tests on Android. There's no Android
   SDK installed locally.
 - Decision: Build a native mobile app with Expo (managed workflow) and TypeScript. During development,
@@ -996,7 +996,7 @@ Template:
   draft (it lives in screen state).
 
 ## ADR-039: EAS build profiles with a local version source, and a local APK script without an Expo account (PLAN 5.3a)
-- Date: 2026-09-28 · Status: Accepted (refines ADR-001)
+- Date: 2026-09-28 · Status: Accepted (refines ADR-001; the EAS part is superseded by ADR-047)
 - Context: ADR-001 planned installable APKs through EAS cloud builds, which need an Expo account
   login and a signing-key decision from the user. A local Gradle release build already worked
   (pre-release `v0.1.0-preview1`), but by hand: prebuild, `local.properties`, Gradle with an ABI
@@ -1290,3 +1290,24 @@ Template:
 - Consequences: no schema, migration or backup change. The hero step has no "back to the app"
   exit during a replay (Android back leaves the app; a restart ends the replay); a "Skip" on the
   replay could come later if users ask. ADR-031's "clear the setting" idea is not used.
+
+## ADR-047: Local builds and an own upload key for Google Play; no EAS (PLAN 5.3b dropped, Phase 7)
+- Date: 2026-10-02 · Status: Accepted (supersedes the EAS parts of ADR-001 and ADR-039)
+- Context: ADR-001 planned EAS cloud builds and ADR-039 left 5.3b for an Expo login and a
+  signing-key decision. The user wants to keep the project cheap and asked whether expo.dev is
+  needed at all. It isn't: `npm run build:apk` already builds a release locally with prebuild and
+  Gradle, and Google Play accepts an Android App Bundle uploaded by hand in the Play Console.
+- Decision:
+  - **No Expo account, no EAS Build/Submit/Update.** Builds stay local (`build:apk`, and a
+    `build:aab` in 7.2). `eas.json` is unused; 7.2 decides whether to delete it.
+  - **Signing for Play:** the user creates an upload key with `keytool` (7.1) and keeps it outside
+    the repo with backups; Play App Signing holds the app signing key. Gradle reads the key's path
+    and passwords from `~/.gradle/gradle.properties` or environment variables. No keystore or
+    password is ever committed (`*.jks` stays gitignored).
+  - **Order:** all of Phase 6 (the 2026-10-02 feature wave) ships first as GitHub pre-releases on
+    the current debug key, upgrade-safe as in ADR-043. The key change happens once, in Phase 7.
+- Consequences: the only fixed cost is the one-time Play developer fee. Installs from a GitHub APK
+  (debug key) can't update to the Play build: those users export a backup, uninstall, install from
+  Play and import it (7.3). Without EAS there are no cloud builds, so building needs this machine's
+  Android SDK and Java (CONTEXT.md). OTA updates (expo-updates) are not available; every change is
+  a store update.

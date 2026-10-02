@@ -162,9 +162,8 @@
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
-2. Phase 5: 5.3b EAS cloud build + release signing. **Needs the user:** log in to Expo (`eas login`,
-   `eas init` links the project) and decide the signing key (EAS-managed credentials or an own
-   keystore kept outside git). Then install `expo-dev-client` for the development profile.
+2. Phase 6 in order, starting with 6.1 (readable numbers). Phase 7 (Google Play) comes after all
+   of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -227,7 +226,7 @@
     CONTEXT.md against the previous release's APK, then `gh release create` with both APKs and
     their SHA-256.
   - `RELEASE_SIGNER_SHA256` in `scripts/buildApkConfig.ts` is the debug keystore's certificate.
-    Don't change it without the user (5.3b): installs from earlier releases couldn't update.
+    Don't change it without the user (Phase 7): installs from earlier releases couldn't update.
   - The first preview's APK reports versionName "1.0.0" (built before ADR-039); the user calls it
     "version 1.0". Only the versionCode matters for updates.
   - `.maestro/release/` flows target the installed app (`at.skillforge.app`), not Expo Go, and
@@ -276,8 +275,8 @@
     (`SoLoaderDSONotFoundError`); use the universal one there. See CONTEXT.md → Gotchas.
   - Releases: bump `expo.android.versionCode` (and `expo.version`) in app.json, build, attach
     the APKs to a GitHub pre-release with their SHA-256.
-  - 5.3b: `eas init` writes `extra.eas.projectId` into app.json; `development` needs
-    `npx expo install expo-dev-client`; never commit a keystore (`*.jks` is gitignored).
+  - EAS is dropped (ADR-047); Play signing is Phase 7. Never commit a keystore (`*.jks` is
+    gitignored).
 - **Acrobatics branch (task 5.5, ADR-041):**
   - Content: `content/progressions/acrobatics.yaml`; sources and chain notes in
     docs/research/progressions.md → B13. Every ogLevel and trial is inferred (`verify:` on all 13
@@ -688,7 +687,8 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.2 Animations and polish: one reveal vocabulary (`BURST_TITLES`, `useLevelUpKey`, node-detail LEVEL UP!), tinted icons keep their outline (`knockout`; Export icon back), "Discard changes?" when leaving the editor with a changed draft, consistent empty states, `npm run e2e` without Maestro on PATH (ADR-038, [PR #22](https://github.com/Herofresh/SkillForge/pull/22))
 - 5.3 EAS build profile and Android APK, split in two:
   - [x] 5.3a Build config + local APK script: `eas.json` (development / preview / production, version source local), app.json version 0.1.0 / versionCode 1, `npm run build:apk[:universal]` (ADR-039, [PR #23](https://github.com/Herofresh/SkillForge/pull/23))
-  - [ ] 5.3b EAS cloud build + proper release signing (needs the user: Expo account login, keystore decision)
+  - ~~5.3b EAS cloud build + proper release signing~~ dropped: no Expo account or paid service
+    (user decision 2026-10-02, ADR-047). Release signing moved to Phase 7 (7.1–7.2).
 
 #### v0.2.0
 - [x] 5.4 Exercise timer (user request 2026-09-28): hold countdown with get-ready, vibration at the target and overtime, stopwatch for other metrics, per-set `durationSec` (additive column, backup version 2), session clock and times in the summary, hold Trials too (ADR-040, [PR #26](https://github.com/Herofresh/SkillForge/pull/26))
@@ -706,6 +706,93 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.12 Confirm before removing an equipment profile in onboarding ([PR #34](https://github.com/Herofresh/SkillForge/pull/34))
 - [x] 5.13 build:apk checks the signer before copying the APK (ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35))
 
+### Phase 6: Feature wave (user requests 2026-10-02)
+Work through these in order, one task per branch and PR. Until Phase 7, releases stay on the
+debug key: every release must install over the user's current build with all data kept (ADR-043,
+upgrade check from every earlier release). Any new table or column is additive and gets a backup
+`schemaVersion` bump that still reads the older versions.
+
+- [ ] 6.1 Readable numbers: in the pixel fonts a 5 can look like an 8. Show every number (XP,
+  levels, reps, timers, steppers, stats, dates) in a font where all ten digits are distinct, and
+  keep the pixel look for headings. Check which roles (`Type.display/title/heading/label`) render
+  digits and pick a fix: a pixel font with clear digits for those roles, or one `Type.number`
+  role used by every numeric text. Screenshot all digits 0–9 per role before/after
+  (`docs/screenshots/6.1-*.png`), update DESIGN.md, ADR.
+- [ ] 6.2 Exercise descriptions: a short plain-language text per node (what the exercise is and
+  how it looks, 1–3 sentences, not the cues), new required YAML field `description` for all nodes,
+  validator + generated module + contributor guide. Show it (a) in the node detail on top,
+  (b) in the Tree (column tile long-press or an info button, and the map node sheet) and (c) in the
+  live session and plan preview through an "i" button that opens a sheet with description + cues,
+  without leaving the session. The overlay/editor can edit a node's description (custom nodes
+  need one). Maestro: open the sheet in `train.yaml` and `tree.yaml`.
+- [ ] 6.3 More content, at least 10 nodes per branch where it makes sense:
+  - **Flexibility** (5 today) grows to ≥ 10 with yoga-based skills, e.g. pigeon → king pigeon (the
+    "dove"), splits (front and middle) progressions, pancake, wheel/bridge variations, lotus prep.
+  - **Mobility:** decide in the ADR whether joint mobility (deep squat, ankle, hip CARs, thoracic,
+    shoulder flexion, German hang) becomes its own branch `mobility` (≥ 10 nodes, left out of the
+    rank median like acrobatics) or stays inside flexibility.
+  - **Other branches under 10** (back lever 7, front lever 5, planche 6, h_pull 6, h_push 8,
+    handstand 8, legs 8, dynamic 8, v_pull 9, v_push 9): add real, sourced intermediate or
+    accessory steps (e.g. front lever raises / rows, planche leans / pseudo planche push-ups,
+    archer rows, shrimp squats). Don't pad: a branch stays under 10 when there's no sourced
+    step that fits; write down why in docs/research/progressions.md.
+  - Every new node has `sources`, `description` (6.2), a `verify:` note where values are
+    inferred, and stable ids. Split into 6.3a (flexibility + mobility) and 6.3b (other branches)
+    if the PR gets large.
+- [ ] 6.4 Pixel animations per exercise: a small looping pixel-art figure showing the general
+  movement (not anatomically perfect). Proposed approach (confirm in the ADR): a shared
+  stick-figure skeleton with joint angles, 2–4 keyframe poses per node defined in data
+  (one source of truth, e.g. `content/animations/*.yaml` or a field per node), rasterized to a
+  pixel grid in code like the app icon, played with stepped frames (`Easing.steps`, DESIGN.md
+  motion rules), equipment drawn as simple props (bar, rings, parallettes, wall, floor). Every
+  node gets one; a node without its own falls back to its pattern's generic pose. Shown in the
+  node detail and the 6.2 description sheet (Tree and Train). Preview sheet with all animations
+  in the dev Style Guide; screenshots for review. Split by branch if needed (6.4a engine +
+  a few nodes, 6.4b the rest).
+- [ ] 6.5 v0.4.0 release (6.1–6.4): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and 0.3.0.
+- [ ] 6.6 Android home-screen widget (like Duolingo): shows whether you trained today, the
+  streak, the hero's level and rank, a few stats; tapping it opens the Train tab
+  (`skillforge://train`). Needs native code: a config plugin / library that works with
+  `expo prebuild` and the local `build:apk` (candidate: `react-native-android-widget`; check
+  licence and SDK 57 support in the ADR). The app writes the widget's data after every
+  session / load and the widget refreshes at midnight so "today" flips. Not testable in Expo
+  Go: verify on the emulator with the release APK and add a screenshot.
+- [ ] 6.7 Rank ladder: tapping the rank crest on the Character tab opens all ranks, the reached
+  ones and the still locked ones with what each needs (from `character.ts`, no copied
+  thresholds).
+- [ ] 6.8 v0.5.0 release (6.6–6.7), same routine.
+- [ ] 6.9 Classes (user idea): classes the hero unlocks at certain levels, ranks or attribute
+  profiles (e.g. a pull-strong hero unlocks a "Climber" class) and can pick one to display.
+  **Starts with a short design proposal for the user** (class list, unlock rules, what a class
+  changes: title and look only, no gameplay effect unless the user wants one); then pure rules in
+  `src/domain/`, selection stored additively, shown on the Character tab and the widget.
+- [ ] 6.10 Companion (user idea, do last): the hero as a small tamagotchi-style pixel character on
+  the Character tab, customizable within limits; classes (6.9) and achievements unlock trinkets
+  and outfits. **Starts with a design proposal for the user** (what reacts to training, what can be
+  customized, which unlocks; no punishing mechanics in the spirit of ADR-023). Reuses the 6.4
+  skeleton and pixel renderer.
+- [ ] 6.11 v0.6.0 release (6.9–6.10), same routine.
+
+### Phase 7: Google Play (local builds, no Expo account, ADR-047)
+- [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
+  done) and keeps it outside the repo with two backups. Gradle reads the path and passwords
+  from `~/.gradle/gradle.properties` or environment variables, never from the repo.
+- [ ] 7.2 `npm run build:aab` (Gradle `bundleRelease`) signed with the upload key; the pinned signer
+  check learns the upload key; `build:apk` keeps working for sideloading. `targetSdkVersion`
+  meets Play's current requirement (check it). Decide whether `eas.json` goes.
+- [ ] 7.3 Move existing installs: the Play build has a different signer, so an install of a GitHub
+  APK can't update to it. In-app/README guide: export backup → uninstall → install from Play →
+  import. Check that a backup from every earlier release imports.
+- [ ] 7.4 Privacy policy page on GitHub Pages (free): what the app stores (everything on the
+  device), what leaves the device (only backups/progressions the user shares), no analytics,
+  no ads, no account; contact address. Update it whenever a feature changes what is collected.
+- [ ] 7.5 Play Console (user, with the agent's help): developer account ($25 once), store listing
+  (texts, screenshots, feature graphic from the pixel assets), content rating, data safety form,
+  app access, target audience.
+- [ ] 7.6 Closed test: new personal developer accounts must run a closed test (currently 12
+  testers for 14 days) before production; collect feedback, fix, then apply for production.
+- [ ] 7.7 Production release and an update routine (versionCode +1, AAB upload, release notes).
+
 ### Later / Backlog
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
@@ -721,13 +808,11 @@ compiled into a typed module for the app; users can layer their own changes on t
 - Timer extras (after 5.8, ADR-040 / ADR-044): sound, a notification when a hold's target or the
   rest's end passes while the app is in the background, timers for rep Trials, pausing the rest
   countdown
-- Exercise demo animations: pixel-art animations per exercise, possibly generated/created with
-  different AI tools (user idea 2026-09-28, not now)
 - Train flow extras: shuffle the plan (seed); reorder in the plan preview too (`moveExercise` is
   generic over `SessionPlan`, ADR-045); edit a logged set of another exercise without selecting it
 - Weekly plans and scheduling
 - Notifications and reminders
-- More content: advanced/elite nodes, full flexibility branch
+- More content: advanced/elite nodes (flexibility, mobility and branch fill-ups are 6.3)
 - Optional cloud sync
 - Progression editor extras: undo an overlay import, edit patterns/alternatives/regressions/sources
   (4.7–4.8, ADR-036); keep a changed draft across an app kill (5.2 only asks on leaving)
