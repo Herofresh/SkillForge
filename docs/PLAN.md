@@ -209,6 +209,16 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Exercise animations, push/legs (task 6.4b-2, ADR-053):** `h_push.ts`, `v_push.ts`,
+  `planche.ts`, `handstand.ts`, `legs.ts` animate every node of those branches (iconic.ts keeps
+  push_up, squat, freestanding_handstand, full_planche); sheets `docs/screenshots/6.4b-<branch>.png`.
+  No engine change. A `wall` prop only stands on the right, so the walk-up-the-wall drills (wall
+  plank, chest-to-wall) are authored facing right with the wall on the left and flipped by a local
+  `mirror(pose)` (pointed toes only: a flexed foot would point backwards once mirrored). The
+  one-arm handstand is a front view. Weakest reads: diamond vs push-up (side view can't show the
+  hand shape; hands sit further back under the chest), straddle vs full planche/one-arm push-ups
+  (the far leg splits a little), chest-to-wall vs back-to-wall final hold (told apart by how they
+  get up).
 - **Exercise animations, part 1 (task 6.4a, ADR-053, [PR #42](https://github.com/Herofresh/SkillForge/pull/42)):**
   - Engine (pure, `src/lib/`): `figure.ts` (Pose = position + absolute angles, `jointsOf`,
     `interpolatePose`, `solveLimb` IK), `figureRaster.ts` (pose + props → 32 × 32 role rows),
@@ -887,6 +897,9 @@ upgrade check from every earlier release). Any new table or column is additive a
     (push-up, squat, handstand, front lever, planche) + display (node detail, info sheet, Style
     Guide) (ADR-053, [PR #42](https://github.com/Herofresh/SkillForge/pull/42))
   - [ ] 6.4b Per-node animations for all remaining nodes
+    - [ ] 6.4b-1 bar branches (h_pull, front_lever, back_lever, dynamic, core)
+    - [x] 6.4b-2 push/legs branches (h_push, v_push, planche, handstand, legs)
+    - [ ] 6.4b-3 flexibility/mobility/acrobatics
 - [ ] 6.5 v0.4.0 release (6.1–6.4): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and 0.3.0.
 - [ ] 6.6 Android home-screen widget (like Duolingo): shows whether you trained today, the
   streak, the hero's level and rank, a few stats; tapping it opens the Train tab
