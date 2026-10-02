@@ -557,4 +557,53 @@ describe('generateWorkout', () => {
       expect(ids(plan)).toContain('back_breakfall');
     });
   });
+
+  describe('flexibility and mobility (PLAN 6.3a, ADR-050)', () => {
+    const flexOrMobility = (nodeId: string) =>
+      ['flexibility', 'mobility'].includes(node(nodeId).branch);
+    const coolDown = (plan: WorkoutPlan) =>
+      plan.blocks
+        .filter((block) => block.kind === 'cool_down')
+        .flatMap((block) => block.exercises.map((e) => e.nodeId));
+
+    it('trains a mobility goal in the cool-down, starting at its frontier', () => {
+      const plan = generateWorkout(
+        request({ goals: ['overhead_squat'], recentSessions: INTERMEDIATE }),
+      );
+      // overhead squat <- deep squat hold <- ankle rocks, and <- wall angel <- shoulder CARs:
+      // the two available roots are its frontier, and the cool-down slot takes one of them.
+      expect(coolDown(plan)).toHaveLength(1);
+      expect(['ankle_rocks', 'shoulder_cars']).toContain(coolDown(plan)[0]);
+    });
+
+    it('trains a flexibility goal such as the king pigeon in the cool-down', () => {
+      const recentSessions = [
+        ...INTERMEDIATE,
+        testOutSession('hips', daysAgo(10), ['pigeon_pose', 'couch_stretch', 'table_bridge']),
+      ];
+      const plan = generateWorkout(request({ goals: ['king_pigeon'], recentSessions }));
+      // The last missing gate is the full bridge.
+      expect(coolDown(plan)).toContain('full_bridge');
+    });
+
+    it('never puts flexibility or mobility work into skill, strength or core slots', () => {
+      for (const goals of [[], ['middle_split'], ['overhead_squat'], ['pull_up']]) {
+        const plan = generateWorkout(request({ goals, recentSessions: INTERMEDIATE }));
+        for (const block of plan.blocks) {
+          if (block.kind === 'cool_down' || block.kind === 'warm_up') continue;
+          expect(block.exercises.filter((e) => flexOrMobility(e.nodeId))).toEqual([]);
+        }
+      }
+    });
+
+    it('is not held back by the 48 h rule and never gets straight-arm safeguards', () => {
+      const recentSessions = [
+        ...INTERMEDIATE,
+        workSession('yesterday', NOW - 20 * MS_PER_HOUR, 'ankle_rocks', 10),
+      ];
+      const plan = generateWorkout(request({ goals: ['cossack_squat'], recentSessions }));
+      expect(coolDown(plan)).toContain('ankle_rocks');
+      expect(plan.warnings.filter((w) => w.nodeId && flexOrMobility(w.nodeId))).toEqual([]);
+    });
+  });
 });

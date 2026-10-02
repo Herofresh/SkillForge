@@ -32,6 +32,8 @@ export const Palette = {
   sunfire: '#F5A524',
   /** Acrobatics lane (PLAN 5.5): a pink apart from blood, ember and amethyst. */
   orchid: '#F28FD0',
+  /** Mobility lane (PLAN 6.3a): a yellow-green apart from verdant (legs) and gold (core). */
+  lime: '#B9E769',
 } as const;
 
 export type PaletteColor = keyof typeof Palette;

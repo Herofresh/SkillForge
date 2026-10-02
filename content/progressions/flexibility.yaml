@@ -1,4 +1,14 @@
-# Flexibility and mobility (our own synthesis: no single source gives a levelled chain)
+# Flexibility: passive range (stretches and yoga poses) plus the two warm-up joint-prep staples
+# (our own synthesis: no single source gives a levelled chain; docs/research/progressions.md B12).
+#
+# Active joint mobility (CARs, ankle, thoracic, deep squat hold) lives in mobility.yaml (ADR-050).
+# Several chains interleave here (og_level must never drop as order rises):
+#   front split:   pike fold -> half split -> (+ couch stretch) -> front split
+#   middle split:  butterfly -> frog -> (+ pike fold) -> pancake -> middle split
+#   lotus:         butterfly -> half lotus -> lotus
+#   pigeon:        pigeon -> (+ couch stretch, full bridge) -> king pigeon ("the dove")
+#   bridge:        table bridge -> full bridge -> one-leg wheel
+# Stretch holds use GMB's 15-45 s range unless a source says otherwise; unilateral holds are per side.
 #
 # One block per exercise (a "node"). Field guide: content/progressions/README.md
 # After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
@@ -28,6 +38,32 @@ nodes:
     verify: >-
       No sourced rep standard; the planche gate is 4-6 weeks of wrist prep (Movement Athlete).
       The trial is a placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Hips: butterfly (yoga baddha konasana), the start of the middle split and lotus paths ---
+  - id: butterfly_stretch
+    name: Butterfly stretch
+    description: Sitting upright with the soles of the feet together and the knees falling out to the sides, you let the inner thighs open. Called bound angle pose (baddha konasana) in yoga; it opens the groin and hips.
+    order: 15
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 15, max: 45 }
+    trial: { sets: 3, target: 45 }
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Sit tall on the sitting bones; put a cushion under the hips if the back rounds.
+      - Hold the ankles, not the toes, and draw the heels in as far as is comfortable.
+      - Let the knees sink by relaxing; press them down gently with the elbows, never bounce.
+    sources:
+      - https://en.wikipedia.org/wiki/Baddha_Konasana
+      - https://gmb.io/hip-mobility/
+    verify: >-
+      OG level 0 is assumed. The trial uses the top of GMB's 15-45 s stretch hold; no source sets a
+      pass standard, and a range goal (knees near the floor) may suit better than a time.
     review:
       status: draft
       notes: ""
@@ -82,6 +118,62 @@ nodes:
       status: draft
       notes: ""
 
+  # --- Front split path ---
+  - id: half_split
+    name: Half split
+    description: Kneeling on one knee with the front leg straight out in front and the heel on the floor, you hinge forward from the hips over the front leg. Called ardha hanumanasana in yoga; it stretches the hamstrings on the way to the front split.
+    order: 32
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 15, max: 45 }
+    trial: { sets: 3, target: 45 } # per side
+    prerequisites:
+      - node: pike_fold
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - floor
+    regression: pike_fold
+    cues:
+      - Back knee under the hip, front heel on the floor, front toes pointing up.
+      - Hinge from the hips with a long, flat back; reach the chest towards the toes.
+      - Hold each side; use blocks or books under the hands if the floor is too far.
+    sources:
+      - https://gmb.io/splits/
+      - https://en.wikipedia.org/wiki/Hanumanasana
+    verify: >-
+      GMB's front split routine uses hamstring hinges like this one but does not name the pose. OG
+      level 0 is assumed; the trial uses the top of GMB's 15-45 s hold.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Hips: pigeon (kapotasana, "the dove") towards the king pigeon ---
+  - id: pigeon_pose
+    name: Pigeon pose
+    description: The front leg is folded across in front of you with the shin on the floor, the back leg stretched long behind, and the hips sink towards the floor. A deep hip opener from yoga (kapota means dove or pigeon) and the first step towards the king pigeon.
+    order: 35
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 15, max: 45 }
+    trial: { sets: 3, target: 45 } # per side
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Keep the hips square to the front; pad under the front hip if it floats high.
+      - Front foot flexed to protect the knee; ease off at any pain in the knee.
+      - Stay upright on the hands, or walk them forward to fold over the front leg.
+    sources:
+      - https://en.wikipedia.org/wiki/Eka_Pada_Rajakapotasana
+      - https://gmb.io/hip-mobility/
+    verify: >-
+      OG level 0 is assumed. The trial uses the top of GMB's 15-45 s stretch hold; no source sets a
+      pass standard.
+    review:
+      status: draft
+      notes: ""
+
   # --- Bridge (BWF chart chain) ---
   - id: table_bridge
     name: Table bridge
@@ -101,6 +193,99 @@ nodes:
     sources:
       - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
     verify: Our synthesis; 0 is assumed and the 3 x 30 s trial follows the general RR hold rule.
+    review:
+      status: draft
+      notes: ""
+
+  - id: frog_stretch
+    name: Frog stretch
+    description: On hands or forearms and knees, the knees slide wide apart with the shins parallel and the feet turned out, and the hips sink back between them. A weight-bearing stretch for the inner thighs and the middle split.
+    order: 42
+    og_level: 1
+    metric: hold_s
+    working_range: { min: 15, max: 45 }
+    trial: { sets: 3, target: 45 }
+    prerequisites:
+      - node: butterfly_stretch
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - floor
+    regression: butterfly_stretch
+    cues:
+      - Knees in line with the hips, ankles in line with the knees; pad under the knees.
+      - Rock the hips slowly back and forward, then hold where the stretch builds.
+      - Keep the back flat; widen the knees only a little at a time.
+    sources:
+      - https://gmb.io/hip-mobility/
+      - https://gmb.io/splits/
+    verify: >-
+      Part of GMB's hip routine and middle split routine. OG level 1 is inferred (a deeper stretch
+      than the butterfly); the trial uses the top of GMB's 15-45 s hold.
+    review:
+      status: draft
+      notes: ""
+
+  - id: couch_stretch
+    name: Couch stretch
+    description: Kneeling in a lunge with the back knee close to a wall or couch and the back shin running up it, you lift the chest until the front of the hip and thigh are stretched. A strong hip flexor and quad stretch, used before the front split and the king pigeon.
+    order: 44
+    og_level: 1
+    metric: hold_s
+    working_range: { min: 30, max: 60 }
+    trial: { sets: 3, target: 60 } # per side
+    prerequisites:
+      - node: pigeon_pose
+        level: 5
+        kind: recommended
+        note: Open hips make the upright position easier to reach.
+    patterns: [mobility]
+    equipment:
+      - wall
+    cues:
+      - Start in a low lunge with the hands on the floor and the back knee a little away from the wall.
+      - Squeeze the glutes and tuck the pelvis under before lifting the chest.
+      - Move the knee closer to the wall only when upright feels easy; it should not hurt.
+    sources:
+      - https://www.garagegymreviews.com/couch-stretch
+      - https://www.active.com/triathlon/articles/the-stretch-that-could-be-the-key-to-saving-your-knees
+    verify: >-
+      Popularised by Kelly Starrett; the guides give 30-60 s or 1-2 min holds, so the 3 x 60 s trial
+      is a placeholder. OG level 1 is inferred.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Lotus prep ---
+  - id: half_lotus
+    name: Half lotus
+    description: Sitting cross-legged, one foot rests high on the opposite thigh with its sole turned up while the other leg stays folded under. Called ardha padmasana in yoga; the step before the full lotus.
+    order: 46
+    og_level: 1
+    metric: hold_s
+    working_range: { min: 30, max: 60 }
+    trial: { sets: 3, target: 60 } # per side
+    prerequisites:
+      - node: butterfly_stretch
+        level: 5
+      - node: pigeon_pose
+        level: 5
+        kind: recommended
+        note: The lotus needs a lot of outward hip rotation; the pigeon trains it.
+    patterns: [mobility]
+    equipment:
+      - floor
+    regression: butterfly_stretch
+    cues:
+      - Turn the whole thigh out from the hip first, then lift the foot with the hands.
+      - Never force it from the knee; stop at any pinch inside the knee.
+      - Sit on a cushion so the knees can drop below the hips.
+    sources:
+      - https://en.wikipedia.org/wiki/Lotus_position
+      - https://en.wikipedia.org/wiki/Baddha_Konasana
+    verify: >-
+      The lotus is one of the yoga poses that most often injures the knee (Wikipedia: the medial
+      meniscus); OG level 1 and the 3 x 60 s trial are inferred placeholders.
     review:
       status: draft
       notes: ""
@@ -133,6 +318,193 @@ nodes:
     verify: >-
       Our synthesis; the OG2 level 2 is inferred and the 3 x 30 s trial follows the general RR hold rule.
       The BWF chart has angled and head bridge steps in between that are not modelled.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Middle split path ---
+  - id: pancake
+    name: Pancake
+    description: Sitting with the legs straight and spread wide, you fold the upper body forward from the hips towards the floor between the legs. Called upavistha konasana in yoga; it stretches the inner thighs and hamstrings together.
+    order: 60
+    og_level: 2
+    metric: hold_s
+    working_range: { min: 15, max: 45 }
+    trial: { sets: 3, target: 45 }
+    prerequisites:
+      - node: pike_fold
+        level: 5
+      - node: frog_stretch
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - floor
+    regression: pike_fold
+    cues:
+      - Sit on a cushion if the pelvis tips back; knees and toes point up.
+      - Tilt the pelvis forward and lead with the chest, not the head.
+      - Press the heels into the floor while folding, then relax deeper.
+    sources:
+      - https://gmb.io/splits/
+      - https://en.wikipedia.org/wiki/Paschimottanasana
+    verify: >-
+      Part of GMB's side split routine. OG level 2 is inferred; the trial uses the top of GMB's
+      15-45 s hold, and a range goal (chest towards the floor) may suit better than a time.
+    review:
+      status: draft
+      notes: ""
+
+  - id: front_split
+    name: Front split
+    description: One leg stretched straight forward and the other straight back, with the hips square and sinking to the floor. Called hanumanasana in yoga; blocks under the hands or hips support the way down.
+    order: 70
+    og_level: 3
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 } # per side
+    prerequisites:
+      - node: half_split
+        level: 5
+      - node: couch_stretch
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - floor
+    regression: half_split
+    cues:
+      - Square the hips to the front; the back knee points down, not out.
+      - Slide down slowly with hands or blocks beside the hips to take weight.
+      - Hold at a strong but calm stretch; flat on the floor comes over months.
+    sources:
+      - https://gmb.io/splits/
+      - https://en.wikipedia.org/wiki/Hanumanasana
+      - https://en.wikipedia.org/wiki/Splits_(gymnastics)
+    verify: >-
+      No source gives a pass time; the trial follows the general RR 3 x 30 s hold rule (with or
+      without blocks is the user's call). OG level 3 is inferred, kept modest because flexibility
+      counts towards the rank median.
+    review:
+      status: draft
+      notes: ""
+
+  - id: lotus
+    name: Lotus
+    description: Sitting cross-legged with each foot resting high on the opposite thigh, soles turned up. The classic yoga meditation seat (padmasana); it needs very open hips.
+    order: 80
+    og_level: 3
+    metric: hold_s
+    working_range: { min: 30, max: 60 }
+    trial: { sets: 3, target: 60 }
+    prerequisites:
+      - node: half_lotus
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - floor
+    regression: half_lotus
+    cues:
+      - Set the first foot in half lotus, then rotate the second thigh out from the hip.
+      - Lift the second foot over with the hands; never lever it in with the knee.
+      - Switch which leg goes on top between sets.
+    sources:
+      - https://en.wikipedia.org/wiki/Lotus_position
+    verify: >-
+      Wikipedia notes about 115 degrees of outward hip rotation is needed and warns of meniscus
+      injury from forcing it. OG level 3 and the 3 x 60 s trial are inferred placeholders.
+    review:
+      status: draft
+      notes: ""
+
+  - id: one_leg_wheel
+    name: One-leg wheel
+    description: From a full bridge, one leg lifts and points straight up while the arms and the other leg hold the arch. Called eka pada urdhva dhanurasana in yoga; the next bridge step on the BWF chart.
+    order: 90
+    og_level: 3
+    metric: hold_s
+    working_range: { min: 5, max: 15 }
+    trial: { sets: 3, target: 15 } # per leg
+    prerequisites:
+      - node: full_bridge
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - floor
+    regression: full_bridge
+    cues:
+      - Shift the weight over the standing foot and the hands before lifting the leg.
+      - Keep the shoulders pushed over the hands while the leg rises.
+      - Lower the leg slowly; switch legs between sets.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://en.wikipedia.org/wiki/Chakrasana
+    verify: >-
+      The BWF chart lists the one-leg bridge after the full and decline bridge without a standard;
+      OG level 3 and the 3 x 15 s trial are inferred.
+    review:
+      status: draft
+      notes: ""
+
+  - id: middle_split
+    name: Middle split
+    description: Both legs stretched straight out to the sides, with the hips sinking to the floor between them. Also called a side or straddle split (samakonasana in yoga).
+    order: 100
+    og_level: 4
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: pancake
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - floor
+    regression: pancake
+    cues:
+      - Tilt the pelvis forward and keep the knees and toes pointing up or forward.
+      - Take weight on the hands or forearms and slide the feet apart a little at a time.
+      - Stop at any pain in the hip joint or the inside of the knee.
+    sources:
+      - https://gmb.io/splits/
+      - https://en.wikipedia.org/wiki/Splits_(gymnastics)
+    verify: >-
+      No source gives a pass time; the trial follows the general RR 3 x 30 s hold rule. OG level 4 is
+      inferred (harder for most adults than the front split), kept modest because flexibility counts
+      towards the rank median.
+    review:
+      status: draft
+      notes: ""
+
+  - id: king_pigeon
+    name: King pigeon
+    description: From pigeon pose, the back knee bends and both hands reach back over the head to hold the back foot, with the chest lifted in a deep backbend. Called eka pada rajakapotasana in yoga, the king of the pigeon poses.
+    order: 110
+    og_level: 4
+    metric: hold_s
+    working_range: { min: 5, max: 20 }
+    trial: { sets: 3, target: 20 } # per side
+    prerequisites:
+      - node: pigeon_pose
+        level: 5
+      - node: couch_stretch
+        level: 5
+      - node: full_bridge
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - floor
+      - bands
+    regression: pigeon_pose
+    cues:
+      - Start with a strap or band around the back foot and walk the hands down it.
+      - Lift the chest and lengthen the spine before bending back.
+      - Elbows point up; come out slowly the way you went in.
+    sources:
+      - https://en.wikipedia.org/wiki/Eka_Pada_Rajakapotasana
+      - https://www.garagegymreviews.com/couch-stretch
+    verify: >-
+      No source gives a pass time; the 3 x 20 s trial is a placeholder (yoga holds poses for a few
+      breaths). OG level 4 is inferred. The prerequisites (pigeon for the hips, couch stretch for the
+      quad, full bridge for the backbend) are our synthesis.
     review:
       status: draft
       notes: ""

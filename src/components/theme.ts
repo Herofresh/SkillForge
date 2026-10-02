@@ -192,6 +192,7 @@ export const BranchColors: Readonly<Record<Branch, string>> = {
   dynamic: Palette.bone,
   flexibility: Palette.arcane,
   acrobatics: Palette.orchid,
+  mobility: Palette.lime,
 };
 
 /**

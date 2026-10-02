@@ -1,0 +1,333 @@
+# Mobility: active joint range and control (PLAN 6.3a, ADR-050)
+#
+# Our own synthesis from physiotherapy and coaching sources (FRC CARs via The Prehab Guys, the
+# weight-bearing lunge test, GMB, Squat University, World Rugby's overhead squat screen, Ido Portal's
+# squat challenge via Antranik). Mobility is moving a joint through its range under your own control;
+# passive stretches and yoga poses live in flexibility.yaml. OG2 has no mobility chart, so every
+# og_level is inferred, and no source gives rep standards for these drills: the trials are
+# placeholders with a verify note.
+#
+# Not here on purpose (they already exist, ids are stable):
+#   deep_squat (legs, the loaded squat to full depth), german_hang (back_lever, straight-arm and
+#   tendon-safeguarded), wrist_prep and shoulder_dislocate (flexibility, the generator's warm-up).
+#
+# Chains (og_level must never drop as order rises, so they interleave):
+#   spine:     cat-cow -> open book -> three-point bridge
+#   ankle/hip: ankle rocks -> deep squat hold -> cossack squat; hip CARs -> 90/90 switches
+#   shoulder:  shoulder CARs -> wall angel
+#   capstone:  deep squat hold + wall angel -> overhead squat
+#
+# One block per exercise (a "node"). Field guide: content/progressions/README.md
+# After editing, run:  npm run progressions:build   (checks the file and regenerates the app data)
+#
+# Keep nodes in order (easiest first). Use gaps of 10 so new nodes can go in between.
+branch: mobility
+nodes:
+  # --- Spine ---
+  - id: cat_cow
+    name: Cat-cow
+    description: On hands and knees, you slowly round the whole back up towards the ceiling (cat) and then let it sink into an arch with the chest forward (cow). A gentle warm-up that moves the spine through flexion and extension.
+    order: 10
+    og_level: 0
+    metric: reps
+    working_range: { min: 8, max: 12 }
+    trial: { sets: 3, target: 12 }
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Hands under the shoulders, knees under the hips.
+      - Move one segment at a time, from the tailbone up to the head and back.
+      - Breathe out as you round, in as you arch; slow and smooth.
+    sources:
+      - https://en.wikipedia.org/wiki/Bitilasana
+    verify: >-
+      A yoga warm-up with no rep standard; OG level 0 and the 3 x 12 trial (like wrist prep) are
+      placeholders.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Ankle ---
+  - id: ankle_rocks
+    name: Knee-to-wall ankle rocks
+    description: Standing in a short lunge facing a wall, you rock the front knee forward over the toes to touch the wall while the heel stays down. It trains ankle dorsiflexion for deep squats and pistols.
+    order: 20
+    og_level: 0
+    metric: reps
+    working_range: { min: 8, max: 12 }
+    trial: { sets: 3, target: 12 } # per side
+    patterns: [mobility]
+    equipment:
+      - wall
+    cues:
+      - Front heel stays flat; the knee travels over the middle toes, not inwards.
+      - Move the foot back a little once the knee touches the wall easily.
+      - "Test: toe to wall at 12.5 cm or more with the knee touching counts as normal range."
+    sources:
+      - https://www.physiotutors.com/wiki/weight-bearing-lunge-test
+      - https://library.theprehabguys.com/vimeo-video/knee-to-wall-ankle-dorsiflexion-assessment
+    verify: >-
+      The weight-bearing lunge test calls 12.5 cm toe-to-wall normal (Physiotutors), but the app has
+      no distance metric, so the trial counts controlled reps; 3 x 12 is a placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Hip and shoulder CARs (controlled articular rotations) ---
+  - id: hip_cars
+    name: Hip CARs
+    description: Standing on one leg (or on hands and knees), you draw the biggest slow circle you can with the other knee, keeping the rest of the body still. Controlled articular rotations from Functional Range Conditioning; they keep the hip's full range under your control.
+    order: 30
+    og_level: 0
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 } # per direction and side
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Brace the whole body so only the hip moves; hold a wall if balance is the limit.
+      - Go slowly and make the circle as large as you can control.
+      - Circle forward, then backward, on each side.
+    sources:
+      - https://library.theprehabguys.com/intro-to-frc/
+    verify: >-
+      FRC describes how to do CARs but gives no rep standard; OG level 0 and the 3 x 5 trial are
+      placeholders.
+    review:
+      status: draft
+      notes: ""
+
+  - id: shoulder_cars
+    name: Shoulder CARs
+    description: Standing tall with one arm straight, you move it in the biggest slow circle you can, forward, up past the ear, behind and back down, without twisting the body. Controlled articular rotations for the shoulder.
+    order: 40
+    og_level: 0
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 } # per direction and side
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Make a fist and tense the whole body so the ribs and hips stay still.
+      - Turn the palm as the arm passes overhead so the circle stays smooth.
+      - Slow is the point; circle both ways on each side.
+    sources:
+      - https://library.theprehabguys.com/intro-to-frc/
+    verify: >-
+      FRC describes how to do CARs but gives no rep standard; OG level 0 and the 3 x 5 trial are
+      placeholders.
+    review:
+      status: draft
+      notes: ""
+
+  - id: open_book
+    name: Open book
+    description: Lying on your side with the knees bent and both arms straight in front, you lift the top arm up and over to the other side, letting the chest turn while the knees stay together. It mobilises the upper back in rotation.
+    order: 50
+    og_level: 0
+    metric: reps
+    working_range: { min: 8, max: 12 }
+    trial: { sets: 3, target: 12 } # per side
+    prerequisites:
+      - node: cat_cow
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Keep the knees stacked and on the floor so the turn comes from the upper back.
+      - Follow the hand with your eyes; breathe out as you open.
+      - Pause where it stretches, then close the book slowly.
+    sources:
+      - https://us.physitrack.com/home-exercise-video/thoracic-rotation-in-side-lying
+    verify: >-
+      A physiotherapy exercise with no rep standard; OG level 0 and the 3 x 12 trial are placeholders.
+    review:
+      status: draft
+      notes: ""
+
+  - id: wall_angel
+    name: Wall angel
+    description: Standing with the head, back and arms against a wall, arms bent like a goal post, you slide the arms up overhead and back down without anything leaving the wall. It trains overhead shoulder and upper back mobility.
+    order: 60
+    og_level: 0
+    metric: reps
+    working_range: { min: 8, max: 12 }
+    trial: { sets: 3, target: 12 }
+    prerequisites:
+      - node: shoulder_cars
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - wall
+    cues:
+      - Feet a hand's width from the wall; keep the lower back from arching off it.
+      - Elbows, wrists and the backs of the hands stay touching the wall.
+      - Slide only as high as you can without losing contact.
+    sources:
+      - https://squatuniversity.com/2016/07/29/the-squat-fix-screening-overhead-mobility/
+    verify: >-
+      Squat University uses the start position as a pass/fail screen (everything flat on the wall);
+      the 3 x 12 trial is a placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  - id: hip_90_90_switch
+    name: 90/90 hip switch
+    description: Sitting with both knees bent to 90 degrees, one leg in front and one to the side, you swing both knees over to the other side without using the hands. It trains inward and outward hip rotation.
+    order: 70
+    og_level: 0
+    metric: reps
+    working_range: { min: 6, max: 10 }
+    trial: { sets: 3, target: 10 } # switches
+    prerequisites:
+      - node: hip_cars
+        level: 5
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Sit tall; lean back on the hands at first, then take them away.
+      - Lift the knees and rotate from the hips, keeping the feet roughly in place.
+      - Pause in each 90/90 position with the chest over the front shin.
+    sources:
+      - https://health.clevelandclinic.org/90-90-stretch/
+      - https://library.theprehabguys.com/vimeo-video/90-90-hip-lift-off/
+    verify: >-
+      Cleveland Clinic gives 20-60 s holds for the static 90/90 and warns against it with hip
+      impingement or knee problems; the 3 x 10 switches trial is a placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  - id: deep_squat_hold
+    name: Deep squat hold
+    description: Resting at the bottom of a squat, hips low between the heels and the feet flat, the arms relaxed in front. A resting position rather than a lift; it opens the ankles, hips and lower back.
+    order: 80
+    og_level: 0
+    metric: hold_s
+    working_range: { min: 30, max: 60 }
+    trial: { sets: 3, target: 60 }
+    prerequisites:
+      - node: ankle_rocks
+        level: 5
+      - node: squat
+        level: 5
+        kind: recommended
+        note: The bodyweight squat teaches the way down and back up.
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Feet a little wider than the hips and turned out; heels stay down.
+      - Press the knees out with the elbows and let the back relax.
+      - Hold a door frame or a post at first if you tip backwards.
+    sources:
+      - https://antranik.org/the-30-minutes-a-day-squat-challenge/
+    verify: >-
+      Ido Portal's squat challenge accumulates 30 minutes a day in this position (via Antranik), not a
+      set standard; the 3 x 60 s trial and OG level 0 are placeholders.
+    review:
+      status: draft
+      notes: ""
+
+  - id: cossack_squat
+    name: Cossack squat
+    description: From a wide stance, you sink sideways into a deep squat over one leg while the other stays straight with the toes pointing up, then shift across to the other side. Strength and mobility for the hips, inner thighs and ankles.
+    order: 90
+    og_level: 1
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # per side
+    prerequisites:
+      - node: deep_squat_hold
+        level: 5
+      - node: hip_90_90_switch
+        level: 5
+        kind: recommended
+        note: Hip rotation helps the bent leg stay in line.
+    patterns: [mobility]
+    trains: [mobility, legs]
+    equipment:
+      - floor
+    cues:
+      - Bent-leg heel stays flat and the knee follows the toes.
+      - Chest up; hold the hands in front as a counterweight.
+      - Go only as deep as you can control, and shift across slowly.
+    sources:
+      - https://gmb.io/splits/
+    verify: >-
+      Part of GMB's side split routine; OG level 1 and the 3 x 8 trial are inferred (rep range from
+      the RR strength rule).
+    review:
+      status: draft
+      notes: ""
+
+  - id: three_point_bridge
+    name: Three-point bridge
+    description: From sitting with the hands behind you, you lift the hips and turn onto one hand and both feet, reaching the other arm over the head so the chest opens to the ceiling. A rotating bridge that mobilises the upper back and shoulders.
+    order: 100
+    og_level: 1
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # per side
+    prerequisites:
+      - node: open_book
+        level: 5
+      - node: table_bridge
+        level: 5
+        kind: recommended
+        note: The table bridge teaches the hip lift.
+    patterns: [mobility]
+    equipment:
+      - floor
+    cues:
+      - Push the hips high and squeeze the glutes as you turn.
+      - Reach the free arm long over the head and look under it.
+      - Hold 5-10 s at the top, then sit back down and switch sides.
+    sources:
+      - https://gmb.io/shoulder-mobility/
+    verify: >-
+      GMB's shoulder routine holds it 5-10 s each side, alternating; OG level 1 and the 3 x 8 trial are
+      inferred placeholders.
+    review:
+      status: draft
+      notes: ""
+
+  - id: overhead_squat
+    name: Overhead squat
+    description: A bodyweight squat to full depth with the arms held straight overhead, often holding a broomstick or a band wide. It checks ankles, hips, upper back and shoulders together, a common movement screen.
+    order: 110
+    og_level: 1
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: deep_squat_hold
+        level: 5
+      - node: wall_angel
+        level: 5
+      - node: shoulder_dislocate
+        level: 5
+        kind: recommended
+        note: Open shoulders keep the arms from drifting forward.
+    patterns: [mobility]
+    equipment:
+      - floor
+      - bands
+    cues:
+      - Arms stay in line with the ears all the way down; don't let them drift forward.
+      - Heels down, knees out over the toes, chest up.
+      - Clasp the hands behind the head instead if the arms are the limit.
+    sources:
+      - https://passport.world.rugby/conditioning-for-rugby/introduction-to-conditioning-youth/functional-screening/progressing-the-overhead-squat/
+    verify: >-
+      World Rugby screens the shape (upright torso, arms overhead, depth, no compensations) without a
+      rep standard; OG level 1 and the 3 x 8 trial are placeholders.
+    review:
+      status: draft
+      notes: ""

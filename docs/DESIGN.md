@@ -237,7 +237,7 @@ Screenshots: `docs/screenshots/4.7-*.png`, `4.8-*.png`.
 **Tree map (PLAN 5.1, ADR-037)** in `src/components/tree/map/`: the Tree tab's Columns | Map tabs
 (`TreeModeTabs`, two `PixelChip` tabs). The map is the night sky with a stone lane per branch, a
 2 dp rule and caps title in the branch's color (`BranchColors`: push warm, pull cool, levers rune /
-amethyst, planche gold light, then parchment, gold, green, bone, arcane, and orchid `#F28FD0` for acrobatics). `MapNode` is a fixed
+amethyst, planche gold light, then parchment, gold, green, bone, arcane, orchid `#F28FD0` for acrobatics and lime `#B9E769` for mobility). `MapNode` is a fixed
 136 × 84 dp card in the tile's `TileFrames` frame with the state icon (a gold star below it for a
 goal, else the quill for a custom node), the name (2 lines), a 8 dp tier pip and the caps state or
 "LV n". Edges (`MapCanvas`) are square pixel lines, `MapStyle`: steel-dark 2 dp unmet; gold 4 dp on
