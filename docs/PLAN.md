@@ -199,7 +199,7 @@
 - Rank ladder (6.7, ADR-054, [PR #47](https://github.com/Herofresh/SkillForge/pull/47)): tapping the rank crest opens a sheet with every rank
   (reached, yours, next, locked) and, per rank, how many branches are at its level; the next rank
   lists the branches still below. Screenshots `docs/screenshots/6.7-*.png`.
-- Release v0.4.0 (6.5, PR_LINK): version 0.4.0 / versionCode 4 with 6.1–6.4 and 6.7 (Jersey 15,
+- Release v0.4.0 (6.5, [PR #48](https://github.com/Herofresh/SkillForge/pull/48)): version 0.4.0 / versionCode 4 with 6.1–6.4 and 6.7 (Jersey 15,
   descriptions, 155 nodes in 14 branches with mobility, upgrade-safe overlays, pixel animations,
   rank ladder). Upgrade check passed on the emulator from **v0.1.0-preview1, v0.2.0 and v0.3.0**:
   hero, goal, session, the 40 XP and a custom exercise placed after Tuck front lever (order 15, now
@@ -960,7 +960,7 @@ upgrade check from every earlier release). Any new table or column is additive a
       lunge reach; contact sheets `docs/screenshots/6.4b-{flexibility,mobility,acrobatics}.png`)
       ([PR #44](https://github.com/Herofresh/SkillForge/pull/44))
 - [x] 6.5 v0.4.0 release (6.1–6.4 and 6.7): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and
-  0.3.0, including a custom exercise in the overlay (PR_LINK)
+  0.3.0, including a custom exercise in the overlay ([PR #48](https://github.com/Herofresh/SkillForge/pull/48))
   - [x] Release prep, 6.3c review fixes: id tie-breaks compare code units (`compareCodeUnits`),
     not `localeCompare`, so order is the same on Hermes as in Node; the node editor shows only the
     advice about the node being edited (`warningsForNode`)
