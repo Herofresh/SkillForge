@@ -2,8 +2,10 @@
  * User-defined progressions on top of the built-in matrix (ADR-016).
  *
  * The overlay adds, edits and hides nodes without touching the built-in data. `applyOverlay` runs
- * the same validator as the build (`validateNodes`), so a user change can never produce a broken tree
- * (cycles, dangling prerequisites, bad trials). Export/import use the same YAML node format as the
+ * the same validator as the build (`validateTree`), so a user change can never produce a broken tree
+ * (cycles, dangling prerequisites, bad trials). Where the user placed a node in a chain is theirs
+ * (ADR-052): a content update can't invalidate it (order clashes are resolved, an og_level that
+ * drops next to it is a warning). Export/import use the same YAML node format as the
  * content files, so a user's custom progression can be sent back to the project as a suggestion.
  *
  * Persistence (Phase 3) and the editor UI (Phase 4) build on these functions.
@@ -17,7 +19,7 @@ import {
   nodeToRaw,
   parseYamlText,
 } from '@/data/progressionFormat';
-import { USER_ID_PREFIX, validateNodes } from '@/data/validate';
+import { USER_ID_PREFIX, validateTree } from '@/data/validate';
 
 import type {
   ExerciseNode,
@@ -60,11 +62,23 @@ export interface OverlayResult {
   /** The merged tree, or the unchanged `base` when there are issues. */
   nodes: ExerciseNode[];
   issues: ValidationIssue[];
+  /** Advice that doesn't stop the tree (ADR-052), e.g. a user node easier than the one above it. */
+  warnings: ValidationIssue[];
 }
+
+/**
+ * The step after the previous node when a user-placed node shares its order with the last node of
+ * its branch (else it goes halfway to the next node).
+ */
+const RESOLVED_ORDER_STEP = 1;
 
 /**
  * Merges `overlay` into `base`. All or nothing: if the merged tree has any issue, `base` is returned
  * unchanged together with the issues, so the caller can show them and keep the old tree.
+ *
+ * Upgrade-safe (ADR-052, ADR-043): a user-placed node (`userPlacedIds`) that shares its `order`
+ * with another node of its branch goes right after it (`resolveOrderClashes`, in the merged tree
+ * only; the stored overlay is unchanged), and an og_level that drops next to it is a warning.
  */
 export function applyOverlay(
   base: readonly ExerciseNode[],
@@ -100,10 +114,67 @@ export function applyOverlay(
     })),
     ...overlay.added,
   ];
-  const nodes = hideNodes(merged, new Set(overlay.hidden));
-  issues.push(...validateNodes(nodes).map((issue) => ({ ...issue, file: OVERLAY_FILE })));
+  const userPlaced = userPlacedIds(overlay);
+  const nodes = resolveOrderClashes(hideNodes(merged, new Set(overlay.hidden)), userPlaced);
+  const tree = validateTree(nodes, userPlaced);
+  const inOverlay = (issue: ValidationIssue) => ({ ...issue, file: OVERLAY_FILE });
+  issues.push(...tree.issues.map(inOverlay));
+  const warnings = tree.warnings.map(inOverlay);
 
-  return issues.length > 0 ? { nodes: [...base], issues } : { nodes, issues };
+  return issues.length > 0 ? { nodes: [...base], issues, warnings } : { nodes, issues, warnings };
+}
+
+/**
+ * The nodes whose place in a chain the user chose: every user node, and the built-in nodes whose
+ * edit sets their branch, order or og_level.
+ */
+export function userPlacedIds(overlay: ProgressionOverlay): ReadonlySet<string> {
+  const editedPlaces = Object.entries(overlay.edited)
+    .filter(
+      ([, edit]) =>
+        edit.branch !== undefined || edit.chainOrder !== undefined || edit.ogLevel !== undefined,
+    )
+    .map(([id]) => id);
+  return new Set([...overlay.added.map((node) => node.id), ...editedPlaces]);
+}
+
+/**
+ * Gives every user-placed node an order of its own in its branch. A node that shares its order
+ * with others comes after them (built-in nodes first, then by id) and gets the order halfway to
+ * the next one, so built-in nodes keep their order and a content update that uses the same order
+ * (e.g. a new built-in node at the midpoint the editor gave a user node) can't make the tree
+ * invalid. Order clashes between built-in nodes are left for the validator.
+ */
+export function resolveOrderClashes(
+  nodes: readonly ExerciseNode[],
+  userPlaced: ReadonlySet<string>,
+): ExerciseNode[] {
+  const resolved = new Map<string, number>();
+  const byBranch = new Map<string, ExerciseNode[]>();
+  for (const node of nodes) byBranch.set(node.branch, [...(byBranch.get(node.branch) ?? []), node]);
+  const placedLast = (node: ExerciseNode) => (userPlaced.has(node.id) ? 1 : 0);
+  for (const chain of byBranch.values()) {
+    const sorted = [...chain].sort(
+      (a, b) =>
+        a.chainOrder - b.chainOrder || placedLast(a) - placedLast(b) || a.id.localeCompare(b.id),
+    );
+    let previous: number | undefined;
+    sorted.forEach((node, index) => {
+      let order = node.chainOrder;
+      if (previous !== undefined && order <= previous && userPlaced.has(node.id)) {
+        const before = previous;
+        const next = sorted.slice(index + 1).find((later) => later.chainOrder > before);
+        order = next ? (before + next.chainOrder) / 2 : before + RESOLVED_ORDER_STEP;
+        resolved.set(node.id, order);
+      }
+      previous = order;
+    });
+  }
+  if (resolved.size === 0) return [...nodes];
+  return nodes.map((node) => {
+    const order = resolved.get(node.id);
+    return order === undefined ? node : { ...node, chainOrder: order };
+  });
 }
 
 /**

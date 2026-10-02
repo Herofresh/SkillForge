@@ -6,10 +6,11 @@ import {
   DESCRIPTION_MISSING_MESSAGE,
   setDescription,
   setName,
+  stepOgLevel,
   stepTrial,
 } from '@/domain/nodeEditor';
 import { EMPTY_OVERLAY, exportOverlay } from '@/domain/overlay';
-import type { ProgressionOverlay } from '@/domain/types';
+import type { ExerciseNode, ProgressionOverlay } from '@/domain/types';
 
 import { createAppStore, type AppStore, type BackupFiles } from './appStore';
 
@@ -170,6 +171,54 @@ describe('node editor (PLAN 4.7)', () => {
     const jump = store.getState().nodeDraft('jump_pull_up');
     expect(jump?.prerequisites.map((prereq) => prereq.nodeId)).toContain('scapular_pull');
     expect(store.getState().nodeDraft('ghost')).toBeUndefined();
+  });
+});
+
+describe('a custom node saved before a content update (PLAN 6.3c, ADR-052)', () => {
+  /** As v0.3.0 saved it: after tuck_front_lever (10), before advanced_tuck_front_lever (20). */
+  const savedOnV030: ExerciseNode = {
+    ...ALL_NODES.find((node) => node.id === 'tuck_front_lever')!,
+    id: 'user_tuck_lever_pulses',
+    name: 'Tuck lever pulses',
+    description: 'Small pulses in a tuck front lever.',
+    chainOrder: 15, // tuck_front_lever_raise took this order in 6.3b
+    prerequisites: [{ nodeId: 'tuck_front_lever', minLevel: 5, kind: 'hard' }],
+    alternatives: [],
+    sourceUrls: [],
+    source: 'user',
+  };
+
+  it('stays in the tree after the update, and the editor saves its resolved place', () => {
+    saveOverlay(test.db, { ...EMPTY_OVERLAY, added: [savedOnV030] }, NOW);
+    const store = storeFor(test);
+    const state = store.getState();
+    expect(state.overlayIssues).toEqual([]);
+    expect(state.nodes.find((node) => node.id === savedOnV030.id)?.chainOrder).toBe(17.5);
+    expect(getOverlay(test.db)?.overlay.added[0].chainOrder).toBe(15); // not rewritten on load
+
+    const draft = state.nodeDraft(savedOnV030.id);
+    expect(draft?.chainOrder).toBe(17.5); // the place the tree shows
+    if (!draft) throw new Error('custom node lost');
+    expect(state.nodeDraftIssues(draft)).toEqual([]);
+    expect(state.saveNodeDraft(draft).issues).toEqual([]);
+    expect(store.getState().overlay.added[0].chainOrder).toBe(17.5);
+  });
+
+  it('warns about a lower og_level than the node above it but still saves it', () => {
+    saveOverlay(test.db, { ...EMPTY_OVERLAY, added: [savedOnV030] }, NOW);
+    const store = storeFor(test);
+    const draft = store.getState().nodeDraft(savedOnV030.id);
+    if (!draft) throw new Error('custom node lost');
+    const easier = stepOgLevel(draft, -1);
+    expect(store.getState().nodeDraftIssues(easier)).toEqual([]);
+    expect(
+      store
+        .getState()
+        .nodeDraftWarnings(easier)
+        .map((warning) => warning.message),
+    ).toEqual([expect.stringMatching(/^og_level 3 is lower than 'tuck_front_lever_raise'/)]);
+    expect(store.getState().saveNodeDraft(easier).issues).toEqual([]);
+    expect(store.getState().overlay.added[0].ogLevel).toBe(3);
   });
 });
 

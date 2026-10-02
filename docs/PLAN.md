@@ -185,6 +185,12 @@
   taps). No existing id, level or hard gate changed, so saved progress, unlocks and ranks carry
   over. `king_pigeon` repeats the pigeon pose's front-knee cue (6.3a review nit).
 
+- Upgrade-safe overlays (6.3c, ADR-052): a content update can no longer invalidate a saved
+  overlay. A user-placed node that shares its `order` with a (new) built-in node goes right after
+  it in the merged tree; an og_level that drops next to a user-placed node is a warning (gold
+  "Worth a look" note in the editor), not an error. Tested against every position a user could
+  pick on v0.3.0.
+
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
@@ -197,6 +203,24 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Upgrade-safe overlays (task 6.3c, ADR-052, [PR #41](https://github.com/Herofresh/SkillForge/pull/41)):**
+  - `applyOverlay` → `userPlacedIds` (user nodes + edits that set branch/order/og_level) →
+    `resolveOrderClashes` (merged tree only; ties sort built-in first, then by id; the user node
+    gets the order halfway to the next node, or +1 at the end) → `validateTree(nodes, userPlaced)`
+    in `src/data/validate.ts`, which returns `{ issues, warnings }`; `validateNodes` (build) is
+    `validateTree` with no user-placed nodes, so the dataset rules are unchanged.
+  - `OverlayResult` has `warnings`. Store: `nodeDraftWarnings` (editor advice, `IssueNotes advice`,
+    testIDs `editor-advice-position` / `editor-advice-other`); `nodeDraft` returns the resolved
+    order so the editor shows and saves the place the tree shows (the only time a resolved order
+    is written back, and it is the same place). Loaded-tree warnings are not shown anywhere else.
+  - Tests: `src/domain/overlayUpgrade.test.ts` rebuilds the v0.3.0 tree from
+    `src/data/skills/releasedPositions.ts` (v0.2.0 identical, v0.1.0-preview1 = minus acrobatics)
+    and checks every user-node position and every built-in move a user could have saved. **When a
+    release changes content, add its positions there.** Without the fix ~30 old positions failed.
+  - Not covered: a content update that adds a prerequisite which closes a cycle with a user's
+    edited prerequisites would still fail (Backlog). Verified by typecheck, lint, format:check,
+    the full Jest suite and `progressions:check`; not run on the emulator (one new editor note,
+    covered by a component test).
 - **Branch fill-ups (task 6.3b, ADR-051):**
   - Content only: YAML + regenerated module/review sheet, no code or format change. New ids and
     sources per branch: docs/research/progressions.md → B15 (also lists the steps considered and
@@ -811,6 +835,12 @@ upgrade check from every earlier release). Any new table or column is additive a
   push-ups, archer rows, shrimp squats). Don't pad: a branch stays under 10 when there's no sourced
   step that fits; write down why in docs/research/progressions.md. Every new node has `sources`,
   `description` (6.2), a `verify:` note where values are inferred, and stable ids.
+- [x] 6.3c Saved overlays survive new built-in nodes (ADR-052, [PR #41](https://github.com/Herofresh/SkillForge/pull/41)): found
+  in the 6.3b review. A user node placed between two nodes gets the midpoint `order`; 6.3a/6.3b put
+  new built-in nodes on exactly such orders (and with higher og_levels), so a saved overlay failed
+  `applyOverlay` after the update and the user's nodes vanished from the tree. Fix: order clashes of
+  user-placed nodes are resolved in the merged tree (stored data unchanged), an og_level drop next to
+  a user-placed node is a warning; regression tests rebuild the v0.3.0 dataset.
 - [ ] 6.4 Pixel animations per exercise: a small looping pixel-art figure showing the general
   movement (not anatomically perfect). Proposed approach (confirm in the ADR): a shared
   stick-figure skeleton with joint angles, 2–4 keyframe poses per node defined in data
@@ -874,6 +904,10 @@ upgrade check from every earlier release). Any new table or column is additive a
   run, and a prerequisite for E2E in CI (5.3a, ADR-039)
 - Backups: "undo" after an app restart (choose one of the safety copies in `documents/backups/`),
   prune old safety copies (4.6 keeps the last import's copy in memory only, ADR-035)
+- Overlay upgrade safety (after 6.3c, ADR-052): a content update that adds a built-in
+  prerequisite closing a cycle with a user's edited prerequisites still invalidates the overlay; no
+  release does that today. Options: drop the user's closing prerequisite in the merged tree, or a
+  dataset check against `RELEASED_POSITIONS`-style snapshots of user edits
 - Settings extras: units/preferences once there are any
 - Replay onboarding extras (5.10, ADR-046): a "Back to the app" exit on the hero step during a
   replay (today: finish it, or restart the app)

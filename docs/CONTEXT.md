@@ -103,7 +103,8 @@ src/
   domain/               PURE TS game rules. No React/Expo/DB imports (ADR-009)
     types.ts            single source of shared types (nodes, issues, overlay, logged sets, progress)
     tier.ts             tierForOgLevel (tier is derived, never stored)
-    overlay.ts          user overlay: applyOverlay (+ straightArmEditIssues, ADR-036),
+    overlay.ts          user overlay: applyOverlay (+ straightArmEditIssues, ADR-036;
+                        userPlacedIds / resolveOrderClashes + warnings, upgrade-safe, ADR-052),
                         exportOverlay/importOverlay (text), overlayToRaw/overlayFromRaw (data: DB row,
                         backups), isEmptyOverlay, OVERLAY_FILE_* / PROGRESSIONS_GUIDE_URL
     overlayEdit.ts      overlay changes from the editor (ADR-036): nodeEditFor (diff to built-in),
@@ -161,7 +162,8 @@ src/
                         goalProgress
   data/
     progressionFormat.ts  THE YAML <-> ExerciseNode parser/normalizer (build, tests, overlay)
-    validate.ts         graph/content rules: validateNodes, formatIssue
+    validate.ts         graph/content rules: validateNodes, validateTree (overlay: issues + warnings,
+                        ADR-052), formatIssue
     progressionBuild.ts buildMatrix, renderGeneratedModule, renderReviewSheet (pure)
     credits.ts          About screen content: CONTENT_SOURCES, FONT_CREDITS, OFL_CREDIT
     testFixtures.ts     synthetic nodes for unit tests
@@ -170,6 +172,7 @@ src/
       progressions.generated.ts  GENERATED from the YAML; never edit
       dataset.test.ts   real dataset is valid and the generated files are fresh
       crossBranchGates.test.ts  content checks: key gates, straight-arm flags, Home paths
+      releasedPositions.ts  test data: node positions of the last release (overlay upgrade test, ADR-052)
       branches.ts       BRANCH_NAMES (display names)
   db/                   persistence (ADR-026): stores and loads, maps rows <-> domain types
     schema.ts           Drizzle tables (see Data model)
@@ -381,6 +384,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 |---|---|
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
+| **User-placed node** | A user node, or a built-in node whose edit sets branch, order or og_level. Its order clashes are resolved in the merged tree and an og_level drop next to it is a warning, so a content update can't invalidate a saved overlay (ADR-052). |
 | **Session plan / active session** | The Train flow's editable plan preview (`SessionPlan`, in memory) and the started session (`ActiveSession`, the `active_session` draft) with its logged sets; `finishedSession` turns it into a `LoggedSession` (ADR-034). |
 | **Edit / reorder in the live session** | Tap a logged set's line to change its result (stepper, Save / Partial / Failed against its own prescription; its time stays) or delete it (confirmed; later sets move up, so `setIndex` stays the dense logging position). "Reorder" shows Up / Down per exercise; a strength pair moves as one (PLAN 5.9, ADR-045). |
 | **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics get a stopwatch. It can be paused and resumed (5.8, ADR-044; the paused time is not measured). Stored as timestamps plus the paused time (`ActiveSession.timer`), so it survives an app kill, paused too; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |

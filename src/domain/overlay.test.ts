@@ -26,7 +26,7 @@ const userNode = makeNode({
 
 describe('applyOverlay', () => {
   it('returns the base unchanged for an empty overlay', () => {
-    expect(applyOverlay(base, EMPTY_OVERLAY)).toEqual({ nodes: base, issues: [] });
+    expect(applyOverlay(base, EMPTY_OVERLAY)).toEqual({ nodes: base, issues: [], warnings: [] });
   });
 
   it('adds a user node', () => {
@@ -100,11 +100,79 @@ describe('applyOverlay', () => {
     );
   });
 
-  it('rejects an edit that breaks a chain rule', () => {
-    const { issues } = applyOverlay(base, overlay({ edited: { pull_up: { ogLevel: 1 } } }));
-    expect(issues.map(formatIssue)).toEqual([
+  it('applies an og_level below the node above as a warning (user autonomy, ADR-052)', () => {
+    const { nodes, issues, warnings } = applyOverlay(
+      base,
+      overlay({ edited: { pull_up: { ogLevel: 1 } } }),
+    );
+    expect(issues).toEqual([]);
+    expect(byId(nodes, 'pull_up')?.ogLevel).toBe(1);
+    expect(warnings.map(formatIssue)).toEqual([
       expect.stringMatching(/^overlay: pull_up: og_level 1 is lower/),
     ]);
+  });
+});
+
+describe('order clashes after a content update (ADR-052)', () => {
+  /** A built-in node an update put at the order the user node already had. */
+  const newCore = makeNode({
+    id: 'band_negative',
+    chainOrder: 25,
+    ogLevel: 2,
+    prerequisites: [{ nodeId: 'pull_up_negative', minLevel: 3, kind: 'hard' }],
+  });
+  const updated = [...base, newCore];
+  const columnOf = (nodes: ExerciseNode[]) =>
+    [...nodes].sort((a, b) => a.chainOrder - b.chainOrder).map((node) => node.id);
+
+  it('puts the user node right after the built-in node with its order', () => {
+    const { nodes, issues } = applyOverlay(updated, overlay({ added: [userNode] }));
+    expect(issues).toEqual([]);
+    expect(byId(nodes, 'band_negative')?.chainOrder).toBe(25); // built-in nodes keep theirs
+    expect(byId(nodes, 'user_band_pull_up')?.chainOrder).toBe(27.5); // halfway to pull_up (30)
+    expect(columnOf(nodes)).toEqual([
+      'dead_hang',
+      'pull_up_negative',
+      'band_negative',
+      'user_band_pull_up',
+      'pull_up',
+    ]);
+  });
+
+  it('orders several clashing user nodes by id after the built-in node', () => {
+    const second = { ...userNode, id: 'user_a_second', name: 'Second' };
+    const { nodes, issues } = applyOverlay(updated, overlay({ added: [userNode, second] }));
+    expect(issues).toEqual([]);
+    expect(columnOf(nodes).slice(2, 5)).toEqual([
+      'band_negative',
+      'user_a_second',
+      'user_band_pull_up',
+    ]);
+    expect(byId(nodes, 'user_a_second')?.chainOrder).toBe(27.5);
+    expect(byId(nodes, 'user_band_pull_up')?.chainOrder).toBe(28.75);
+  });
+
+  it('moves a clash at the end of the column one step after the last node', () => {
+    const last = { ...userNode, chainOrder: 30, ogLevel: 3 };
+    const { nodes, issues } = applyOverlay(base, overlay({ added: [last] }));
+    expect(issues).toEqual([]);
+    expect(byId(nodes, last.id)?.chainOrder).toBe(31);
+  });
+
+  it('resolves a built-in node the user moved onto an order the update now uses', () => {
+    const moved = overlay({ edited: { pull_up_negative: { chainOrder: 25 } } });
+    const { nodes, issues } = applyOverlay(updated, moved);
+    expect(issues).toEqual([]);
+    expect(byId(nodes, 'pull_up_negative')?.chainOrder).toBe(27.5);
+    expect(moved.edited.pull_up_negative.chainOrder).toBe(25); // stored overlay untouched
+  });
+
+  it('still reports two built-in nodes with one order', () => {
+    const broken = [...base, { ...newCore, chainOrder: 20 }];
+    const { issues } = applyOverlay(broken, EMPTY_OVERLAY);
+    expect(issues.map(formatIssue)).toContainEqual(
+      expect.stringMatching(/order 20 is also used by/),
+    );
   });
 });
 

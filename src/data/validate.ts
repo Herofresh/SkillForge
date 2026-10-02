@@ -35,8 +35,31 @@ type Report = (node: ExerciseNode, message: string) => void;
 
 /** Runs every rule and returns all issues (empty = valid). Issues carry the node id, not the file. */
 export function validateNodes(nodes: readonly ExerciseNode[]): ValidationIssue[] {
+  return validateTree(nodes, new Set()).issues;
+}
+
+export interface TreeValidation {
+  /** Errors: a tree with any of them is not used. */
+  issues: ValidationIssue[];
+  /** Advice only (ADR-052): the tree is used as it is. */
+  warnings: ValidationIssue[];
+}
+
+/**
+ * `validateNodes` for a tree with the user's overlay (ADR-052). `userPlaced` are the nodes whose
+ * place in the chain the user chose (user nodes, built-in nodes whose edit sets branch, order or
+ * og_level): an og_level that drops next to one of them is a warning, not an error, so a content
+ * update that puts a new built-in node next to it can't invalidate the user's tree. Every other
+ * rule (references, cycles, straight-arm, trials, …) stays an error.
+ */
+export function validateTree(
+  nodes: readonly ExerciseNode[],
+  userPlaced: ReadonlySet<string>,
+): TreeValidation {
   const issues: ValidationIssue[] = [];
+  const warnings: ValidationIssue[] = [];
   const report: Report = (node, message) => issues.push({ nodeId: node.id, message });
+  const warn: Report = (node, message) => warnings.push({ nodeId: node.id, message });
   const byId = new Map<string, ExerciseNode>();
 
   for (const node of nodes) {
@@ -57,9 +80,9 @@ export function validateNodes(nodes: readonly ExerciseNode[]): ValidationIssue[]
     }
   }
 
-  checkChains(nodes, report);
+  checkChains(nodes, userPlaced, report, warn);
   checkCycles(byId, report);
-  return issues;
+  return { issues, warnings };
 }
 
 /** Human-readable one-liner, e.g. `content/progressions/v_pull.yaml: pull_up: prerequisite …`. */
@@ -220,8 +243,17 @@ function checkSources(node: ExerciseNode, report: Report): void {
   }
 }
 
-/** Per branch: chainOrder is unique and ogLevel never drops as chainOrder rises. */
-function checkChains(nodes: readonly ExerciseNode[], report: Report): void {
+/**
+ * Per branch: chainOrder is unique and ogLevel never drops as chainOrder rises. The og_level rule
+ * is an error between nodes the user didn't place (checked on that subsequence, so a user node in
+ * between doesn't hide a broken built-in chain) and a warning next to a `userPlaced` node.
+ */
+function checkChains(
+  nodes: readonly ExerciseNode[],
+  userPlaced: ReadonlySet<string>,
+  report: Report,
+  warn: Report,
+): void {
   const byBranch = new Map<string, ExerciseNode[]>();
   for (const node of nodes) {
     byBranch.set(node.branch, [...(byBranch.get(node.branch) ?? []), node]);
@@ -236,15 +268,37 @@ function checkChains(nodes: readonly ExerciseNode[], report: Report): void {
           current,
           `order ${current.chainOrder} is also used by '${previous.id}' in ${current.branch}`,
         );
-      } else if (current.ogLevel < previous.ogLevel) {
-        report(
-          current,
-          `og_level ${current.ogLevel} is lower than '${previous.id}' (og_level ${previous.ogLevel}), ` +
-            `which comes before it in ${current.branch}; raise it or move the node earlier`,
-        );
+      } else if (userPlaced.has(previous.id) || userPlaced.has(current.id)) {
+        if (current.ogLevel < previous.ogLevel) {
+          if (userPlaced.has(current.id)) warn(current, ogLevelDropMessage(previous, current));
+          else warn(previous, ogLevelAboveMessage(previous, current));
+        }
+      }
+    }
+    const fixed = sorted.filter((node) => !userPlaced.has(node.id));
+    for (let i = 1; i < fixed.length; i++) {
+      const sameOrder = fixed[i].chainOrder === fixed[i - 1].chainOrder; // reported above
+      if (!sameOrder && fixed[i].ogLevel < fixed[i - 1].ogLevel) {
+        report(fixed[i], ogLevelDropMessage(fixed[i - 1], fixed[i]));
       }
     }
   }
+}
+
+/** `current` comes right after `previous` in their branch but has a lower og_level. */
+function ogLevelDropMessage(previous: ExerciseNode, current: ExerciseNode): string {
+  return (
+    `og_level ${current.ogLevel} is lower than '${previous.id}' (og_level ${previous.ogLevel}), ` +
+    `which comes before it in ${current.branch}; raise it or move the node earlier`
+  );
+}
+
+/** The same drop, said about `previous` (a user-placed node above a lower built-in one). */
+function ogLevelAboveMessage(previous: ExerciseNode, current: ExerciseNode): string {
+  return (
+    `og_level ${previous.ogLevel} is higher than '${current.id}' (og_level ${current.ogLevel}), ` +
+    `which comes after it in ${previous.branch}; lower it or move the node later`
+  );
 }
 
 /** Prerequisites (hard and recommended) must form a DAG. Reports each cycle once. */
