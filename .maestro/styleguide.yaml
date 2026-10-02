@@ -43,6 +43,15 @@ name: Style guide - components render and respond
       id: 'styleguide'
     timeout: 20000
 - assertVisible: 'Typography'
+# Readable numbers (PLAN 6.1): every text role shows the digits 0-9.
+- scrollUntilVisible:
+    element:
+      id: 'digits-small'
+    direction: DOWN
+    timeout: 90000 # a long page on a software-rendered emulator
+- assertVisible:
+    id: 'digits-display'
+- takeScreenshot: 6.1-digits
 - scrollUntilVisible:
     element:
       id: 'demo-warning-acknowledge'

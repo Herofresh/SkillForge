@@ -158,11 +158,16 @@
 - `build:apk` (5.13, ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35)): the signer check runs on Gradle's APK before
   the copy, so a wrongly signed APK never lands in `builds/`; path and SHA-256 are printed only
   for an APK that passed.
+- Readable numbers (6.1, ADR-048, PR_LINK): the pixel font is now **Jersey 15** (titles,
+  headings, buttons, header titles; sizes 36/28/21/23) instead of Pixelify Sans, whose 5 read as
+  an S or an 8. Silkscreen and Alegreya Sans stay (their digits were already clear). The Style
+  Guide has a **Digits** section (0–9 per variant); `fonts.test.ts` pins every role to a checked
+  font. Screenshots `docs/screenshots/6.1-*.png`.
 
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
-2. Phase 6 in order, starting with 6.1 (readable numbers). Phase 7 (Google Play) comes after all
+2. Phase 6 in order, next 6.2 (exercise descriptions). Phase 7 (Google Play) comes after all
    of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -171,6 +176,13 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Readable numbers (task 6.1, ADR-048):** `FontFamily.pixel` = `Jersey15_400Regular`;
+  `FontFamily.display` is gone (one weight). Header titles use the new `HeaderTitleStyle` token
+  (tabs and stack). A new font must pass the Style Guide → Digits check and be added to
+  `CLEAR_DIGIT_FONTS` in `src/components/fonts.test.ts`. Verified on the Pixel 8 Pro AVD:
+  `styleguide.yaml` (now asserts the Digits rows and takes `6.1-digits`), `train.yaml` and
+  `character.yaml` pass; before/after screenshots committed. Metro started with `CI=1` does not
+  watch files: restart it (`--clear`) after a dependency change or edits won't show.
 - **Remove confirmation (task 5.12):** `EquipmentProfileEditor` owns the "Remove <name>?" sheet
   (`remove-dialog`, `remove-confirm`, "Keep it") and always asks, on first run too; the `onRemove`
   prop is gone. Settings only passes `onRename`. No Maestro change needed (`settings.yaml` already
@@ -712,12 +724,8 @@ debug key: every release must install over the user's current build with all dat
 upgrade check from every earlier release). Any new table or column is additive and gets a backup
 `schemaVersion` bump that still reads the older versions.
 
-- [ ] 6.1 Readable numbers: in the pixel fonts a 5 can look like an 8. Show every number (XP,
-  levels, reps, timers, steppers, stats, dates) in a font where all ten digits are distinct, and
-  keep the pixel look for headings. Check which roles (`Type.display/title/heading/label`) render
-  digits and pick a fix: a pixel font with clear digits for those roles, or one `Type.number`
-  role used by every numeric text. Screenshot all digits 0–9 per role before/after
-  (`docs/screenshots/6.1-*.png`), update DESIGN.md, ADR.
+- [x] 6.1 Readable numbers: Jersey 15 replaces Pixelify Sans in the pixel roles, so every digit
+  is distinct; Style Guide → Digits; screenshots `docs/screenshots/6.1-*.png` (ADR-048, PR_LINK)
 - [ ] 6.2 Exercise descriptions: a short plain-language text per node (what the exercise is and
   how it looks, 1–3 sentences, not the cues), new required YAML field `description` for all nodes,
   validator + generated module + contributor guide. Show it (a) in the node detail on top,

@@ -42,9 +42,9 @@ export const OFL_CREDIT: Credit = {
 
 export const FONT_CREDITS: readonly Credit[] = [
   {
-    name: 'Pixelify Sans',
-    note: '© 2021 The Pixelify Sans Project Authors · SIL Open Font License 1.1',
-    url: 'https://github.com/eifetx/Pixelify-Sans',
+    name: 'Jersey 15',
+    note: '© 2023 The Soft Type Project Authors · SIL Open Font License 1.1',
+    url: 'https://github.com/scfried/soft-type-jersey',
   },
   {
     name: 'Silkscreen',

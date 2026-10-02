@@ -23,7 +23,8 @@ describe('PixelText', () => {
   it('renders its text in the variant font with the default tone', async () => {
     await render(<PixelText variant="title">Skill Tree</PixelText>);
     expect(screen.getByText('Skill Tree')).toHaveStyle({
-      fontFamily: 'PixelifySans_700Bold',
+      fontFamily: 'Jersey15_400Regular',
+      fontSize: 28,
       color: Colors.gold,
     });
   });
