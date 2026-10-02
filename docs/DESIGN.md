@@ -178,6 +178,20 @@ it on long press (too small for the button); the Legend mentions both ways.
 Screenshots: `docs/screenshots/4.2-tree.png`, `4.3-node-detail.png`, `4.3-unlock.png`,
 `4.3-trial.png`.
 
+**Exercise animations (PLAN 6.4, ADR-053):** `PixelAnimation` plays a node's animation
+(`animationFor(node)`) as a 32 × 32-cell side view: the hero in `gold` like the app icon, the near
+arm in `goldLight` with a 1-cell `ink` edge (and the head too) so arm, head and torso stay apart,
+the far arm and leg in `goldDark` behind the body, equipment in `steel` / `steelDark` (bars and
+rings in front of the gripping hands) and floor, walls and boxes in `bronze`. It sits centred on
+top of the node detail's About panel at 128 dp (4 dp per cell) and on top of the
+`ExerciseInfoSheet` at 96 dp; use multiples of 32 dp. It is decorative (hidden from screen
+readers): the description next to it says the same in words. Proportions are chunky on purpose
+(head radius 2.7 cells, torso ~3–4 cells, limbs ~2 cells) so the pose reads at 96 dp; a figure
+must keep its head inside the frame and its feet on the floor (tested). The Style Guide's
+"Exercise animations" section shows every animation; `npm run animations:sheet` renders contact
+sheets for review (`docs/screenshots/6.4a-v_pull.png`, `6.4a-iconic.png`, `6.4a-patterns.png`);
+on the phone: `6.4a-node-detail.png`, `6.4a-info-sheet.png`, `6.4a-styleguide.png`.
+
 **Train (PLAN 4.4, ADR-034)** in `src/components/train/`: `ExerciseCard` (stone card, gold-lined
 `Frames.selected` for the current exercise; sword icon, shield for a Trial, cross when skipped;
 rune TRIAL / ember STRAIGHT-ARM / green DONE caps tags; "Swapped from X", "Replaces X", "Pair"
@@ -294,6 +308,11 @@ line around a `stone` disc, on the `night` background. Roles map to `Palette` ke
 - **Reduce motion:** every animation checks `useReducedMotion()` (Reanimated). With it on, show the
   end state immediately (the burst shows only the title; sheets appear without sliding).
 - Buttons animate by position only (the press drop), no fades.
+- **Exercise animations loop (PLAN 6.4, ADR-053):** the one exception to "short, never loop".
+  They explain a movement rather than celebrate, so they repeat: sprite frames of `FRAME_MS`
+  (160 ms) each, switched in whole steps (a linear ramp floored to the frame index on the UI
+  thread, the same stepped look as `Easing.steps`); the in-between poses are eased (smoothstep)
+  between keyframes. With reduce motion they show one still keyframe and never move.
 - **Reveal moments (PLAN 5.2, ADR-038):** every celebration is a `LevelUpBurst` with a title from
   `BURST_TITLES` (LEVEL UP!, UNLOCKED!, TESTED OUT!, QUEST COMPLETE). The ring bursts from the
   title's centre. Where they play: Train summary (quest complete, first level-up, first unlock),
@@ -321,4 +340,4 @@ line around a `stone` disc, on the `night` background. Roles map to `Palette` ke
 | Show safeguards with `WarningBanner` and an acknowledge step | Block the user because of a safeguard (ADR-023) |
 | Take numbers from the store/domain and pass fractions to bars | Compute XP/levels in components |
 | Add a `testID` where Maestro needs a stable selector | Rely on text that changes with data in E2E flows |
-| Respect reduce motion | Loop animations or animate for more than ~0.6 s |
+| Respect reduce motion | Loop animations or animate for more than ~0.6 s (exercise animations are the one looping exception, §7) |

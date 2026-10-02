@@ -1513,3 +1513,66 @@ Template:
   as the user chose the place. The XP of a node follows its own og_level, so nothing else changes.
   Not covered: a new built-in prerequisite that closes a cycle with a user's edited prerequisites
   (no release does that today; Backlog).
+
+## ADR-053: Exercise animations: a side-view stick figure from joint angles, poses as typed data, rasterized to a 32 × 32 grid (PLAN 6.4a)
+- Date: 2026-10-02 · Status: Accepted (extends ADR-030's pixel look and ADR-042's code-grid art;
+  an exception to DESIGN.md's "short, never loop" motion rule)
+- Context: the user wants "pixel animations to display skills / exercises. They don't need to be
+  perfect but they should give a general idea of what it could look like." 155 nodes need one
+  eventually, so drawing frames by hand is out; the app already draws pixel art from code grids
+  (icons, app icon, radar) and must not render big SVG bitmaps on Android (ADR-037).
+- Decision:
+  - **Skeleton (`src/lib/figure.ts`, pure):** a 2D side view facing right: hip, torso, a head on a
+    neck, two-bone arms and legs (near and far), feet that are flexed or pointed. A `Pose` is one
+    position plus **absolute** joint angles in degrees; any joint can be the anchor that the
+    position pins (hands on a bar, feet on the floor). Interpolation takes the shorter arc per
+    angle; when two keyframes pin the same joint, that joint moves straight (so hands stay on the
+    bar), else the hip does. Bone lengths are chunky on purpose (`BONES`: torso 7, arm 4 + 3.6,
+    leg 5 + 5, head radius 2.7 cells) so a pose reads at 96 dp; real proportions looked like a
+    noodle at that size.
+  - **Raster (`figureRaster.ts`):** a pose plus props becomes 32 × 32 rows of role characters
+    (the `pixelGrid.ts` format): limbs and torso as capsules (cells whose centre is within ~1.15 /
+    1.8 cells of the bone), the head as a disc. Roles: body (`gold`), near arm (`goldLight` with
+    an `ink` edge, also around the head; without it the arm, head and torso merged into one
+    shape), far limbs (`goldDark`, behind), metal (`steel` / `steelDark`) and wood (`bronze`).
+    Props: floor, wall, bar (end-on), rail (a bar seen from the front), rings, parallettes, dip
+    bars, box, pole. Bars and rings draw in front of the hands, the rest behind.
+  - **Animation (`figureAnimation.ts`):** 1–4 keyframes, each with an optional `hold` (extra
+    frames) and `steps` (frames to the next one, e.g. a slow negative), looping back to the first;
+    in-betweens are smoothstep-eased; `still` names the keyframe shown with reduce motion.
+  - **Data: typed TypeScript in `src/data/animations/`, not YAML.** Poses are tuned numbers that
+    only make sense next to the rendered frames, and authoring them by hand angle by angle was
+    slow and error-prone. The helper `figure({ hip, torso, hands, feet, pin })` solves the limb
+    angles from where hands and feet should be (two-bone IK), shares poses between nodes
+    (`hang()`, `top()` in `v_pull.ts`) and is type-checked. YAML would have needed its own schema,
+    parser, build step and generated module for data no user or coach edits (the overlay never
+    touches animations), with none of that reuse. It is still one source of truth:
+    `NODE_ANIMATIONS` (per node id) and `PATTERN_ANIMATIONS` (one per `Pattern`), resolved by
+    `animationFor(node)`: the node's own, else its **first** pattern's generic one; a user node
+    without patterns falls back to `core`.
+  - **Generic poses:** push-up (horizontal push), pike push-up (vertical push), pull-up
+    (vertical pull), ring row (horizontal pull), planche lean (straight-arm push), tuck front
+    lever (straight-arm pull), squat, hip hinge, hollow hold (core), handstand kick-up (balance),
+    seated forward fold (mobility), jump squat (explosive).
+  - **6.4a coverage:** the whole `v_pull` branch (10 nodes; the archer pull-up is the one front
+    view, since its movement is sideways) plus push-up, squat, freestanding handstand, front
+    lever and full planche. Every other node shows its pattern's animation until 6.4b.
+  - **Display (`PixelAnimation`):** one small `Svg` (96–128 dp, never a big bitmap) with one
+    `Path` per role; each path's `d` switches frame through Reanimated `useAnimatedProps` on a
+    repeating linear ramp floored to the frame index, so playing costs no React render. Frames are
+    rasterized once per animation and cached. Frame time `FRAME_MS` 160 ms. Reduce motion shows
+    the still keyframe. Decorative for screen readers (the description says it in words). Shown on
+    top of the node detail's About panel (128 dp) and the `ExerciseInfoSheet` (96 dp, so Tree and
+    Train get it); the dev Style Guide lists every animation.
+  - **Looping:** DESIGN.md's motion rule (≤ 640 ms, no loops) is for celebrations; an exercise
+    animation explains a movement, so it loops in stepped sprite frames.
+  - **Review:** `npm run animations:sheet` renders contact sheets (a labelled row of frames per
+    animation, on the stone panel color) to `docs/screenshots/6.4a-*.png`; every pose was checked
+    there. Tests: the engine in plain Node; every animation id is a node, every node resolves,
+    1–4 keyframes, every frame keeps the figure inside the grid with its head visible and above
+    the floor, pinned hands stay within 1.5 cells of their bar or ring.
+- Consequences: no new dependency and no data, overlay or backup change. Adding an animation is a
+  TS edit plus a look at the sheet. A side view hides sideways movement (archer moves, side
+  planks, cartwheels need a front view like the archer pull-up). The figure has one build; the
+  6.10 companion can reuse the skeleton and raster with its own proportions. 6.4b fills in the
+  remaining ~140 nodes.

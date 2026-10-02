@@ -190,11 +190,17 @@
   it in the merged tree; an og_level that drops next to a user-placed node is a warning (gold
   "Worth a look" note in the editor), not an error. Tested against every position a user could
   pick on v0.3.0.
+- Exercise animations, part 1 (6.4a, ADR-053, PR_LINK): a small looping pixel figure (side-view
+  stick figure from joint angles, 32 × 32 grid, stepped 160 ms frames) on top of the node
+  detail's About panel and the exercise info sheet (Tree and Train); reduce motion shows a still
+  pose. All 10 v_pull nodes plus push-up, squat, freestanding handstand, front lever and full
+  planche have their own; every other node shows its first pattern's generic animation. Dev Style
+  Guide → Exercise animations; contact sheets and emulator screenshots `docs/screenshots/6.4a-*.png`.
 
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
-2. Phase 6 in order, next 6.4 (pixel animations per exercise). Phase 7 (Google Play) comes after
+2. Phase 6 in order, next 6.4b (per-node animations for the remaining nodes). Phase 7 (Google Play) comes after
    all of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -203,6 +209,31 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Exercise animations, part 1 (task 6.4a, ADR-053, PR_LINK):**
+  - Engine (pure, `src/lib/`): `figure.ts` (Pose = position + absolute angles, `jointsOf`,
+    `interpolatePose`, `solveLimb` IK), `figureRaster.ts` (pose + props → 32 × 32 role rows),
+    `figureAnimation.ts` (keyframes → frames). Data in `src/data/animations/` (typed TS, not
+    YAML, see the ADR): `generic.ts` (one per Pattern), `iconic.ts`, `v_pull.ts`, resolved by
+    `animationFor(node)` in `index.ts`. UI: `PixelAnimation` (ui kit) in the node detail and
+    `ExerciseInfoSheet`; Style Guide section "Exercise animations".
+  - **6.4b, where to continue:** add `<branch>.ts` files next to `v_pull.ts`, spread them into
+    `NODE_ANIMATIONS`, author poses with `figure({ hip, torso, hands: [{ to }], feet: [{ to }],
+    pin })` (angles in degrees, 0 = right/facing, 90 = down, -90 = up; `ON_FLOOR` for hands/feet
+    on the floor; `pin: 'hand'` on a bar), add the file to `SHEETS` in
+    `scripts/animationSheetBuild.ts` (e.g. `6.4b-<branch>.png`), run `npm run animations:sheet --
+    --only <id> --cell 8 --out <scratch png>` and look at it until the exercise is recognisable.
+    Then extend the coverage test in `animations.test.ts` (today: v_pull + `ICONIC_IDS`).
+  - Gotchas: angles interpolate the short way, so a roll needs keyframes < 180° apart. A head or
+    hand that leaves the grid fails the bounds test (that is why the pull-up bar is at row 5 and
+    the chest-to-bar one at row 7). Arms come out of one shoulder point; in the front view
+    (archer) that reads as a Y, which is fine at this size. Far limbs hide behind the torso: bend
+    them forward to show them (one-arm chin-up).
+  - Verified: typecheck, lint, format, the full Jest suite, `progressions:check`, the contact
+    sheets (looked at every frame), and on the Pixel 8 Pro emulator in Expo Go: the node detail (dead hang), the
+    info sheet (jumping pull-up; consecutive screenshots show different frames, so it plays) and
+    the Style Guide section render (`docs/screenshots/6.4a-node-detail.png`, `6.4a-info-sheet.png`,
+    `6.4a-styleguide.png`). Not checked: reduce motion on a device (the still frame is unit-tested
+    only), and no Maestro flow asserts the animation (the Svg is hidden from accessibility).
 - **Upgrade-safe overlays (task 6.3c, ADR-052, [PR #41](https://github.com/Herofresh/SkillForge/pull/41)):**
   - `applyOverlay` → `userPlacedIds` (user nodes + edits that set branch/order/og_level) →
     `resolveOrderClashes` (merged tree only; ties sort built-in first, then by id; the user node
@@ -851,9 +882,9 @@ upgrade check from every earlier release). Any new table or column is additive a
   node detail and the 6.2 description sheet (Tree and Train). Preview sheet with all animations
   in the dev Style Guide; screenshots for review. Split by branch if needed (6.4a engine +
   a few nodes, 6.4b the rest).
-  - [~] 6.4a Engine + generic pattern poses + one branch fully animated (v_pull) + iconic nodes
+  - [x] 6.4a Engine + generic pattern poses + one branch fully animated (v_pull) + iconic nodes
     (push-up, squat, handstand, front lever, planche) + display (node detail, info sheet, Style
-    Guide) (claude-agent)
+    Guide) (ADR-053, PR_LINK)
   - [ ] 6.4b Per-node animations for all remaining nodes
 - [ ] 6.5 v0.4.0 release (6.1–6.4): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and 0.3.0.
 - [ ] 6.6 Android home-screen widget (like Duolingo): shows whether you trained today, the
