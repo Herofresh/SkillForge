@@ -139,6 +139,32 @@ nodes:
       status: draft
       notes: ""
 
+  - id: ring_push_up
+    name: Ring push-up
+    description: A push-up with the hands on rings hanging a few centimetres above the floor. The rings move freely, so the chest and shoulders also have to hold them steady.
+    order: 55
+    og_level: 4 # OG2: ring push-ups [4]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: diamond_push_up
+        level: 5
+    patterns: [horizontal_push]
+    equipment:
+      - rings
+    regression: push_up
+    cues:
+      - Rings low, just above the floor; body straight from head to heels.
+      - Keep the rings close to the body as you lower; do not let them drift apart.
+      - Press up to straight arms and push the rings away at the top.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
   # --- One-arm and archer work ---
   - id: elevated_one_arm_push_up
     name: Elevated one-arm push-up
@@ -195,6 +221,32 @@ nodes:
       status: draft
       notes: ""
 
+  - id: straddle_one_arm_push_up
+    name: Straddle one-arm push-up
+    description: A push-up on one arm on the floor, the feet spread wide for balance and the free hand behind the back. The first one-arm push-up from the floor.
+    order: 75
+    og_level: 6 # OG2: straddle one-arm push-up [6]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per arm
+    prerequisites:
+      - node: elevated_one_arm_push_up
+        level: 5
+    patterns: [horizontal_push]
+    equipment:
+      - floor
+    regression: elevated_one_arm_push_up
+    cues:
+      - Feet wide apart, hand under the chest, free hand behind the back.
+      - Keep the hips and shoulders square to the floor; do not twist open.
+      - Lower until the chest is near the hand, then press back up.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
   # --- Planche-specific pushing ---
   - id: pseudo_planche_push_up
     name: Pseudo planche push-up
@@ -227,6 +279,32 @@ nodes:
     verify: >-
       OG2 level inferred: OG2 lists the rings-turned-out 40 degree PPPU at about level 6;
       the floor version is placed at 6 too. Check with a coach.
+    review:
+      status: draft
+      notes: ""
+
+  - id: one_arm_push_up
+    name: One-arm push-up
+    description: A push-up on one arm with the feet close together and the whole body straight, without twisting. The classic one-arm push-up.
+    order: 90
+    og_level: 8 # OG2: straight-body one-arm push-up [8]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per arm
+    prerequisites:
+      - node: straddle_one_arm_push_up
+        level: 5
+    patterns: [horizontal_push]
+    equipment:
+      - floor
+    regression: straddle_one_arm_push_up
+    cues:
+      - Feet together or only slightly apart, body in one straight line.
+      - Squeeze the glutes and brace so the hips do not rotate.
+      - Lower until the chest is near the hand, then press back up.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
     review:
       status: draft
       notes: ""

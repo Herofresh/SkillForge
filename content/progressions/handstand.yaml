@@ -96,6 +96,36 @@ nodes:
       status: draft
       notes: ""
 
+  - id: chest_to_wall_shoulder_taps
+    name: Chest-to-wall shoulder taps
+    description: In a chest-to-wall handstand, you shift the weight onto one hand and lift the other to tap its shoulder, then switch sides. It teaches the weight shifts used to balance freely.
+    order: 35
+    og_level: 3
+    metric: reps
+    working_range: { min: 4, max: 8 }
+    trial: { sets: 3, target: 8 } # taps per side
+    prerequisites:
+      - node: chest_to_wall_handstand
+        level: 5
+    skill: true
+    patterns: [balance, vertical_push]
+    equipment:
+      - wall
+    regression: chest_to_wall_handstand
+    cues:
+      - Walk up into a chest-to-wall handstand, body straight, hands close to the wall.
+      - Shift the weight onto one hand before lifting the other; keep the hips still.
+      - Tap the shoulder lightly, put the hand back, then switch.
+    sources:
+      - https://www.12minuteathlete.com/stronger-handstand/
+      - https://gmb.io/freestanding-handstand/
+    verify: >-
+      Not on the OG2 chart or the BWF chart; level 3 (between the chest-to-wall handstand and the
+      freestanding handstand) and the 3 x 8 taps per side are inferred.
+    review:
+      status: draft
+      notes: ""
+
   # --- Bent-arm balance ---
   - id: frog_stand
     name: Frog stand (crow)
@@ -154,6 +184,37 @@ nodes:
     verify: >-
       OG2 gives level 4-5; 4 is used. GMB's common gate is about 60 s; the 3 x 30 s trial
       follows the RR hold rule.
+    review:
+      status: draft
+      notes: ""
+
+  - id: ring_shoulder_stand
+    name: Ring shoulder stand
+    description: Balancing upside down on rings with bent arms, the shoulders low next to the rings and the body straight above them. A first inverted hold on rings, before the ring handstand.
+    order: 55
+    og_level: 5 # OG2: rings shoulder stand [5]
+    metric: hold_s
+    working_range: { min: 10, max: 30 }
+    trial: { sets: 3, target: 30 }
+    prerequisites:
+      - node: support_hold
+        level: 5
+        note: A steady ring support hold first.
+      - node: chest_to_wall_handstand
+        level: 5
+    skill: true
+    patterns: [balance, vertical_push]
+    equipment:
+      - rings
+    regression: chest_to_wall_handstand
+    cues:
+      - Rings low; roll up from a tuck with the arms bent and the elbows in.
+      - Keep the rings pressed against the body and the shoulders close to them.
+      - Extend the legs straight up and come down the way you went up.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: OG2 level 5 is printed; the 3 x 30 s hold standard is the RR hold rule.
     review:
       status: draft
       notes: ""
@@ -221,6 +282,37 @@ nodes:
     verify: >-
       No rep standard in the sources; 3 x 5 follows Steven Low's strength rule (advance past
       5-6 reps) and is a placeholder.
+    review:
+      status: draft
+      notes: ""
+
+  - id: elevated_straddle_press
+    name: Elevated straddle press
+    description: A straddle press to handstand that starts with the feet on a raised surface, so the hips start higher. The step between the wall eccentric and the press from the floor.
+    order: 65
+    og_level: 6 # OG2: elevated straddle stand straddle press [6]
+    metric: reps
+    working_range: { min: 3, max: 6 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: wall_straddle_press_eccentric
+        level: 5
+      - node: freestanding_handstand
+        level: 5
+    skill: true
+    patterns: [balance, straight_arm_push, core]
+    equipment:
+      - floor # feet on a step, chair or sofa
+      - box
+    regression: wall_straddle_press_eccentric
+    cues:
+      - Feet wide on the raised surface, hands on the floor in front of it.
+      - Lean the shoulders over the hands until the feet float off.
+      - Lift the hips over the shoulders, then bring the legs together.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/the-fundamentals-of-bodyweight-strength-training/
+    verify: OG2 level 6 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
     review:
       status: draft
       notes: ""

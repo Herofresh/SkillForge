@@ -213,6 +213,39 @@ nodes:
       status: draft
       notes: ""
 
+  - id: ring_dip
+    name: Ring dip
+    description: A dip between two rings. From a straight-arm support you lower until the shoulders are below the elbows and press back up, while keeping the rings steady at your sides.
+    order: 65
+    og_level: 4 # OG2: ring dips [4]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: dip_negative
+        level: 5
+      - node: support_hold
+        level: 5
+        note: A steady ring support hold (3 x 30 s) first.
+      - node: parallel_bar_dip
+        level: 5
+        kind: recommended
+        note: Parallel bar dips (3 x 8) make the first ring dips much easier.
+    patterns: [vertical_push]
+    equipment:
+      - rings
+    regression: dip_negative
+    cues:
+      - Start in a ring support, arms straight, rings close to the body.
+      - Lower until the shoulders are just below the elbows; keep the rings from drifting out.
+      - Press back up to straight arms and turn the rings slightly out at the top.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
   - id: wall_handstand_push_up
     name: Wall handstand push-up (full range)
     description: A handstand push-up against the wall with the hands raised on parallettes, so the head can travel below hand level. It is the full-range version of the wall headstand push-up, which stops when the head touches the floor.

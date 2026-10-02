@@ -29,6 +29,31 @@ nodes:
       status: draft
       notes: ""
 
+  - id: single_leg_deadlift
+    name: Single-leg deadlift
+    description: Standing on one leg, you hinge at the hip and lower the chest towards the floor while the free leg reaches back, then stand up tall. A balance and hamstring exercise with no equipment.
+    order: 15
+    og_level: 1
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per leg
+    patterns: [hinge]
+    equipment:
+      - floor # touch a wall or chair for balance at first
+    cues:
+      - Soft knee on the standing leg; the back stays flat.
+      - Push the hips back and let the free leg rise in line with the body.
+      - Stand up by squeezing the glute of the standing leg.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises/hinge
+    verify: >-
+      Not on the OG2 chart; the BWF chart and the BWF wiki put the one-leg deadlift at the start
+      of the hinge path. Level 1 and the RR rep standard 3 x 8 are inferred.
+    review:
+      status: draft
+      notes: ""
+
   - id: squat
     name: Bodyweight squat
     description: Standing with the feet shoulder-width apart, you sit the hips down until the thighs are at least parallel to the floor and stand back up. The basic leg exercise.
@@ -137,6 +162,33 @@ nodes:
       status: draft
       notes: ""
 
+  - id: beginner_shrimp_squat
+    name: Beginner shrimp squat
+    description: "A one-leg squat with the other leg bent behind you: you lower until the back knee and toes touch the floor together and stand up again. The first step of the shrimp squat path."
+    order: 55
+    og_level: 3
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per leg
+    prerequisites:
+      - node: bulgarian_split_squat
+        level: 5
+    patterns: [squat]
+    equipment:
+      - floor
+    regression: bulgarian_split_squat
+    cues:
+      - Bend the free leg behind you; reach the arms forward for balance.
+      - Lower slowly until the back knee and toes touch the floor.
+      - Stand up through the front heel; knee in line with the toes.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises/squat
+    verify: Not on the OG2 chart; level 3 (next to the Bulgarian split squat) is inferred.
+    review:
+      status: draft
+      notes: ""
+
   - id: assisted_pistol_squat
     name: Assisted pistol squat
     description: A one-leg squat holding a door frame or pole lightly, with the other leg straight out in front. The hands help as little as possible.
@@ -162,6 +214,33 @@ nodes:
       - https://redditbwf.github.io/wiki/recommended_routine.html
       - https://gist.github.com/sgup/f10f1d57e54b7876495f4bafb6d697eb
     verify: Order follows the RR squat progression; the OG2 level is inferred.
+    review:
+      status: draft
+      notes: ""
+
+  - id: intermediate_shrimp_squat
+    name: Intermediate shrimp squat
+    description: A shrimp squat in which only the back knee touches the floor at the bottom, the toes stay up. Harder than the beginner version because the leg works through a deeper range.
+    order: 65
+    og_level: 4
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per leg
+    prerequisites:
+      - node: beginner_shrimp_squat
+        level: 5
+    patterns: [squat]
+    equipment:
+      - floor
+    regression: beginner_shrimp_squat
+    cues:
+      - Free leg bent behind you, toes kept off the floor.
+      - Lower until only the knee touches the floor, softly.
+      - Stand up without the back foot pushing off.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises/squat
+    verify: Not on the OG2 chart; level 4 (next to the pistol squat) is inferred.
     review:
       status: draft
       notes: ""
@@ -217,6 +296,33 @@ nodes:
     verify: >-
       The OG2 level is inferred. The trial follows Steven Low's eccentric guide (2-3 sets of 2-3 reps
       at 3-5 s); there is no Nordic-specific standard.
+    review:
+      status: draft
+      notes: ""
+
+  - id: nordic_curl
+    name: Nordic curl
+    description: Kneeling with the heels anchored, you lower the straight body towards the floor using the hamstrings and pull yourself back up without pushing off with the hands. The full nordic curl.
+    order: 90
+    og_level: 5
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: nordic_curl_negative
+        level: 5
+    patterns: [hinge]
+    equipment:
+      - floor # heels anchored under a sofa, heavy furniture or a partner
+    regression: nordic_curl_negative
+    cues:
+      - Knees on a pad, heels anchored, body straight from knees to head.
+      - Lower slowly with the hips extended; do not bend at the waist.
+      - Pull back up with the hamstrings; catch yourself with the hands only if needed.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises/hinge
+    verify: Not on the OG2 chart; level 5 (above the negative at 4) and the 3 x 5 standard are inferred.
     review:
       status: draft
       notes: ""

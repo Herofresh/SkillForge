@@ -159,6 +159,40 @@ nodes:
       status: draft
       notes: ""
 
+  - id: one_leg_back_lever
+    name: One-leg back lever
+    description: A back lever with one leg straight in line with the body and the other knee bent, face down below the rings or bar. It sits between the straddle and the full back lever.
+    order: 55
+    og_level: 6
+    metric: hold_s
+    working_range: { min: 8, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: straddle_back_lever
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - rings
+      - bar
+    regression: straddle_back_lever
+    cues:
+      - One leg straight out in line with the body, the other knee bent.
+      - Squeeze the glutes; keep the hips from sagging below the shoulders.
+      - Switch the straight leg between sets.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://antranik.org/ssc/
+    verify: >-
+      OG2 prints the half-lay / one-leg back lever at 6. The BWF chart lists it before the
+      straddle and notes that the straddle is easier for some people; here it follows the OG2
+      level.
+    review:
+      status: draft
+      notes: ""
+
   - id: back_lever
     name: Back lever
     description: Hanging below rings or a bar on straight arms, face down, with the whole body straight and horizontal behind the hands. A classic straight-arm gymnastics hold.
@@ -186,6 +220,69 @@ nodes:
       - https://antranik.org/ssc/
       - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
     verify: OG2 level ~6 is inferred from the chart layout.
+    review:
+      status: draft
+      notes: ""
+
+  # --- Back lever pulls (OG2 8-9) ---
+  - id: back_lever_pullout
+    name: Back lever pullout
+    description: From a back lever, you pull the straight body back up to an inverted hang with straight arms, without piking or bending the arms. It trains control on the way out of the lever.
+    order: 65
+    og_level: 8
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: back_lever
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - rings
+      - bar
+    regression: back_lever
+    cues:
+      - Start in a full back lever, body straight.
+      - Keep the arms locked and press the hands down to rotate up to an inverted hang.
+      - Move slowly; stop at any pain in the biceps or elbows.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: OG2 level 8 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
+    review:
+      status: draft
+      notes: ""
+
+  - id: german_hang_pullout
+    name: German hang pullout
+    description: From a German hang, you pull with straight arms up through the back lever to an inverted hang. A long straight-arm pull through the full shoulder range.
+    order: 67
+    og_level: 9
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: back_lever_pullout
+        level: 5
+      - node: german_hang
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - rings
+      - bar
+    regression: back_lever_pullout
+    cues:
+      - Start from a relaxed German hang, arms straight.
+      - Pull through the back lever without bending the arms or piking.
+      - Finish in an inverted hang and come out slowly.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: OG2 level 9 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
     review:
       status: draft
       notes: ""

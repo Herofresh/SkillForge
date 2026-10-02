@@ -3,8 +3,17 @@
  * the straight-arm flags (ADR-010) and a Home-profile path through every major pattern (ADR-005).
  */
 import { ALL_NODES, NODE_BY_ID } from '@/data/skills';
+import { computeCharacter } from '@/domain/character';
 import { HOME_EQUIPMENT as HOME } from '@/domain/equipment';
-import type { EquipmentTag, ExerciseNode, Pattern, PrerequisiteKind } from '@/domain/types';
+import { emptyProgress } from '@/domain/progression';
+import {
+  BRANCHES,
+  type Branch,
+  type EquipmentTag,
+  type ExerciseNode,
+  type Pattern,
+  type PrerequisiteKind,
+} from '@/domain/types';
 
 function node(id: string): ExerciseNode {
   const found = NODE_BY_ID.get(id);
@@ -128,7 +137,11 @@ describe('straight-arm flags (ADR-010)', () => {
       (n) => n.patterns.some((p) => straightArmPatterns.includes(p)) && !n.straightArm,
     ).map((n) => n.id);
     // Handstand presses use straight arms but are balance skills, not tendon-loading holds.
-    expect(unflagged).toEqual(['wall_straddle_press_eccentric', 'straddle_press_to_handstand']);
+    expect(unflagged).toEqual([
+      'wall_straddle_press_eccentric',
+      'elevated_straddle_press',
+      'straddle_press_to_handstand',
+    ]);
   });
 });
 
@@ -193,15 +206,116 @@ describe('flexibility and mobility branches (PLAN 6.3a, ADR-050)', () => {
   });
 });
 
+describe('branch fill-ups (PLAN 6.3b)', () => {
+  /** The nodes added in 6.3b, by branch. */
+  const ADDED: Readonly<Partial<Record<Branch, readonly string[]>>> = {
+    front_lever: [
+      'tuck_front_lever_raise',
+      'tuck_ice_cream_maker',
+      'half_lay_front_lever',
+      'front_lever_to_inverted',
+      'hanging_pull_to_inverted',
+    ],
+    back_lever: ['one_leg_back_lever', 'back_lever_pullout', 'german_hang_pullout'],
+    planche: [
+      'tuck_planche_push_up',
+      'advanced_tuck_planche_push_up',
+      'half_lay_planche',
+      'straddle_planche_push_up',
+    ],
+    h_pull: [
+      'wide_row',
+      'advanced_tuck_front_lever_row',
+      'one_arm_row',
+      'straddle_front_lever_row',
+    ],
+    h_push: ['ring_push_up', 'straddle_one_arm_push_up', 'one_arm_push_up'],
+    handstand: ['chest_to_wall_shoulder_taps', 'ring_shoulder_stand', 'elevated_straddle_press'],
+    legs: [
+      'single_leg_deadlift',
+      'beginner_shrimp_squat',
+      'intermediate_shrimp_squat',
+      'nordic_curl',
+    ],
+    dynamic: ['ring_muscle_up', 'advanced_tuck_human_flag'],
+    v_pull: ['l_pull_up'],
+    v_push: ['ring_dip'],
+  };
+  const added = new Set(Object.values(ADDED).flat());
+  const existing = ALL_NODES.filter((n) => !added.has(n.id));
+
+  it('gives every branch at least 10 nodes', () => {
+    for (const branch of BRANCHES) {
+      const count = ALL_NODES.filter((n) => n.branch === branch).length;
+      expect([branch, count >= 10]).toEqual([branch, true]);
+    }
+  });
+
+  it('puts every added node in its branch', () => {
+    for (const [branch, nodeIds] of Object.entries(ADDED)) {
+      for (const id of nodeIds) expect([id, node(id).branch]).toEqual([id, branch]);
+    }
+  });
+
+  it('never gates an existing node behind an added one, so saved progress keeps its unlocks', () => {
+    for (const n of existing) {
+      const gates = n.prerequisites.filter((p) => p.kind === 'hard' && added.has(p.nodeId));
+      expect([n.id, gates]).toEqual([n.id, []]);
+    }
+  });
+
+  it('cannot lower the rank of a user with progress on the existing nodes', () => {
+    // Everything that existed before 6.3b is proficient: the new nodes add no rank branch and
+    // can only raise a branch peak, never lower it.
+    const progress = Object.fromEntries(
+      existing.map((n) => [n.id, { ...emptyProgress(n.id), xp: 1, level: 5, trialPassed: true }]),
+    );
+    const before = computeCharacter(existing, progress, 0);
+    const after = computeCharacter(ALL_NODES, progress, 0);
+    expect(after.medianOgLevel).toBe(before.medianOgLevel);
+    expect(after.rank).toBe(before.rank);
+  });
+
+  it('keeps the straight-arm safeguards on every added lever, planche and flag node', () => {
+    const straightArm = [
+      ...(ADDED.front_lever ?? []),
+      ...(ADDED.back_lever ?? []),
+      ...(ADDED.planche ?? []),
+      'advanced_tuck_human_flag',
+    ];
+    for (const id of straightArm) expect([id, node(id).straightArm]).toEqual([id, true]);
+    // Lever rows are bent-arm pulls, like the tuck front lever row.
+    for (const id of ['advanced_tuck_front_lever_row', 'straddle_front_lever_row']) {
+      expect([id, node(id).straightArm]).toEqual([id, false]);
+    }
+  });
+
+  it('chains the lever rows, planche push-ups and one-arm paths onto the existing holds', () => {
+    expect(allPrerequisites('straddle_front_lever_row', 'hard')).toContain('straddle_front_lever');
+    expect(allPrerequisites('straddle_front_lever_row', 'hard')).toContain('tuck_front_lever_row');
+    expect(allPrerequisites('straddle_planche_push_up', 'hard')).toContain('tuck_planche');
+    expect(allPrerequisites('one_arm_push_up', 'hard')).toContain('elevated_one_arm_push_up');
+    expect(allPrerequisites('one_arm_row', 'hard')).toContain('straddle_one_arm_row');
+    expect(allPrerequisites('german_hang_pullout', 'hard')).toContain('back_lever');
+    expect(allPrerequisites('hanging_pull_to_inverted', 'hard')).toContain('front_lever');
+    expect(allPrerequisites('nordic_curl', 'hard')).toContain('nordic_curl_negative');
+  });
+});
+
 describe('Home profile (floor, wall, bar, parallettes, bands)', () => {
   const reachable = homeReachable();
 
   it('can reach every node except the ones that need dip bars, rings or a pole', () => {
     const unreachable = ALL_NODES.filter((n) => !reachable.has(n.id)).map((n) => n.id);
     expect(unreachable.sort()).toEqual([
+      'advanced_tuck_human_flag',
       'human_flag',
       'iron_cross',
       'parallel_bar_dip',
+      'ring_dip',
+      'ring_muscle_up',
+      'ring_push_up',
+      'ring_shoulder_stand',
       'straddle_human_flag',
       'tuck_human_flag',
     ]);

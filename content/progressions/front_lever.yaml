@@ -42,6 +42,39 @@ nodes:
       status: draft
       notes: ""
 
+  - id: tuck_front_lever_raise
+    name: Tuck front lever raise
+    description: From a hang on straight arms, you raise the tucked body up into a tuck front lever and lower it back down without bending the arms. A moving drill for the pull-down strength of the lever.
+    order: 15
+    og_level: 4
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: tuck_front_lever
+        level: 5
+        note: A steady tuck front lever hold comes first.
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - bar
+      - rings
+    regression: tuck_front_lever
+    cues:
+      - Start from a dead hang with the knees tucked.
+      - Keep the arms locked and press the bar down towards the hips to lift the body.
+      - Pause level with the floor, then lower slowly; no swinging.
+    sources:
+      - https://rangeofmotion.net.au/front-lever-exercise-improvement-program
+      - https://fitnessvolt.com/front-lever-raises-guide/
+    verify: >-
+      Not on the OG2 chart or the BWF chart; level 4 (next to the tuck hold) and the RR rep
+      standard 3 x 8 are inferred.
+    review:
+      status: draft
+      notes: ""
+
   - id: advanced_tuck_front_lever
     name: Advanced tuck front lever
     description: A tuck front lever with the hips opened and the back flat, thighs at about a right angle to the body. The longer shape makes the horizontal hold harder.
@@ -69,6 +102,41 @@ nodes:
       - https://redditbwf.github.io/wiki/recommended_routine.html
       - https://www.calisthenics-corner.com/skills/front-lever/
     verify: OG2 level ~4 is inferred from the chart layout.
+    review:
+      status: draft
+      notes: ""
+
+  - id: tuck_ice_cream_maker
+    name: Tuck ice cream maker
+    description: Starting at the top of a pull-up, you straighten the arms while tipping back into a tuck front lever, then pull back up to the top. It links bent-arm pulling to the lever position.
+    order: 25
+    og_level: 5
+    metric: reps
+    working_range: { min: 3, max: 6 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: tuck_front_lever
+        level: 5
+      - node: pull_up
+        level: 5
+    straight_arm: true # the lever half loads straight arms; counted with the straight-arm safeguards
+    skill: true
+    patterns: [straight_arm_pull, vertical_pull]
+    equipment:
+      - rings
+      - bar
+    regression: tuck_front_lever
+    cues:
+      - Start at the top of a pull-up with the knees tucked.
+      - Push the bar away and lean back until the arms are straight and the body is level.
+      - Pull back up to the top along the same path, then lower to a hang.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://calisthenics-parks.com/skills/206-en-ice-cream-makers
+    verify: >-
+      Not on the OG2 chart; the BWF chart puts the tuck ice cream maker in its intermediate band
+      next to the tuck front lever row (OG2 5). Level 5 and the 3 x 5 standard (Steven Low's
+      strength rule) are inferred.
     review:
       status: draft
       notes: ""
@@ -138,6 +206,39 @@ nodes:
       status: draft
       notes: ""
 
+  - id: half_lay_front_lever
+    name: Half-lay front lever
+    description: A front lever with the hips open and the legs together, the knees bent so the shins hang down. Longer than the straddle and shorter than the full lever.
+    order: 45
+    og_level: 7
+    metric: hold_s
+    working_range: { min: 8, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: straddle_front_lever
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - bar
+      - rings
+    regression: straddle_front_lever
+    cues:
+      - Legs together, knees bent, hips fully open in line with the body.
+      - Body level with the floor; squeeze the glutes so the hips do not pike.
+      - Arms locked, shoulders pulled down.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://en.wikipedia.org/wiki/Front_lever
+      - https://antranik.org/ssc/
+    verify: >-
+      OG2 prints the half-lay / one-leg front lever at 7 and the full lever at 8; the dataset has
+      the full lever at 7 (PLAN 1.6), so 7 keeps the order.
+    review:
+      status: draft
+      notes: ""
+
   - id: front_lever
     name: Front lever
     description: Hanging below a bar or rings on straight arms with the whole body rigid and horizontal, face up and legs together. An iconic straight-arm pulling skill.
@@ -164,6 +265,67 @@ nodes:
       - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
       - https://antranik.org/ssc/
       - https://en.wikipedia.org/wiki/Front_lever
+    review:
+      status: draft
+      notes: ""
+
+  # --- Dynamic front lever skills (OG2 9-10) ---
+  - id: front_lever_to_inverted
+    name: Front lever to inverted hang
+    description: From a front lever, you pull the straight body up on straight arms until it hangs upside down, then lower it back to the lever. A dynamic front lever skill.
+    order: 60
+    og_level: 9
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: front_lever
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - bar
+      - rings
+    regression: front_lever
+    cues:
+      - Start in a full front lever, body straight and arms locked.
+      - Press the bar towards the hips to rotate the body up to an inverted hang.
+      - Lower back to the lever under control and hold it briefly.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: OG2 level 9 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
+    review:
+      status: draft
+      notes: ""
+
+  - id: hanging_pull_to_inverted
+    name: Hanging pull to inverted hang
+    description: From a dead hang, you pull the straight body up on straight arms, through the front lever, all the way to an inverted hang, and lower back down. The hardest front lever pull in the tree.
+    order: 70
+    og_level: 10
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: front_lever_to_inverted
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull]
+    equipment:
+      - bar
+      - rings
+    regression: front_lever_to_inverted
+    cues:
+      - Start from a still dead hang, body straight, no swing.
+      - Keep the arms locked and the body rigid as it passes the front lever.
+      - Lower slowly the same way.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: OG2 level 10 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
     review:
       status: draft
       notes: ""

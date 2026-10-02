@@ -402,6 +402,43 @@ describe('generateWorkout', () => {
     });
   });
 
+  describe('straight-arm nodes added in PLAN 6.3b', () => {
+    const goals = ['tuck_front_lever_raise', 'tuck_planche_push_up', 'one_leg_back_lever'];
+    const holds = testOutSession('holds', daysAgo(20), [
+      'tuck_front_lever',
+      'tuck_planche',
+      'straddle_back_lever',
+    ]);
+    const unlocks = [
+      selfUnlock('tuck_front_lever', daysAgo(21)),
+      selfUnlock('tuck_planche', daysAgo(21)),
+      selfUnlock('straddle_back_lever', daysAgo(21)),
+    ];
+    const newStraightArm = (plan: WorkoutPlan) =>
+      planExercises(plan).filter((e) => goals.includes(e.nodeId) && node(e.nodeId).straightArm);
+
+    it('are flagged, so their suggestions stay within the ~60 s budget and open no early Trial', () => {
+      for (const id of goals) expect(node(id).straightArm).toBe(true);
+      const plan = generateWorkout(
+        request({ goals, recentSessions: [...INTERMEDIATE, holds], actions: unlocks }),
+      );
+      expect(newStraightArm(plan).length).toBeGreaterThan(0);
+      expect(newStraightArm(plan).some((e) => e.isTrial)).toBe(false);
+      expect(straightArmSeconds(plan)).toBeLessThanOrEqual(STRAIGHT_ARM_SESSION_BUDGET_S);
+      expect(plan.warnings.filter((warning) => warning.severity === 'warning')).toEqual([]);
+    });
+
+    it('are not suggested within 48 h of a straight-arm session', () => {
+      const recent = [
+        ...INTERMEDIATE,
+        holds,
+        workSession('yesterday', NOW - 24 * MS_PER_HOUR, 'tuck_front_lever', 10),
+      ];
+      const plan = generateWorkout(request({ goals, recentSessions: recent, actions: unlocks }));
+      expect(planExercises(plan).some((e) => node(e.nodeId).straightArm)).toBe(false);
+    });
+  });
+
   it('skips a pattern trained less than 48 h ago', () => {
     const recentSessions = [workSession('yesterday', NOW - 20 * MS_PER_HOUR, 'dead_hang', 20)];
     const plan = generateWorkout(request({ goals: ['strict_bar_muscle_up'], recentSessions }));

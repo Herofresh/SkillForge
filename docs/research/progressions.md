@@ -190,6 +190,52 @@ are placeholders with a `verify:` note.
 - **Not modelled:** the dive roll (the sources teach it off a springboard onto mats), mae ukemi,
   round-off rebound, handsprings and flips.
 
+### B15. Branch fill-ups (PLAN 6.3b, ADR-051)
+Every branch now has at least 10 nodes. On 2026-10-02 the printed OG2 chart PDF and the BWF
+Progressions chart v5.4 PDF were both read directly (levels below are the **printed** OG2 levels,
+not inferred). New ids per branch (dataset level in brackets; `verify:` where noted):
+
+- **Front lever (5 → 10):** Tuck FL raise [4, verify: not on OG2/BWF; Range of Motion FL program
+  and FitnessVolt: raises from a hang need a ~10 s tuck hold first] → Tuck ice cream maker [5,
+  verify: BWF intermediate band, next to the tuck FL row; not on OG2] → Half-lay FL [7, OG2 7] →
+  FL to inverted [9, OG2 9, BWF] → Hanging pull to inverted [10, OG2 10, BWF "Hanging Pull FL to
+  Inv"].
+- **Back lever (7 → 10):** One-leg BL [6, OG2 "Half Lay / 1 Leg BL" 6; BWF lists it before the
+  straddle and notes the straddle is easier for some] → BL pullout [8, OG2 8, BWF] → German hang
+  pullout [9, OG2 9, BWF].
+- **Planche (6 → 10):** Tuck PL push-up [6, OG2 6] → Adv tuck PL push-up [8, OG2 8] → Half-lay
+  planche [9, OG2 9] → Straddle PL push-up [10, OG2 10]. All BWF too. Flagged `straight_arm` (the
+  branch rule; they start and end in a planche).
+- **Rows (6 → 10):** Wide row [3, OG2 3] → Adv tuck FL row [6, OG2 6] → One-arm row [7, OG2 7] →
+  Straddle FL row [8, OG2 8]. All BWF too. Lever rows stay bent-arm (not flagged).
+- **Push-ups (8 → 11):** Ring push-up [4, OG2 4] → Straddle one-arm push-up [6, OG2 6] →
+  One-arm push-up [8, OG2 "Straight Body OA PU" 8]. All BWF too.
+- **Handstand (8 → 11):** Chest-to-wall shoulder taps [3, verify: not on OG2/BWF; 12 Minute
+  Athlete, GMB chest-to-wall work] → Ring shoulder stand [5, OG2 5, BWF] → Elevated straddle press
+  [6, OG2 "Ele Str Std Str Press" 6].
+- **Legs (8 → 12):** Single-leg deadlift [1, verify: BWF "OL Deadlift" and the BWF wiki hinge page
+  start the hinge path with it; not on OG2] → Beginner shrimp squat [3] → Intermediate shrimp
+  squat [4] (BWF chart and wiki squat progression: beginner = back knee and toes touch together,
+  intermediate = only the knee touches, advanced = hold the back foot) → Nordic curl [5, verify:
+  BWF chart; not on OG2].
+- **Dynamic (8 → 10):** Ring muscle-up [5, OG2 "Muscle-ups" 5] → Advanced tuck flag [6, OG2 6].
+- **Vertical pull (9 → 10):** L-sit pull-up [4, OG2 4, BWF].
+- **Vertical push (9 → 10):** Ring dip [4, OG2 4, BWF].
+
+**OG2 printed levels vs the dataset (for PLAN 1.6):** the chart prints Full FL 8 (dataset 7),
+Full BL 7 (6), Straddle PL 8 (7), Full PL 11 (10), Straddle / Full flag 7 / 8 (6 / 6), Bar pull-ups
+3 (2), Tuck BL 3 (2). The new nodes do not change existing levels (rank stability); where a
+printed level would break the per-branch order, the new node takes the nearest level that fits and
+says so in `verify:` (half-lay FL 7, advanced tuck flag 6).
+
+**Considered and left out (not padding):** circle FL [11], BA pull-up / handstand lower to BL
+[10–11], SA straddle planche to handstand [12] and the Maltese [17] (elite teasers beyond the
+current legendary nodes); pike skin the cat (a variant of the existing skin the cat); archer-in
+row (no clear description in the sources); typewriter pull-up, wall headstand, advanced shrimp
+squat, banded nordic negatives, straddle / one-leg elbow lever and the vertical flag (sourced, but
+the branches already reach 10 and they sit next to existing nodes). They can be added later
+without migrations.
+
 ## 2. Cross-branch prerequisites
 
 | Target | Prerequisite(s) | Threshold | Source quality |
@@ -353,6 +399,12 @@ are placeholders with a `verify:` note.
 - [Cleveland Clinic: 90/90 stretch](https://health.clevelandclinic.org/90-90-stretch/)
 - [Antranik: The 30 minutes a day squat challenge](https://antranik.org/the-30-minutes-a-day-squat-challenge/)
 - [World Rugby: Progressing the overhead squat](https://passport.world.rugby/conditioning-for-rugby/introduction-to-conditioning-youth/functional-screening/progressing-the-overhead-squat/)
+- [Range of Motion: Front lever exercise improvement program](https://rangeofmotion.net.au/front-lever-exercise-improvement-program)
+- [FitnessVolt: Front lever raises guide](https://fitnessvolt.com/front-lever-raises-guide/)
+- [Calisthenics Parks: Ice cream makers](https://calisthenics-parks.com/skills/206-en-ice-cream-makers)
+- [12 Minute Athlete: 5 exercises for a stronger handstand](https://www.12minuteathlete.com/stronger-handstand/)
+- [r/bodyweightfitness wiki: Squat progression](https://www.reddit.com/r/bodyweightfitness/wiki/exercises/squat)
+- [r/bodyweightfitness wiki: Hinge progression](https://www.reddit.com/r/bodyweightfitness/wiki/exercises/hinge)
 
 **Caveats:**
 - The `~` levels and the tier band boundaries are inferred.

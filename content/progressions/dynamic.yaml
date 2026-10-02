@@ -107,6 +107,41 @@ nodes:
       status: draft
       notes: ""
 
+  - id: ring_muscle_up
+    name: Ring muscle-up
+    description: On rings with a false grip, you pull up high, turn the wrists over the rings and press out to a straight-arm support. The classic rings muscle-up.
+    order: 35
+    og_level: 5 # OG2: muscle-ups (rings) [5]
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: muscle_up_negative
+        level: 5
+      - node: ring_dip
+        level: 5
+        kind: recommended
+        note: Ring dips make the press-out after the transition much easier.
+      - node: kipping_muscle_up
+        level: 5
+        kind: recommended
+        note: A bar muscle-up teaches the transition first.
+    skill: true
+    patterns: [vertical_pull, vertical_push, explosive]
+    equipment:
+      - rings
+    regression: muscle_up_negative
+    cues:
+      - Set a false grip, the wrist over the ring.
+      - Pull the rings to the lower chest, then lean forward over them.
+      - Turn through to a deep dip and press out to straight arms.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
   # --- Elbow lever ---
   - id: elbow_lever
     name: Elbow lever
@@ -172,6 +207,37 @@ nodes:
       - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
       - https://bodyproskills.com/articles/human-flag-prerequisites/
     verify: The 5-15 s range and 3 x 15 s trial are placeholders for an advanced hold.
+    review:
+      status: draft
+      notes: ""
+
+  - id: advanced_tuck_human_flag
+    name: Advanced tuck human flag
+    description: A human flag with the hips open and the back flat, knees still bent, the body held sideways off a vertical pole. It sits between the tuck and the straddle flag.
+    order: 55
+    og_level: 6
+    metric: hold_s
+    working_range: { min: 5, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: tuck_human_flag
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_pull, straight_arm_push, core]
+    equipment:
+      - pole
+    regression: tuck_human_flag
+    cues:
+      - From the tuck, open the hips so the back is flat and the thighs point away.
+      - Top hand pulls, bottom hand pushes; both arms stay straight.
+      - Keep the body level with the floor.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: >-
+      OG2 prints tuck 5, advanced tuck 6, straddle 7, full 8; the dataset has straddle and full at 6
+      (PLAN 1.6), so 6 keeps the order. The 5-15 s range and 3 x 15 s trial follow the other flags.
     review:
       status: draft
       notes: ""

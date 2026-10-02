@@ -1437,3 +1437,43 @@ Template:
   plans only when it's a goal (cool-down) — the warm-up still uses wrist prep and dislocates. If
   mobility should count towards the rank, that is a product decision and a one-line change to
   `NON_RANK_BRANCHES`.
+
+## ADR-051: Branch fill-ups to 10 nodes from the OG2 and BWF charts; existing levels and gates untouched (PLAN 6.3b)
+- Date: 2026-10-02 · Status: Accepted (extends ADR-016's dataset; keeps ADR-010/023/025 unchanged)
+- Context: the user asked that "if it makes sense each category has at least 10 skills in it".
+  Ten branches had 5–9 nodes. Saved progress is keyed by node id, the rank is the median of the
+  per-branch peak ogLevel (ADR-007), and straight-arm nodes carry the tendon safeguards.
+- Decision:
+  - **30 new ids, no renames, no moves:** front lever +5 (tuck FL raise, tuck ice cream maker,
+    half-lay FL, FL to inverted, hanging pull to inverted), back lever +3 (one-leg BL, BL pullout,
+    German hang pullout), planche +4 (tuck / advanced tuck / straddle planche push-up, half-lay
+    planche), h_pull +4 (wide row, advanced tuck and straddle FL row, one-arm row), h_push +3 (ring
+    push-up, straddle one-arm push-up, one-arm push-up), handstand +3 (chest-to-wall shoulder
+    taps, ring shoulder stand, elevated straddle press), legs +4 (single-leg deadlift, beginner and
+    intermediate shrimp squat, nordic curl), dynamic +2 (ring muscle-up, advanced tuck flag),
+    v_pull +1 (L-sit pull-up), v_push +1 (ring dip). Every branch now has 10–12 nodes; none is
+    left under 10.
+  - **Sources:** each step is on the printed OG2 chart or the BWF Progressions chart v5.4 (both
+    read from the PDFs on 2026-10-02), except the tuck FL raise and the chest-to-wall shoulder
+    taps (coaching sites, the two steps the user named); those carry `verify:` notes, as does
+    every rep/hold standard that no source gives (Steven Low's 3 x 5 strength rule for skill
+    reps, the RR 3 x 8 / 3 x 30 s rules otherwise, the 3 x 15 s advanced-hold rule).
+  - **ogLevel:** the printed OG2 level where it fits. The chart prints several existing nodes one
+    level higher than the dataset (full FL 8 vs 7, full BL 7 vs 6, straddle / full planche 8 / 11
+    vs 7 / 10, straddle / full flag 7 / 8 vs 6 / 6). Existing levels are **not** changed here
+    (that is PLAN 1.6 and would move people's rank); a new node whose printed level would break
+    the per-branch monotonic order gets the nearest level that keeps it, with a `verify:` note.
+  - **Gates:** new nodes hang off existing ones; no existing node gets a new hard prerequisite, so
+    nobody's unlocks or generator frontier change on upgrade (test in
+    `crossBranchGates.test.ts`). Adding nodes can only raise a branch peak, and no rank branch is
+    added, so no rank can drop (test).
+  - **Straight arm:** every new front lever, back lever and planche node is `straight_arm: true`
+    (the branch rule), including the planche push-ups and the ice cream maker, which bend the arms
+    but start and end in a lever / planche: they keep the 6-week Trial recommendation, the ~60 s
+    budget (2 s per rep) and the 48 h rest. The advanced tuck flag is flagged like the other flags.
+    The new lever rows in h_pull stay bent-arm like the tuck front lever row; the elevated
+    straddle press is unflagged like the other handstand presses.
+- Consequences: 155 nodes. Four new nodes need rings (ring push-up, ring dip, ring muscle-up,
+  ring shoulder stand) and one a pole, so they are out of reach on the Home profile. No code or
+  data-format change; the generator picks the new nodes up from their flags and patterns (tests
+  for the budget and the 48 h rest on the new straight-arm nodes).

@@ -144,6 +144,41 @@ nodes:
       status: draft
       notes: ""
 
+  # --- Planche push-ups (OG2 PB/floor planche push-ups) ---
+  - id: tuck_planche_push_up
+    name: Tuck planche push-up
+    description: From a tuck planche, you bend the arms to lower the chest towards the floor and press back up while the feet stay off the floor. Push-ups in the planche position.
+    order: 45
+    og_level: 6
+    metric: reps
+    working_range: { min: 3, max: 6 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: tuck_planche
+        level: 5
+      - node: pseudo_planche_push_up
+        level: 5
+        kind: recommended
+        note: Builds the bent-arm strength in the forward lean.
+    straight_arm: true # bent-arm press, but it starts and ends in a planche: keeps the safeguards
+    skill: true
+    patterns: [straight_arm_push, horizontal_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: tuck_planche
+    cues:
+      - Start in a tuck planche with the shoulders past the hands.
+      - Lower with the elbows close to the body; keep the hips at shoulder height.
+      - Press back to straight arms and push the floor away.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: OG2 level 6 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
+    review:
+      status: draft
+      notes: ""
+
   # --- Advanced holds (standard: about 15 s, Antranik / Steven Low) ---
   - id: straddle_planche
     name: Straddle planche
@@ -171,6 +206,73 @@ nodes:
       - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
       - https://antranik.org/ssc/
       - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
+    review:
+      status: draft
+      notes: ""
+
+  - id: advanced_tuck_planche_push_up
+    name: Advanced tuck planche push-up
+    description: A planche push-up from the advanced tuck, with the back flat and the hips level with the shoulders. The longer shape makes each press much harder.
+    order: 53
+    og_level: 8
+    metric: reps
+    working_range: { min: 3, max: 6 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: advanced_tuck_planche
+        level: 5
+      - node: tuck_planche_push_up
+        level: 5
+    straight_arm: true # bent-arm press, but it starts and ends in a planche: keeps the safeguards
+    skill: true
+    patterns: [straight_arm_push, horizontal_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: tuck_planche_push_up
+    cues:
+      - Start in an advanced tuck planche, back flat.
+      - Lower until the chest is near hand height without dropping the hips.
+      - Press back up with the shoulders leaning past the hands.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: >-
+      OG2 prints it at 8, above the straddle planche (8 on the chart, 7 in the dataset); the
+      3 x 5 rep standard is a placeholder (Steven Low's strength rule).
+    review:
+      status: draft
+      notes: ""
+
+  - id: half_lay_planche
+    name: Half-lay planche
+    description: A planche with the hips open and the legs together, the knees bent, so the body is level from the shoulders to the knees. It sits between the straddle and the full planche.
+    order: 56
+    og_level: 9
+    metric: hold_s
+    working_range: { min: 8, max: 15 }
+    trial: { sets: 3, target: 15 }
+    prerequisites:
+      - node: straddle_planche
+        level: 5
+    straight_arm: true
+    skill: true
+    patterns: [straight_arm_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: straddle_planche
+    cues:
+      - Legs together, knees bent, hips fully open in line with the body.
+      - Arms locked, shoulders protracted and well past the hands.
+      - Squeeze the glutes; no sag or pike at the hips.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://antranik.org/ssc/
+    verify: >-
+      OG2 prints the half-lay / one-leg planche at 9 (straddle 8, full 11 on the chart; 7 and 10
+      in the dataset, PLAN 1.6).
     review:
       status: draft
       notes: ""
@@ -203,6 +305,38 @@ nodes:
       - https://antranik.org/ssc/
       - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
     verify: OG2 level ~10 is inferred from the chart layout.
+    review:
+      status: draft
+      notes: ""
+
+  - id: straddle_planche_push_up
+    name: Straddle planche push-up
+    description: A push-up held in a straddle planche, legs straight and wide, lowering the chest towards the floor and pressing back up without touching down. An advanced planche strength move.
+    order: 70
+    og_level: 10
+    metric: reps
+    working_range: { min: 3, max: 5 }
+    trial: { sets: 3, target: 5 }
+    prerequisites:
+      - node: straddle_planche
+        level: 5
+      - node: advanced_tuck_planche_push_up
+        level: 5
+    straight_arm: true # bent-arm press, but it starts and ends in a planche: keeps the safeguards
+    skill: true
+    patterns: [straight_arm_push, horizontal_push]
+    equipment:
+      - floor
+      - parallettes
+    regression: advanced_tuck_planche_push_up
+    cues:
+      - Start in a straddle planche, legs straight and wide.
+      - Lower with the body staying level; the feet never touch the floor.
+      - Press back to straight arms and protract the shoulders.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    verify: OG2 level 10 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
     review:
       status: draft
       notes: ""

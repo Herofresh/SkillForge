@@ -178,13 +178,18 @@
   cossack squat, three-point bridge, overhead squat), appended to `BRANCHES`, lime lane, left out of
   the rank median (`NON_RANK_BRANCHES`). Only new ids; no data or database change. The
   `wall_handstand_push_up` and `elbow_lever` descriptions were reworded (6.2 review).
+- Branch fill-ups (6.3b, ADR-051, [PR #40](https://github.com/Herofresh/SkillForge/pull/40)): **155 nodes**, every branch has 10–17. 30 new ids from
+  the printed OG2 chart and the BWF Progressions chart (lever / planche variants and pulls, lever
+  rows, planche push-ups, ring push-ups / dips / muscle-up / shoulder stand, one-arm push-up and
+  row, L-sit pull-up, shrimp squats, nordic curl, elevated straddle press, chest-to-wall shoulder
+  taps). No existing id, level or hard gate changed, so saved progress, unlocks and ranks carry
+  over. `king_pigeon` repeats the pigeon pose's front-knee cue (6.3a review nit).
 
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
-2. Phase 6 in order, next 6.3b (fill the other branches under 10 nodes; every new node needs a
-   `description`). Phase 7 (Google Play) comes after all
-   of Phase 6; the user creates the upload key then (7.1).
+2. Phase 6 in order, next 6.4 (pixel animations per exercise). Phase 7 (Google Play) comes after
+   all of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -192,6 +197,21 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Branch fill-ups (task 6.3b, ADR-051):**
+  - Content only: YAML + regenerated module/review sheet, no code or format change. New ids and
+    sources per branch: docs/research/progressions.md → B15 (also lists the steps considered and
+    left out, and the OG2 printed-vs-dataset level gaps for PLAN 1.6).
+  - Rules kept: no existing node got a hard prerequisite on a new one; new levels are the printed
+    OG2 level unless that would break the per-branch order (then the nearest fitting level +
+    `verify:`). Tests: `crossBranchGates.test.ts` → "branch fill-ups (PLAN 6.3b)" (≥ 10 per
+    branch, no new gates on old nodes, rank of an existing user unchanged, straight-arm flags) and
+    `generator.test.ts` → "straight-arm nodes added in PLAN 6.3b" (budget, no early Trial, 48 h).
+  - Planche push-ups and the tuck ice cream maker bend the arms but are `straight_arm: true` (branch
+    rule; they start/end in a planche or lever). A coach may want the planche push-ups unflagged;
+    that needs an ADR and the branch rule in `validate.ts` relaxed.
+  - Home profile: the ring nodes and the advanced tuck flag are out of reach (test list updated).
+  - Verified by typecheck, lint, format:check, the full Jest suite and `progressions:check`; not
+    run on the emulator (no UI change).
 - **Flexibility + mobility (task 6.3a, ADR-050):**
   - Content only plus the branch plumbing: `BRANCHES` (+ `mobility`, last), `BRANCH_NAMES`,
     `BranchColors.mobility` = `Palette.lime`, `NON_RANK_BRANCHES` in `character.ts`. Any new
@@ -204,7 +224,7 @@
   - Verified by typecheck, lint, the full Jest suite and `progressions:check`; the new tab, lane
     and goal-picker tab are covered by component tests (`treeMap.test.tsx`), not by an emulator
     run or screenshot.
-  - 6.3b (other branches) is next; ADR-050 may need renumbering if another ADR lands first.
+  - 6.3b (other branches) followed as ADR-051.
 - **Exercise descriptions (task 6.2, ADR-049):**
   - Format: `description` has fallback `''` in `progressionFormat.ts` (so v1 overlays and
     pre-6.2 backups read); `validateNodes` requires it on `core` nodes only. The editor's own
@@ -785,7 +805,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   - Also: reword the `wall_handstand_push_up` and `elbow_lever` descriptions (6.2 review nits).
   - Every new node has `sources`, `description` (6.2), a `verify:` note where values are
     inferred, and stable ids.
-- [ ] 6.3b More content: other branches under 10 (back lever 7, front lever 5, planche 6,
+- [x] 6.3b More content (ADR-051, [PR #40](https://github.com/Herofresh/SkillForge/pull/40)): other branches under 10 (back lever 7, front lever 5, planche 6,
   h_pull 6, h_push 8, handstand 8, legs 8, dynamic 8, v_pull 9, v_push 9): add real, sourced
   intermediate or accessory steps (e.g. front lever raises / rows, planche leans / pseudo planche
   push-ups, archer rows, shrimp squats). Don't pad: a branch stays under 10 when there's no sourced
