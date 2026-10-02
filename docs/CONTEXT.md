@@ -719,13 +719,27 @@ Before publishing a release, check that it installs over the previous one with t
 2. Download the previous release's universal APK: `gh release download <tag> -p "*universal*"`.
 3. Start the emulator (see "E2E tests", step 1), then `adb uninstall at.skillforge.app` and
    `adb install <previous>.apk`.
-4. `npm run e2e -- .maestro/release/upgrade-seed.yaml`: fresh onboarding with a Pull-up test-out.
+4. `npm run e2e -- .maestro/release/upgrade-seed.yaml`: fresh onboarding with a Pull-up test-out,
+   then a custom exercise "Lever hold" saved right after Tuck front lever (the user overlay; on
+   v0.3.0 and earlier its order clashes with a later built-in node, ADR-052). Works on every
+   release since v0.1.0-preview1.
 5. `adb install -r builds/<new>.apk` (an update: no uninstall, no clearState). It must print
    `Success`; `INSTALL_FAILED_UPDATE_INCOMPATIBLE` means the signer changed,
    `INSTALL_FAILED_VERSION_DOWNGRADE` a versionCode that isn't higher.
 6. `npm run e2e -- .maestro/release/upgrade-verify.yaml`: the hero, goal, session and XP are still
-   there and onboarding isn't shown again. The flows take the screenshots `5.7-upgrade-before` /
-   `5.7-upgrade-after` (copy them from Maestro's test folder to `docs/screenshots/`).
+   there, onboarding isn't shown again and "Lever hold" is still in the Front lever column. The
+   flows take the screenshots `5.7-upgrade-before` / `5.7-upgrade-after` and
+   `upgrade-before-overlay` / `upgrade-after-overlay` (copy them from Maestro's test folder to
+   `docs/screenshots/`).
+7. Repeat 3–6 for **every** earlier release a user may still have (`gh release list`), not only
+   the last one.
+
+**Building in an agent worktree:** under `.claude/worktrees/<agent-…>/` the native CMake object
+paths get too long for Windows and Gradle fails with "ninja: error: manifest 'build.ninja' still
+dirty after 100 tries". A `subst` drive doesn't help (codegen then sees two roots). Copy the tree
+without `node_modules`, `android`, `builds` and `.git` to a short folder (e.g.
+`robocopy <worktree> D:\sf040 /E /XD node_modules android builds .git .expo /XF .git`), run
+`npm ci` and the build there, and take the APKs from that folder's `builds/` (6.5).
 
 ## Gotchas
 - Skill node IDs are permanent, because saved progress references them.

@@ -199,12 +199,21 @@
 - Rank ladder (6.7, ADR-054, [PR #47](https://github.com/Herofresh/SkillForge/pull/47)): tapping the rank crest opens a sheet with every rank
   (reached, yours, next, locked) and, per rank, how many branches are at its level; the next rank
   lists the branches still below. Screenshots `docs/screenshots/6.7-*.png`.
+- Release v0.4.0 (6.5, [PR #48](https://github.com/Herofresh/SkillForge/pull/48)): version 0.4.0 / versionCode 4 with 6.1–6.4 and 6.7 (Jersey 15,
+  descriptions, 155 nodes in 14 branches with mobility, upgrade-safe overlays, pixel animations,
+  rank ladder). Upgrade check passed on the emulator from **v0.1.0-preview1, v0.2.0 and v0.3.0**:
+  hero, goal, session, the 40 XP and a custom exercise placed after Tuck front lever (order 15, now
+  shared with the built-in Tuck front lever raise) all kept, no onboarding. The seed/verify flows
+  now cover the user overlay. Screenshots `docs/screenshots/6.5-*.png`. The GitHub release is
+  created by the coordinator after the merge.
 
 ## Next up
-1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
-   timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
-2. Phase 6 in order, next 6.5 (v0.4.0 release; 6.4 animations and 6.7 rank ladder are done). Phase 7 (Google Play) comes after
-   all of Phase 6; the user creates the upload key then (7.1).
+1. Coordinator: after this PR is merged, publish the GitHub pre-release `v0.4.0` with both APKs
+   and their SHA-256 (see the 6.5 handoff note). Then, on the user's phone: install v0.4.0 over
+   the installed build (Update, no uninstall) and look at the new font, descriptions,
+   animations, the mobility tab and the rank ladder; report what feels off.
+2. Phase 6 in order, next 6.6 (widget), then 6.8 (v0.5.0 release: 6.6). Phase 7 (Google Play)
+   comes after all of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -212,6 +221,16 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Release v0.4.0 (task 6.5):** ADR-043 routine. Built from the rebased branch (includes 6.7) in
+  a short-path copy of the worktree (`D:\sf040`): in `.claude/worktrees/<agent>/` the native
+  CMake paths are too long and Gradle fails with "build.ninja still dirty after 100 tries"
+  (CONTEXT.md → "Release upgrade check"). Signer check passed (pinned `RELEASE_SIGNER_SHA256`,
+  unchanged). APKs and SHA-256: see the PR body; the coordinator publishes them. The
+  `.maestro/release/` flows now also save a custom exercise "Lever hold" after Tuck front lever
+  on the old version and look for it after the update (the 6.3c risk). Maestro only finds a branch chip that is
+  rendered, so the flows swipe the chip row (y 21 %) until `branch-front_lever` shows (a no-op when
+  it already does). All three upgrade checks ran on the final build (main 4826661 + this branch). Not checked: a real phone, a backup import of a v0.3.0
+  backup into 0.4.0 (covered by Jest only).
 - **Rank ladder (task 6.7, ADR-054, [PR #47](https://github.com/Herofresh/SkillForge/pull/47)):** the rank crest on the Character tab is a button
   that opens `RankLadderSheet` (`src/components/character/`), built from `rankLadder` in
   `src/domain/rankLadder.ts` (via `characterSheet().ladder`). `character.ts` gained
@@ -940,7 +959,8 @@ upgrade check from every earlier release). Any new table or column is additive a
     - [x] 6.4b-3 flexibility/mobility/acrobatics (all 41 nodes; generic `mobility` is now a low
       lunge reach; contact sheets `docs/screenshots/6.4b-{flexibility,mobility,acrobatics}.png`)
       ([PR #44](https://github.com/Herofresh/SkillForge/pull/44))
-- [ ] 6.5 v0.4.0 release (6.1–6.4): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and 0.3.0.
+- [x] 6.5 v0.4.0 release (6.1–6.4 and 6.7): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and
+  0.3.0, including a custom exercise in the overlay ([PR #48](https://github.com/Herofresh/SkillForge/pull/48))
   - [x] Release prep, 6.3c review fixes: id tie-breaks compare code units (`compareCodeUnits`),
     not `localeCompare`, so order is the same on Hermes as in Node; the node editor shows only the
     advice about the node being edited (`warningsForNode`)
@@ -954,7 +974,7 @@ upgrade check from every earlier release). Any new table or column is additive a
 - [x] 6.7 Rank ladder: tapping the rank crest on the Character tab opens all ranks, the reached
   ones and the still locked ones with what each needs (from `character.ts`, no copied
   thresholds) (ADR-054, [PR #47](https://github.com/Herofresh/SkillForge/pull/47))
-- [ ] 6.8 v0.5.0 release (6.6–6.7), same routine.
+- [ ] 6.8 v0.5.0 release (6.6; 6.7 already shipped in v0.4.0), same routine.
 - [ ] 6.9 Classes (user idea): classes the hero unlocks at certain levels, ranks or attribute
   profiles (e.g. a pull-strong hero unlocks a "Climber" class) and can pick one to display.
   **Starts with a short design proposal for the user** (class list, unlock rules, what a class

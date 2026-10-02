@@ -1,6 +1,8 @@
 # Release upgrade check, step 2 of 2 (PLAN 5.7, ADR-043): run after installing the NEW APK over the
 # previous release seeded by upgrade-seed.yaml (`adb install -r`, no uninstall, no clearState).
-# The hero, the goal, the logged Trial session and its XP must all still be there.
+# The hero, the goal, the logged Trial session and its XP must all still be there, and so must the
+# custom exercise "Lever hold" the seed placed after Tuck front lever (its order now clashes with a
+# built-in node; ADR-052 resolves it instead of dropping the whole overlay).
 appId: at.skillforge.app
 name: Upgrade check 2 - data survives the update
 ---
@@ -34,3 +36,32 @@ name: Upgrade check 2 - data survives the update
     direction: DOWN
     timeout: 30000
 - takeScreenshot: 5.7-upgrade-after
+# The user overlay survived: the custom exercise is still in the Front lever column.
+- tapOn: 'Tree'
+- extendedWaitUntil:
+    visible:
+      id: 'tree-screen'
+    timeout: 20000
+- repeat:
+    times: 6
+    while:
+      notVisible:
+        id: 'branch-front_lever'
+    commands:
+      - swipe:
+          start: 85%, 21%
+          end: 25%, 21%
+          duration: 600
+- tapOn:
+    id: 'branch-front_lever'
+- extendedWaitUntil:
+    visible:
+      id: 'tree-branch-title'
+      text: 'Front lever'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'tile-custom-user_lever_hold'
+    direction: DOWN
+    timeout: 60000
+- takeScreenshot: upgrade-after-overlay

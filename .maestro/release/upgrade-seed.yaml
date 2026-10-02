@@ -84,3 +84,85 @@ name: Upgrade check 1 - seed data on the previous release
     id: 'character-total-xp'
     text: '0 XP earned in total'
 - takeScreenshot: 5.7-upgrade-before
+# The user overlay: a custom exercise right after Tuck front lever. The ids exist since v0.1.0.
+- tapOn: 'Tree'
+- extendedWaitUntil:
+    visible:
+      id: 'tree-screen'
+    timeout: 20000
+# The branch chips scroll sideways; Front lever is the fifth.
+- repeat:
+    times: 6
+    while:
+      notVisible:
+        id: 'branch-front_lever'
+    commands:
+      - swipe:
+          start: 85%, 21%
+          end: 25%, 21%
+          duration: 600
+- tapOn:
+    id: 'branch-front_lever'
+- extendedWaitUntil:
+    visible:
+      id: 'tree-branch-title'
+      text: 'Front lever'
+    timeout: 20000
+- tapOn:
+    id: 'tree-add-exercise'
+- extendedWaitUntil:
+    visible:
+      id: 'node-editor'
+    timeout: 20000
+- tapOn:
+    id: 'editor-name'
+- inputText: 'Lever hold'
+- hideKeyboard
+- tapOn:
+    id: 'editor-change-position'
+- extendedWaitUntil:
+    visible:
+      id: 'position-sheet'
+    timeout: 20000
+- tapOn:
+    id: 'position-tuck_front_lever'
+- assertVisible:
+    id: 'editor-position'
+    text: 'Tuck front lever'
+- scrollUntilVisible:
+    element:
+      id: 'editor-add-prerequisite'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'editor-add-prerequisite'
+- extendedWaitUntil:
+    visible:
+      id: 'prerequisite-sheet'
+    timeout: 20000
+- tapOn:
+    id: 'prerequisite-sheet-search'
+- inputText: 'Tuck front'
+- hideKeyboard
+- tapOn:
+    id: 'option-tuck_front_lever'
+- scrollUntilVisible:
+    element:
+      id: 'editor-save'
+    direction: DOWN
+    timeout: 60000
+- assertVisible:
+    id: 'editor-status'
+    text: 'The tree stays valid with these changes.'
+- tapOn:
+    id: 'editor-save'
+- extendedWaitUntil:
+    visible:
+      id: 'node-detail'
+    timeout: 20000
+- back
+- extendedWaitUntil:
+    visible:
+      id: 'tile-custom-user_lever_hold'
+    timeout: 20000
+- takeScreenshot: upgrade-before-overlay
