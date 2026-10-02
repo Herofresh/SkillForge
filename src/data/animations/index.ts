@@ -6,9 +6,11 @@
 import { PATTERNS, type ExerciseNode, type Pattern } from '@/domain/types';
 import type { FigureAnimation } from '@/lib/figureAnimation';
 
+import { ACROBATICS_ANIMATIONS } from './acrobatics';
 import { BACK_LEVER_ANIMATIONS } from './back_lever';
 import { CORE_ANIMATIONS } from './core';
 import { DYNAMIC_ANIMATIONS } from './dynamic';
+import { FLEXIBILITY_ANIMATIONS } from './flexibility';
 import { FRONT_LEVER_ANIMATIONS } from './front_lever';
 import { PATTERN_ANIMATIONS } from './generic';
 import { H_PULL_ANIMATIONS } from './h_pull';
@@ -16,6 +18,7 @@ import { H_PUSH_ANIMATIONS } from './h_push';
 import { HANDSTAND_ANIMATIONS } from './handstand';
 import { ICONIC_ANIMATIONS } from './iconic';
 import { LEGS_ANIMATIONS } from './legs';
+import { MOBILITY_ANIMATIONS } from './mobility';
 import { PLANCHE_ANIMATIONS } from './planche';
 import { V_PULL_ANIMATIONS } from './v_pull';
 import { V_PUSH_ANIMATIONS } from './v_push';
@@ -36,6 +39,9 @@ export const NODE_ANIMATIONS: Readonly<Record<string, FigureAnimation>> = {
   ...CORE_ANIMATIONS,
   ...H_PULL_ANIMATIONS,
   ...ICONIC_ANIMATIONS,
+  ...FLEXIBILITY_ANIMATIONS,
+  ...MOBILITY_ANIMATIONS,
+  ...ACROBATICS_ANIMATIONS,
 };
 
 /** Used when a (user) node lists no pattern at all. */

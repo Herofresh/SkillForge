@@ -6,6 +6,7 @@
 import type { Pattern } from '@/domain/types';
 import type { FigureAnimation } from '@/lib/figureAnimation';
 
+import { legVia } from './floorPoses';
 import { ICONIC_ANIMATIONS } from './iconic';
 import { figure, ON_FLOOR, p } from './pose';
 import { PULL_UP } from './v_pull';
@@ -174,28 +175,29 @@ const hollowHold: FigureAnimation = {
   ],
 };
 
-/** Seated forward fold: sit tall with straight legs, then fold over them towards the toes. */
-const SEAT = p(11, 27.4);
-const forwardFold: FigureAnimation = {
+/**
+ * Low lunge reach: the generic stretch. Kneeling on the back knee, the hips sink forward while
+ * both arms sweep up overhead, opening the front of the back hip. (The seated forward fold it
+ * replaced is now the pike fold's own animation.)
+ */
+const LUNGE_KNEE = p(9.5, ON_FLOOR);
+function lowLunge(hip: { x: number; y: number }, torso: number, arms: number) {
+  return figure({
+    hip,
+    torso,
+    head: torso + 4,
+    hands: [[arms, arms - 4]],
+    feet: [{ to: p(18.4, ON_FLOOR) }, legVia(hip, LUNGE_KNEE, p(LUNGE_KNEE.x - 6, ON_FLOOR))],
+    toes: 'point',
+  });
+}
+const lowLungeReach: FigureAnimation = {
   props: [FLOOR],
   still: 1,
-  steps: 4,
+  steps: 5,
   keyframes: [
-    {
-      hold: 1,
-      pose: figure({ hip: SEAT, torso: -95, hands: [[-20, -10]], feet: [[0, 0]], toes: 'flex' }),
-    },
-    {
-      hold: 3,
-      pose: figure({
-        hip: SEAT,
-        torso: -22,
-        head: -12,
-        hands: [[8, 4]],
-        feet: [[0, 0]],
-        toes: 'point',
-      }),
-    },
+    { hold: 1, pose: lowLunge(p(10.6, 24.2), -84, 62) },
+    { hold: 3, pose: lowLunge(p(12.6, 25.4), -98, -104) },
   ],
 };
 
@@ -245,6 +247,6 @@ export const PATTERN_ANIMATIONS: Readonly<Record<Pattern, FigureAnimation>> = {
   hinge: hipHinge,
   core: hollowHold,
   balance: ICONIC_ANIMATIONS.freestanding_handstand,
-  mobility: forwardFold,
+  mobility: lowLungeReach,
   explosive: jumpSquat,
 };

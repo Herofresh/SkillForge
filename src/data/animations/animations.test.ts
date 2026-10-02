@@ -48,6 +48,15 @@ describe('exercise animation data (PLAN 6.4a)', () => {
     }
   });
 
+  it.each(['flexibility', 'mobility', 'acrobatics'])(
+    'animates every %s node on its own (PLAN 6.4b-3)',
+    (branch) => {
+      const nodes = ALL_NODES.filter((node) => node.branch === branch);
+      expect(nodes.length).toBeGreaterThanOrEqual(10);
+      for (const node of nodes) expect(animationFor(node).source).toBe('node');
+    },
+  );
+
   it('resolves every built-in node to an animation, its pattern when it has none', () => {
     for (const node of ALL_NODES) {
       const resolved = animationFor(node);
