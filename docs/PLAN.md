@@ -209,7 +209,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Exercise animations, bar branches (task 6.4b-1, PR_LINK):** `h_pull.ts`, `front_lever.ts`,
+- **Exercise animations, bar branches (task 6.4b-1, [PR #45](https://github.com/Herofresh/SkillForge/pull/45)):** `h_pull.ts`, `front_lever.ts`,
   `back_lever.ts`, `dynamic.ts`, `core.ts` animate all 49 remaining nodes of those branches (the
   front lever stays in iconic.ts); sheets `docs/screenshots/6.4b-<branch>.png`. No engine change.
   `lever.ts` holds the shared lever leg shapes (tuck → full; a straddle is drawn as a V of the
@@ -906,7 +906,7 @@ upgrade check from every earlier release). Any new table or column is additive a
     (push-up, squat, handstand, front lever, planche) + display (node detail, info sheet, Style
     Guide) (ADR-053, [PR #42](https://github.com/Herofresh/SkillForge/pull/42))
   - [ ] 6.4b Per-node animations for all remaining nodes
-    - [x] 6.4b-1 bar branches (h_pull, front_lever, back_lever, dynamic, core) (PR_LINK)
+    - [x] 6.4b-1 bar branches (h_pull, front_lever, back_lever, dynamic, core) ([PR #45](https://github.com/Herofresh/SkillForge/pull/45))
     - [x] 6.4b-2 push/legs branches (h_push, v_push, planche, handstand, legs)
     - [ ] 6.4b-3 flexibility/mobility/acrobatics
 - [ ] 6.5 v0.4.0 release (6.1–6.4): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and 0.3.0.
