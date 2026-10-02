@@ -1513,6 +1513,10 @@ Template:
   as the user chose the place. The XP of a node follows its own og_level, so nothing else changes.
   Not covered: a new built-in prerequisite that closes a cycle with a user's edited prerequisites
   (no release does that today; Backlog).
+- Update (PLAN 6.5 prep): ties between user-placed nodes break by id in code-unit order
+  (`compareCodeUnits`), not `localeCompare`, which can order `_`, digits and case differently on
+  Hermes than in Node; the other id tie-breaks in `src/domain/` do the same. The editor shows only
+  the warnings about the node being edited (`warningsForNode`).
 
 ## ADR-053: Exercise animations: a side-view stick figure from joint angles, poses as typed data, rasterized to a 32 × 32 grid (PLAN 6.4a)
 - Date: 2026-10-02 · Status: Accepted (extends ADR-030's pixel look and ADR-042's code-grid art;

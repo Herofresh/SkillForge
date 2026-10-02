@@ -293,7 +293,8 @@ src/
       ui.test.tsx       component render tests (RNTL); icons.test.ts, frameGeometry.test.ts
   lib/                  generic helpers: clamp.ts, deepEqual.ts, curve.ts (geometric level curves), median.ts,
                         time.ts (MS_PER_HOUR/DAY/WEEK, currentTime for UI handlers), hash.ts (FNV-1a, seeded tie-breaks),
-                        id.ts (createId for local records), contrast.ts (WCAG ratio),
+                        id.ts (createId for local records), compare.ts (compareCodeUnits: id tie-breaks,
+                        same order on Hermes as in Node), contrast.ts (WCAG ratio),
                         pixelGrid.ts (icon grid → runs), segments.ts (litSegments for bars),
                         radar.ts (spoke points, polygon rasterized into cells), viewport.ts
                         (pan/zoom worklets: zoomAround, clampPan, fitBox), figure.ts (side-view

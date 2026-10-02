@@ -4,6 +4,8 @@
  * straight-arm and locked nodes. The safeguards are advisory: `testOutWarnings` lists what to show
  * and acknowledge first, nothing here blocks.
  */
+import { compareCodeUnits } from '@/lib/compare';
+
 import { PROGRESSION_STEP } from './generator';
 import { nodeUseWarnings, resolveNode, type ProgressMap } from './progression';
 import type { SessionResult } from './recompute';
@@ -27,7 +29,7 @@ const lookupOf = (nodes: readonly ExerciseNode[]): NodeLookup =>
 
 /** Easiest first: ogLevel, then branch column position, then id (stable across runs). */
 function byDifficulty(a: ExerciseNode, b: ExerciseNode): number {
-  return a.ogLevel - b.ogLevel || a.chainOrder - b.chainOrder || a.id.localeCompare(b.id);
+  return a.ogLevel - b.ogLevel || a.chainOrder - b.chainOrder || compareCodeUnits(a.id, b.id);
 }
 
 /** The goals and every node they need through hard prerequisites (transitively). */

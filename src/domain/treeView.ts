@@ -8,6 +8,8 @@
  * - A locked legendary node is shown as a silhouette (`legendary` tile state).
  * - Prerequisites list the alternatives that also satisfy them (ADR-019) and which node met them.
  */
+import { compareCodeUnits } from '@/lib/compare';
+
 import { nodesInBranch } from './branch';
 import { nodeAttributes } from './character';
 import {
@@ -216,7 +218,7 @@ export function nodeHistory(
       };
     })
     .filter((entry): entry is NodeSessionLog => entry !== undefined)
-    .sort((a, b) => b.at - a.at || b.sessionId.localeCompare(a.sessionId))
+    .sort((a, b) => b.at - a.at || compareCodeUnits(b.sessionId, a.sessionId))
     .slice(0, limit);
 }
 

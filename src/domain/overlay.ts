@@ -20,6 +20,7 @@ import {
   parseYamlText,
 } from '@/data/progressionFormat';
 import { USER_ID_PREFIX, validateTree } from '@/data/validate';
+import { compareCodeUnits } from '@/lib/compare';
 
 import type {
   ExerciseNode,
@@ -139,6 +140,20 @@ export function userPlacedIds(overlay: ProgressionOverlay): ReadonlySet<string> 
 }
 
 /**
+ * The `applyOverlay` warnings that concern one node: reported on it, or on a neighbour and naming
+ * it (an og_level drop between two user-placed nodes is reported on the later one only). The
+ * editor of a node shows these, not the advice about other nodes in the tree.
+ */
+export function warningsForNode(
+  warnings: readonly ValidationIssue[],
+  nodeId: string,
+): ValidationIssue[] {
+  return warnings.filter(
+    (warning) => warning.nodeId === nodeId || warning.message.includes(`'${nodeId}'`),
+  );
+}
+
+/**
  * Gives every user-placed node an order of its own in its branch. A node that shares its order
  * with others comes after them (built-in nodes first, then by id) and gets the order halfway to
  * the next one, so built-in nodes keep their order and a content update that uses the same order
@@ -156,7 +171,9 @@ export function resolveOrderClashes(
   for (const chain of byBranch.values()) {
     const sorted = [...chain].sort(
       (a, b) =>
-        a.chainOrder - b.chainOrder || placedLast(a) - placedLast(b) || a.id.localeCompare(b.id),
+        a.chainOrder - b.chainOrder ||
+        placedLast(a) - placedLast(b) ||
+        compareCodeUnits(a.id, b.id), // the same order on Hermes as in Node
     );
     let previous: number | undefined;
     sorted.forEach((node, index) => {

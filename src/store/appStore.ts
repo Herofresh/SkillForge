@@ -89,6 +89,7 @@ import {
   OVERLAY_FILE_EXTENSION,
   OVERLAY_FILE_PREFIX,
   OVERLAY_MIME_TYPE,
+  warningsForNode,
 } from '@/domain/overlay';
 import {
   overlayImportPreview,
@@ -929,8 +930,10 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       nodeDraftWarnings(draft) {
         const node = withDraftId(finalizeDraft(draft));
         const overlay = withNode(get().overlay, baseNodes, node);
-        // A new draft's warnings name the draft (its id is only given on save).
-        return applyOverlay(baseNodes, overlay).warnings.map((warning) =>
+        // Only the advice about this node; a new draft's warnings name the draft (its id is only
+        // given on save).
+        const { warnings } = applyOverlay(baseNodes, overlay);
+        return warningsForNode(warnings, node.id).map((warning) =>
           warning.nodeId === node.id ? { ...warning, nodeId: draft.id } : warning,
         );
       },

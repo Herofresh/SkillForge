@@ -220,6 +220,43 @@ describe('a custom node saved before a content update (PLAN 6.3c, ADR-052)', () 
     expect(store.getState().saveNodeDraft(easier).issues).toEqual([]);
     expect(store.getState().overlay.added[0].ogLevel).toBe(3);
   });
+
+  it("shows only the edited node's advice, not another user node's", () => {
+    const lastOrder = Math.max(
+      ...ALL_NODES.filter((node) => node.branch === savedOnV030.branch).map(
+        (node) => node.chainOrder,
+      ),
+    );
+    /** At the end of the column but easier than the node above it: a warning of its own. */
+    const other: ExerciseNode = {
+      ...savedOnV030,
+      id: 'user_easy_lever_hold',
+      name: 'Easy lever hold',
+      chainOrder: lastOrder + 10,
+      ogLevel: 1,
+    };
+    saveOverlay(test.db, { ...EMPTY_OVERLAY, added: [savedOnV030, other] }, NOW);
+    const store = storeFor(test);
+    const draft = store.getState().nodeDraft(savedOnV030.id);
+    if (!draft) throw new Error('custom node lost');
+    expect(store.getState().nodeDraftWarnings(draft)).toEqual([]);
+
+    const easier = stepOgLevel(draft, -1);
+    expect(
+      store
+        .getState()
+        .nodeDraftWarnings(easier)
+        .map((warning) => warning.nodeId),
+    ).toEqual([savedOnV030.id]);
+    const otherDraft = store.getState().nodeDraft(other.id);
+    if (!otherDraft) throw new Error('custom node lost');
+    expect(
+      store
+        .getState()
+        .nodeDraftWarnings(otherDraft)
+        .map((warning) => warning.nodeId),
+    ).toEqual([other.id]);
+  });
 });
 
 describe('shared progressions (PLAN 4.8)', () => {
