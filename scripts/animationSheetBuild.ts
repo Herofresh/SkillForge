@@ -9,6 +9,11 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join } from 'node:path';
 
 import { NODE_ANIMATIONS, PATTERN_ANIMATIONS } from '@/data/animations';
+import { BACK_LEVER_ANIMATIONS } from '@/data/animations/back_lever';
+import { CORE_ANIMATIONS } from '@/data/animations/core';
+import { DYNAMIC_ANIMATIONS } from '@/data/animations/dynamic';
+import { FRONT_LEVER_ANIMATIONS } from '@/data/animations/front_lever';
+import { H_PULL_ANIMATIONS } from '@/data/animations/h_pull';
 import { H_PUSH_ANIMATIONS } from '@/data/animations/h_push';
 import { HANDSTAND_ANIMATIONS } from '@/data/animations/handstand';
 import { ICONIC_ANIMATIONS } from '@/data/animations/iconic';
@@ -54,6 +59,15 @@ if (only !== undefined) {
 } else {
   write('docs/screenshots/6.4a-v_pull.png', entries(V_PULL_ANIMATIONS), SHEET_CELL);
   write('docs/screenshots/6.4a-iconic.png', entries(ICONIC_ANIMATIONS), SHEET_CELL);
+  write('docs/screenshots/6.4b-h_pull.png', entries(H_PULL_ANIMATIONS), SHEET_CELL);
+  write(
+    'docs/screenshots/6.4b-front_lever.png',
+    entries({ ...FRONT_LEVER_ANIMATIONS, front_lever: ICONIC_ANIMATIONS.front_lever }),
+    SHEET_CELL,
+  );
+  write('docs/screenshots/6.4b-back_lever.png', entries(BACK_LEVER_ANIMATIONS), SHEET_CELL);
+  write('docs/screenshots/6.4b-dynamic.png', entries(DYNAMIC_ANIMATIONS), SHEET_CELL);
+  write('docs/screenshots/6.4b-core.png', entries(CORE_ANIMATIONS), SHEET_CELL);
   write('docs/screenshots/6.4a-patterns.png', entries(PATTERN_ANIMATIONS, 'pattern:'), SHEET_CELL);
   write('docs/screenshots/6.4b-h_push.png', entries(H_PUSH_ANIMATIONS), SHEET_CELL);
   write('docs/screenshots/6.4b-v_push.png', entries(V_PUSH_ANIMATIONS), SHEET_CELL);

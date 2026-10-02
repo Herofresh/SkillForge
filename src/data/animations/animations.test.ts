@@ -39,6 +39,15 @@ describe('exercise animation data (PLAN 6.4a)', () => {
     for (const node of nodes) expect(animationFor(node).source).toBe('node');
   });
 
+  it('animates every node of the bar branches on its own (PLAN 6.4b-1)', () => {
+    const branches = ['h_pull', 'front_lever', 'back_lever', 'dynamic', 'core'];
+    const nodes = ALL_NODES.filter((node) => branches.includes(node.branch));
+    expect(nodes.length).toBeGreaterThanOrEqual(50);
+    for (const node of nodes) {
+      expect([node.id, animationFor(node).source]).toEqual([node.id, 'node']);
+    }
+  });
+
   it('resolves every built-in node to an animation, its pattern when it has none', () => {
     for (const node of ALL_NODES) {
       const resolved = animationFor(node);
