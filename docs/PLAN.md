@@ -171,7 +171,7 @@
   has a Description section; a user node needs one to be saved, but old overlays/backups without
   one still load (shown as "No description yet…"). Overlay layout version 2, backup
   `schemaVersion` 3 (older ones still read); no database change.
-- Flexibility + mobility (6.3a, ADR-050, [PR #PRNUM](https://github.com/Herofresh/SkillForge/pull/PRNUM)): **125 nodes in 14 branches.** `flexibility`
+- Flexibility + mobility (6.3a, ADR-050, [PR #39](https://github.com/Herofresh/SkillForge/pull/39)): **125 nodes in 14 branches.** `flexibility`
   grew from 5 to 17 (yoga paths: pigeon → king pigeon "the dove", half split → front split,
   butterfly → frog → pancake → middle split, half lotus → lotus, full bridge → one-leg wheel). New
   branch `mobility` (11 nodes: CARs, ankle rocks, open book, wall angel, 90/90, deep squat hold,
@@ -776,7 +776,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   without leaving the session. The overlay/editor can edit a node's description (custom nodes
   need one). Maestro: open the sheet in `train.yaml` and `tree.yaml`. Screenshots
   `docs/screenshots/6.2-*.png`.
-- [x] 6.3a More content: flexibility + mobility (ADR-050, [PR #PRNUM](https://github.com/Herofresh/SkillForge/pull/PRNUM)):
+- [x] 6.3a More content: flexibility + mobility (ADR-050, [PR #39](https://github.com/Herofresh/SkillForge/pull/39)):
   - **Flexibility** (5 today) grows to ≥ 10 with yoga-based skills, e.g. pigeon → king pigeon (the
     "dove"), splits (front and middle) progressions, pancake, wheel/bridge variations, lotus prep.
   - **Mobility:** decide in the ADR whether joint mobility (deep squat, ankle, hip CARs, thoracic,
