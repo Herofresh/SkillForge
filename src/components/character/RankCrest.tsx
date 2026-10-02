@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import type { RankTitle } from '@/domain/types';
 
@@ -18,21 +18,22 @@ type Props = {
   rank: RankTitle;
   /** "Next: Apprentice at OG 2 median", or a line for the top rank. */
   hint?: string;
+  /** Makes the crest a button, e.g. to open the rank ladder (PLAN 6.7). */
+  onPress?: () => void;
   testID?: string;
 };
 
-/** The rank title with its pixel crest: the emblem in a rank-colored double frame. */
-export function RankCrest({ rank, hint, testID }: Props) {
-  const color = RankColors[rank];
-  return (
-    <View
-      testID={testID}
-      accessible
-      accessibilityRole="text"
-      accessibilityLabel={`Rank: ${rank}${hint ? `. ${hint}` : ''}`}
-      style={styles.row}>
+/**
+ * The rank title with its pixel crest: the emblem in a rank-colored double frame. With `onPress`
+ * the whole crest is a button and shows a "See all ranks" cue.
+ */
+export function RankCrest({ rank, hint, onPress, testID }: Props) {
+  const label = `Rank: ${rank}${hint ? `. ${hint}` : ''}`;
+  const body = (pressed: boolean) => (
+    <View style={styles.row}>
       <PixelFrame
-        frame={{ lines: [Colors.ink, color, Colors.ink], fill: Colors.surfaceRaised }}
+        frame={{ lines: [Colors.ink, RankColors[rank], Colors.ink], fill: Colors.surfaceRaised }}
+        pressed={pressed}
         padding={Spacing.sm}>
         <PixelIcon name={RANK_ICONS[rank]} size={48} />
       </PixelFrame>
@@ -40,7 +41,7 @@ export function RankCrest({ rank, hint, testID }: Props) {
         <PixelText variant="label" tone="textMuted">
           Rank
         </PixelText>
-        <PixelText variant="title" color={color}>
+        <PixelText variant="title" color={RankColors[rank]}>
           {rank}
         </PixelText>
         {hint !== undefined && (
@@ -48,8 +49,30 @@ export function RankCrest({ rank, hint, testID }: Props) {
             {hint}
           </PixelText>
         )}
+        {onPress && (
+          <PixelText variant="label" tone="rune">
+            See all ranks
+          </PixelText>
+        )}
       </View>
     </View>
+  );
+  if (!onPress) {
+    return (
+      <View testID={testID} accessible accessibilityRole="text" accessibilityLabel={label}>
+        {body(false)}
+      </View>
+    );
+  }
+  return (
+    <Pressable
+      testID={testID}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityHint="Shows every rank and what the next ones need">
+      {({ pressed }) => body(pressed)}
+    </Pressable>
   );
 }
 

@@ -1,6 +1,7 @@
 # Character tab (PLAN 4.5): from a fresh install the sheet shows level 1 and an empty history; after
 # a logged session it shows the earned XP and the session, which opens its summary. Takes the 4.5
-# screenshots. Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
+# screenshots. The rank crest opens and closes the rank ladder (PLAN 6.7, 6.7 screenshots).
+# Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Character - level and XP after a logged session, history opens the session
 ---
@@ -36,6 +37,37 @@ name: Character - level and XP after a logged session, history opens the session
     text: '0 XP earned in total'
 - assertVisible:
     id: 'attribute-radar'
+# 6.7: the rank crest opens the rank ladder: Novice is the hero's rank, Apprentice the next one
+- tapOn:
+    id: 'character-rank'
+- extendedWaitUntil:
+    visible:
+      id: 'rank-ladder'
+    timeout: 20000
+- assertVisible:
+    id: 'rank-ladder-novice-status'
+    text: 'Your rank'
+- assertVisible:
+    id: 'rank-ladder-apprentice-status'
+    text: 'Next rank'
+- takeScreenshot: 6.7-rank-ladder
+- scrollUntilVisible:
+    element:
+      id: 'rank-ladder-legend-status'
+    direction: DOWN
+    timeout: 30000
+- assertVisible:
+    id: 'rank-ladder-legend-status'
+    text: 'Locked'
+- takeScreenshot: 6.7-rank-ladder-locked
+- tapOn:
+    id: 'rank-ladder-close'
+- extendedWaitUntil:
+    notVisible:
+      id: 'rank-ladder'
+    timeout: 20000
+- assertVisible:
+    id: 'character-screen'
 # Log a short session: Train now (Home, 30 min) → start → log the first set → finish
 - tapOn: 'Train'
 - extendedWaitUntil:

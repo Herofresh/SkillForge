@@ -3,14 +3,17 @@ import { fireEvent, render, screen, userEvent } from '@testing-library/react-nat
 import { ALL_NODES } from '@/data/skills';
 import { openTestDatabase } from '@/db/testing/testDatabase';
 import { serializeBackup } from '@/domain/backup';
+import { branchOgLevels, RANK_BRANCHES } from '@/domain/character';
 import { goalProgress, radarAxes, type SessionListItem } from '@/domain/characterView';
 import { EMPTY_OVERLAY } from '@/domain/overlay';
+import { rankLadder } from '@/domain/rankLadder';
 import { createAppStore, type AppStore, type BackupFiles } from '@/store/appStore';
 import { setAppStore } from '@/store/useAppStore';
 
 import { AttributeRadar } from './character/AttributeRadar';
 import { GoalProgressCard } from './character/GoalProgressCard';
 import { RankCrest } from './character/RankCrest';
+import { RankLadderSheet } from './character/RankLadderSheet';
 import { SessionHistoryRow } from './character/SessionHistoryRow';
 import { EquipmentProfileEditor } from './equipment/EquipmentProfileEditor';
 import { BackupPanel } from './settings/BackupPanel';
@@ -57,6 +60,65 @@ describe('RankCrest', () => {
     await render(<RankCrest rank="Adept" hint="Branch median OG 6" />);
     expect(screen.getByText('Adept')).toBeOnTheScreen();
     expect(screen.getByLabelText('Rank: Adept. Branch median OG 6')).toBeOnTheScreen();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('is a button when it opens the ladder', async () => {
+    const onPress = jest.fn();
+    const user = userEvent.setup();
+    await render(<RankCrest rank="Novice" hint="Branch median Foundation" onPress={onPress} />);
+    expect(screen.getByText('See all ranks')).toBeOnTheScreen();
+    await user.press(
+      screen.getByRole('button', { name: 'Rank: Novice. Branch median Foundation' }),
+    );
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('RankLadderSheet', () => {
+  it('shows a new hero every rank, the next one with every branch still below', async () => {
+    const ladder = rankLadder(branchOgLevels(ALL_NODES, {}));
+    const onClose = jest.fn();
+    const user = userEvent.setup();
+    await render(<RankLadderSheet ladder={ladder} onClose={onClose} />);
+    expect(screen.getByText('Rank ladder')).toBeOnTheScreen();
+    for (const rank of ['Novice', 'Apprentice', 'Adept', 'Master', 'Legend']) {
+      expect(screen.getByText(rank)).toBeOnTheScreen();
+    }
+    expect(screen.getByTestId('rank-ladder-novice-status')).toHaveTextContent('Your rank');
+    expect(screen.getByTestId('rank-ladder-apprentice-status')).toHaveTextContent('Next rank');
+    expect(screen.getByTestId('rank-ladder-legend-status')).toHaveTextContent('Locked');
+    expect(screen.getByTestId('rank-ladder-apprentice-progress')).toHaveTextContent(
+      `0 of ${ladder.branchesForRank} branches at OG 2 or higher · ${ladder.branchesForRank} to go`,
+    );
+    expect(screen.getByTestId('rank-ladder-legend-progress')).toBeOnTheScreen();
+    expect(screen.queryByTestId('rank-ladder-novice-progress')).toBeNull();
+    // Only the next rank lists the branches below it.
+    expect(screen.getByTestId('rank-ladder-apprentice-below')).toBeOnTheScreen();
+    expect(screen.queryByTestId('rank-ladder-adept-below')).toBeNull();
+    expect(screen.getByText('Planche')).toBeOnTheScreen();
+    expect(screen.queryByText('Acrobatics')).toBeNull();
+    expect(
+      screen.getByLabelText(
+        /^Legend\. Locked\. Branch median OG 13\. 0 of 7 branches at OG 13 or higher/,
+      ),
+    ).toBeOnTheScreen();
+    expect(screen.getByLabelText(/^Apprentice\. Next rank\. .*Still below: /)).toBeOnTheScreen();
+    await user.press(screen.getByTestId('rank-ladder-close'));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks the lower ranks reached and counts the branches at the next level', async () => {
+    const levels = branchOgLevels(ALL_NODES, {});
+    for (const branch of RANK_BRANCHES.slice(0, 7)) levels[branch] = 6;
+    levels[RANK_BRANCHES[7]] = 9;
+    await render(<RankLadderSheet ladder={rankLadder(levels)} onClose={jest.fn()} />);
+    expect(screen.getByTestId('rank-ladder-novice-status')).toHaveTextContent('Reached');
+    expect(screen.getByTestId('rank-ladder-apprentice-status')).toHaveTextContent('Reached');
+    expect(screen.getByTestId('rank-ladder-adept-status')).toHaveTextContent('Your rank');
+    expect(screen.getByTestId('rank-ladder-master-progress')).toHaveTextContent(
+      '1 of 7 branches at OG 9 or higher · 6 to go',
+    );
   });
 });
 

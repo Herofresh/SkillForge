@@ -155,6 +155,11 @@ export const RANK_BRANCHES: readonly Branch[] = BRANCHES.filter(
   (branch) => !NON_RANK_BRANCHES.includes(branch),
 );
 
+/** The rank median: the median over the {@link RANK_BRANCHES} of each branch's peak ogLevel. */
+export function rankMedianOgLevel(branchLevels: Readonly<Record<Branch, number>>): number {
+  return median(RANK_BRANCHES.map((branch) => branchLevels[branch]));
+}
+
 export function rankForMedianOgLevel(medianOgLevel: number): RankTitle {
   const match = RANK_MIN_MEDIAN_OG_LEVEL.find(({ min }) => medianOgLevel >= min);
   return match?.rank ?? 'Novice';
@@ -185,7 +190,7 @@ export function computeCharacter(
 ): Character {
   const branchLevels = branchOgLevels(nodes, progress);
   const peakOgLevels = attributePeakOgLevels(nodes, progress);
-  const medianOgLevel = median(RANK_BRANCHES.map((branch) => branchLevels[branch]));
+  const medianOgLevel = rankMedianOgLevel(branchLevels);
   return {
     totalXp,
     level: characterLevel(totalXp),

@@ -66,7 +66,8 @@ app/                    expo-router screens (UI only, no game logic)
                         finish / abandon (confirm dialogs)
     summary.tsx         total XP + bonuses, per-exercise outcome/XP, level-up and unlock bursts,
                         streak, SessionResult warnings acknowledged before Done
-  (tabs)/character.tsx  character sheet (PLAN 4.5, ADR-035): hero, level + XP, rank crest, pixel
+  (tabs)/character.tsx  character sheet (PLAN 4.5, ADR-035): hero, level + XP, rank crest (opens
+                        the rank ladder sheet, PLAN 6.7), pixel
                         radar + stat bars, balance note, streak/totals, goals, recent sessions
   session/[sessionId].tsx  a past session's summary (SessionResultPanels), from the Character
                         history and the node detail's history rows (PLAN 5.10); unknown id → not found
@@ -163,6 +164,9 @@ src/
     characterView.ts    Character tab view model (ADR-035): characterSheet, radarAxes, nextRank,
                         rankHint, activeStreak, characterTotals, balanceNote, recentSessions,
                         goalProgress
+    rankLadder.ts       rank ladder view model (PLAN 6.7, ADR-054): rankLadder (every rank with
+                        reached/current/next/locked, branches at its level, branches below),
+                        branchesForMedian, rankRequirement, rankProgressText
   data/
     progressionFormat.ts  THE YAML <-> ExerciseNode parser/normalizer (build, tests, overlay)
     validate.ts         graph/content rules: validateNodes, validateTree (overlay: issues + warnings,
@@ -255,8 +259,9 @@ src/
                         and buzz(cue) over React Native's Vibration (ADR-044)
     train/SessionResultPanels.tsx  XP, streak, level-ups, unlocks, exercises of a SessionResult
                         (Train summary and past session)
-    character/          AttributeRadar (rasterized pixel radar), RankCrest (RANK_ICONS),
-                        SessionHistoryRow, GoalProgressCard
+    character/          AttributeRadar (rasterized pixel radar), RankCrest (RANK_ICONS; a
+                        button with onPress), RankLadderSheet (PLAN 6.7), SessionHistoryRow,
+                        GoalProgressCard
     equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form + the "Remove?"
                         confirmation (onboarding, Settings)
     settings/           BackupPanel (export, import confirm, rejection issues, undo), AboutPanel,
@@ -505,6 +510,10 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
   `acrobatics` and `mobility`, ADR-041, ADR-050)
   of each branch's highest proficient ogLevel:
   Novice < 2 ≤ Apprentice < 6 ≤ Adept < 9 ≤ Master < 13 ≤ Legend.
+  `rankMedianOgLevel(branchLevels)` is that median; the rank ladder (PLAN 6.7, ADR-054) reads it too.
+- **Rank ladder:** a rank is surely reached once `branchesForMedian(12)` = 7 rank branches (more
+  than half) have a peak at its level; with an even count a high middle value can make up for a
+  lower one, so a rank can also come with 6. The ladder shows "n of 7 branches at OG x or higher".
 - **Balance warning:** |push peak − pull peak| > 2 OG levels.
 
 ## Generator *(Phase 2.5, ADR-024; constants in `src/domain/generator.ts` only)*

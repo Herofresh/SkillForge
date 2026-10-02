@@ -7,6 +7,7 @@ import { compareCodeUnits } from '@/lib/compare';
 
 import { goalPathNodes } from './assessment';
 import {
+  branchOgLevels,
   characterLevelProgress,
   computeCharacter,
   RANK_MIN_MEDIAN_OG_LEVEL,
@@ -14,6 +15,7 @@ import {
 } from './character';
 import { formatOgLevel } from './format';
 import { resolveNode, type ProgressMap } from './progression';
+import { rankLadder, type RankLadder } from './rankLadder';
 import type { EngineState, SessionResult } from './recompute';
 import { tierForOgLevel } from './tier';
 import {
@@ -248,6 +250,8 @@ export interface CharacterSheet {
   nextRank?: { rank: RankTitle; minMedianOgLevel: number };
   /** `rankHint`: the median and the next rank's threshold. */
   rankHint: string;
+  /** Every rank and what the locked ones need (PLAN 6.7), opened from the rank crest. */
+  ladder: RankLadder;
   radar: RadarAxis[];
   /** Present when push and pull peaks are more than `PUSH_PULL_MAX_GAP` OG levels apart. */
   balance?: BalanceNote;
@@ -279,6 +283,7 @@ export function characterSheet(input: CharacterSheetInput): CharacterSheet {
     medianOgLevel: character.medianOgLevel,
     ...(next ? { nextRank: next } : {}),
     rankHint: rankHint(character.medianOgLevel, next),
+    ladder: rankLadder(branchOgLevels(nodes, engine.progress)),
     radar: radarAxes(character.attributes),
     ...(character.pushPullWarning ? { balance: balanceNote(character.peakOgLevels) } : {}),
     streak: activeStreak(engine, now),

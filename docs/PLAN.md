@@ -196,11 +196,14 @@
   pose. All 10 v_pull nodes plus push-up, squat, freestanding handstand, front lever and full
   planche have their own; every other node shows its first pattern's generic animation. Dev Style
   Guide → Exercise animations; contact sheets and emulator screenshots `docs/screenshots/6.4a-*.png`.
+- Rank ladder (6.7, ADR-054, PR_LINK): tapping the rank crest opens a sheet with every rank
+  (reached, yours, next, locked) and, per rank, how many branches are at its level; the next rank
+  lists the branches still below. Screenshots `docs/screenshots/6.7-*.png`.
 
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
-2. Phase 6 in order, next 6.5 (v0.4.0 release; 6.4 animations are done). Phase 7 (Google Play) comes after
+2. Phase 6 in order, next 6.5 (v0.4.0 release; 6.4 animations and 6.7 rank ladder are done). Phase 7 (Google Play) comes after
    all of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -209,6 +212,17 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Rank ladder (task 6.7, ADR-054, PR_LINK):** the rank crest on the Character tab is a button
+  that opens `RankLadderSheet` (`src/components/character/`), built from `rankLadder` in
+  `src/domain/rankLadder.ts` (via `characterSheet().ladder`). `character.ts` gained
+  `rankMedianOgLevel` (the one median, also used by `computeCharacter`). Progress is "n of 7
+  branches at OG x or higher" (`branchesForMedian`: more than half always lifts the median; with
+  12 branches 6 can be enough when a higher middle value makes up for it, the status uses the real
+  median). Only the next rank lists the branches below its level. No data or schema change.
+  Verified: typecheck, lint, format:check, progressions:check, the full Jest suite (one
+  `treeMap.test.tsx` case timed out once at 5 s under load while the emulator was running and
+  passes alone; unrelated), and Maestro `character.yaml` on the Pixel 8 Pro emulator (opens,
+  asserts Novice/Apprentice/Legend, closes; `docs/screenshots/6.7-rank-ladder*.png`).
 - **6.3c review fixes (6.5 release prep, ADR-052 update):** every id/session-id tie-break in
   `src/domain/` (overlay order clashes, branch columns, assessment, onboarding, recent sessions,
   node session log) uses `compareCodeUnits` from `src/lib/compare.ts`; `localeCompare` is left only
@@ -937,9 +951,9 @@ upgrade check from every earlier release). Any new table or column is additive a
   licence and SDK 57 support in the ADR). The app writes the widget's data after every
   session / load and the widget refreshes at midnight so "today" flips. Not testable in Expo
   Go: verify on the emulator with the release APK and add a screenshot.
-- [ ] 6.7 Rank ladder: tapping the rank crest on the Character tab opens all ranks, the reached
+- [x] 6.7 Rank ladder: tapping the rank crest on the Character tab opens all ranks, the reached
   ones and the still locked ones with what each needs (from `character.ts`, no copied
-  thresholds).
+  thresholds) (ADR-054, PR_LINK)
 - [ ] 6.8 v0.5.0 release (6.6–6.7), same routine.
 - [ ] 6.9 Classes (user idea): classes the hero unlocks at certain levels, ranks or attribute
   profiles (e.g. a pull-strong hero unlocks a "Climber" class) and can pick one to display.
