@@ -5,6 +5,7 @@ import {
   RANK_MIN_MEDIAN_OG_LEVEL,
   NON_RANK_BRANCHES,
   rankForMedianOgLevel,
+  rankMedianOgLevel,
 } from './character';
 import {
   branchesForMedian,
@@ -121,6 +122,34 @@ describe('rankLadder', () => {
     for (const step of reached) {
       expect(step.branchesToGo).toBe(0);
       expect(step.branchesBelow).toEqual([]);
+    }
+  });
+
+  it('matches the rank rule and never overstates the progress for random peaks', () => {
+    // Seeded Park-Miller generator so the cases are the same on every run.
+    let seed = 47;
+    const next = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    for (let run = 0; run < 500; run += 1) {
+      const branchLevels = levels(
+        Object.fromEntries(BRANCHES.map((branch) => [branch, Math.floor(next() * 17)])),
+      );
+      const medianOgLevel = median(RANK_BRANCHES.map((branch) => branchLevels[branch]));
+      const ladder = rankLadder(branchLevels);
+      expect(rankMedianOgLevel(branchLevels)).toBe(medianOgLevel);
+      expect(ladder.medianOgLevel).toBe(medianOgLevel);
+      expect(ladder.rank).toBe(rankForMedianOgLevel(medianOgLevel));
+      for (const step of ladder.steps) {
+        const reached = step.status === 'reached' || step.status === 'current';
+        expect(reached).toBe(medianOgLevel >= step.minMedianOgLevel);
+        // A rank not yet reached always has at least one branch to go.
+        if (!reached) {
+          expect(step.branchesAtLevel).toBeLessThan(ladder.branchesForRank);
+          expect(step.branchesToGo).toBeGreaterThan(0);
+        }
+      }
     }
   });
 
