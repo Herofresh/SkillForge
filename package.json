@@ -72,7 +72,8 @@
     "lockfile:fix": "node scripts/lockfile.ts fix",
     "build:apk": "tsx scripts/buildApk.ts",
     "build:apk:universal": "tsx scripts/buildApk.ts --universal",
-    "icon:build": "tsx scripts/iconBuild.ts"
+    "icon:build": "tsx scripts/iconBuild.ts",
+    "animations:sheet": "tsx scripts/animationSheetBuild.ts"
   },
   "private": true,
   "jest": {

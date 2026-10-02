@@ -52,6 +52,9 @@ describe('ExerciseInfoSheet', () => {
     const user = userEvent.setup();
     await render(<ExerciseInfoSheet node={pullUp} onClose={onClose} onOpenDetail={onOpenDetail} />);
     expect(screen.getByText('Pull-up')).toBeOnTheScreen();
+    expect(
+      screen.getByTestId('exercise-info-animation', { includeHiddenElements: true }),
+    ).toBeTruthy();
     expect(screen.getByTestId('exercise-info-description')).toHaveTextContent(pullUp.description);
     for (const cue of pullUp.cues) expect(screen.getByText(`• ${cue}`)).toBeOnTheScreen();
     await user.press(screen.getByTestId('exercise-info-open'));

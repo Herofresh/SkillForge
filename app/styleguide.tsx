@@ -17,6 +17,7 @@ import {
   ICON_NAMES,
   LevelBadge,
   LevelUpBurst,
+  PixelAnimation,
   PixelButton,
   PixelFrame,
   PixelIcon,
@@ -28,6 +29,7 @@ import {
   WarningBanner,
   XPBar,
 } from '@/components/ui';
+import { ANIMATION_CATALOGUE } from '@/data/animations';
 import { ATTRIBUTES, TIERS } from '@/domain/types';
 
 /** Sample values for the demo bars only. */
@@ -151,6 +153,21 @@ export default function StyleGuideScreen() {
           </View>
         </Section>
 
+        <Section title="Exercise animations">
+          <View style={styles.wrap} testID="styleguide-animations">
+            {ANIMATION_CATALOGUE.map((entry) => (
+              <PixelFrame key={entry.key} shadow={false} padding={Spacing.xs}>
+                <View style={styles.animation}>
+                  <PixelAnimation animation={entry} size={96} />
+                  <PixelText variant="small" tone="textMuted" align="center">
+                    {entry.label}
+                  </PixelText>
+                </View>
+              </PixelFrame>
+            ))}
+          </View>
+        </Section>
+
         <Section title="Warnings">
           <WarningBanner
             testID="demo-warning"
@@ -229,6 +246,11 @@ const styles = StyleSheet.create({
     height: 32,
     borderWidth: 2,
     borderColor: Colors.ink,
+  },
+  animation: {
+    width: 96,
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
   icon: {
     width: 72,
