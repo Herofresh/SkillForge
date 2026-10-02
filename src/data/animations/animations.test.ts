@@ -14,6 +14,8 @@ import {
 
 /** Nodes PLAN 6.4a animates on their own besides the whole v_pull branch. */
 const ICONIC_IDS = ['push_up', 'squat', 'freestanding_handstand', 'front_lever', 'full_planche'];
+/** Branches PLAN 6.4b-2 animates node by node (the iconic nodes among them stay in iconic.ts). */
+const PUSH_LEGS_BRANCHES = ['h_push', 'v_push', 'planche', 'handstand', 'legs'];
 /** How far (cells) a gripping hand may sit from the centre of its bar or ring. */
 const GRIP_TOLERANCE = 1.5;
 /** Joints may poke this far into the floor's top row (feet and hands rest on it). */
@@ -29,6 +31,12 @@ describe('exercise animation data (PLAN 6.4a)', () => {
     expect(vPull.length).toBeGreaterThanOrEqual(10);
     for (const node of vPull) expect(animationFor(node).source).toBe('node');
     for (const id of ICONIC_IDS) expect(NODE_ANIMATIONS[id]).toBeDefined();
+  });
+
+  it.each(PUSH_LEGS_BRANCHES)('animates every %s node on its own (6.4b-2)', (branch) => {
+    const nodes = ALL_NODES.filter((node) => node.branch === branch);
+    expect(nodes.length).toBeGreaterThanOrEqual(10);
+    for (const node of nodes) expect(animationFor(node).source).toBe('node');
   });
 
   it('resolves every built-in node to an animation, its pattern when it has none', () => {

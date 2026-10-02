@@ -9,8 +9,13 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join } from 'node:path';
 
 import { NODE_ANIMATIONS, PATTERN_ANIMATIONS } from '@/data/animations';
+import { H_PUSH_ANIMATIONS } from '@/data/animations/h_push';
+import { HANDSTAND_ANIMATIONS } from '@/data/animations/handstand';
 import { ICONIC_ANIMATIONS } from '@/data/animations/iconic';
+import { LEGS_ANIMATIONS } from '@/data/animations/legs';
+import { PLANCHE_ANIMATIONS } from '@/data/animations/planche';
 import { V_PULL_ANIMATIONS } from '@/data/animations/v_pull';
+import { V_PUSH_ANIMATIONS } from '@/data/animations/v_push';
 import type { FigureAnimation } from '@/lib/figureAnimation';
 
 import { renderSheet, SHEET_CELL, type SheetEntry } from './animationSheet';
@@ -50,4 +55,9 @@ if (only !== undefined) {
   write('docs/screenshots/6.4a-v_pull.png', entries(V_PULL_ANIMATIONS), SHEET_CELL);
   write('docs/screenshots/6.4a-iconic.png', entries(ICONIC_ANIMATIONS), SHEET_CELL);
   write('docs/screenshots/6.4a-patterns.png', entries(PATTERN_ANIMATIONS, 'pattern:'), SHEET_CELL);
+  write('docs/screenshots/6.4b-h_push.png', entries(H_PUSH_ANIMATIONS), SHEET_CELL);
+  write('docs/screenshots/6.4b-v_push.png', entries(V_PUSH_ANIMATIONS), SHEET_CELL);
+  write('docs/screenshots/6.4b-planche.png', entries(PLANCHE_ANIMATIONS), SHEET_CELL);
+  write('docs/screenshots/6.4b-handstand.png', entries(HANDSTAND_ANIMATIONS), SHEET_CELL);
+  write('docs/screenshots/6.4b-legs.png', entries(LEGS_ANIMATIONS), SHEET_CELL);
 }
