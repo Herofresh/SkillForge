@@ -1,5 +1,5 @@
 /**
- * The guard around `react-native-android-widget` (PLAN 6.6, ADR-054). The library's entry looks up
+ * The guard around `react-native-android-widget` (PLAN 6.6, ADR-055). The library's entry looks up
  * its native TurboModule with `getEnforcing` as soon as it is imported, which throws where the
  * module isn't compiled in: Expo Go, iOS, web and Jest. So nothing imports the library (or
  * `nativeWidget.tsx`, which does) statically; `loadNativeWidget` checks first and `require`s it

@@ -1,5 +1,5 @@
 /**
- * Where the app leaves the widget's snapshot (PLAN 6.6, ADR-054): one JSON file in the app's
+ * Where the app leaves the widget's snapshot (PLAN 6.6, ADR-055): one JSON file in the app's
  * document directory. The widget's background task can run while the app is closed, so it reads
  * this file instead of opening the database and replaying the history. Only I/O lives here; the
  * shape and its checks are in `src/domain/widget.ts`.

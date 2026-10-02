@@ -1,5 +1,5 @@
 /**
- * The Android home-screen widget's data (PLAN 6.6, ADR-054). Two steps, both pure:
+ * The Android home-screen widget's data (PLAN 6.6, ADR-055). Two steps, both pure:
  *
  * 1. `widgetSnapshot` turns the app state into a small JSON-safe snapshot. The app writes it to a
  *    file whenever its state changes; the widget's background task reads it back

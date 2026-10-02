@@ -206,13 +206,19 @@
   shared with the built-in Tuck front lever raise) all kept, no onboarding. The seed/verify flows
   now cover the user overlay. Screenshots `docs/screenshots/6.5-*.png`. The GitHub release is
   created by the coordinator after the merge.
+- Home-screen widget (6.6, ADR-055, PR_LINK): an Android widget (react-native-android-widget,
+  MIT) shows "Trained today" / "Not yet today", the streak, level, rank and top 3 attributes in
+  the pixel look; a tap opens the Train tab (`skillforge://train`). The app writes a snapshot file
+  after loadAll, on data changes and on foreground; the widget decides "today" and the streak at
+  draw time (30-minute updates, so it flips ≤ 30 min after midnight). Only in release builds; Expo
+  Go and Jest skip it. Screenshots `docs/screenshots/6.6-widget-*.png`.
 
 ## Next up
 1. Coordinator: after this PR is merged, publish the GitHub pre-release `v0.4.0` with both APKs
    and their SHA-256 (see the 6.5 handoff note). Then, on the user's phone: install v0.4.0 over
    the installed build (Update, no uninstall) and look at the new font, descriptions,
    animations, the mobility tab and the rank ladder; report what feels off.
-2. Phase 6 in order, next 6.6 (widget), then 6.8 (v0.5.0 release: 6.6). Phase 7 (Google Play)
+2. Phase 6 in order, next 6.8 (v0.5.0 release: 6.6 widget is done). Phase 7 (Google Play)
    comes after all of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -221,6 +227,25 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Home-screen widget (task 6.6, ADR-055, PR_LINK):**
+  - Code: `src/domain/widget.ts` (pure: `widgetSnapshot`, `widgetView`, `parseWidgetSnapshot`),
+    `src/widget/` (`widgetModule.ts` guard, `nativeWidget.tsx` layout + task + redraw,
+    `widgetStorage.ts` file, `widgetSync.ts` store subscription started from `bootstrap.ts`),
+    root `index.ts` (new `main`), plugin config in `app.json`, library mock in `jest.setup.ts`.
+    `gridSvg` (`src/lib/pixelGrid.ts`) / `iconSvg` (`icons.ts`) draw pixel icons as SVG strings.
+  - Verified: typecheck, lint, Jest (75 suites), format:check, progressions:check, lockfile:check;
+    `npm run build:apk:universal -- --clean` (signer check passed; built in a short-path copy
+    `D:\sf066`, identical code except comments, since native builds fail in `.claude/worktrees/`);
+    on the Pixel_8_Pro_API_35 emulator: the widget is in the picker (4 × 2), added via long-press
+    → Widgets → search "SkillForge" → Add; showed "Trained today" with the existing data; after
+    moving the clock one day forward (`adb root`, `date`) "Not yet today" with the streak kept;
+    after logging and finishing a session "Trained today" and streak 2; tap opened the Train tab;
+    resizing to 2 cells while the app was force-stopped redrew it from the background task
+    (compact layout). The APK was installed with `install -r -d` over the release agent's 0.4.0
+    data (kept, no migration). Not verified: the 30-min periodic flip at real midnight (unit tests
+    cover `widgetView`), a real phone.
+  - Ideas (not done): a `previewImage` for the widget picker (shows the app icon today), larger
+    type on the 4 × 2 size, classes (6.9) on the widget (bump `WIDGET_SNAPSHOT_VERSION`).
 - **Release v0.4.0 (task 6.5):** ADR-043 routine. Built from the rebased branch (includes 6.7) in
   a short-path copy of the worktree (`D:\sf040`): in `.claude/worktrees/<agent>/` the native
   CMake paths are too long and Gradle fails with "build.ninja still dirty after 100 tries"
@@ -964,7 +989,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   - [x] Release prep, 6.3c review fixes: id tie-breaks compare code units (`compareCodeUnits`),
     not `localeCompare`, so order is the same on Hermes as in Node; the node editor shows only the
     advice about the node being edited (`warningsForNode`)
-- [ ] 6.6 Android home-screen widget (like Duolingo): shows whether you trained today, the
+- [x] 6.6 (ADR-055, PR_LINK) Android home-screen widget (like Duolingo): shows whether you trained today, the
   streak, the hero's level and rank, a few stats; tapping it opens the Train tab
   (`skillforge://train`). Needs native code: a config plugin / library that works with
   `expo prebuild` and the local `build:apk` (candidate: `react-native-android-widget`; check

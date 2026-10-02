@@ -3,7 +3,7 @@
 'use no memo';
 
 /**
- * The home-screen widget itself (PLAN 6.6, ADR-054): its layout in the library's widget primitives,
+ * The home-screen widget itself (PLAN 6.6, ADR-055): its layout in the library's widget primitives,
  * the background task that draws it when Android asks (added, resized, the 30-minute update), and
  * the redraw the app requests after its data changed. This file imports `react-native-android-widget`
  * statically, so only `widgetModule.ts` may load it, after checking the native module exists.

@@ -1,5 +1,5 @@
 /**
- * Keeps the home-screen widget current (PLAN 6.6, ADR-054). After `loadAll`, the app writes a fresh
+ * Keeps the home-screen widget current (PLAN 6.6, ADR-055). After `loadAll`, the app writes a fresh
  * `WidgetSnapshot` and redraws the widget; then again whenever the parts the widget shows change
  * (a finished session or Trial, a test-out, an import, a renamed hero) and whenever the app comes to
  * the foreground (the day may have changed). One store subscription covers every action that
