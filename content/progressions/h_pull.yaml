@@ -9,6 +9,7 @@ nodes:
   # --- Foundations: easy rows (band at home, or leaning back on rings/bar) ---
   - id: band_row
     name: Band row
+    description: "A row with a resistance band anchored in front of you at chest height: you pull the band towards the lower ribs and let it back out. It trains the upper back with no bar needed."
     order: 10
     og_level: 0 # foundation: not on the OG2 chart
     metric: reps
@@ -33,6 +34,7 @@ nodes:
 
   - id: incline_row
     name: Incline row
+    description: Holding rings or a low bar with the feet on the floor and the body leaning back at a slant, you pull the chest up to the hands. The more upright you stand, the easier it is.
     order: 20 # order 10 is kept for band_row (see docs/research/node-manifest.md)
     og_level: 0 # OG2 puts the row negative at level 1, so the incline row sits below it
     metric: reps
@@ -57,6 +59,7 @@ nodes:
   # --- Full rows ---
   - id: horizontal_row
     name: Horizontal row
+    description: Hanging below a bar or rings with the body straight and almost parallel to the floor, heels on the ground, you pull the chest up to the hands. Also called an inverted or Australian row.
     order: 30
     og_level: 2 # OG2: horizontal / ring row [2]
     metric: reps
@@ -83,6 +86,7 @@ nodes:
 
   - id: archer_row
     name: Archer row
+    description: A row with the hands wide, pulling towards one hand while the other arm stays straight out to the side. It loads one arm at a time, a step towards the one-arm row.
     order: 40
     og_level: 4 # OG2: archer row [4]
     metric: reps
@@ -110,6 +114,7 @@ nodes:
   # --- Advanced: lever rows and one-arm rows ---
   - id: tuck_front_lever_row
     name: Tuck front lever row
+    description: From a tuck front lever, knees pulled in and the body horizontal under the bar, you pull the bar to the lower chest and lower back to straight arms. A row in the front-lever position.
     order: 50
     og_level: 5 # OG2: front lever rows, tuck [5]
     metric: reps
@@ -141,6 +146,7 @@ nodes:
 
   - id: straddle_one_arm_row
     name: Straddle one-arm row
+    description: A row with only one hand on the ring or bar, feet spread wide on the floor for balance. You pull the chest to the hand without letting the body twist open.
     order: 60
     og_level: 6 # OG2: straddle one-arm row [6]
     metric: reps

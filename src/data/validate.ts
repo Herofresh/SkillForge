@@ -15,6 +15,8 @@ export const MAX_OG_LEVEL = 17;
 export const MIN_PREREQUISITE_LEVEL = 1;
 export const MAX_PREREQUISITE_LEVEL = 10;
 export const MAX_TRIAL_SETS = 10;
+/** A description is 1–3 short sentences (PLAN 6.2, ADR-049); longer text belongs in the cues. */
+export const MAX_DESCRIPTION_LENGTH = 300;
 
 /** Plausible upper bound of a trial/working-range value, per metric. Catches typos like 300 reps. */
 export const METRIC_MAX_VALUE: Record<Metric, number> = {
@@ -49,6 +51,7 @@ export function validateNodes(nodes: readonly ExerciseNode[]): ValidationIssue[]
     checkEquipment(node, report);
     checkRangeAndTrial(node, report);
     checkSources(node, report);
+    checkDescription(node, report);
     if (STRAIGHT_ARM_BRANCHES.includes(node.branch) && !node.straightArm) {
       report(node, `is in the straight-arm branch '${node.branch}' but straight_arm is not true`);
     }
@@ -188,6 +191,23 @@ function checkRangeAndTrial(node: ExerciseNode, report: Report): void {
     }
   } else if (trial.reps !== undefined) {
     report(node, `trial reps is only used for ${METRICS_WITH_REPS.join(' and ')} nodes`);
+  }
+}
+
+/**
+ * Built-in nodes need a description; a user node may lack one (saved before PLAN 6.2, ADR-049),
+ * so old overlays and backups keep loading. The editor asks for it when the user saves the node.
+ */
+function checkDescription(node: ExerciseNode, report: Report): void {
+  if (node.source === 'core' && node.description.trim() === '') {
+    report(node, 'description is missing: 1–3 plain sentences on what the exercise looks like');
+  }
+  if (node.description.length > MAX_DESCRIPTION_LENGTH) {
+    report(
+      node,
+      `description is ${node.description.length} characters; keep it under ` +
+        `${MAX_DESCRIPTION_LENGTH} (1–3 short sentences)`,
+    );
   }
 }
 

@@ -1,11 +1,13 @@
 import {
   formatClock,
+  formatDescription,
   formatLevelProgress,
   formatOgLevel,
   formatPerformance,
   formatShortDate,
   formatTrial,
   formatWorkingRange,
+  NO_DESCRIPTION_TEXT,
   spokenOgLevel,
 } from './format';
 
@@ -82,5 +84,13 @@ describe('formatClock', () => {
     expect(formatClock(725)).toBe('12:05');
     expect(formatClock(3_725)).toBe('1:02:05');
     expect(formatClock(-4)).toBe('0:00');
+  });
+});
+
+describe('formatDescription', () => {
+  it('shows the description, or a hint when a user node has none yet', () => {
+    expect(formatDescription('Hanging from a bar.')).toBe('Hanging from a bar.');
+    expect(formatDescription('')).toBe(NO_DESCRIPTION_TEXT);
+    expect(formatDescription('  ')).toBe(NO_DESCRIPTION_TEXT);
   });
 });

@@ -103,6 +103,27 @@ describe('serializeBackup / parseBackup', () => {
   });
 });
 
+describe('descriptions (schema version 3, PLAN 6.2)', () => {
+  it('writes version 3 with the user node description in the overlay', () => {
+    const document = documentOf();
+    expect(document.schemaVersion).toBe(3);
+    const overlay = document.overlay as { version: number; added: Record<string, unknown>[] };
+    expect(overlay.version).toBe(2);
+    expect(overlay.added[0].description).toBe(userNode.description);
+  });
+
+  it('still reads a version 2 backup (v0.2.0 / v0.3.0) whose user node has no description', () => {
+    const v2 = documentOf();
+    v2.schemaVersion = 2;
+    const overlay = v2.overlay as { version: number; added: Record<string, unknown>[] };
+    overlay.version = 1;
+    delete overlay.added[0].description;
+    const parsed = parseDocument(v2);
+    expect(parsed.issues).toEqual([]);
+    expect(parsed.data?.overlay.added[0]).toEqual({ ...userNode, description: '' });
+  });
+});
+
 describe('set durations (schema version 2, PLAN 5.4)', () => {
   const timed: UserData = {
     ...data,
@@ -115,7 +136,7 @@ describe('set durations (schema version 2, PLAN 5.4)', () => {
 
   it('round-trips the durations of timed sets and leaves untimed sets without one', () => {
     const document = documentOf(timed);
-    expect(document.schemaVersion).toBe(2);
+    expect(document.schemaVersion).toBe(BACKUP_SCHEMA_VERSION);
     const [first, second] = document.sessions as { sets: Record<string, unknown>[] }[];
     expect(first.sets[0].durationSec).toBe(31);
     expect(second.sets[0]).not.toHaveProperty('durationSec');

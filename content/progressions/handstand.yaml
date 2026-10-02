@@ -9,6 +9,7 @@ nodes:
   # --- Wall work (hold standard: RR 3 x 30 s) ---
   - id: wall_plank
     name: Wall plank
+    description: With the hands on the floor and the feet up on a wall, the body forms an L with the hips above the shoulders. A first upside-down position on the way to the handstand.
     order: 10
     og_level: 0
     metric: hold_s
@@ -35,6 +36,7 @@ nodes:
 
   - id: wall_handstand
     name: Wall handstand (back to wall)
+    description: A handstand kicked up with your back to a wall, so the heels rest on it for balance. It builds the strength and comfort to hold your weight upside down.
     order: 20
     og_level: 1
     metric: hold_s
@@ -67,6 +69,7 @@ nodes:
 
   - id: chest_to_wall_handstand
     name: Chest-to-wall handstand
+    description: "A handstand facing the wall: you walk the feet up the wall until chest and toes face it, hands close to it. It teaches the straight, stacked handstand line."
     order: 30
     og_level: 2
     metric: hold_s
@@ -96,6 +99,7 @@ nodes:
   # --- Bent-arm balance ---
   - id: frog_stand
     name: Frog stand (crow)
+    description: Squatting with the hands on the floor and the knees resting on the bent elbows, you tip forward until the feet lift and balance on the hands. Also called the crow.
     order: 40
     og_level: 3
     metric: hold_s
@@ -124,6 +128,7 @@ nodes:
   # --- Freestanding ---
   - id: freestanding_handstand
     name: Freestanding handstand
+    description: Balancing upside down on your hands with no wall, body straight and stacked over the wrists. The core balance skill of calisthenics.
     order: 50
     og_level: 4
     metric: hold_s
@@ -156,6 +161,7 @@ nodes:
   # --- Press to handstand ---
   - id: wall_straddle_press_eccentric
     name: Wall straddle press eccentric
+    description: From a handstand with the heels on the wall, you open the legs wide and lower them slowly to the floor. The lowering half of a straddle press.
     order: 60
     og_level: 5
     metric: eccentric_s
@@ -186,6 +192,7 @@ nodes:
 
   - id: straddle_press_to_handstand
     name: Straddle press to handstand
+    description: From a wide straddle stand with the hands on the floor, you lift the hips over the shoulders and the legs up into a handstand without jumping. A strength and compression skill.
     order: 70
     og_level: 7
     metric: reps
@@ -221,6 +228,7 @@ nodes:
   # --- One-arm (legendary) ---
   - id: one_arm_handstand
     name: One-arm handstand
+    description: Balancing upside down on a single straight arm. An elite balance skill that builds on years of handstand practice.
     order: 80
     og_level: 10
     metric: hold_s

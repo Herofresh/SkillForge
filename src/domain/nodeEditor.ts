@@ -7,6 +7,7 @@
  * The functions don't try to keep the draft valid (the validator's issues are the feedback); they
  * only keep numbers on the metric's step and above zero, so a stepper never produces noise.
  */
+import { MAX_DESCRIPTION_LENGTH } from '@/data/validate';
 import { deepEqual } from '@/lib/deepEqual';
 
 import { searchNodes } from './assessment';
@@ -155,6 +156,7 @@ export function newCustomNode(
   const draft: ExerciseNode = {
     id: NEW_NODE_ID,
     name: '',
+    description: '',
     branch,
     chainOrder: CHAIN_ORDER_GAP,
     ogLevel: template?.ogLevel ?? 0,
@@ -176,6 +178,31 @@ export function newCustomNode(
 
 export function setName(draft: ExerciseNode, name: string): ExerciseNode {
   return { ...draft, name: name.slice(0, MAX_NODE_NAME_LENGTH) };
+}
+
+/** The description as typed (cut at the validator's `MAX_DESCRIPTION_LENGTH`; trimmed on save). */
+export function setDescription(draft: ExerciseNode, description: string): ExerciseNode {
+  return { ...draft, description: description.slice(0, MAX_DESCRIPTION_LENGTH) };
+}
+
+/** What the editor tells the user when a user node has no description yet. */
+export const DESCRIPTION_MISSING_MESSAGE =
+  'description is missing: say in 1–3 sentences what the exercise is and what it looks like';
+
+/**
+ * The editor's own rules on top of `applyOverlay` (ADR-049): a user node needs a description to
+ * be saved. The validator lets a user node without one load (saved before PLAN 6.2); built-in
+ * nodes are covered by the validator itself.
+ */
+export function draftIssues(draft: ExerciseNode): ValidationIssue[] {
+  if (draft.source !== 'user' || draft.description.trim() !== '') return [];
+  return [{ nodeId: draft.id, message: DESCRIPTION_MISSING_MESSAGE }];
+}
+
+/** The draft as it is saved: the description trimmed like the YAML format does. */
+export function finalizeDraft(draft: ExerciseNode): ExerciseNode {
+  const description = draft.description.trim();
+  return description === draft.description ? draft : { ...draft, description };
 }
 
 /** Changes the metric of a user node and resets its standards to the metric's defaults. */
@@ -339,6 +366,7 @@ export function prerequisiteOptions(
 /** Editor sections an issue is shown in (inline, next to the fields it is about). */
 export const EDITOR_SECTIONS = [
   'name',
+  'description',
   'position',
   'standards',
   'prerequisites',
@@ -350,6 +378,7 @@ export type EditorSection = (typeof EDITOR_SECTIONS)[number];
 
 /** Message patterns → section, first match wins (the validator's wording). */
 const SECTION_PATTERNS: readonly [RegExp, EditorSection][] = [
+  [/^description/, 'description'],
   [/prerequisite|cycle/, 'prerequisites'],
   [/working_range|trial/, 'standards'],
   [/equipment/, 'equipment'],

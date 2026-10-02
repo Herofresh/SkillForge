@@ -165,7 +165,16 @@ available = rune double line ("glow"), rune icon, READY · training = raised wit
 gold "GOAL" star tag. `ChainLink` draws the prerequisite chain between tiles (`ChainColors`: gold met,
 steel unmet); `PrereqChip` is a ✓/✗ + name chip for other prerequisites (36 dp, hit slop to 48 dp).
 `TreeLegend` explains it all. The `cross` icon is the ✗. The node detail (`src/components/node/`) is
-built from `DetailSection` panels (caps heading + icon); its header reuses the tile frame.
+built from `DetailSection` panels (caps heading + icon); its header reuses the tile frame, and the
+first panel is "About" (`info` icon) with the description (PLAN 6.2).
+
+**Exercise info (PLAN 6.2, ADR-049):** the `info` icon is a rune ring with a light "i".
+`InfoButton` puts it on a small `raised` frame that drops into its shadow when pressed (no fade),
+centred in a 48 dp target; it sits at the end of a tile's top row and of an `ExerciseCard` header.
+`ExerciseInfoSheet` is a `PixelModal` titled with the exercise name: the description in `body`,
+then the cues as `small` bullets in a shadowless parchment frame with a scroll icon and a CUES
+label (the body scrolls above 360 dp), plus a primary "Open skill" in the Tree only. Map nodes open
+it on long press (too small for the button); the Legend mentions both ways.
 Screenshots: `docs/screenshots/4.2-tree.png`, `4.3-node-detail.png`, `4.3-unlock.png`,
 `4.3-trial.png`.
 
@@ -216,7 +225,8 @@ confirm in a `PixelModal` with a danger button. Screenshots: `docs/screenshots/4
 editor is a stack of `DetailSection` panels (an arcane "Exercise" panel for a custom node: name,
 metric chips, "Comes after" + `PositionSheet`, difficulty stepper, straight-arm chip; then
 Standards steppers, Prerequisites as raised cards with a "Required" chip, level stepper and Remove,
-Equipment options as tag-chip cards, Cues on parchment, Trains chips with "Auto"). Validator issues
+a Description panel with a multiline field for every node (6.2), Equipment options as tag-chip
+cards, Cues on parchment, Trains chips with "Auto"). Validator issues
 show inline under the section they are about in an `IssueNotes` danger frame ("FIX THIS TO SAVE");
 the footer states the problem count and Save stays disabled while there are any. `CustomBadge`
 (arcane frame, quill, "CUSTOM") marks added/edited nodes on the detail header; tiles get a smaller

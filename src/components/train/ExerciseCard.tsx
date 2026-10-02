@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import type { ExerciseView } from '@/domain/trainView';
 
+import { InfoButton } from '../node/InfoButton';
 import { Frames, Spacing } from '../theme';
 import { PixelFrame, PixelIcon, PixelText } from '../ui';
 
@@ -12,14 +13,17 @@ type Props = {
   highlighted?: boolean;
   /** Buttons under the details (swap/remove in the preview). */
   children?: ReactNode;
+  /** Opens the exercise info sheet (PLAN 6.2): an "i" next to the name. */
+  onInfo?: () => void;
   testID?: string;
 };
 
 /**
  * One exercise of a plan or session: name, sets × target and rest, with its markers: Trial,
- * straight-arm, swapped by the user, replaced for the equipment (ADR-005) and its strength pair.
+ * straight-arm, swapped by the user, replaced for the equipment (ADR-005) and its strength pair,
+ * and an "i" for the exercise info sheet (PLAN 6.2) when `onInfo` is set.
  */
-export function ExerciseCard({ exercise, highlighted = false, children, testID }: Props) {
+export function ExerciseCard({ exercise, highlighted = false, children, onInfo, testID }: Props) {
   const tags = exerciseTags(exercise);
   return (
     <PixelFrame
@@ -34,6 +38,9 @@ export function ExerciseCard({ exercise, highlighted = false, children, testID }
           style={styles.name}>
           {exercise.name}
         </PixelText>
+        {onInfo && (
+          <InfoButton name={exercise.name} onPress={onInfo} testID={testID && `${testID}-info`} />
+        )}
       </View>
       <PixelText testID={testID && `${testID}-prescription`}>
         {`${exercise.prescription} · ${exercise.rest}`}

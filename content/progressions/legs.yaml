@@ -9,6 +9,7 @@ nodes:
   # --- Squat (two legs) ---
   - id: assisted_squat
     name: Assisted squat
+    description: A squat holding on to something sturdy in front of you, like a door frame or pole, to help with balance and depth. It teaches the squat pattern before the free version.
     order: 10
     og_level: 0 # foundation: easier than the OG2 level-1 parallel squat
     metric: reps
@@ -30,6 +31,7 @@ nodes:
 
   - id: squat
     name: Bodyweight squat
+    description: Standing with the feet shoulder-width apart, you sit the hips down until the thighs are at least parallel to the floor and stand back up. The basic leg exercise.
     order: 20
     og_level: 1 # OG2 parallel squat
     metric: reps
@@ -55,6 +57,7 @@ nodes:
 
   - id: deep_squat
     name: Deep squat
+    description: A squat all the way down, hips well below the knees and the heels flat on the floor. It builds leg strength through the full range and ankle and hip mobility.
     order: 30
     og_level: 2 # OG2 full squat
     metric: reps
@@ -81,6 +84,7 @@ nodes:
   # --- Single leg ---
   - id: split_squat
     name: Split squat
+    description: Standing in a long stance with one foot forward and the back heel up, you lower straight down until the back knee nearly touches the floor. A single-leg-focused squat.
     order: 40
     og_level: 2
     metric: reps
@@ -107,6 +111,7 @@ nodes:
 
   - id: bulgarian_split_squat
     name: Bulgarian split squat
+    description: A split squat with the rear foot raised on a chair or box behind you. More of the load goes onto the front leg.
     order: 50
     og_level: 3
     metric: reps
@@ -134,6 +139,7 @@ nodes:
 
   - id: assisted_pistol_squat
     name: Assisted pistol squat
+    description: A one-leg squat holding a door frame or pole lightly, with the other leg straight out in front. The hands help as little as possible.
     order: 60
     og_level: 3
     metric: reps
@@ -162,6 +168,7 @@ nodes:
 
   - id: pistol_squat
     name: Pistol squat
+    description: Squatting all the way down and back up on one leg while the other leg is held straight out in front off the floor. It needs strength, balance and mobility.
     order: 70
     og_level: 4
     metric: reps
@@ -188,6 +195,7 @@ nodes:
   # --- Hinge (hamstrings) ---
   - id: nordic_curl_negative
     name: Nordic curl negative
+    description: Kneeling with the heels held down, you lower the straight body forward towards the floor as slowly as you can and catch yourself with the hands. It builds strong hamstrings.
     order: 80
     og_level: 4
     metric: eccentric_s

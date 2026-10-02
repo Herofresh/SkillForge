@@ -28,6 +28,16 @@ describe('progression dataset', () => {
     expect(NODE_BY_ID.size).toBe(ALL_NODES.length);
   });
 
+  it('describes every node in 1-3 sentences that are not a copy of its cues (PLAN 6.2)', () => {
+    const MAX_SENTENCES = 3;
+    for (const node of ALL_NODES) {
+      const sentences = node.description.split(/(?<=[.!?])\s+/).filter(Boolean);
+      expect([node.id, sentences.length <= MAX_SENTENCES]).toEqual([node.id, true]);
+      expect([node.id, node.description.trim().length > 0]).toEqual([node.id, true]);
+      for (const cue of node.cues) expect(node.description).not.toContain(cue);
+    }
+  });
+
   it('has at least one node in every branch', () => {
     for (const branch of BRANCHES) {
       expect(ALL_NODES.some((node) => node.branch === branch)).toBe(true);

@@ -1,5 +1,5 @@
-# Tree tab and node detail (PLAN 4.2, 4.3): from a fresh install, open the vertical pull branch, open
-# Dead hang, set it as a goal and pass its Trial (the chain to Scapular pull lights up), then
+# Tree tab and node detail (PLAN 4.2, 4.3, 6.2): from a fresh install, open the vertical pull
+# branch, read Dead hang's info sheet (6.2) and open Dead hang from it, set it as a goal and pass its Trial (the chain to Scapular pull lights up), then
 # self-unlock the locked Jumping pull-up after acknowledging its prerequisites note (ADR-023) and
 # check its state on the detail and the tile. Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
@@ -43,13 +43,29 @@ name: Tree - branch, node detail, goal, Trial and unlock anyway
 - assertVisible:
     id: 'tile-state-scapular_pull'
     text: 'Locked'
-# 4.3: open Dead hang and make it a goal
+# 6.2: the tile's "i" shows what Dead hang is, then "Open skill" goes to its detail
 - tapOn:
-    id: 'tile-dead_hang'
+    id: 'tile-info-dead_hang'
+- extendedWaitUntil:
+    visible:
+      id: 'exercise-info'
+    timeout: 20000
+- assertVisible:
+    id: 'exercise-info-description'
+    text: 'Simply hanging from a bar.*'
+- assertVisible: '.*Full grip with the thumb.*'
+- takeScreenshot: 6.2-tree-info
+- tapOn:
+    id: 'exercise-info-open'
+# 4.3: Dead hang's detail starts with its description; make it a goal
 - extendedWaitUntil:
     visible:
       id: 'node-detail'
     timeout: 20000
+- assertVisible:
+    id: 'detail-description-text'
+    text: 'Simply hanging from a bar.*'
+- takeScreenshot: 6.2-node-detail
 - assertVisible:
     id: 'detail-state'
     text: 'Ready'

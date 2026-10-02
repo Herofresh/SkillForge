@@ -1,5 +1,5 @@
 import { makeChain, makeNode } from '@/data/testFixtures';
-import { formatIssue, validateNodes } from '@/data/validate';
+import { formatIssue, MAX_DESCRIPTION_LENGTH, validateNodes } from '@/data/validate';
 import type { ExerciseNode } from '@/domain/types';
 
 /** Messages of all issues, for readable assertions. */
@@ -230,6 +230,23 @@ describe('validateNodes', () => {
     it('rejects sources that are not URLs', () => {
       expect(messages([makeNode({ id: 'a', sourceUrls: ['OG2 book'] })])).toEqual([
         "a: source 'OG2 book' is not a http(s) URL",
+      ]);
+    });
+  });
+
+  describe('description (PLAN 6.2, ADR-049)', () => {
+    it('requires a description on built-in nodes only', () => {
+      expect(messages([makeNode({ id: 'a', description: ' ' })])).toEqual([
+        'a: description is missing: 1–3 plain sentences on what the exercise looks like',
+      ]);
+      // A user node saved before 6.2 has none and must keep loading.
+      expect(messages([makeNode({ id: 'user_a', source: 'user', description: '' })])).toEqual([]);
+    });
+
+    it('keeps it short', () => {
+      const long = 'x'.repeat(MAX_DESCRIPTION_LENGTH + 1);
+      expect(messages([makeNode({ id: 'user_a', source: 'user', description: long })])).toEqual([
+        `user_a: description is ${long.length} characters; keep it under ${MAX_DESCRIPTION_LENGTH} (1–3 short sentences)`,
       ]);
     });
   });

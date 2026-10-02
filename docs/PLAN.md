@@ -163,11 +163,19 @@
   an S or an 8. Silkscreen and Alegreya Sans stay (their digits were already clear). The Style
   Guide has a **Digits** section (0–9 per variant); `fonts.test.ts` pins every role to a checked
   font. Screenshots `docs/screenshots/6.1-*.png`.
+- Exercise descriptions (6.2, ADR-049, [PR #38](https://github.com/Herofresh/SkillForge/pull/38)): every node has a `description` (1–3 plain
+  sentences, YAML key after `name`, required on built-in nodes, ≤ 300 characters; review sheet
+  column). The node detail opens with an "About" panel; one `ExerciseInfoSheet` (description +
+  cues) opens from the Tree tile's "i" or a long press, a long press on a map node, and the "i" on
+  plan-preview cards and the live session's current exercise (no navigation in Train). The editor
+  has a Description section; a user node needs one to be saved, but old overlays/backups without
+  one still load (shown as "No description yet…"). Overlay layout version 2, backup
+  `schemaVersion` 3 (older ones still read); no database change.
 
 ## Next up
 1. On the user's phone: install [v0.3.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.3.0) over the installed build (Update, no uninstall) and try the
    timer (vibration, keep-awake, pause) and the acrobatics tab; report what feels off.
-2. Phase 6 in order, next 6.2 (exercise descriptions). Phase 7 (Google Play) comes after all
+2. Phase 6 in order, next 6.3 (more content; every new node needs a `description`). Phase 7 (Google Play) comes after all
    of Phase 6; the user creates the upload key then (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -176,6 +184,19 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Exercise descriptions (task 6.2, ADR-049):**
+  - Format: `description` has fallback `''` in `progressionFormat.ts` (so v1 overlays and
+    pre-6.2 backups read); `validateNodes` requires it on `core` nodes only. The editor's own
+    rule is `draftIssues` in `nodeEditor.ts` (user nodes), combined with the `applyOverlay`
+    issues in the store's `nodeDraftIssues` / `saveNodeDraft`; `finalizeDraft` trims.
+  - `dataset.test.ts` checks ≤ 3 sentences and that no cue is copied into the description.
+  - `OVERLAY_VERSION` 2 (reads 1–2), `BACKUP_SCHEMA_VERSION` 3 (reads 1–3).
+  - UI: `src/components/node/ExerciseInfoSheet.tsx` + `InfoButton.tsx`, new `info` icon;
+    `PixelModal`'s close button now has `<testID>-close`. `NodeTile` / `MapNode` /
+    `ExerciseCard` show the affordance only when `onInfo` is passed.
+  - Verified on the Pixel 8 Pro AVD (Expo Go, Metro `--clear`): `tree.yaml`, `train.yaml`,
+    `editor.yaml` (now types a description for the custom node) and `map.yaml` pass. The map
+    long press is covered by a component test only, not by Maestro.
 - **Readable numbers (task 6.1, ADR-048):** `FontFamily.pixel` = `Jersey15_400Regular`;
   `FontFamily.display` is gone (one weight). Header titles use the new `HeaderTitleStyle` token
   (tabs and stack). A new font must pass the Style Guide → Digits check and be added to
@@ -726,13 +747,14 @@ upgrade check from every earlier release). Any new table or column is additive a
 
 - [x] 6.1 Readable numbers: Jersey 15 replaces Pixelify Sans in the pixel roles, so every digit
   is distinct; Style Guide → Digits; screenshots `docs/screenshots/6.1-*.png` (ADR-048, [PR #37](https://github.com/Herofresh/SkillForge/pull/37))
-- [ ] 6.2 Exercise descriptions: a short plain-language text per node (what the exercise is and
+- [x] 6.2 Exercise descriptions (ADR-049, [PR #38](https://github.com/Herofresh/SkillForge/pull/38)): a short plain-language text per node (what the exercise is and
   how it looks, 1–3 sentences, not the cues), new required YAML field `description` for all nodes,
   validator + generated module + contributor guide. Show it (a) in the node detail on top,
   (b) in the Tree (column tile long-press or an info button, and the map node sheet) and (c) in the
   live session and plan preview through an "i" button that opens a sheet with description + cues,
   without leaving the session. The overlay/editor can edit a node's description (custom nodes
-  need one). Maestro: open the sheet in `train.yaml` and `tree.yaml`.
+  need one). Maestro: open the sheet in `train.yaml` and `tree.yaml`. Screenshots
+  `docs/screenshots/6.2-*.png`.
 - [ ] 6.3 More content, at least 10 nodes per branch where it makes sense:
   - **Flexibility** (5 today) grows to ≥ 10 with yoga-based skills, e.g. pigeon → king pigeon (the
     "dove"), splits (front and middle) progressions, pancake, wheel/bridge variations, lotus prep.

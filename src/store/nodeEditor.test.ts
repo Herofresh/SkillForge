@@ -1,7 +1,13 @@
 import { ALL_NODES } from '@/data/skills';
-import { getOverlay } from '@/db/overlayRepository';
 import { openTestDatabase, type TestDatabase } from '@/db/testing/testDatabase';
-import { addPrerequisite, setName, stepTrial } from '@/domain/nodeEditor';
+import { getOverlay, saveOverlay } from '@/db/overlayRepository';
+import {
+  addPrerequisite,
+  DESCRIPTION_MISSING_MESSAGE,
+  setDescription,
+  setName,
+  stepTrial,
+} from '@/domain/nodeEditor';
 import { EMPTY_OVERLAY, exportOverlay } from '@/domain/overlay';
 import type { ProgressionOverlay } from '@/domain/types';
 
@@ -30,7 +36,10 @@ afterEach(() => test.close());
 function addTowelHang(store: AppStore): string {
   const state = store.getState();
   const draft = addPrerequisite(
-    setName(state.newNodeDraft('v_pull', 'dead_hang'), 'Towel hang'),
+    setDescription(
+      setName(state.newNodeDraft('v_pull', 'dead_hang'), 'Towel hang'),
+      'A dead hang gripping a towel thrown over the bar. ',
+    ),
     'dead_hang',
   );
   expect(state.nodeDraftIssues(draft)).toEqual([]);
@@ -57,6 +66,52 @@ describe('node editor (PLAN 4.7)', () => {
     ).toBe(true);
     // A second one with the same name gets its own id.
     expect(addTowelHang(store)).toBe('user_towel_hang_2');
+  });
+
+  it('asks a custom node for a description and stores it trimmed (PLAN 6.2)', () => {
+    const store = storeFor(test);
+    const state = store.getState();
+    const draft = setName(state.newNodeDraft('v_pull', 'dead_hang'), 'Towel hang');
+    const missing = [{ nodeId: '', message: DESCRIPTION_MISSING_MESSAGE }];
+    expect(state.nodeDraftIssues(draft)).toEqual(missing);
+    expect(state.saveNodeDraft(draft).issues).toEqual(missing);
+    expect(store.getState().overlay.added).toEqual([]);
+    const nodeId = addTowelHang(store);
+    expect(store.getState().nodes.find((node) => node.id === nodeId)?.description).toBe(
+      'A dead hang gripping a towel thrown over the bar.',
+    );
+  });
+
+  it('keeps a custom node saved before descriptions existed and asks for one on its next save', () => {
+    const store = storeFor(test);
+    const nodeId = addTowelHang(store);
+    const saved = store.getState().overlay;
+    // The row as v0.3.0 wrote it: overlayToRaw leaves an empty description out.
+    saveOverlay(
+      test.db,
+      { ...saved, added: saved.added.map((node) => ({ ...node, description: '' })) },
+      NOW,
+    );
+    const reloaded = storeFor(test).getState();
+    const old = reloaded.nodes.find((node) => node.id === nodeId);
+    expect(old?.description).toBe('');
+    if (!old) throw new Error('custom node lost');
+    expect(reloaded.nodeDraftIssues(old)).toEqual([
+      { nodeId, message: DESCRIPTION_MISSING_MESSAGE },
+    ]);
+  });
+
+  it('edits the description of a built-in node and never clears it', () => {
+    const store = storeFor(test);
+    const pullUp = store.getState().nodeDraft('pull_up');
+    if (!pullUp) throw new Error('pull_up missing');
+    const edited = setDescription(pullUp, 'My own words.');
+    expect(store.getState().saveNodeDraft(edited).issues).toEqual([]);
+    expect(store.getState().overlay.edited).toEqual({ pull_up: { description: 'My own words.' } });
+    const cleared = store.getState().nodeDraftIssues(setDescription(pullUp, ''));
+    expect(cleared.map((issue) => issue.message)).toEqual([
+      expect.stringMatching(/^description is missing/),
+    ]);
   });
 
   it('shows a cycle as an issue and never saves it', () => {

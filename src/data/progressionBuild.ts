@@ -137,6 +137,8 @@ export function renderReviewSheet(nodes: readonly ExerciseNode[]): string {
     '',
     `**${nodes.length} nodes**, ${reviewed} coach-reviewed, ${flagged} flagged ⚠ (needs verifying).`,
     '',
+    '- **Description** = the short text the app shows: what the exercise is and what it looks ' +
+      'like (not the cues). Please check it matches the exercise.',
     '- **OG** = Overcoming Gravity 2 difficulty level (0 = foundation, below OG level 1; 17 = hardest).',
     '- **Prerequisites** = other exercises that must reach the given level (L1–L10; L5 = Proficient) ' +
       'first. *(rec.)* = recommended only, does not lock.',
@@ -154,8 +156,8 @@ export function renderReviewSheet(nodes: readonly ExerciseNode[]): string {
       continue;
     }
     lines.push(
-      '| # | Exercise | OG | Metric | Working range | Trial | Prerequisites | Trains | Equipment | Sources | ⚠ Verify | Review | Coach notes |',
-      '|---|---|---|---|---|---|---|---|---|---|---|---|---|',
+      '| # | Exercise | Description | OG | Metric | Working range | Trial | Prerequisites | Trains | Equipment | Sources | ⚠ Verify | Review | Coach notes |',
+      '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
     );
     for (const node of chain) {
       const flags = [node.legendary ? 'legendary' : '', node.straightArm ? 'straight-arm' : '']
@@ -174,6 +176,7 @@ export function renderReviewSheet(nodes: readonly ExerciseNode[]): string {
       const row = [
         String(node.chainOrder),
         `**${node.name}** \`${node.id}\`${flags ? ` (${flags})` : ''}`,
+        node.description,
         String(node.ogLevel),
         node.metric,
         `${node.workingRange.min}–${node.workingRange.max} ${UNIT[node.metric]}`,

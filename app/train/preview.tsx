@@ -2,6 +2,7 @@ import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { ExerciseInfoSheet } from '@/components/node/ExerciseInfoSheet';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { Spacing } from '@/components/theme';
 import { ExerciseCard } from '@/components/train/ExerciseCard';
@@ -12,12 +13,14 @@ import { allAcknowledged, planMinutes } from '@/domain/train';
 import { blockViews } from '@/domain/trainView';
 import { useAppStore } from '@/store/useAppStore';
 
-type Sheet = { kind: 'swap'; key: string; name: string } | { kind: 'add' };
+type Sheet =
+  { kind: 'swap'; key: string; name: string } | { kind: 'add' } | { kind: 'info'; nodeId: string };
 
 /**
  * The plan preview (PLAN 4.4): the generated session by block with sets × target, rest, Trial and
  * swap/substitution markers, the generator's notes and the advisory warnings (ADR-023). The user may
- * swap an exercise for another of the same pattern, remove or add one; "Start session" goes ahead
+ * swap an exercise for another of the same pattern, remove or add one, or tap its "i" for what it
+ * is and its cues (PLAN 6.2); "Start session" goes ahead
  * once the warnings are acknowledged.
  */
 export default function PlanPreviewScreen() {
@@ -39,6 +42,7 @@ export default function PlanPreviewScreen() {
   const blocks = useMemo(() => (plan ? blockViews(plan.exercises, lookup) : []), [plan, lookup]);
   // Derived from the plan in the store; recomputed on every render (swap, add, remove).
   const warnings = trainWarnings();
+  const infoNode = sheet?.kind === 'info' ? lookup.get(sheet.nodeId) : undefined;
 
   if (!plan) {
     return (
@@ -100,7 +104,11 @@ export default function PlanPreviewScreen() {
               {block.label}
             </PixelText>
             {block.exercises.map((exercise) => (
-              <ExerciseCard key={exercise.key} exercise={exercise} testID={`plan-${exercise.key}`}>
+              <ExerciseCard
+                key={exercise.key}
+                exercise={exercise}
+                onInfo={() => setSheet({ kind: 'info', nodeId: exercise.nodeId })}
+                testID={`plan-${exercise.key}`}>
                 <View style={styles.actions}>
                   <PixelButton
                     label="Swap"
@@ -164,6 +172,7 @@ export default function PlanPreviewScreen() {
           testID="swap-sheet"
         />
       )}
+      {infoNode && <ExerciseInfoSheet node={infoNode} onClose={() => setSheet(undefined)} />}
       {sheet?.kind === 'add' && (
         <NodeOptionSheet
           title="Add exercise"

@@ -9,6 +9,7 @@ nodes:
   # --- Joint prep (warm-up staples) ---
   - id: wrist_prep
     name: Wrist prep routine
+    description: A short routine on hands and knees that moves the wrists through several hand positions, fingers forward, sideways and back. It warms up the wrists before handstand and planche work.
     order: 10
     og_level: 0
     metric: reps
@@ -33,6 +34,7 @@ nodes:
 
   - id: shoulder_dislocate
     name: Band shoulder dislocate
+    description: Holding a band wide with straight arms, you lift it in one arc from in front of the hips over the head to behind you and back. A shoulder mobility drill; nothing actually dislocates.
     order: 20
     og_level: 0
     metric: reps
@@ -57,6 +59,7 @@ nodes:
   # --- Compression ---
   - id: pike_fold
     name: Pike fold
+    description: Sitting with the legs straight and together, you fold the upper body forward from the hips towards the legs. It stretches the hamstrings for the L-sit, compression and press work.
     order: 30
     og_level: 0
     metric: hold_s
@@ -82,6 +85,7 @@ nodes:
   # --- Bridge (BWF chart chain) ---
   - id: table_bridge
     name: Table bridge
+    description: Sitting with the hands behind you and the knees bent, you push the hips up until the body is flat like a table top. A gentle bridge that opens the shoulders and hips.
     order: 40
     og_level: 0
     metric: hold_s
@@ -103,6 +107,7 @@ nodes:
 
   - id: full_bridge
     name: Full bridge
+    description: Lying on your back, you push up on hands and feet until the arms and legs are straight and the body forms an arch. Also called a wheel; it opens the shoulders and spine.
     order: 50
     og_level: 2
     metric: hold_s

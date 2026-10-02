@@ -40,6 +40,13 @@ export function TreeLegend({ visible, onClose }: Props) {
           under a tile are prerequisites from elsewhere.
         </PixelText>
       </View>
+      <View style={styles.row}>
+        <PixelIcon name="info" />
+        <PixelText variant="small" style={styles.text}>
+          What an exercise is and its cues: tap the i on a tile, or long-press a skill (also on the
+          map).
+        </PixelText>
+      </View>
     </PixelModal>
   );
 }

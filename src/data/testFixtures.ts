@@ -13,6 +13,7 @@ export const FIXTURE_SOURCE_URL = 'https://example.org/source';
 export function makeNode(overrides: Partial<ExerciseNode> & { id: string }): ExerciseNode {
   return {
     name: overrides.id,
+    description: `What ${overrides.id} looks like.`,
     branch: 'v_pull',
     chainOrder: 10,
     ogLevel: 1,

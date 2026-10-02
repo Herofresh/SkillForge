@@ -73,7 +73,13 @@ import {
   parseOnboardingCompletedAt,
   toggleGoal,
 } from '@/domain/onboarding';
-import { customNodeId, NEW_NODE_ID, newCustomNode } from '@/domain/nodeEditor';
+import {
+  customNodeId,
+  draftIssues,
+  finalizeDraft,
+  NEW_NODE_ID,
+  newCustomNode,
+} from '@/domain/nodeEditor';
 import {
   applyOverlay,
   EMPTY_OVERLAY,
@@ -328,9 +334,15 @@ export interface AppState {
   nodeDraft(nodeId: string): ExerciseNode | undefined;
   /** A new user node in `branch` after `afterId` (default: the end), not saved yet. */
   newNodeDraft(branch: Branch, afterId?: string): ExerciseNode;
-  /** The `applyOverlay` issues the tree would have with `draft` saved (empty = it can be saved). */
+  /**
+   * The issues of `draft`: the editor's own (`draftIssues`: a user node needs a description) and
+   * the `applyOverlay` issues the tree would have with it saved (empty = it can be saved).
+   */
   nodeDraftIssues(draft: ExerciseNode): ValidationIssue[];
-  /** Saves `draft` into the overlay (a new node gets its `user_` id from its name). */
+  /**
+   * Saves `draft` into the overlay (a new node gets its `user_` id from its name). Writes nothing
+   * and returns the issues while `nodeDraftIssues` has any.
+   */
   saveNodeDraft(draft: ExerciseNode): SaveNodeDraftResult;
   /** Removes every change to `nodeId` ("Reset to default"; deletes a user node). */
   resetNode(nodeId: string): ValidationIssue[];
@@ -898,12 +910,14 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       },
 
       nodeDraftIssues(draft) {
-        const overlay = withNode(get().overlay, baseNodes, withDraftId(draft));
-        return applyOverlay(baseNodes, overlay).issues;
+        const overlay = withNode(get().overlay, baseNodes, withDraftId(finalizeDraft(draft)));
+        return [...draftIssues(draft), ...applyOverlay(baseNodes, overlay).issues];
       },
 
       saveNodeDraft(draft) {
-        const node = withDraftId(draft);
+        const node = withDraftId(finalizeDraft(draft));
+        const ownIssues = draftIssues(draft);
+        if (ownIssues.length > 0) return { nodeId: node.id, issues: ownIssues };
         const issues = get().saveOverlay(withNode(get().overlay, baseNodes, node));
         return { nodeId: node.id, issues };
       },

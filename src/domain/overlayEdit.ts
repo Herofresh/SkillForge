@@ -21,6 +21,7 @@ export type CustomizationKind = (typeof CUSTOMIZATION_KINDS)[number];
 /** The fields a `NodeEdit` can change (everything but `id` and `source`). */
 export const EDITABLE_NODE_FIELDS = [
   'name',
+  'description',
   'branch',
   'chainOrder',
   'ogLevel',
@@ -46,6 +47,7 @@ export type EditableNodeField = (typeof EDITABLE_NODE_FIELDS)[number];
 /** Plain-language names of the fields, for the import preview ("changes: Trial, cues"). */
 export const NODE_FIELD_LABELS: Readonly<Record<EditableNodeField, string>> = {
   name: 'name',
+  description: 'description',
   branch: 'branch',
   chainOrder: 'position',
   ogLevel: 'difficulty',

@@ -1,5 +1,5 @@
-# Train flow (PLAN 4.4, 5.4, 5.8, 5.9): from a fresh install, plan a 30-min Home session, look at
-# the plan preview and a swap sheet, start it, time and log the first exercise's set, start and pause
+# Train flow (PLAN 4.4, 5.4, 5.8, 5.9, 6.2): from a fresh install, plan a 30-min Home session, look
+# at the plan preview, a swap sheet and an exercise info sheet (also in the session), start it, time and log the first exercise's set, start and pause
 # the next set's timer, then kill the app and check that the session resumes with its sets and the
 # paused timer, which resumes (the draft is saved after every change), edit the logged set, move an
 # exercise down, finish it and see the summary with XP > 0. Prerequisites and run: see smoke.yaml /
@@ -61,6 +61,26 @@ name: Train - plan, live session, resume after a restart, summary
     notVisible:
       id: 'swap-sheet'
     timeout: 20000
+# 6.2: the "i" shows what the first exercise is, and closing it stays on the plan
+- tapOn:
+    id: 'plan-e0-info'
+- extendedWaitUntil:
+    visible:
+      id: 'exercise-info'
+    timeout: 20000
+- assertVisible:
+    id: 'exercise-info-description'
+- assertNotVisible:
+    id: 'exercise-info-open'
+- takeScreenshot: 6.2-plan-info
+- tapOn:
+    id: 'exercise-info-close'
+- extendedWaitUntil:
+    notVisible:
+      id: 'exercise-info'
+    timeout: 20000
+- assertVisible:
+    id: 'plan-preview'
 - scrollUntilVisible:
     element:
       id: 'start-session'
@@ -79,6 +99,26 @@ name: Train - plan, live session, resume after a restart, summary
 - assertVisible:
     id: 'session-clock'
 - takeScreenshot: 4.4-session
+# 6.2: the current exercise's "i" opens description + cues without leaving the session
+- tapOn:
+    id: 'current-exercise-info'
+- extendedWaitUntil:
+    visible:
+      id: 'exercise-info'
+    timeout: 20000
+- assertVisible:
+    id: 'exercise-info-description'
+    text: 'A short routine on hands and knees.*'
+- takeScreenshot: 6.2-session-info
+- tapOn:
+    id: 'exercise-info-close'
+- extendedWaitUntil:
+    notVisible:
+      id: 'exercise-info'
+    timeout: 20000
+- assertVisible:
+    id: 'set-label'
+    text: 'Set 1 of 1'
 # Exercise timer (5.4): start it, stop it (a hold shows Stop after its 3 s get-ready), log the set
 - tapOn:
     id: 'set-timer-start'

@@ -5,7 +5,10 @@ import {
   addPrerequisite,
   clearTrains,
   customNodeId,
+  DESCRIPTION_MISSING_MESSAGE,
   draftChanged,
+  draftIssues,
+  finalizeDraft,
   editorIssueText,
   issueSection,
   issuesBySection,
@@ -17,6 +20,7 @@ import {
   removeCue,
   removeEquipmentOption,
   removePrerequisite,
+  setDescription,
   setMetric,
   setName,
   stepOgLevel,
@@ -28,6 +32,7 @@ import {
   toggleTrains,
   MAX_NODE_NAME_LENGTH,
 } from '@/domain/nodeEditor';
+import { MAX_DESCRIPTION_LENGTH } from '@/data/validate';
 import type { ExerciseNode } from '@/domain/types';
 
 const chain = makeChain(); // dead_hang (10, og 0) -> pull_up_negative (20, og 2) -> pull_up (30, og 2)
@@ -189,6 +194,8 @@ describe('issues in the editor', () => {
     expect(section('og_level 1 is lower than ...')).toBe('position');
     expect(section('is a built-in straight-arm skill and stays in the x branch')).toBe('position');
     expect(section('name must not be empty')).toBe('name');
+    expect(section(DESCRIPTION_MISSING_MESSAGE)).toBe('description');
+    expect(section('description is 301 characters; keep it under 300')).toBe('description');
     expect(section('something new')).toBe('other');
   });
 
@@ -212,6 +219,34 @@ describe('issues in the editor', () => {
     expect(editorIssueText({ nodeId: 'dead_hang', message: 'cycle' }, 'x', named)).toBe(
       'Dead hang: cycle',
     );
+  });
+});
+
+describe('description (PLAN 6.2, ADR-049)', () => {
+  const custom = { ...newCustomNode(chain, 'v_pull'), name: 'Towel hang' };
+
+  it('starts empty on a new node and keeps the text as typed, up to the limit', () => {
+    expect(custom.description).toBe('');
+    expect(setDescription(custom, ' Hang from a towel. ').description).toBe(' Hang from a towel. ');
+    const long = setDescription(custom, 'x'.repeat(MAX_DESCRIPTION_LENGTH + 20));
+    expect(long.description).toHaveLength(MAX_DESCRIPTION_LENGTH);
+  });
+
+  it('asks for a description on a user node only', () => {
+    expect(draftIssues(custom)).toEqual([
+      { nodeId: NEW_NODE_ID, message: DESCRIPTION_MISSING_MESSAGE },
+    ]);
+    expect(draftIssues(setDescription(custom, '   '))).toHaveLength(1);
+    expect(draftIssues(setDescription(custom, 'Hang from a towel.'))).toEqual([]);
+    // Built-in nodes: the validator checks them (no double message).
+    expect(draftIssues({ ...chain[0], description: '' })).toEqual([]);
+  });
+
+  it('trims the description for saving', () => {
+    const typed = setDescription(custom, '  Hang from a towel.  ');
+    expect(finalizeDraft(typed).description).toBe('Hang from a towel.');
+    const clean = setDescription(custom, 'Hang.');
+    expect(finalizeDraft(clean)).toBe(clean);
   });
 });
 

@@ -140,6 +140,12 @@ export interface ExerciseNode {
   /** Stable snake_case id. Never rename (saved progress references it). User nodes start `user_`. */
   id: string;
   name: string;
+  /**
+   * What the exercise is and what it looks like, in 1–3 plain sentences (PLAN 6.2, ADR-049); not
+   * the cues. Required in `content/progressions/`. A user node saved before 6.2 may have `''`
+   * (old overlays and backups keep loading); the editor asks for one on its next save.
+   */
+  description: string;
   branch: Branch;
   /** Position inside the branch column. Unique per branch; only used for ordering. */
   chainOrder: number;

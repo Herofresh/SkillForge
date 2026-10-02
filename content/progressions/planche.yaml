@@ -9,6 +9,7 @@ nodes:
   # --- Entry and wrist conditioning (hold standard: RR 3 x 30 s) ---
   - id: planche_lean
     name: Planche lean
+    description: From a push-up position with straight arms, you lean the shoulders forward past the hands and hold. It teaches the forward lean and wrist load of the planche.
     order: 10
     og_level: 2
     metric: hold_s
@@ -44,6 +45,7 @@ nodes:
 
   - id: straight_arm_frog_stand
     name: Straight-arm frog stand
+    description: Balancing on straight arms with the knees resting on the outside of the arms and the feet off the floor. A bridge between the bent-arm crow and the tuck planche.
     order: 20
     og_level: 4
     metric: hold_s
@@ -76,6 +78,7 @@ nodes:
   # --- Tuck positions ---
   - id: tuck_planche
     name: Tuck planche
+    description: Balancing on straight arms with the knees tucked to the chest and the feet off the floor, hips at shoulder height. The body floats like a ball above the hands; the first true planche hold.
     order: 30
     og_level: 5
     metric: hold_s
@@ -113,6 +116,7 @@ nodes:
 
   - id: advanced_tuck_planche
     name: Advanced tuck planche
+    description: A tuck planche with the back flat and the hips pushed back level with the shoulders, knees still bent. It stretches the shape out towards a full planche.
     order: 40
     og_level: 6
     metric: hold_s
@@ -143,6 +147,7 @@ nodes:
   # --- Advanced holds (standard: about 15 s, Antranik / Steven Low) ---
   - id: straddle_planche
     name: Straddle planche
+    description: Balancing on straight arms with the body horizontal above the floor and the legs straight and spread wide. An advanced planche hold; the wide legs make it a little easier than the full version.
     order: 50
     og_level: 7
     metric: hold_s
@@ -172,6 +177,7 @@ nodes:
 
   - id: full_planche
     name: Full planche
+    description: Holding the whole body straight and horizontal above the floor, legs together, supported only by straight arms. The goal of the planche branch and an elite skill.
     order: 60
     og_level: 10
     metric: hold_s

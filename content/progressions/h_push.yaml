@@ -9,6 +9,7 @@ nodes:
   # --- Foundations: build up to the first full push-up ---
   - id: wall_push_up
     name: Wall push-up
+    description: A push-up done standing, with the hands on a wall instead of the floor. You lean in towards the wall and press back out; the more upright you stand, the easier it is.
     order: 10
     og_level: 0 # foundation: easier than the OG2 level-1 push-up
     metric: reps
@@ -31,6 +32,7 @@ nodes:
 
   - id: incline_push_up
     name: Incline push-up
+    description: A push-up with the hands raised on a box, bench, bar or parallettes while the feet stay on the floor. The body forms a slanted plank, which makes it lighter than a floor push-up.
     order: 20
     og_level: 0 # foundation: easier than the OG2 level-1 push-up
     metric: reps
@@ -59,6 +61,7 @@ nodes:
 
   - id: knee_push_up
     name: Knee push-up
+    description: A push-up on the floor with the knees down instead of the toes. The body stays straight from head to knees, so the arms lift less of your weight.
     order: 30
     og_level: 0 # foundation: easier than the OG2 level-1 push-up
     metric: reps
@@ -85,6 +88,7 @@ nodes:
   # --- Full push-up and harder two-arm variations ---
   - id: push_up
     name: Push-up
+    description: "The classic push-up: a straight-body plank on hands and toes, lowered until the chest nears the floor and pressed back up. Trains the chest, shoulders and triceps."
     order: 40
     og_level: 1 # OG2 anchor: push-up = level 1
     metric: reps
@@ -111,6 +115,7 @@ nodes:
 
   - id: diamond_push_up
     name: Diamond push-up
+    description: A push-up with the hands close together under the chest, thumbs and index fingers touching in a diamond shape. The narrow hands shift the work onto the triceps.
     order: 50
     og_level: 2
     metric: reps
@@ -137,6 +142,7 @@ nodes:
   # --- One-arm and archer work ---
   - id: elevated_one_arm_push_up
     name: Elevated one-arm push-up
+    description: A one-arm push-up with the working hand on a raised surface and the other arm behind the back or at the side. The feet are wide for balance; lowering the surface makes it harder.
     order: 60
     og_level: 5 # OG2: incline/elevated one-arm push-up
     metric: reps
@@ -164,6 +170,7 @@ nodes:
 
   - id: archer_push_up
     name: Archer push-up
+    description: A wide push-up where you lower towards one hand while the other arm stays out straight to the side. It is a step between a two-arm and a one-arm push-up.
     order: 70
     og_level: 6
     metric: reps
@@ -191,6 +198,7 @@ nodes:
   # --- Planche-specific pushing ---
   - id: pseudo_planche_push_up
     name: Pseudo planche push-up
+    description: A push-up with the hands back by the waist, fingers turned out, and the shoulders leaning forward past the hands. It looks like a push-up tipped forward and builds strength for the planche.
     order: 80
     og_level: 6
     metric: reps

@@ -9,6 +9,7 @@ nodes:
   # --- Foundation: the kip swing ---
   - id: kipping_swing
     name: Kip swing
+    description: Hanging from a bar with straight arms, you swing between an arched and a hollow body shape. The controlled swing is the engine of the kipping muscle-up.
     order: 10
     og_level: 1
     metric: reps
@@ -39,6 +40,7 @@ nodes:
   # --- Muscle-up ---
   - id: muscle_up_negative
     name: Muscle-up negative
+    description: "Only the lowering half of a muscle-up: from support on top of the bar you lower through the dip, then slowly through the transition into a hang. It teaches the path over the bar."
     order: 20
     og_level: 3
     metric: eccentric_s
@@ -78,6 +80,7 @@ nodes:
 
   - id: kipping_muscle_up
     name: Kipping muscle-up
+    description: "A muscle-up on a bar that uses a kip swing for momentum: you pull the bar towards the hips, bring the chest over it and press out to straight arms on top."
     order: 30
     og_level: 4
     metric: reps
@@ -107,6 +110,7 @@ nodes:
   # --- Elbow lever ---
   - id: elbow_lever
     name: Elbow lever
+    description: Balancing the body horizontally on the hands, with the bent elbows dug into the hips as a support. A balance skill that looks impressive but needs more technique than strength.
     order: 40
     og_level: 5
     metric: hold_s
@@ -139,6 +143,7 @@ nodes:
   # --- Human flag (on a vertical pole) ---
   - id: tuck_human_flag
     name: Tuck human flag
+    description: Holding on to a vertical pole with both arms straight, top hand pulling and bottom hand pushing, the body held sideways off the ground with the knees tucked. The first step to the human flag.
     order: 50
     og_level: 5
     metric: hold_s
@@ -173,6 +178,7 @@ nodes:
 
   - id: straddle_human_flag
     name: Straddle human flag
+    description: A human flag with the legs straight and spread wide, the body held sideways and level off a vertical pole. The step before the full flag.
     order: 60
     og_level: 6
     metric: hold_s
@@ -201,6 +207,7 @@ nodes:
 
   - id: human_flag
     name: Human flag
+    description: Holding the whole body straight and sideways, parallel to the ground, off a vertical pole with straight arms. A famous strength and show skill.
     order: 70
     og_level: 6
     metric: hold_s
@@ -230,6 +237,7 @@ nodes:
   # --- Strict muscle-up ---
   - id: strict_bar_muscle_up
     name: Strict bar muscle-up
+    description: "A muscle-up on a bar with no swing: from a still dead hang you pull explosively, turn the wrists over the bar and press to support on top. It takes much more strength than the kipping version."
     order: 80
     og_level: 7
     metric: reps
