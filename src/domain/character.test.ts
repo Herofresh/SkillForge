@@ -232,7 +232,12 @@ describe('computeCharacter', () => {
     const nodes = RANK_BRANCHES.map((branch, index) =>
       makeNode({ id: `n_${branch}`, branch, ogLevel: index < 6 ? 2 : 0, patterns: ['core'] }),
     );
-    const squat = makeNode({ id: 'squat_hold', branch: 'mobility', ogLevel: 3, patterns: ['mobility'] });
+    const squat = makeNode({
+      id: 'squat_hold',
+      branch: 'mobility',
+      ogLevel: 3,
+      patterns: ['mobility'],
+    });
     const all = [...nodes, squat];
     const character = computeCharacter(all, passed(...all.map((node) => node.id)), 0);
     expect(character.medianOgLevel).toBe(1);
