@@ -28,9 +28,10 @@
  *   for the summary screen.
  * - Node editor and shared progressions (PLAN 4.7–4.8, ADR-036): `nodeDraft` / `newNodeDraft`
  *   start an editor draft, `nodeDraftIssues` validates it live (the overlay with the draft through
- *   `applyOverlay`; `nodeDraftWarnings` gives the advice that doesn't stop a save), `saveNodeDraft`, `resetNode` and `setNodeHidden` change the overlay through
- *   `saveOverlay` (so a broken tree is never saved). `exportOverlay` / `shareOverlay` hand out the
- *   overlay as YAML; `previewOverlayImport` / `importOverlay` merge a shared one after a preview.
+ *   `applyOverlay`; `nodeDraftWarnings` gives the advice that doesn't stop a save),
+ *   `saveNodeDraft`, `resetNode` and `setNodeHidden` change the overlay through `saveOverlay`
+ *   (so a broken tree is never saved). `exportOverlay` / `shareOverlay` hand out the overlay as
+ *   YAML; `previewOverlayImport` / `importOverlay` merge a shared one after a preview.
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
  *
  * `createAppStore` takes its dependencies (database, built-in tree, clock, id source, file access) so
