@@ -33,7 +33,10 @@ const LIMB_RADIUS = 1.15;
 const TORSO_RADIUS = 1.8;
 /** How far the outline reaches past the head and the near arm. */
 const OUTLINE = 0.75;
-const BAR_RADIUS = 1.1;
+const BAR_RADIUS = 1.6;
+/** A bar's rig: the post stands this many columns behind the bar (to the left), unless set. */
+const DEFAULT_POST_OFFSET = 11;
+const POST_WIDTH = 2;
 const RING_RADIUS = 1.6;
 const RING_HOLE_RADIUS = 0.7;
 
@@ -42,8 +45,12 @@ export type Prop =
   | { kind: 'floor' }
   /** A wall whose face is at column `x`, extending to the right edge. */
   | { kind: 'wall'; x: number }
-  /** A pull-up bar seen end-on, centred at (`x`, `y`). */
-  | { kind: 'bar'; x: number; y: number }
+  /**
+   * A pull-up bar seen end-on, centred at (`x`, `y`), on a rig: a post from the floor at column
+   * `postX` (default 11 columns to the left) and a beam over to the bar, like a pull-up station
+   * from the side.
+   */
+  | { kind: 'bar'; x: number; y: number; postX?: number }
   /** A bar seen from the front (front-view animations): a rail at row `y` from `x` to `x + width`. */
   | { kind: 'rail'; x: number; y: number; width: number }
   /** A gymnastics ring at (`x`, `y`) on a strap from the top edge. */
@@ -138,6 +145,14 @@ function drawPropBehind(canvas: Canvas, prop: Prop) {
     case 'rail':
       fillRect(canvas, prop.x, prop.y - 1, prop.width, 2, metal);
       return;
+    case 'bar': {
+      const postX = Math.max(0, Math.round(prop.postX ?? prop.x - DEFAULT_POST_OFFSET));
+      const beamY = Math.round(prop.y) - 1;
+      fillRect(canvas, postX, beamY, POST_WIDTH, FLOOR_Y - beamY, metalDark);
+      const beamFrom = Math.min(postX, Math.round(prop.x));
+      fillRect(canvas, beamFrom, beamY, Math.abs(Math.round(prop.x) - postX) + 1, 2, metalDark);
+      return;
+    }
     case 'pole':
       fillRect(canvas, prop.x, 0, 2, FLOOR_Y, metal);
       return;

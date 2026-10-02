@@ -9,7 +9,7 @@ import type { Pose } from '@/lib/figure';
 import { figure, ON_FLOOR, p } from './pose';
 
 const FLOOR = { kind: 'floor' } as const;
-const BAR = p(16, 5);
+const BAR = p(16, 6);
 const BAR_PROP = { kind: 'bar', x: BAR.x, y: BAR.y } as const;
 /** The free arm of a one-arm hang, bent in front of the body so it shows. */
 const ARM_AT_SIDE = [55, 110] as const;
@@ -44,10 +44,10 @@ function hang(options: HangOptions = {}): Pose {
 function top(options: { oneArm?: boolean } = {}): Pose {
   const hand = { to: BAR };
   return figure({
-    hip: p(14.1, 13.6),
+    hip: p(14.1, 14.6),
     torso: -95,
     hands: [hand, options.oneArm ? ARM_AT_SIDE : hand],
-    feet: [{ to: p(12, 22.5) }],
+    feet: [{ to: p(12, 23.5) }],
     toes: 'point',
     pin: 'hand',
   });
@@ -149,10 +149,10 @@ export const V_PULL_ANIMATIONS: Readonly<Record<string, FigureAnimation>> = {
       {
         hold: 1,
         pose: figure({
-          hip: p(14.1, 13.6),
+          hip: p(14.1, 14.6),
           torso: -95,
           hands: [{ to: BAR }],
-          feet: [{ to: p(24, 13) }],
+          feet: [{ to: p(24, 14) }],
           toes: 'point',
           pin: 'hand',
         }),

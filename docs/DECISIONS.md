@@ -1535,7 +1535,9 @@ Template:
     1.8 cells of the bone), the head as a disc. Roles: body (`gold`), near arm (`goldLight` with
     an `ink` edge, also around the head; without it the arm, head and torso merged into one
     shape), far limbs (`goldDark`, behind), metal (`steel` / `steelDark`) and wood (`bronze`).
-    Props: floor, wall, bar (end-on), rail (a bar seen from the front), rings, parallettes, dip
+    Props: floor, wall, bar (end-on, a bold 3-cell cross-section on a rig: a post from the floor
+    and a beam over to it, so a hang reads as hanging and not as raised arms; the bar sits at row
+    5–8 so the head clears it at the top of a pull-up), rail (a bar seen from the front), rings, parallettes, dip
     bars, box, pole. Bars and rings draw in front of the hands, the rest behind.
   - **Animation (`figureAnimation.ts`):** 1–4 keyframes, each with an optional `hold` (extra
     frames) and `steps` (frames to the next one, e.g. a slow negative), looping back to the first;

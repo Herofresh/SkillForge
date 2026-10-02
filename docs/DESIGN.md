@@ -181,8 +181,9 @@ Screenshots: `docs/screenshots/4.2-tree.png`, `4.3-node-detail.png`, `4.3-unlock
 **Exercise animations (PLAN 6.4, ADR-053):** `PixelAnimation` plays a node's animation
 (`animationFor(node)`) as a 32 × 32-cell side view: the hero in `gold` like the app icon, the near
 arm in `goldLight` with a 1-cell `ink` edge (and the head too) so arm, head and torso stay apart,
-the far arm and leg in `goldDark` behind the body, equipment in `steel` / `steelDark` (bars and
-rings in front of the gripping hands) and floor, walls and boxes in `bronze`. It sits centred on
+the far arm and leg in `goldDark` behind the body, equipment in `steel` / `steelDark` (a bar is a
+bold 3-cell steel cross-section on a `steelDark` rig, a post from the floor and a beam over to it,
+so a hang reads as hanging from a pull-up station; bars and rings in front of the gripping hands) and floor, walls and boxes in `bronze`. It sits centred on
 top of the node detail's About panel at 128 dp (4 dp per cell) and on top of the
 `ExerciseInfoSheet` at 96 dp; use multiples of 32 dp. It is decorative (hidden from screen
 readers): the description next to it says the same in words. Proportions are chunky on purpose

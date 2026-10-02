@@ -81,6 +81,19 @@ describe('rasterizePose', () => {
     expect(cell(wallRows, 30, 15)).toBe(FIGURE_ROLES.wood);
   });
 
+  it('puts a bar on a rig: a post from the floor and a beam over to the bar', () => {
+    const rows = rasterizePose(STAND, [{ kind: 'floor' }, { kind: 'bar', x: 16, y: 6 }]);
+    // Post 11 columns to the left, from the beam down to the floor.
+    expect(cell(rows, 5, 20)).toBe(FIGURE_ROLES.metalDark);
+    expect(cell(rows, 5, FLOOR_Y - 1)).toBe(FIGURE_ROLES.metalDark);
+    // Beam at the bar's height, the bar itself a bold steel cross-section.
+    expect(cell(rows, 10, 5)).toBe(FIGURE_ROLES.metalDark);
+    expect(cell(rows, 16, 6)).toBe(FIGURE_ROLES.metal);
+    expect(cell(rows, 15, 5)).toBe(FIGURE_ROLES.metal);
+    const right = rasterizePose(STAND, [{ kind: 'bar', x: 10, y: 6, postX: 25 }]);
+    expect(cell(right, 25, 20)).toBe(FIGURE_ROLES.metalDark);
+  });
+
   it('draws every prop kind inside the grid', () => {
     const props: Prop[] = [
       { kind: 'floor' },

@@ -224,8 +224,9 @@
     --only <id> --cell 8 --out <scratch png>` and look at it until the exercise is recognisable.
     Then extend the coverage test in `animations.test.ts` (today: v_pull + `ICONIC_IDS`).
   - Gotchas: angles interpolate the short way, so a roll needs keyframes < 180° apart. A head or
-    hand that leaves the grid fails the bounds test (that is why the pull-up bar is at row 5 and
-    the chest-to-bar one at row 7). Arms come out of one shoulder point; in the front view
+    hand that leaves the grid fails the bounds test (that is why the pull-up bar is at row 6 and
+    the chest-to-bar one at row 7). A `bar` prop draws its rig (post + beam) itself; `postX` moves
+    the post when a figure needs that side. Arms come out of one shoulder point; in the front view
     (archer) that reads as a Y, which is fine at this size. Far limbs hide behind the torso: bend
     them forward to show them (one-arm chin-up).
   - Verified: typecheck, lint, format, the full Jest suite, `progressions:check`, the contact
