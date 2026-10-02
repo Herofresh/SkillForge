@@ -1,6 +1,13 @@
 import { makeChain, makeNode } from '@/data/testFixtures';
 import { formatIssue } from '@/data/validate';
-import { EMPTY_OVERLAY, applyOverlay, exportOverlay, importOverlay } from '@/domain/overlay';
+import {
+  EMPTY_OVERLAY,
+  applyOverlay,
+  exportOverlay,
+  importOverlay,
+  resolveOrderClashes,
+  warningsForNode,
+} from '@/domain/overlay';
 import type { ExerciseNode, ProgressionOverlay } from '@/domain/types';
 
 const base = makeChain(); // dead_hang -> pull_up_negative -> pull_up
@@ -152,6 +159,23 @@ describe('order clashes after a content update (ADR-052)', () => {
     expect(byId(nodes, 'user_band_pull_up')?.chainOrder).toBe(28.75);
   });
 
+  it('breaks an id tie by code unit, the same on every engine (not localeCompare)', () => {
+    // localeCompare puts 'user_a_b' first (Node's ICU: '_' before digits); code units put '9' first.
+    const digit = { ...userNode, id: 'user_a9', name: 'Digit' };
+    const underscore = { ...userNode, id: 'user_a_b', name: 'Underscore' };
+    const { nodes, issues } = applyOverlay(updated, overlay({ added: [underscore, digit] }));
+    expect(issues).toEqual([]);
+    expect(columnOf(nodes).slice(2, 5)).toEqual(['band_negative', 'user_a9', 'user_a_b']);
+
+    // Upper case sorts before lower case by code unit; localeCompare does the opposite.
+    const upper = { ...userNode, id: 'user_B' };
+    const lower = { ...userNode, id: 'user_a' };
+    const placed = new Set([upper.id, lower.id]);
+    const resolved = resolveOrderClashes([...updated, lower, upper], placed);
+    expect(byId(resolved, 'user_B')?.chainOrder).toBe(27.5);
+    expect(byId(resolved, 'user_a')?.chainOrder).toBe(28.75);
+  });
+
   it('moves a clash at the end of the column one step after the last node', () => {
     const last = { ...userNode, chainOrder: 30, ogLevel: 3 };
     const { nodes, issues } = applyOverlay(base, overlay({ added: [last] }));
@@ -173,6 +197,30 @@ describe('order clashes after a content update (ADR-052)', () => {
     expect(issues.map(formatIssue)).toContainEqual(
       expect.stringMatching(/order 20 is also used by/),
     );
+  });
+});
+
+describe('warningsForNode (ADR-052)', () => {
+  const warnings = [
+    { nodeId: 'user_late', message: "og_level 1 is lower than 'user_early' (og_level 3), …" },
+    { nodeId: 'user_elsewhere', message: "og_level 1 is lower than 'pull_up' (og_level 4), …" },
+  ];
+
+  it("keeps the warnings reported on the node or naming it, not other nodes' advice", () => {
+    expect(warningsForNode(warnings, 'user_late')).toEqual([warnings[0]]);
+    expect(warningsForNode(warnings, 'user_early')).toEqual([warnings[0]]);
+    expect(warningsForNode(warnings, 'user_elsewhere')).toEqual([warnings[1]]);
+    expect(warningsForNode(warnings, 'user_ear')).toEqual([]); // a whole id, not a prefix
+  });
+
+  it('finds a drop between two user nodes from either side', () => {
+    const early = { ...userNode, id: 'user_early', chainOrder: 22, ogLevel: 3 };
+    const late = { ...userNode, id: 'user_late', chainOrder: 24, ogLevel: 2 };
+    const result = applyOverlay(base, overlay({ added: [early, late] }));
+    expect(result.issues).toEqual([]);
+    expect(warningsForNode(result.warnings, 'user_late')).toHaveLength(1);
+    expect(warningsForNode(result.warnings, 'user_early')).toHaveLength(1);
+    expect(warningsForNode(result.warnings, 'dead_hang')).toEqual([]);
   });
 });
 

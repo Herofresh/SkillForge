@@ -3,6 +3,8 @@
  * radar, the push/pull balance note, streak, totals), the recent sessions list and the goals with
  * their progress along the goal paths. Pure: screens only render what these return.
  */
+import { compareCodeUnits } from '@/lib/compare';
+
 import { goalPathNodes } from './assessment';
 import {
   characterLevelProgress,
@@ -185,7 +187,7 @@ export function recentSessions(
 ): SessionListItem[] {
   const lookup = lookupOf(nodes);
   return [...sessions]
-    .sort((a, b) => b.startedAt - a.startedAt || b.id.localeCompare(a.id))
+    .sort((a, b) => b.startedAt - a.startedAt || compareCodeUnits(b.id, a.id))
     .slice(0, limit)
     .map((session) => sessionListItem(session, results[session.id], lookup));
 }

@@ -2,6 +2,8 @@
  * First-run onboarding rules (PLAN 4.1, ADR-031): the hero name, the goal list limits and the
  * summary shown at the end. Pure; the store persists the results and the screens render them.
  */
+import { compareCodeUnits } from '@/lib/compare';
+
 import { computeCharacter, type Character } from './character';
 import type { ProgressMap } from './progression';
 import type { ExerciseNode } from './types';
@@ -89,6 +91,6 @@ export function onboardingSummary(
     goals: goals.flatMap((id) => byId.get(id) ?? []),
     testedOut: nodes
       .filter((node) => progress[node.id]?.trialPassed)
-      .sort((a, b) => a.ogLevel - b.ogLevel || a.id.localeCompare(b.id)),
+      .sort((a, b) => a.ogLevel - b.ogLevel || compareCodeUnits(a.id, b.id)),
   };
 }

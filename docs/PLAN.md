@@ -209,6 +209,14 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **6.3c review fixes (6.5 release prep, ADR-052 update):** every id/session-id tie-break in
+  `src/domain/` (overlay order clashes, branch columns, assessment, onboarding, recent sessions,
+  node session log) uses `compareCodeUnits` from `src/lib/compare.ts`; `localeCompare` is left only
+  for sorting names people read (`train.ts`, `overlayEdit.ts`). `nodeDraftWarnings` filters through
+  `warningsForNode` (warnings on the node or naming it, so a drop between two user nodes shows in
+  both editors). Loaded-tree warnings are still not shown elsewhere (no "My progressions" list of
+  them). Verified by typecheck, lint, Jest, format:check and `progressions:check`; not run on the
+  emulator.
 - **Exercise animations, bar branches (task 6.4b-1, [PR #45](https://github.com/Herofresh/SkillForge/pull/45)):** `h_pull.ts`, `front_lever.ts`,
   `back_lever.ts`, `dynamic.ts`, `core.ts` animate all 49 remaining nodes of those branches (the
   front lever stays in iconic.ts); sheets `docs/screenshots/6.4b-<branch>.png`. No engine change.
@@ -919,6 +927,9 @@ upgrade check from every earlier release). Any new table or column is additive a
       lunge reach; contact sheets `docs/screenshots/6.4b-{flexibility,mobility,acrobatics}.png`)
       ([PR #44](https://github.com/Herofresh/SkillForge/pull/44))
 - [ ] 6.5 v0.4.0 release (6.1–6.4): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and 0.3.0.
+  - [x] Release prep, 6.3c review fixes: id tie-breaks compare code units (`compareCodeUnits`),
+    not `localeCompare`, so order is the same on Hermes as in Node; the node editor shows only the
+    advice about the node being edited (`warningsForNode`)
 - [ ] 6.6 Android home-screen widget (like Duolingo): shows whether you trained today, the
   streak, the hero's level and rank, a few stats; tapping it opens the Train tab
   (`skillforge://train`). Needs native code: a config plugin / library that works with
