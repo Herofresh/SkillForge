@@ -140,6 +140,37 @@ nodes:
       status: draft
       notes: ""
 
+  - id: l_pull_up
+    name: L-sit pull-up
+    description: A pull-up with the legs held straight out in front in an L, hips at a right angle. It adds a core hold to every rep.
+    order: 55
+    og_level: 4 # OG2: L-pull-ups [4]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: pull_up
+        level: 5
+      - node: l_sit
+        level: 5
+        kind: recommended
+        note: An L-sit hold helps keep the legs up.
+    patterns: [vertical_pull, core]
+    equipment:
+      - bar
+      - rings
+    regression: pull_up
+    cues:
+      - Hang with the legs straight out in front, toes pointed, hips at 90 degrees.
+      - Pull until the chin is over the bar without letting the legs drop.
+      - Lower to straight arms with the L still held.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
   # --- Harder pull-ups ---
   - id: chest_to_bar_pull_up
     name: Chest-to-bar pull-up

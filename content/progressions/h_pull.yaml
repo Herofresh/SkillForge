@@ -84,6 +84,33 @@ nodes:
       status: draft
       notes: ""
 
+  - id: wide_row
+    name: Wide row
+    description: A horizontal row with the hands much wider than the shoulders, pulling the chest up to the bar or rings. The wide grip puts more of the work on the upper back.
+    order: 35
+    og_level: 3 # OG2: wide rows [3]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: horizontal_row
+        level: 5
+    patterns: [horizontal_pull]
+    equipment:
+      - rings
+      - bar
+    regression: horizontal_row
+    cues:
+      - Hands about twice shoulder width, body straight from head to heels.
+      - Pull the chest up between the hands, elbows pointing out.
+      - Lower all the way to straight arms.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
   - id: archer_row
     name: Archer row
     description: A row with the hands wide, pulling towards one hand while the other arm stays straight out to the side. It loads one arm at a time, a step towards the one-arm row.
@@ -144,6 +171,37 @@ nodes:
       status: draft
       notes: ""
 
+  - id: advanced_tuck_front_lever_row
+    name: Advanced tuck front lever row
+    description: A row in the advanced tuck front lever, back flat and hips open, pulling the bar to the lower chest and lowering back to straight arms. The next step after the tuck front lever row.
+    order: 55
+    og_level: 6 # OG2: front lever rows, advanced tuck [6]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: tuck_front_lever_row
+        level: 5
+      - node: advanced_tuck_front_lever
+        level: 5
+        note: Hold the advanced tuck front lever (3 x 30 s) before rowing in it.
+    straight_arm: false # bent-arm pull, even though it starts in a lever
+    patterns: [horizontal_pull]
+    equipment:
+      - bar
+      - rings
+    regression: tuck_front_lever_row
+    cues:
+      - Start in an advanced tuck front lever, back flat, arms straight.
+      - Pull the bar to the lower chest while the body stays level.
+      - Lower back to straight arms without dropping the hips.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
   - id: straddle_one_arm_row
     name: Straddle one-arm row
     description: A row with only one hand on the ring or bar, feet spread wide on the floor for balance. You pull the chest to the hand without letting the body twist open.
@@ -166,6 +224,64 @@ nodes:
       - Pull the chest to the hand, then lower to a straight arm under control.
     sources:
       - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+    review:
+      status: draft
+      notes: ""
+
+  - id: one_arm_row
+    name: One-arm row
+    description: A row on one arm with the feet together, pulling the chest to the hand while the body stays square instead of twisting open. The end of the one-arm row path.
+    order: 70
+    og_level: 7 # OG2: one-arm rows [7]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 } # reps per arm
+    prerequisites:
+      - node: straddle_one_arm_row
+        level: 5
+    patterns: [horizontal_pull]
+    equipment:
+      - rings
+      - bar
+    regression: straddle_one_arm_row
+    cues:
+      - Feet together, one hand on the ring or bar, body straight.
+      - Keep the hips and shoulders square; the free arm may reach to the side for balance.
+      - Pull the chest to the hand, then lower to a straight arm under control.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+    review:
+      status: draft
+      notes: ""
+
+  - id: straddle_front_lever_row
+    name: Straddle front lever row
+    description: A row in the straddle front lever, legs straight and wide, pulling the bar to the body and lowering back to straight arms while staying level. An advanced lever row.
+    order: 80
+    og_level: 8 # OG2: front lever rows, straddle [8]
+    metric: reps
+    working_range: { min: 5, max: 8 }
+    trial: { sets: 3, target: 8 }
+    prerequisites:
+      - node: advanced_tuck_front_lever_row
+        level: 5
+      - node: straddle_front_lever
+        level: 5
+        note: Hold the straddle front lever (3 x 15 s) before rowing in it.
+    straight_arm: false # bent-arm pull, even though it starts in a lever
+    patterns: [horizontal_pull]
+    equipment:
+      - bar
+      - rings
+    regression: advanced_tuck_front_lever_row
+    cues:
+      - Start in a straddle front lever, legs straight and wide.
+      - Pull the bar towards the hips while the body stays horizontal.
+      - Lower back to straight arms without dropping the hips.
+    sources:
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
     review:
       status: draft
       notes: ""

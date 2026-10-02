@@ -255,6 +255,55 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "ring_push_up",
+    "branch": "h_push",
+    "name": "Ring push-up",
+    "description": "A push-up with the hands on rings hanging a few centimetres above the floor. The rings move freely, so the chest and shoulders also have to hold them steady.",
+    "chainOrder": 55,
+    "ogLevel": 4,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "diamond_push_up",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "horizontal_push"
+    ],
+    "equipment": [
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "push_up",
+    "cues": [
+      "Rings low, just above the floor; body straight from head to heels.",
+      "Keep the rings close to the body as you lower; do not let them drift apart.",
+      "Press up to straight arms and push the rings away at the top."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "elevated_one_arm_push_up",
     "branch": "h_push",
     "name": "Elevated one-arm push-up",
@@ -362,6 +411,55 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "straddle_one_arm_push_up",
+    "branch": "h_push",
+    "name": "Straddle one-arm push-up",
+    "description": "A push-up on one arm on the floor, the feet spread wide for balance and the free hand behind the back. The first one-arm push-up from the floor.",
+    "chainOrder": 75,
+    "ogLevel": 6,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "elevated_one_arm_push_up",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "horizontal_push"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "elevated_one_arm_push_up",
+    "cues": [
+      "Feet wide apart, hand under the chest, free hand behind the back.",
+      "Keep the hips and shoulders square to the floor; do not twist open.",
+      "Lower until the chest is near the hand, then press back up."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "pseudo_planche_push_up",
     "branch": "h_push",
     "name": "Pseudo planche push-up",
@@ -416,6 +514,55 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://themovementathlete.com/planche-requirements/"
     ],
     "verify": "OG2 level inferred: OG2 lists the rings-turned-out 40 degree PPPU at about level 6; the floor version is placed at 6 too. Check with a coach.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "one_arm_push_up",
+    "branch": "h_push",
+    "name": "One-arm push-up",
+    "description": "A push-up on one arm with the feet close together and the whole body straight, without twisting. The classic one-arm push-up.",
+    "chainOrder": 90,
+    "ogLevel": 8,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "straddle_one_arm_push_up",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "horizontal_push"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "straddle_one_arm_push_up",
+    "cues": [
+      "Feet together or only slightly apart, body in one straight line.",
+      "Squeeze the glutes and brace so the hips do not rotate.",
+      "Lower until the chest is near the hand, then press back up."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
     "review": {
       "status": "draft"
     },
@@ -796,6 +943,67 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "ring_dip",
+    "branch": "v_push",
+    "name": "Ring dip",
+    "description": "A dip between two rings. From a straight-arm support you lower until the shoulders are below the elbows and press back up, while keeping the rings steady at your sides.",
+    "chainOrder": 65,
+    "ogLevel": 4,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "dip_negative",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "support_hold",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "A steady ring support hold (3 x 30 s) first."
+      },
+      {
+        "nodeId": "parallel_bar_dip",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "Parallel bar dips (3 x 8) make the first ring dips much easier."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "vertical_push"
+    ],
+    "equipment": [
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "dip_negative",
+    "cues": [
+      "Start in a ring support, arms straight, rings close to the body.",
+      "Lower until the shoulders are just below the elbows; keep the rings from drifting out.",
+      "Press back up to straight arms and turn the rings slightly out at the top."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "wall_handstand_push_up",
     "branch": "v_push",
     "name": "Wall handstand push-up (full range)",
@@ -1158,6 +1366,65 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "l_pull_up",
+    "branch": "v_pull",
+    "name": "L-sit pull-up",
+    "description": "A pull-up with the legs held straight out in front in an L, hips at a right angle. It adds a core hold to every rep.",
+    "chainOrder": 55,
+    "ogLevel": 4,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "pull_up",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "l_sit",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "An L-sit hold helps keep the legs up."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "vertical_pull",
+      "core"
+    ],
+    "equipment": [
+      [
+        "bar"
+      ],
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "pull_up",
+    "cues": [
+      "Hang with the legs straight out in front, toes pointed, hips at 90 degrees.",
+      "Pull until the chin is over the bar without letting the legs drop.",
+      "Lower to straight arms with the L still held."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "chest_to_bar_pull_up",
     "branch": "v_pull",
     "name": "Chest-to-bar pull-up",
@@ -1506,6 +1773,58 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "wide_row",
+    "branch": "h_pull",
+    "name": "Wide row",
+    "description": "A horizontal row with the hands much wider than the shoulders, pulling the chest up to the bar or rings. The wide grip puts more of the work on the upper back.",
+    "chainOrder": 35,
+    "ogLevel": 3,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "horizontal_row",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "horizontal_pull"
+    ],
+    "equipment": [
+      [
+        "rings"
+      ],
+      [
+        "bar"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "horizontal_row",
+    "cues": [
+      "Hands about twice shoulder width, body straight from head to heels.",
+      "Pull the chest up between the hands, elbows pointing out.",
+      "Lower all the way to straight arms."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "archer_row",
     "branch": "h_pull",
     "name": "Archer row",
@@ -1616,6 +1935,64 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "advanced_tuck_front_lever_row",
+    "branch": "h_pull",
+    "name": "Advanced tuck front lever row",
+    "description": "A row in the advanced tuck front lever, back flat and hips open, pulling the bar to the lower chest and lowering back to straight arms. The next step after the tuck front lever row.",
+    "chainOrder": 55,
+    "ogLevel": 6,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "tuck_front_lever_row",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "advanced_tuck_front_lever",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "Hold the advanced tuck front lever (3 x 30 s) before rowing in it."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "horizontal_pull"
+    ],
+    "equipment": [
+      [
+        "bar"
+      ],
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "tuck_front_lever_row",
+    "cues": [
+      "Start in an advanced tuck front lever, back flat, arms straight.",
+      "Pull the bar to the lower chest while the body stays level.",
+      "Lower back to straight arms without dropping the hips."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "straddle_one_arm_row",
     "branch": "h_pull",
     "name": "Straddle one-arm row",
@@ -1660,6 +2037,116 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+    ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "one_arm_row",
+    "branch": "h_pull",
+    "name": "One-arm row",
+    "description": "A row on one arm with the feet together, pulling the chest to the hand while the body stays square instead of twisting open. The end of the one-arm row path.",
+    "chainOrder": 70,
+    "ogLevel": 7,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "straddle_one_arm_row",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "horizontal_pull"
+    ],
+    "equipment": [
+      [
+        "rings"
+      ],
+      [
+        "bar"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "straddle_one_arm_row",
+    "cues": [
+      "Feet together, one hand on the ring or bar, body straight.",
+      "Keep the hips and shoulders square; the free arm may reach to the side for balance.",
+      "Pull the chest to the hand, then lower to a straight arm under control."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "straddle_front_lever_row",
+    "branch": "h_pull",
+    "name": "Straddle front lever row",
+    "description": "A row in the straddle front lever, legs straight and wide, pulling the bar to the body and lowering back to straight arms while staying level. An advanced lever row.",
+    "chainOrder": 80,
+    "ogLevel": 8,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "advanced_tuck_front_lever_row",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "straddle_front_lever",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "Hold the straddle front lever (3 x 15 s) before rowing in it."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "horizontal_pull"
+    ],
+    "equipment": [
+      [
+        "bar"
+      ],
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "advanced_tuck_front_lever_row",
+    "cues": [
+      "Start in a straddle front lever, legs straight and wide.",
+      "Pull the bar towards the hips while the body stays horizontal.",
+      "Lower back to straight arms without dropping the hips."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
     ],
     "review": {
       "status": "draft"
@@ -1731,6 +2218,60 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "tuck_front_lever_raise",
+    "branch": "front_lever",
+    "name": "Tuck front lever raise",
+    "description": "From a hang on straight arms, you raise the tucked body up into a tuck front lever and lower it back down without bending the arms. A moving drill for the pull-down strength of the lever.",
+    "chainOrder": 15,
+    "ogLevel": 4,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "tuck_front_lever",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "A steady tuck front lever hold comes first."
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_pull"
+    ],
+    "equipment": [
+      [
+        "bar"
+      ],
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "tuck_front_lever",
+    "cues": [
+      "Start from a dead hang with the knees tucked.",
+      "Keep the arms locked and press the bar down towards the hips to lift the body.",
+      "Pause level with the floor, then lower slowly; no swinging."
+    ],
+    "sourceUrls": [
+      "https://rangeofmotion.net.au/front-lever-exercise-improvement-program",
+      "https://fitnessvolt.com/front-lever-raises-guide/"
+    ],
+    "verify": "Not on the OG2 chart or the BWF chart; level 4 (next to the tuck hold) and the RR rep standard 3 x 8 are inferred.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "advanced_tuck_front_lever",
     "branch": "front_lever",
     "name": "Advanced tuck front lever",
@@ -1779,6 +2320,65 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://www.calisthenics-corner.com/skills/front-lever/"
     ],
     "verify": "OG2 level ~4 is inferred from the chart layout.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "tuck_ice_cream_maker",
+    "branch": "front_lever",
+    "name": "Tuck ice cream maker",
+    "description": "Starting at the top of a pull-up, you straighten the arms while tipping back into a tuck front lever, then pull back up to the top. It links bent-arm pulling to the lever position.",
+    "chainOrder": 25,
+    "ogLevel": 5,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 6
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "tuck_front_lever",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "pull_up",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_pull",
+      "vertical_pull"
+    ],
+    "equipment": [
+      [
+        "rings"
+      ],
+      [
+        "bar"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "tuck_front_lever",
+    "cues": [
+      "Start at the top of a pull-up with the knees tucked.",
+      "Push the bar away and lean back until the arms are straight and the body is level.",
+      "Pull back up to the top along the same path, then lower to a hang."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://calisthenics-parks.com/skills/206-en-ice-cream-makers"
+    ],
+    "verify": "Not on the OG2 chart; the BWF chart puts the tuck ice cream maker in its intermediate band next to the tuck front lever row (OG2 5). Level 5 and the 3 x 5 standard (Steven Low's strength rule) are inferred.",
     "review": {
       "status": "draft"
     },
@@ -1892,6 +2492,60 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "half_lay_front_lever",
+    "branch": "front_lever",
+    "name": "Half-lay front lever",
+    "description": "A front lever with the hips open and the legs together, the knees bent so the shins hang down. Longer than the straddle and shorter than the full lever.",
+    "chainOrder": 45,
+    "ogLevel": 7,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 8,
+      "max": 15
+    },
+    "trial": {
+      "sets": 3,
+      "target": 15
+    },
+    "prerequisites": [
+      {
+        "nodeId": "straddle_front_lever",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_pull"
+    ],
+    "equipment": [
+      [
+        "bar"
+      ],
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "straddle_front_lever",
+    "cues": [
+      "Legs together, knees bent, hips fully open in line with the body.",
+      "Body level with the floor; squeeze the glutes so the hips do not pike.",
+      "Arms locked, shoulders pulled down."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://en.wikipedia.org/wiki/Front_lever",
+      "https://antranik.org/ssc/"
+    ],
+    "verify": "OG2 prints the half-lay / one-leg front lever at 7 and the full lever at 8; the dataset has the full lever at 7 (PLAN 1.6), so 7 keeps the order.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "front_lever",
     "branch": "front_lever",
     "name": "Front lever",
@@ -1939,6 +2593,112 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://antranik.org/ssc/",
       "https://en.wikipedia.org/wiki/Front_lever"
     ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "front_lever_to_inverted",
+    "branch": "front_lever",
+    "name": "Front lever to inverted hang",
+    "description": "From a front lever, you pull the straight body up on straight arms until it hangs upside down, then lower it back to the lever. A dynamic front lever skill.",
+    "chainOrder": 60,
+    "ogLevel": 9,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 5
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "front_lever",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_pull"
+    ],
+    "equipment": [
+      [
+        "bar"
+      ],
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "front_lever",
+    "cues": [
+      "Start in a full front lever, body straight and arms locked.",
+      "Press the bar towards the hips to rotate the body up to an inverted hang.",
+      "Lower back to the lever under control and hold it briefly."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "verify": "OG2 level 9 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "hanging_pull_to_inverted",
+    "branch": "front_lever",
+    "name": "Hanging pull to inverted hang",
+    "description": "From a dead hang, you pull the straight body up on straight arms, through the front lever, all the way to an inverted hang, and lower back down. The hardest front lever pull in the tree.",
+    "chainOrder": 70,
+    "ogLevel": 10,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 5
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "front_lever_to_inverted",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_pull"
+    ],
+    "equipment": [
+      [
+        "bar"
+      ],
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "front_lever_to_inverted",
+    "cues": [
+      "Start from a still dead hang, body straight, no swing.",
+      "Keep the arms locked and the body rigid as it passes the front lever.",
+      "Lower slowly the same way."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "verify": "OG2 level 10 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
       "status": "draft"
     },
@@ -2214,6 +2974,60 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "one_leg_back_lever",
+    "branch": "back_lever",
+    "name": "One-leg back lever",
+    "description": "A back lever with one leg straight in line with the body and the other knee bent, face down below the rings or bar. It sits between the straddle and the full back lever.",
+    "chainOrder": 55,
+    "ogLevel": 6,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 8,
+      "max": 15
+    },
+    "trial": {
+      "sets": 3,
+      "target": 15
+    },
+    "prerequisites": [
+      {
+        "nodeId": "straddle_back_lever",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_pull"
+    ],
+    "equipment": [
+      [
+        "rings"
+      ],
+      [
+        "bar"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "straddle_back_lever",
+    "cues": [
+      "One leg straight out in line with the body, the other knee bent.",
+      "Squeeze the glutes; keep the hips from sagging below the shoulders.",
+      "Switch the straight leg between sets."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://antranik.org/ssc/"
+    ],
+    "verify": "OG2 prints the half-lay / one-leg back lever at 6. The BWF chart lists it before the straddle and notes that the straddle is easier for some people; here it follows the OG2 level.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "back_lever",
     "branch": "back_lever",
     "name": "Back lever",
@@ -2262,6 +3076,117 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
     "verify": "OG2 level ~6 is inferred from the chart layout.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "back_lever_pullout",
+    "branch": "back_lever",
+    "name": "Back lever pullout",
+    "description": "From a back lever, you pull the straight body back up to an inverted hang with straight arms, without piking or bending the arms. It trains control on the way out of the lever.",
+    "chainOrder": 65,
+    "ogLevel": 8,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 5
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "back_lever",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_pull"
+    ],
+    "equipment": [
+      [
+        "rings"
+      ],
+      [
+        "bar"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "back_lever",
+    "cues": [
+      "Start in a full back lever, body straight.",
+      "Keep the arms locked and press the hands down to rotate up to an inverted hang.",
+      "Move slowly; stop at any pain in the biceps or elbows."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "verify": "OG2 level 8 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "german_hang_pullout",
+    "branch": "back_lever",
+    "name": "German hang pullout",
+    "description": "From a German hang, you pull with straight arms up through the back lever to an inverted hang. A long straight-arm pull through the full shoulder range.",
+    "chainOrder": 67,
+    "ogLevel": 9,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 5
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "back_lever_pullout",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "german_hang",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_pull"
+    ],
+    "equipment": [
+      [
+        "rings"
+      ],
+      [
+        "bar"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "back_lever_pullout",
+    "cues": [
+      "Start from a relaxed German hang, arms straight.",
+      "Pull through the back lever without bending the arms or piking.",
+      "Finish in an inverted hang and come out slowly."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "verify": "OG2 level 9 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
       "status": "draft"
     },
@@ -2574,6 +3499,66 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "tuck_planche_push_up",
+    "branch": "planche",
+    "name": "Tuck planche push-up",
+    "description": "From a tuck planche, you bend the arms to lower the chest towards the floor and press back up while the feet stay off the floor. Push-ups in the planche position.",
+    "chainOrder": 45,
+    "ogLevel": 6,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 6
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "tuck_planche",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "pseudo_planche_push_up",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "Builds the bent-arm strength in the forward lean."
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_push",
+      "horizontal_push"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ],
+      [
+        "parallettes"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "tuck_planche",
+    "cues": [
+      "Start in a tuck planche with the shoulders past the hands.",
+      "Lower with the elbows close to the body; keep the hips at shoulder height.",
+      "Press back to straight arms and push the floor away."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "verify": "OG2 level 6 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "straddle_planche",
     "branch": "planche",
     "name": "Straddle planche",
@@ -2621,6 +3606,119 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://antranik.org/ssc/",
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "advanced_tuck_planche_push_up",
+    "branch": "planche",
+    "name": "Advanced tuck planche push-up",
+    "description": "A planche push-up from the advanced tuck, with the back flat and the hips level with the shoulders. The longer shape makes each press much harder.",
+    "chainOrder": 53,
+    "ogLevel": 8,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 6
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "advanced_tuck_planche",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "tuck_planche_push_up",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_push",
+      "horizontal_push"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ],
+      [
+        "parallettes"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "tuck_planche_push_up",
+    "cues": [
+      "Start in an advanced tuck planche, back flat.",
+      "Lower until the chest is near hand height without dropping the hips.",
+      "Press back up with the shoulders leaning past the hands."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "verify": "OG2 prints it at 8, above the straddle planche (8 on the chart, 7 in the dataset); the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "half_lay_planche",
+    "branch": "planche",
+    "name": "Half-lay planche",
+    "description": "A planche with the hips open and the legs together, the knees bent, so the body is level from the shoulders to the knees. It sits between the straddle and the full planche.",
+    "chainOrder": 56,
+    "ogLevel": 9,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 8,
+      "max": 15
+    },
+    "trial": {
+      "sets": 3,
+      "target": 15
+    },
+    "prerequisites": [
+      {
+        "nodeId": "straddle_planche",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_push"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ],
+      [
+        "parallettes"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "straddle_planche",
+    "cues": [
+      "Legs together, knees bent, hips fully open in line with the body.",
+      "Arms locked, shoulders protracted and well past the hands.",
+      "Squeeze the glutes; no sag or pike at the hips."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://antranik.org/ssc/"
+    ],
+    "verify": "OG2 prints the half-lay / one-leg planche at 9 (straddle 8, full 11 on the chart; 7 and 10 in the dataset, PLAN 1.6).",
     "review": {
       "status": "draft"
     },
@@ -2676,6 +3774,65 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
     "verify": "OG2 level ~10 is inferred from the chart layout.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "straddle_planche_push_up",
+    "branch": "planche",
+    "name": "Straddle planche push-up",
+    "description": "A push-up held in a straddle planche, legs straight and wide, lowering the chest towards the floor and pressing back up without touching down. An advanced planche strength move.",
+    "chainOrder": 70,
+    "ogLevel": 10,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 5
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "straddle_planche",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "advanced_tuck_planche_push_up",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_push",
+      "horizontal_push"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ],
+      [
+        "parallettes"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "advanced_tuck_planche_push_up",
+    "cues": [
+      "Start in a straddle planche, legs straight and wide.",
+      "Lower with the body staying level; the feet never touch the floor.",
+      "Press back to straight arms and protract the shoulders."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "verify": "OG2 level 10 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
       "status": "draft"
     },
@@ -2841,6 +3998,57 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "chest_to_wall_shoulder_taps",
+    "branch": "handstand",
+    "name": "Chest-to-wall shoulder taps",
+    "description": "In a chest-to-wall handstand, you shift the weight onto one hand and lift the other to tap its shoulder, then switch sides. It teaches the weight shifts used to balance freely.",
+    "chainOrder": 35,
+    "ogLevel": 3,
+    "metric": "reps",
+    "workingRange": {
+      "min": 4,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "chest_to_wall_handstand",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "vertical_push"
+    ],
+    "equipment": [
+      [
+        "wall"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "chest_to_wall_handstand",
+    "cues": [
+      "Walk up into a chest-to-wall handstand, body straight, hands close to the wall.",
+      "Shift the weight onto one hand before lifting the other; keep the hips still.",
+      "Tap the shoulder lightly, put the hand back, then switch."
+    ],
+    "sourceUrls": [
+      "https://www.12minuteathlete.com/stronger-handstand/",
+      "https://gmb.io/freestanding-handstand/"
+    ],
+    "verify": "Not on the OG2 chart or the BWF chart; level 3 (between the chest-to-wall handstand and the freestanding handstand) and the 3 x 8 taps per side are inferred.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "frog_stand",
     "branch": "handstand",
     "name": "Frog stand (crow)",
@@ -2946,6 +4154,63 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "ring_shoulder_stand",
+    "branch": "handstand",
+    "name": "Ring shoulder stand",
+    "description": "Balancing upside down on rings with bent arms, the shoulders low next to the rings and the body straight above them. A first inverted hold on rings, before the ring handstand.",
+    "chainOrder": 55,
+    "ogLevel": 5,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 10,
+      "max": 30
+    },
+    "trial": {
+      "sets": 3,
+      "target": 30
+    },
+    "prerequisites": [
+      {
+        "nodeId": "support_hold",
+        "minLevel": 5,
+        "kind": "hard",
+        "note": "A steady ring support hold first."
+      },
+      {
+        "nodeId": "chest_to_wall_handstand",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "vertical_push"
+    ],
+    "equipment": [
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "chest_to_wall_handstand",
+    "cues": [
+      "Rings low; roll up from a tuck with the arms bent and the elbows in.",
+      "Keep the rings pressed against the body and the shoulders close to them.",
+      "Extend the legs straight up and come down the way you went up."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "verify": "OG2 level 5 is printed; the 3 x 30 s hold standard is the RR hold rule.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "wall_straddle_press_eccentric",
     "branch": "handstand",
     "name": "Wall straddle press eccentric",
@@ -2998,6 +4263,66 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "elevated_straddle_press",
+    "branch": "handstand",
+    "name": "Elevated straddle press",
+    "description": "A straddle press to handstand that starts with the feet on a raised surface, so the hips start higher. The step between the wall eccentric and the press from the floor.",
+    "chainOrder": 65,
+    "ogLevel": 6,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 6
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "wall_straddle_press_eccentric",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "freestanding_handstand",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "balance",
+      "straight_arm_push",
+      "core"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ],
+      [
+        "box"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "wall_straddle_press_eccentric",
+    "cues": [
+      "Feet wide on the raised surface, hands on the floor in front of it.",
+      "Lean the shoulders over the hands until the feet float off.",
+      "Lift the hips over the shoulders, then bring the legs together."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/the-fundamentals-of-bodyweight-strength-training/"
+    ],
+    "verify": "OG2 level 6 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
       "status": "draft"
     },
@@ -3720,6 +5045,49 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "single_leg_deadlift",
+    "branch": "legs",
+    "name": "Single-leg deadlift",
+    "description": "Standing on one leg, you hinge at the hip and lower the chest towards the floor while the free leg reaches back, then stand up tall. A balance and hamstring exercise with no equipment.",
+    "chainOrder": 15,
+    "ogLevel": 1,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "hinge"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "cues": [
+      "Soft knee on the standing leg; the back stays flat.",
+      "Push the hips back and let the free leg rise in line with the body.",
+      "Stand up by squeezing the glute of the standing leg."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises/hinge"
+    ],
+    "verify": "Not on the OG2 chart; the BWF chart and the BWF wiki put the one-leg deadlift at the start of the hinge path. Level 1 and the RR rep standard 3 x 8 are inferred.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "squat",
     "branch": "legs",
     "name": "Bodyweight squat",
@@ -3921,6 +5289,56 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "beginner_shrimp_squat",
+    "branch": "legs",
+    "name": "Beginner shrimp squat",
+    "description": "A one-leg squat with the other leg bent behind you: you lower until the back knee and toes touch the floor together and stand up again. The first step of the shrimp squat path.",
+    "chainOrder": 55,
+    "ogLevel": 3,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "bulgarian_split_squat",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "squat"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "bulgarian_split_squat",
+    "cues": [
+      "Bend the free leg behind you; reach the arms forward for balance.",
+      "Lower slowly until the back knee and toes touch the floor.",
+      "Stand up through the front heel; knee in line with the toes."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises/squat"
+    ],
+    "verify": "Not on the OG2 chart; level 3 (next to the Bulgarian split squat) is inferred.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "assisted_pistol_squat",
     "branch": "legs",
     "name": "Assisted pistol squat",
@@ -3970,6 +5388,56 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://gist.github.com/sgup/f10f1d57e54b7876495f4bafb6d697eb"
     ],
     "verify": "Order follows the RR squat progression; the OG2 level is inferred.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "intermediate_shrimp_squat",
+    "branch": "legs",
+    "name": "Intermediate shrimp squat",
+    "description": "A shrimp squat in which only the back knee touches the floor at the bottom, the toes stay up. Harder than the beginner version because the leg works through a deeper range.",
+    "chainOrder": 65,
+    "ogLevel": 4,
+    "metric": "reps",
+    "workingRange": {
+      "min": 5,
+      "max": 8
+    },
+    "trial": {
+      "sets": 3,
+      "target": 8
+    },
+    "prerequisites": [
+      {
+        "nodeId": "beginner_shrimp_squat",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "squat"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "beginner_shrimp_squat",
+    "cues": [
+      "Free leg bent behind you, toes kept off the floor.",
+      "Lower until only the knee touches the floor, softly.",
+      "Stand up without the back foot pushing off."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises/squat"
+    ],
+    "verify": "Not on the OG2 chart; level 4 (next to the pistol squat) is inferred.",
     "review": {
       "status": "draft"
     },
@@ -4069,6 +5537,56 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
     "verify": "The OG2 level is inferred. The trial follows Steven Low's eccentric guide (2-3 sets of 2-3 reps at 3-5 s); there is no Nordic-specific standard.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "nordic_curl",
+    "branch": "legs",
+    "name": "Nordic curl",
+    "description": "Kneeling with the heels anchored, you lower the straight body towards the floor using the hamstrings and pull yourself back up without pushing off with the hands. The full nordic curl.",
+    "chainOrder": 90,
+    "ogLevel": 5,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 5
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "nordic_curl_negative",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": false,
+    "isSkill": false,
+    "patterns": [
+      "hinge"
+    ],
+    "equipment": [
+      [
+        "floor"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "nordic_curl_negative",
+    "cues": [
+      "Knees on a pad, heels anchored, body straight from knees to head.",
+      "Lower slowly with the hips extended; do not bend at the waist.",
+      "Pull back up with the hamstrings; catch yourself with the hands only if needed."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises/hinge"
+    ],
+    "verify": "Not on the OG2 chart; level 5 (above the negative at 4) and the 3 x 5 standard are inferred.",
     "review": {
       "status": "draft"
     },
@@ -4249,6 +5767,69 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "source": "core"
   },
   {
+    "id": "ring_muscle_up",
+    "branch": "dynamic",
+    "name": "Ring muscle-up",
+    "description": "On rings with a false grip, you pull up high, turn the wrists over the rings and press out to a straight-arm support. The classic rings muscle-up.",
+    "chainOrder": 35,
+    "ogLevel": 5,
+    "metric": "reps",
+    "workingRange": {
+      "min": 3,
+      "max": 5
+    },
+    "trial": {
+      "sets": 3,
+      "target": 5
+    },
+    "prerequisites": [
+      {
+        "nodeId": "muscle_up_negative",
+        "minLevel": 5,
+        "kind": "hard"
+      },
+      {
+        "nodeId": "ring_dip",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "Ring dips make the press-out after the transition much easier."
+      },
+      {
+        "nodeId": "kipping_muscle_up",
+        "minLevel": 5,
+        "kind": "recommended",
+        "note": "A bar muscle-up teaches the transition first."
+      }
+    ],
+    "straightArm": false,
+    "isSkill": true,
+    "patterns": [
+      "vertical_pull",
+      "vertical_push",
+      "explosive"
+    ],
+    "equipment": [
+      [
+        "rings"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "muscle_up_negative",
+    "cues": [
+      "Set a false grip, the wrist over the ring.",
+      "Pull the rings to the lower chest, then lean forward over them.",
+      "Turn through to a deep dip and press out to straight arms."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
     "id": "elbow_lever",
     "branch": "dynamic",
     "name": "Elbow lever",
@@ -4366,6 +5947,58 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "https://bodyproskills.com/articles/human-flag-prerequisites/"
     ],
     "verify": "The 5-15 s range and 3 x 15 s trial are placeholders for an advanced hold.",
+    "review": {
+      "status": "draft"
+    },
+    "source": "core"
+  },
+  {
+    "id": "advanced_tuck_human_flag",
+    "branch": "dynamic",
+    "name": "Advanced tuck human flag",
+    "description": "A human flag with the hips open and the back flat, knees still bent, the body held sideways off a vertical pole. It sits between the tuck and the straddle flag.",
+    "chainOrder": 55,
+    "ogLevel": 6,
+    "metric": "hold_s",
+    "workingRange": {
+      "min": 5,
+      "max": 15
+    },
+    "trial": {
+      "sets": 3,
+      "target": 15
+    },
+    "prerequisites": [
+      {
+        "nodeId": "tuck_human_flag",
+        "minLevel": 5,
+        "kind": "hard"
+      }
+    ],
+    "straightArm": true,
+    "isSkill": true,
+    "patterns": [
+      "straight_arm_pull",
+      "straight_arm_push",
+      "core"
+    ],
+    "equipment": [
+      [
+        "pole"
+      ]
+    ],
+    "alternatives": [],
+    "regressionId": "tuck_human_flag",
+    "cues": [
+      "From the tuck, open the hips so the back is flat and the thighs point away.",
+      "Top hand pulls, bottom hand pushes; both arms stay straight.",
+      "Keep the body level with the floor."
+    ],
+    "sourceUrls": [
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+    ],
+    "verify": "OG2 prints tuck 5, advanced tuck 6, straddle 7, full 8; the dataset has straddle and full at 6 (PLAN 1.6), so 6 keeps the order. The 5-15 s range and 3 x 15 s trial follow the other flags.",
     "review": {
       "status": "draft"
     },
@@ -5360,7 +6993,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "cues": [
       "Start with a strap or band around the back foot and walk the hands down it.",
       "Lift the chest and lengthen the spine before bending back.",
-      "Elbows point up; come out slowly the way you went in."
+      "Elbows point up; come out slowly the way you went in.",
+      "Front foot flexed to protect the knee, as in pigeon pose; ease off at any pain in the knee."
     ],
     "sourceUrls": [
       "https://en.wikipedia.org/wiki/Eka_Pada_Rajakapotasana",

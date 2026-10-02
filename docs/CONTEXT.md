@@ -313,14 +313,14 @@ jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests
 `progressionFormat.ts`, check with `validate.ts`) → `progressions.generated.ts` + review sheet → app
 imports `ALL_NODES` → at runtime `applyOverlay(ALL_NODES, userOverlay)` gives the user's tree.
 
-**Dataset (125 nodes, all `review.status: draft`):**
+**Dataset (155 nodes, all `review.status: draft`):**
 
 | Branch | Nodes | Branch | Nodes | Branch | Nodes |
 |---|---|---|---|---|---|
-| `h_push` | 8 | `front_lever` | 5 | `core` | 10 |
-| `v_push` | 9 | `back_lever` | 7 | `legs` | 8 |
-| `v_pull` | 9 | `planche` | 6 | `dynamic` | 8 |
-| `h_pull` | 6 | `handstand` | 8 | `flexibility` | 17 |
+| `h_push` | 11 | `front_lever` | 10 | `core` | 10 |
+| `v_push` | 10 | `back_lever` | 10 | `legs` | 12 |
+| `v_pull` | 10 | `planche` | 10 | `dynamic` | 10 |
+| `h_pull` | 10 | `handstand` | 11 | `flexibility` | 17 |
 | `acrobatics` | 13 | `mobility` | 11 | | |
 
 The 88 manifest nodes plus `straight_bar_dip` (Home dip, ADR-017) and the 13-node **acrobatics**
@@ -332,10 +332,15 @@ front split, butterfly → frog → pancake → middle split, half lotus → lot
 wheel) and added the 11-node **mobility** branch (CARs, ankle rocks, open book, wall angel, 90/90,
 deep squat hold, cossack squat, three-point bridge, overhead squat). Both are plain `mobility`
 pattern work (`skill: false`), so the generator only puts them in the goal-driven cool-down slot.
+PLAN 6.3b (ADR-051) filled every other branch to at least 10 with 30 OG2 / BWF-chart steps (lever
+and planche variants, lever rows, planche push-ups, ring push-ups and dips, one-arm push-up and
+row, L-sit pull-up, shrimp squats, nordic curl, ring muscle-up, ring shoulder stand, elevated
+straddle press); no existing node gained a hard gate on a new one.
 Content checks beyond the validator
 (cross-branch gates, straight-arm flags, a Home path per pattern) are in
 `src/data/skills/crossBranchGates.test.ts`. With the Home profile only `parallel_bar_dip` (dip bars),
-`iron_cross` (rings) and the three human flags (pole) are out of reach.
+`iron_cross`, `ring_push_up`, `ring_dip`, `ring_muscle_up`, `ring_shoulder_stand` (rings) and the
+four human flags (pole) are out of reach.
 
 **Data flow:** UI → store action (`src/store/appStore.ts`) → repository persists the history entry
 (`sessions` + `session_sets`, or `user_actions`) → domain step (`applySession` /
