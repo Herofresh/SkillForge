@@ -1311,3 +1311,37 @@ Template:
   Play and import it (7.3). Without EAS there are no cloud builds, so building needs this machine's
   Android SDK and Java (CONTEXT.md). OTA updates (expo-updates) are not available; every change is
   a store update.
+
+## ADR-048: Jersey 15 replaces Pixelify Sans so every digit is distinct (PLAN 6.1)
+- Date: 2026-10-02 · Status: Accepted (amends the font choice of ADR-030)
+- Context: the user reported that "a 5 can look like an 8". Rendering 0–9 in every text role
+  (Style Guide → Digits, `docs/screenshots/6.1-digits-before.png`) showed the cause: Pixelify Sans
+  (the `display`, `title` and `heading` variants and the header titles) draws the 5 with a curved
+  top that reads as an S or an 8 (also 2/Z). Silkscreen (`label`) and Alegreya Sans
+  (`body`/`small`) draw all ten digits distinctly. The pixel roles show most of the app's numbers:
+  levels, the timer clock, rest countdown, XP totals, stepper values, button labels.
+- Options:
+  1. A `Type.number` role used by every numeric text: numbers sit inside mixed strings ("8 reps",
+     "LV 3", "+40 XP", "0:42") in ~100 call sites, so each would need auditing and future code
+     would have to remember the role; letters in those strings would switch font too.
+  2. Merge Pixelify letters with other digits into a custom font file: clever, an extra build
+     step and an OFL derivative to maintain.
+  3. **Swap the pixel font for one with clear digits (chosen).** One token change fixes every
+     current and future number in those roles.
+- Decision:
+  - `FontFamily.pixel` is **Jersey 15** (`@expo-google-fonts/jersey-15`, SIL OFL 1.1, © 2023 The
+    Soft Type Project Authors) for `display`, `title`, `heading` and the navigation header titles
+    (`HeaderTitleStyle`). It is a chunky mixed-case pixel font with a flat-topped 5, an open 8 and
+    a plain 0, close to the old look. `FontFamily.display` is gone (Jersey 15 has one weight;
+    hierarchy comes from size, gold and the hard shadow). Pixelify Sans is uninstalled.
+  - Candidates compared side by side: Tiny5 (spindly), Jersey 10 / Handjet (too condensed),
+    Press Start 2P / Sixtyfour / Workbench (too wide or noisy), VT323 (too thin), Micro 5 (tiny
+    for its size), Bytesized (odd 8 and 9), Jacquard 12 (blackletter).
+  - Jersey 15's cap height is 0.56 em against Pixelify's 0.65, so the sizes grow by about 7/6
+    (display 32 → 36, title 24 → 28, heading 18 → 21, header 20 → 23) and keep the same cap and line
+    heights; the text gets narrower, so nothing new wraps.
+  - Silkscreen and Alegreya Sans stay. `fonts.test.ts` checks that every role's font is loaded and
+    on the checked `CLEAR_DIGIT_FONTS` list; the Style Guide keeps the Digits section.
+- Consequences: no layout height changes; headings look slightly more condensed. Only bundled font
+  files change (no data), so the release stays upgrade-safe. Credits list Jersey 15 instead of
+  Pixelify Sans.

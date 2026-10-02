@@ -2,7 +2,7 @@ import { Redirect } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
 import { StyleSheet, View } from 'react-native';
 
-import { Border, Colors, FontFamily, TypeScale } from '@/components/theme';
+import { Border, Colors, FontFamily, HeaderTitleStyle } from '@/components/theme';
 import { PixelIcon, type IconName } from '@/components/ui';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -48,7 +48,7 @@ export default function TabLayout() {
         headerBackground: () => <Rule edge="bottom" />,
         headerShadowVisible: false,
         headerTintColor: Colors.gold,
-        headerTitleStyle: { fontFamily: TypeScale.title.fontFamily, fontSize: 20 },
+        headerTitleStyle: HeaderTitleStyle,
       }}>
       {TABS.map(({ name, title, icon }) => (
         <Tabs.Screen

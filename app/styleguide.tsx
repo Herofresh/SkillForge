@@ -34,6 +34,8 @@ import { ATTRIBUTES, TIERS } from '@/domain/types';
 const SAMPLE_ATTRIBUTES = [42, 35, 28, 18, 12, 6];
 const SAMPLE_MAX = 42;
 const noop = () => undefined;
+/** Every digit, plus the pairs people confuse, to check each text role (PLAN 6.1, ADR-048). */
+const DIGITS = '0123456789 · 5 8 · 3:58';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -68,6 +70,14 @@ export default function StyleGuideScreen() {
           {(Object.keys(TypeScale) as TextVariant[]).map((variant) => (
             <PixelText key={variant} variant={variant}>
               {variant} · The hero trains
+            </PixelText>
+          ))}
+        </Section>
+
+        <Section title="Digits">
+          {(Object.keys(TypeScale) as TextVariant[]).map((variant) => (
+            <PixelText key={variant} variant={variant} testID={`digits-${variant}`}>
+              {variant} {DIGITS}
             </PixelText>
           ))}
         </Section>

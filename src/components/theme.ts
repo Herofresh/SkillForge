@@ -78,10 +78,11 @@ export const AttributeColors: Readonly<Record<Attribute, string>> = {
  * fonts are loaded (or if loading fails) React Native falls back to the system font.
  */
 export const FontFamily = {
-  /** Pixel display font for titles and numbers. */
-  display: 'PixelifySans_700Bold',
-  /** Pixel font for headings and buttons. */
-  pixel: 'PixelifySans_600SemiBold',
+  /**
+   * Pixel font for titles, headings, buttons and big numbers: Jersey 15, whose ten digits are all
+   * distinct (ADR-048 replaced Pixelify Sans, where a 5 looked like an S or an 8).
+   */
+  pixel: 'Jersey15_400Regular',
   /** Tiny all-caps pixel font for tags, chips and tab labels. */
   caps: 'Silkscreen_400Regular',
   /** Readable humanist body font. */
@@ -89,17 +90,23 @@ export const FontFamily = {
   bodyBold: 'AlegreyaSans_700Bold',
 } as const;
 
-/** Type scale (docs/DESIGN.md → Typography). */
+/**
+ * Type scale (docs/DESIGN.md → Typography). Jersey 15 draws smaller than its size (cap height 0.56
+ * em), so the pixel sizes are about 7/6 of the old Pixelify ones: same cap height and line height.
+ */
 export const TypeScale = {
-  display: { fontFamily: FontFamily.display, fontSize: 32, lineHeight: 40 },
-  title: { fontFamily: FontFamily.display, fontSize: 24, lineHeight: 32 },
-  heading: { fontFamily: FontFamily.pixel, fontSize: 18, lineHeight: 24 },
+  display: { fontFamily: FontFamily.pixel, fontSize: 36, lineHeight: 40 },
+  title: { fontFamily: FontFamily.pixel, fontSize: 28, lineHeight: 32 },
+  heading: { fontFamily: FontFamily.pixel, fontSize: 21, lineHeight: 24 },
   label: { fontFamily: FontFamily.caps, fontSize: 12, lineHeight: 16, letterSpacing: 1 },
   body: { fontFamily: FontFamily.body, fontSize: 17, lineHeight: 24 },
   small: { fontFamily: FontFamily.body, fontSize: 15, lineHeight: 20 },
 } as const;
 
 export type TextVariant = keyof typeof TypeScale;
+
+/** Navigation header titles (tab and stack screens): the pixel font, between heading and title. */
+export const HeaderTitleStyle = { fontFamily: FontFamily.pixel, fontSize: 23 } as const;
 
 /** One art pixel in dp. Borders, steps, shadows and icon cells are multiples of it. */
 export const PIXEL = 2;

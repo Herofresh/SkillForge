@@ -78,8 +78,7 @@ screen stays up until they and the database are ready. If loading fails the syst
 
 | Family token | Font | Role |
 |---|---|---|
-| `FontFamily.display` | Pixelify Sans Bold | Titles, big numbers |
-| `FontFamily.pixel` | Pixelify Sans SemiBold | Headings, button labels |
+| `FontFamily.pixel` | Jersey 15 | Titles, headings, button labels, big numbers |
 | `FontFamily.caps` | Silkscreen | Tiny caps tags: chips, bar labels, tab labels |
 | `FontFamily.body` / `bodyBold` | Alegreya Sans Regular / Bold | Everything people read |
 
@@ -87,12 +86,22 @@ Type scale (`TypeScale`, used through `<PixelText variant>`):
 
 | Variant | Font | Size / line | Notes |
 |---|---|---|---|
-| `display` | display | 32 / 40 | Gold, hard 2 dp ink text shadow |
-| `title` | display | 24 / 32 | Gold, hard text shadow |
-| `heading` | pixel | 18 / 24 | Section and button text |
+| `display` | pixel | 36 / 40 | Gold, hard 2 dp ink text shadow |
+| `title` | pixel | 28 / 32 | Gold, hard text shadow |
+| `heading` | pixel | 21 / 24 | Section and button text |
 | `label` | caps | 12 / 16, +1 tracking | Short tags only (≤ 3 words); Silkscreen is all caps by design |
 | `body` | body | 17 / 24 | Default |
 | `small` | body | 15 / 20 | Secondary lines |
+
+Navigation header titles use `HeaderTitleStyle` (pixel, 23).
+
+**Readable numbers (PLAN 6.1, ADR-048):** every role's font draws all ten digits distinctly, so
+numbers need no special role; any variant may show them. Jersey 15 replaced Pixelify Sans, whose 5
+read as an S or an 8. Jersey 15 draws small for its size (cap height 0.56 em), hence the larger
+pixel sizes; the line heights are unchanged. The Style Guide's **Digits** section shows 0–9 in
+every variant (`docs/screenshots/6.1-digits-before.png` / `-after.png`); check it before adding a
+font, and add the font to `CLEAR_DIGIT_FONTS` in `src/components/fonts.test.ts` only if every digit
+is distinct.
 
 Rules: never set `fontFamily`/`fontSize` by hand, use a variant. Keep pixel fonts for short
 strings; sentences are always `body`/`small`. Don't use `label` for anything a screen reader user

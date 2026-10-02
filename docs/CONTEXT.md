@@ -9,7 +9,7 @@ Expo SDK 57 (`expo` 57.0.x), React Native 0.86, React 19.2, expo-router 57, Type
 Jest 29 with `jest-expo`, ESLint 9 (flat config) with `eslint-config-expo`, and Prettier 3.
 Persistence: `expo-sqlite` 57, `drizzle-orm` 0.45 (expo-sqlite driver), `drizzle-kit` 0.31,
 `zustand` 5 (ADR-026). Backups: `expo-file-system`, `expo-sharing`, `expo-document-picker` 57 (ADR-028).
-UI (ADR-030): `react-native-svg` 15, `@expo-google-fonts/pixelify-sans`, `silkscreen`,
+UI (ADR-030): `react-native-svg` 15, `@expo-google-fonts/jersey-15`, `silkscreen`,
 `alegreya-sans`, `react-native-reanimated` 4; component tests with `@testing-library/react-native`
 14 + `test-renderer`. Exercise timer (ADR-040): `expo-keep-awake` 57 and React Native's `Vibration`
 (`android.permission.VIBRATE` in `app.json`).

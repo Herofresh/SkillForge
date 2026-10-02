@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo-google-fonts/alegreya-sans": "^0.4.2",
-    "@expo-google-fonts/pixelify-sans": "^0.4.2",
+    "@expo-google-fonts/jersey-15": "^0.4.1",
     "@expo-google-fonts/silkscreen": "^0.4.2",
     "@expo/ui": "~57.0.20",
     "drizzle-orm": "^0.45.3",
