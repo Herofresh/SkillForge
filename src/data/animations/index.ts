@@ -6,7 +6,12 @@
 import { PATTERNS, type ExerciseNode, type Pattern } from '@/domain/types';
 import type { FigureAnimation } from '@/lib/figureAnimation';
 
+import { BACK_LEVER_ANIMATIONS } from './back_lever';
+import { CORE_ANIMATIONS } from './core';
+import { DYNAMIC_ANIMATIONS } from './dynamic';
+import { FRONT_LEVER_ANIMATIONS } from './front_lever';
 import { PATTERN_ANIMATIONS } from './generic';
+import { H_PULL_ANIMATIONS } from './h_pull';
 import { H_PUSH_ANIMATIONS } from './h_push';
 import { HANDSTAND_ANIMATIONS } from './handstand';
 import { ICONIC_ANIMATIONS } from './iconic';
@@ -25,6 +30,11 @@ export const NODE_ANIMATIONS: Readonly<Record<string, FigureAnimation>> = {
   ...PLANCHE_ANIMATIONS,
   ...HANDSTAND_ANIMATIONS,
   ...LEGS_ANIMATIONS,
+  ...FRONT_LEVER_ANIMATIONS,
+  ...BACK_LEVER_ANIMATIONS,
+  ...DYNAMIC_ANIMATIONS,
+  ...CORE_ANIMATIONS,
+  ...H_PULL_ANIMATIONS,
   ...ICONIC_ANIMATIONS,
 };
 
