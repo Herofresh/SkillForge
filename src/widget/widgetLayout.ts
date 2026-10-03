@@ -762,10 +762,11 @@ export function companionLayout(view: WidgetView, widthDp: number, heightDp: num
   // The mood's first frame without the empty canvas around it: the sprite takes only the space
   // its pixels need (the pose, weapon and accessories decide how much).
   const rows = trimPixelRows(
-    companionStill(view.companion.mood, {
-      loadout: view.companion.loadout,
-      weapon: view.companion.weapon,
-    }),
+    companionStill(
+      view.companion.mood,
+      { loadout: view.companion.loadout, weapon: view.companion.weapon },
+      view.companion.look,
+    ),
   );
   const sprite = (pixel: number): WidgetSprite => ({ type: 'sprite', pixel, rows });
   const maxPixel = Math.max(

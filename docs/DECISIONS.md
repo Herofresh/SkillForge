@@ -2107,10 +2107,12 @@ Template:
     attribute; arrangements at scale 1 or more (the 6.6 sizes) always beat smaller ones, and
     below that only scale × fill counts (on the emulator a 2 × 1 at 0.9 crammed in rank, class
     and a stat in 9 dp labels; the two-line status at 1.1 reads better). The companion adds the
-    sprite size (whole dp per sprite pixel, 2 and up, crisp) and scores pixel^0.75 × scale × fill
-    (with pixel × scale the sprite grew until the text was at 0.9). The sprite is its mood frame
-    trimmed to the painted pixels (`trimPixelRows`): the 32 × 40 canvas has empty rows above the
-    head, which on the 4 × 3 widget showed as a band. Free space is spread with `space-evenly` /
+    sprite size (whole dp per sprite pixel, 2 and up, crisp) and scores pixel × scale × fill,
+    readable text first (the sprite grows only while the text stays at scale 1 or more). The
+    sprite is its mood frame trimmed to the painted pixels (`trimPixelRows`): the 6.10 canvas
+    had empty rows above the head, which on the 4 × 3 widget showed as a band, and a pose's
+    width (a raised weapon, a kneeling sad pose) differs per mood; the layout uses the frame
+    it draws, so it works for any canvas size (6.13 made it 32 × 44). Free space is spread with `space-evenly` /
     `space-between` (the root box fills the widget), so what is left is small and even.
   - **Font sizes in dp** (`allowFontScaling: false`): the layout fits the text to the widget's
     size; the system font scale would make it overflow and clip. The user scales the widget by

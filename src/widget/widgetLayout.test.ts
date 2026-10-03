@@ -288,8 +288,14 @@ describe('the companion widget layout (PLAN 6.12)', () => {
     expect(sprite(happy)?.height).toBeGreaterThanOrEqual(0.7 * happy.inner.height);
   });
 
-  it('stacks the sprite over the lines on a squarer widget', () => {
-    expect(companionLayout(longView, 395, 380).sizeClass).toBe('grid');
+  it('grows the sprite when the widget is resized taller', () => {
+    const small = companionLayout(longView, 395, 250);
+    const tall = companionLayout(longView, 395, 380);
+    expect(tall.spritePixel ?? 0).toBeGreaterThan(small.spritePixel ?? 0);
+  });
+
+  it('stacks the sprite over the lines when the widget is slim and tall', () => {
+    expect(['grid', 'tall']).toContain(companionLayout(longView, 228, 380).sizeClass);
   });
 
   it('falls back to the small layout without a companion in the snapshot', () => {

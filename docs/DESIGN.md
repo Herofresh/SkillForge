@@ -435,8 +435,8 @@ strings (`iconSvg`, crisp edges).
   would clip it; a bigger widget is the way to bigger text.
 - **Companion sprite:** its mood's first frame trimmed to its painted pixels (`trimPixelRows`), a
   whole number of dp per sprite pixel (2 and up, crisp), on a transparent background so it stands
-  straight on the widget surface (no box). It grows while the text keeps a good size (6 dp per
-  pixel, about 186 dp tall, next to the lines at 1.6 on the Pixel 8 Pro's 4 × 2).
+  straight on the widget surface (no box). It grows while the text stays at scale 1 or more (on
+  the Pixel 8 Pro's 4 × 2, 4–5 dp per pixel, most of the height, next to the lines at 1.5–1.7).
 - **Sizes (app.json):** small default 4 × 1 (min 110 × 40 dp, at most 300 dp tall: two rows),
   companion default 4 × 2 (min 300 × 110 dp); both resizable both ways.
 - **First run (no snapshot yet):** `sword` + "SkillForge" in gold + "OPEN THE APP TO BEGIN", in a
