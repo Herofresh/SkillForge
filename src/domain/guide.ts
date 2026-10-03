@@ -396,7 +396,7 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
       more: [
         `It leads towards your goals first (up to ${n(facts.maxGoals)}), then favours ` +
           'movements you haven’t trained lately and the weaker side of push and pull.',
-        `Muscles worked in the last ${n(facts.patternRestHours)} h get a rest; ` +
+        `Movements trained in the last ${n(facts.patternRestHours)} h get a rest; ` +
           `${list(facts.restExemptPatterns)} work is always fine.`,
         'Double progression: hit every set and the next target goes up; reach the top of the ' +
           'range and it suggests the Trial.',
@@ -414,8 +414,9 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
       more: [
         'Add them from your home screen: long-press an empty spot, choose Widgets and look ' +
           'for SkillForge.',
-        'They show what the app last saved on this phone and update after every session and at ' +
-          'midnight, so “trained today” is always about today.',
+        'They show what the app last saved on this phone. They update after every session and ' +
+          'refresh on their own regularly, so shortly after midnight “trained today” is about the ' +
+          'new day.',
       ],
     },
     data: {
