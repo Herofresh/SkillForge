@@ -1784,3 +1784,71 @@ Template:
   changes, re-check the thresholds (the ceiling test catches impossible ones, not slow ones).
   Renaming a class id loses the stored selection and unlock times (tiers are derived again), so
   ids are stable forever like node ids.
+
+## ADR-058: Weekly class challenges: pinned per week, counted from history, a flat once-a-week XP bonus (PLAN 6.9b)
+- Date: 2026-10-03 · Status: Accepted
+- Context: user decision (2026-10-03): "the class you select gives you an additional weekly
+  challenge relevant to that class", one optional challenge per week with a small bonus and a
+  badge; a suggestion only, never blocking, no penalty for missing it (ADR-023 spirit). Classes
+  stay cosmetic otherwise (ADR-057). The bonus must survive a recompute from history (ADR-008),
+  must not be farmable by switching classes, and no challenge may push straight-arm volume past
+  the safeguards (ADR-010, ADR-023).
+- Decision:
+  - **Data:** every class in `HERO_CLASSES` has a `challenge { goal, targets }` with one target
+    per tier (a little more at tier II / III). Goal kinds (`ChallengeGoal`): `sessions`,
+    `complete_sessions` (no skipped set), `sessions_training` (sessions that train every listed
+    attribute), `exercises_training` (exercises, one node per session, that train an attribute),
+    `trial_attempts` (Trials attempted, one per node and session). The 15 challenges: Recruit
+    train in 2 sessions; Warrior / Ranger / Monk / Rogue push / pull / core / balance work in
+    2 / 3 / 3 sessions; Barbarian leg work 2 / 2 / 3; Druid 3 / 4 / 5 mobility exercises; Paladin
+    push + pull, Samurai pull + core, Templar push + core, Cleric core + mobility 2 / 2 / 3; Bard
+    balance + mobility 1 / 2 / 2; Knight 2 / 3 / 3 sessions without a skipped set; Berserker
+    3 / 3 / 4 sessions; Sorcerer 1 / 1 / 2 Trial attempts. Never more than four sessions a week
+    (test), so a challenge fits a normal 2–4 sessions week and the generator's own plans meet it.
+  - **Counting:** per logged session, from its done sets (value above 0) on known nodes;
+    **straight-arm nodes never count** (no lever / planche volume and no early straight-arm Trial
+    is ever rewarded; the generator and `safeguards.ts` are unchanged). Straight-arm sets are also
+    ignored when checking a session for skipped sets (`complete_sessions`), so skipping a lever or
+    planche set for the tendons never costs progress. A session counts in the week of its
+    `startedAt`.
+  - **Week:** the local calendar week, Monday 00:00 to the next Monday 00:00 (`localWeekBounds` in
+    `src/lib/time.ts`, calendar arithmetic: 167 / 169 h across DST). The window is stored with the
+    pin, so a later time-zone change can't move a past week.
+  - **Pinned per week (anti-farming):** the first session of a week pins the challenge of the
+    class worn then (`ChallengePin { start, end, classId, tier }`); later class switches that week
+    change nothing, the newly worn class's challenge starts next Monday (the card says so). Until
+    the first session the Character tab previews the worn class's challenge. One pin per week, so
+    at most one bonus per week whatever the hero wears. Weeks before the update have no pin and
+    no challenge (nothing retroactive); the first session after the update pins the current week
+    and that week's earlier sessions count.
+  - **Bonus:** a flat `CLASS_CHALLENGE_BONUS_XP = 50` character XP in `xp.ts`
+    (`SessionXp.challengeBonus`), paid by the session that reaches the target, never node XP. A
+    simulation of the generator's 45-minute plans (every set as prescribed) gave 130–320 XP per
+    session, so 50 is a fifth to a third of one session and about 5–8 % of a three-session week:
+    a small nudge, never worth skipping rest for. The badge is the count of completed weeks
+    ("Challenge badges: n"), derived, not stored.
+  - **Recomputable:** the pins are stored user data (the `class_challenges` setting:
+    `{ version: 1, pins: [...] }`), like `UserAction`s. `recompute(nodes, sessions, actions,
+    weeklyChallenges(pins))` and `applySession(..., challenges)` run the same step
+    (`advanceChallenge`: one running tally in `EngineState.challenge`, sessions replay in time
+    order), so incremental == full replay (tests). The store pins before applying a session and
+    recomputes fully whenever a pin was added. Progress on screen (`challengeProgress`) sums the
+    same per-session contribution over the week's sessions.
+  - **Persistence:** no migration, no backup change (settings already travel; `schemaVersion`
+    stays 3). An older backup without the setting imports without challenge bonuses; the parser
+    drops broken or overlapping pins and keeps unknown class ids for later releases (they give no
+    challenge).
+  - **UI:** Character tab, under the class banner: `ChallengeCard` (goal, segmented bar, "1 / 2
+    sessions", "+50 XP when done", a gold COMPLETE tag, the badge count, the fine print "Optional:
+    missing it costs nothing. Straight-arm skill work never counts."). Train summary and a past
+    session: `ChallengeProgressPanel` ("+1 this session", the week's count; a
+    `BURST_TITLES.challengeComplete` "CHALLENGE COMPLETE!" burst on the fresh summary), and the
+    bonus in the XP line. The class sheet shows every class's challenge at its tier. The plan
+    preview and the generator show nothing (no nudge in this task).
+  - The 6.9 review nit: the Sorcerer's rank progress now reads "You are Novice · branch median
+    Foundation · Adept at OG 6".
+- Consequences: a formula or data change to the challenges is a rebalance like any XP change
+  (recompute from history and the pins). Changing a class's challenge changes past weeks pinned
+  to it on the next recompute (like an XP formula change; the pin keeps only class and tier).
+  Renaming a class id drops its past bonuses. A session logged into a past week without a pin
+  pins that week to the class worn now (a full recompute follows, so the result stays exact).

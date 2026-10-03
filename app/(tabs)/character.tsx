@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AttributeRadar } from '@/components/character/AttributeRadar';
+import { ChallengeCard } from '@/components/character/ChallengeCard';
 import { ClassBanner } from '@/components/character/ClassBanner';
 import { ClassSheet } from '@/components/character/ClassSheet';
 import { GoalProgressCard } from '@/components/character/GoalProgressCard';
@@ -31,7 +32,7 @@ import { useAppStore } from '@/store/useAppStore';
 
 /**
  * The character sheet (PLAN 4.5): hero, level and XP, rank crest (opens the rank ladder, PLAN 6.7),
- * the worn hero class (opens the class sheet, PLAN 6.9), the attribute radar with the push/pull balance note, streak and totals, goals along their paths
+ * the worn hero class (opens the class sheet, PLAN 6.9) with its weekly challenge (PLAN 6.9b), the attribute radar with the push/pull balance note, streak and totals, goals along their paths
  * and the recent sessions (each opens its summary). Everything comes from `characterSheet` over the store's state.
  */
 export default function CharacterScreen() {
@@ -42,6 +43,7 @@ export default function CharacterScreen() {
   const goals = useAppStore((state) => state.goals);
   const heroName = useAppStore((state) => state.profile?.heroName);
   const classes = useAppStore((state) => state.classes);
+  const challengePins = useAppStore((state) => state.challengePins);
   // The streak depends on the time: read the clock whenever the tab comes into view.
   const [now, setNow] = useState(() => Date.now());
   useFocusEffect(useCallback(() => setNow(Date.now()), []));
@@ -54,10 +56,11 @@ export default function CharacterScreen() {
         sessionResults,
         goals,
         classes,
+        challengePins,
         now,
         ...(heroName !== undefined ? { heroName } : {}),
       }),
-    [nodes, engine, sessions, sessionResults, goals, classes, heroName, now],
+    [nodes, engine, sessions, sessionResults, goals, classes, challengePins, heroName, now],
   );
   return <CharacterBody sheet={sheet} />;
 }
@@ -157,6 +160,11 @@ function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
             testID="character-class"
           />
         </View>
+        {sheet.challenge && (
+          <View style={styles.divider}>
+            <ChallengeCard challenge={sheet.challenge} />
+          </View>
+        )}
       </PixelFrame>
       {ladderOpen && <RankLadderSheet ladder={sheet.ladder} onClose={() => setLadderOpen(false)} />}
       {classesOpen && (

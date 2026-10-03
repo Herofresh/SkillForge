@@ -17,7 +17,12 @@
  * are 12 × 12 grids with the icon roles (`#` main, `+` accent, `*` highlight, `o` shade).
  */
 import type { PaletteColor } from '@/components/palette';
-import type { ClassDefinition, ClassRule } from '@/domain/types';
+import type {
+  Attribute,
+  ClassChallengeDefinition,
+  ClassDefinition,
+  ClassRule,
+} from '@/domain/types';
 
 /** The emblem roles, the same as the pixel icons' (`src/components/ui/icons.ts`). */
 export type EmblemRole = '#' | '+' | '*' | 'o';
@@ -27,6 +32,8 @@ export interface HeroClass extends ClassDefinition {
   flavor: string;
   /** The class color (its title and frame), a Palette key. */
   color: PaletteColor;
+  /** The weekly challenge the class offers while worn (PLAN 6.9b, ADR-058). */
+  challenge: ClassChallengeDefinition;
   /** 12 × 12 pixel grid (`.` empty). */
   emblem: readonly string[];
   /** Palette key per emblem role. */
@@ -41,12 +48,22 @@ const stats = (points: Extract<ClassRule, { kind: 'stats' }>['points']): ClassRu
   points,
 });
 
+/**
+ * A weekly challenge of sessions that train every listed attribute, with one target per tier
+ * (ADR-058: a little more at tier II / III, never more than three or four sessions a week).
+ */
+const trainIn = (
+  attributes: readonly Attribute[],
+  targets: readonly number[],
+): ClassChallengeDefinition => ({ goal: { kind: 'sessions_training', attributes }, targets });
+
 export const HERO_CLASSES: readonly HeroClass[] = [
   {
     id: 'recruit',
     name: 'Recruit',
     flavor: 'Every legend starts with a first rep.',
     color: 'mist',
+    challenge: { goal: { kind: 'sessions' }, targets: [2] },
     tiers: [{ name: 'Recruit', rule: { kind: 'start' } }],
     emblem: [
       '............',
@@ -69,6 +86,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Warrior',
     flavor: 'Push the world away: dips, push-ups, presses.',
     color: 'ember',
+    challenge: trainIn(['push'], [2, 3, 3]),
     tiers: [
       { name: 'Warrior', rule: stats({ push: 30 }) },
       { name: 'Veteran', rule: stats({ push: 120 }) },
@@ -95,6 +113,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Ranger',
     flavor: 'A climber of cliffs and trees: pull-ups, rows, levers.',
     color: 'verdant',
+    challenge: trainIn(['pull'], [2, 3, 3]),
     tiers: [
       { name: 'Ranger', rule: stats({ pull: 30 }) },
       { name: 'Pathfinder', rule: stats({ pull: 120 }) },
@@ -121,6 +140,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Monk',
     flavor: 'A centre of stone: hollow holds, L-sits, compression.',
     color: 'gold',
+    challenge: trainIn(['core'], [2, 3, 3]),
     tiers: [
       { name: 'Monk', rule: stats({ core: 25 }) },
       { name: 'Ascetic', rule: stats({ core: 100 }) },
@@ -147,6 +167,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Barbarian',
     flavor: 'Legs like tree trunks: squats, lunges, jumps.',
     color: 'blood',
+    challenge: trainIn(['legs'], [2, 2, 3]),
     tiers: [
       { name: 'Barbarian', rule: stats({ legs: 25 }) },
       { name: 'Marauder', rule: stats({ legs: 70 }) },
@@ -173,6 +194,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Rogue',
     flavor: 'Light on hands and feet: handstands, balance, tumbling.',
     color: 'amethyst',
+    challenge: trainIn(['balance'], [2, 3, 3]),
     tiers: [
       { name: 'Rogue', rule: stats({ balance: 20 }) },
       { name: 'Shadow', rule: stats({ balance: 60 }) },
@@ -199,6 +221,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Druid',
     flavor: 'Bends like a willow: mobility drills and deep ranges.',
     color: 'lime',
+    challenge: { goal: { kind: 'exercises_training', attribute: 'mobility' }, targets: [3, 4, 5] },
     tiers: [
       { name: 'Druid', rule: stats({ mobility: 20 }) },
       { name: 'Shaman', rule: stats({ mobility: 60 }) },
@@ -225,6 +248,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Paladin',
     flavor: 'Push and pull in balance, shoulders built to last.',
     color: 'goldLight',
+    challenge: trainIn(['push', 'pull'], [2, 2, 3]),
     tiers: [
       { name: 'Paladin', rule: stats({ push: 25, pull: 25 }) },
       { name: 'Crusader', rule: stats({ push: 100, pull: 100 }) },
@@ -251,6 +275,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Samurai',
     flavor: 'Straight arms and a steel core: the lever path.',
     color: 'rune',
+    challenge: trainIn(['pull', 'core'], [2, 2, 3]),
     tiers: [
       { name: 'Samurai', rule: stats({ pull: 25, core: 20 }) },
       { name: 'Kensei', rule: stats({ pull: 100, core: 80 }) },
@@ -277,6 +302,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Templar',
     flavor: 'Locked arms that hold the body level: the planche path.',
     color: 'bone',
+    challenge: trainIn(['push', 'core'], [2, 2, 3]),
     tiers: [
       { name: 'Templar', rule: stats({ push: 25, core: 20 }) },
       { name: 'Inquisitor', rule: stats({ push: 100, core: 80 }) },
@@ -303,6 +329,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Bard',
     flavor: 'Flow and grace: cartwheels, rolls and poised holds.',
     color: 'orchid',
+    challenge: trainIn(['balance', 'mobility'], [1, 2, 2]),
     tiers: [
       { name: 'Bard', rule: stats({ balance: 15, mobility: 15 }) },
       { name: 'Skald', rule: stats({ balance: 50, mobility: 50 }) },
@@ -329,6 +356,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Cleric',
     flavor: 'Calm breath, a strong centre and a supple body.',
     color: 'sky',
+    challenge: trainIn(['core', 'mobility'], [2, 2, 3]),
     tiers: [
       { name: 'Cleric', rule: stats({ core: 20, mobility: 15 }) },
       { name: 'Priest', rule: stats({ core: 80, mobility: 50 }) },
@@ -355,6 +383,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Knight',
     flavor: 'Trained in every art: all six attributes.',
     color: 'steel',
+    challenge: { goal: { kind: 'complete_sessions' }, targets: [2, 3, 3] },
     tiers: [
       {
         name: 'Knight',
@@ -390,6 +419,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Berserker',
     flavor: 'Shows up, again and again: sessions logged.',
     color: 'sunfire',
+    challenge: { goal: { kind: 'sessions' }, targets: [3, 3, 4] },
     tiers: [
       { name: 'Berserker', rule: { kind: 'sessions', count: 20 } },
       { name: 'Bloodrager', rule: { kind: 'sessions', count: 100 } },
@@ -416,6 +446,7 @@ export const HERO_CLASSES: readonly HeroClass[] = [
     name: 'Sorcerer',
     flavor: 'Mastery across the tree, measured by your rank.',
     color: 'arcane',
+    challenge: { goal: { kind: 'trial_attempts' }, targets: [1, 1, 2] },
     tiers: [
       { name: 'Sorcerer', rule: { kind: 'rank', rank: 'Adept' } },
       { name: 'Archmage', rule: { kind: 'rank', rank: 'Master' } },

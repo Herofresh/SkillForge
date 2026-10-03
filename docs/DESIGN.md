@@ -266,6 +266,22 @@ panels: a CLASS UNLOCKED! (or TIER UP!) burst with the title, one line per class
 "Warrior class unlocked" / "Warrior · tier II") and "Wear …". Style Guide → Class emblems shows
 every emblem locked and at tiers I–III. Screenshots: `docs/screenshots/6.9-*.png`.
 
+**Weekly class challenge (PLAN 6.9b, ADR-058)** in `src/components/character/`: in the same panel,
+under the class banner and another bronze rule, the `ChallengeCard`: a scroll icon, caps "Weekly
+challenge · <title>" muted, the goal as a heading ("Pull work in 2 sessions this week"), a
+segmented bar with one segment per counted unit (at most 10; the class color, gold once done),
+"1 / 2 sessions" with "+50 XP when done" in rune on the right ("Complete: +50 XP earned" in gold
+once done, plus a gold "COMPLETE" tag next to the heading), a gold star line "Challenge badges: n"
+once any week was completed, and muted small print: "Fixed for this week. The Monk challenge
+starts on Monday." when the worn class changed, "Your first session this week fixes the challenge
+for the week." while it is a preview, and always "Optional: missing it costs nothing. Straight-arm
+skill work (planche, levers) never counts." No pressure wording, no countdown, no red. The Train
+summary (and a past session, without the burst) adds an arcane `ChallengeProgressPanel` after the
+class panel: "Weekly challenge · <title>" (or the CHALLENGE COMPLETE! burst with "<title> · +50
+XP"), the goal, the bar, "1 / 2 sessions" and "+1 this session" / "Complete! +50 XP" / "Already
+complete this week"; the XP line adds "· +50 challenge". The class sheet shows each class's
+"Weekly challenge: …" in rune under its flavor line. Screenshots: `docs/screenshots/6.9b-*.png`.
+
 **Node editor and shared progressions (PLAN 4.7–4.8, ADR-036)** in `src/components/editor/`: the
 editor is a stack of `DetailSection` panels (an arcane "Exercise" panel for a custom node: name,
 metric chips, "Comes after" + `PositionSheet`, difficulty stepper, straight-arm chip; then
@@ -381,7 +397,8 @@ Icons are the 12×12 grids as SVG strings (`iconSvg`, 24 dp, crisp edges).
   thread, the same stepped look as `Easing.steps`); the in-between poses are eased (smoothstep)
   between keyframes. With reduce motion they show one still keyframe and never move.
 - **Reveal moments (PLAN 5.2, ADR-038):** every celebration is a `LevelUpBurst` with a title from
-  `BURST_TITLES` (LEVEL UP!, UNLOCKED!, TESTED OUT!, QUEST COMPLETE, CLASS UNLOCKED!, TIER UP!). The ring bursts from the
+  `BURST_TITLES` (LEVEL UP!, UNLOCKED!, TESTED OUT!, QUEST COMPLETE, CLASS UNLOCKED!, TIER UP!,
+  CHALLENGE COMPLETE!). The ring bursts from the
   title's centre. Where they play: Train summary (quest complete, first level-up, first unlock, a class
   unlocked or a class tier reached),
   Trial outcome (tested out; node detail and onboarding share `TrialOutcome`), onboarding summary

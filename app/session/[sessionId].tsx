@@ -2,6 +2,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 
+import { ChallengeProgressPanel } from '@/components/character/ChallengeProgressPanel';
 import { ClassUnlockPanel } from '@/components/character/ClassUnlockPanel';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { Spacing } from '@/components/theme';
@@ -16,7 +17,7 @@ import { useAppStore } from '@/store/useAppStore';
 /**
  * A past session (PLAN 4.5), opened from the Character tab's history or a node detail's history
  * (PLAN 5.10): the same panels as the Train summary (XP, streak, level-ups, unlocks, exercises,
- * the class tiers it reached, PLAN 6.9),
+ * the class tiers it reached, PLAN 6.9, its weekly class challenge progress, PLAN 6.9b),
  * without the bursts, and its advisory notes as plain text (they were acknowledged when the session
  * was logged). An unknown or missing id shows "Session not found".
  */
@@ -30,6 +31,7 @@ export default function PastSessionScreen() {
   );
   const nodes = useAppStore((state) => state.nodes);
   const classes = useAppStore((state) => state.classes);
+  const challengePins = useAppStore((state) => state.challengePins);
   const tierUps = useMemo(
     () =>
       sessionId === undefined ? [] : sessionClassTierUps(HERO_CLASSES, classes.unlocks, sessionId),
@@ -63,6 +65,13 @@ export default function PastSessionScreen() {
         <ClassUnlockPanel
           tierUps={tierUps}
           wornClassId={wornClass(HERO_CLASSES, classes).classId}
+          celebrate={false}
+          playKey={session.id}
+        />
+        <ChallengeProgressPanel
+          {...(view.challenge ? { step: view.challenge } : {})}
+          pins={challengePins}
+          bonus={view.challengeBonus}
           celebrate={false}
           playKey={session.id}
         />

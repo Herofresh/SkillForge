@@ -1,6 +1,7 @@
 import { makeSet } from '@/data/testFixtures';
 import {
   classifyOutcome,
+  CLASS_CHALLENGE_BONUS_XP,
   COMPLETION_BONUS_RATIO,
   difficultyMult,
   exerciseXp,
@@ -138,13 +139,27 @@ describe('session bonuses', () => {
       exerciseXp: 100,
       completionBonus: 100 * COMPLETION_BONUS_RATIO,
       streakBonus: 10,
+      challengeBonus: 0,
       total: 120,
     });
     expect(sessionXp([60, 40], false, 1)).toEqual({
       exerciseXp: 100,
       completionBonus: 0,
       streakBonus: 0,
+      challengeBonus: 0,
       total: 100,
     });
+  });
+
+  it('adds the flat class challenge bonus once the session completes the challenge', () => {
+    expect(sessionXp([60, 40], false, 1, true)).toEqual({
+      exerciseXp: 100,
+      completionBonus: 0,
+      streakBonus: 0,
+      challengeBonus: CLASS_CHALLENGE_BONUS_XP,
+      total: 100 + CLASS_CHALLENGE_BONUS_XP,
+    });
+    // Flat: the same bonus for a small session, never scaled by its XP.
+    expect(sessionXp([5], false, 1, true).challengeBonus).toBe(CLASS_CHALLENGE_BONUS_XP);
   });
 });

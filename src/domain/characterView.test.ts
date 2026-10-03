@@ -1,4 +1,5 @@
 import { makeChain, makeNode, makeSession } from '@/data/testFixtures';
+import { localWeekBounds } from '@/lib/time';
 
 import {
   activeStreak,
@@ -189,6 +190,29 @@ describe('characterSheet', () => {
       now: 0,
     });
     expect(sheet.wornClass).toMatchObject({ classId: 'ranger', title: 'Ranger', isNew: true });
+    // PLAN 6.9b: without a pin, the worn class's challenge as a preview.
+    expect(sheet.challenge).toMatchObject({ classId: 'ranger', pinned: false, count: 0 });
+  });
+
+  it('shows the pinned weekly challenge with its progress', () => {
+    const monday = new Date(2026, 8, 21, 12).getTime();
+    const session = makeSession('s1', monday, [{ nodeId: 'pull_up', count: 2 }]);
+    const sheet = characterSheet({
+      nodes: makeChain(),
+      engine: INITIAL_ENGINE_STATE,
+      sessions: [session],
+      sessionResults: {},
+      goals: [],
+      challengePins: [{ ...localWeekBounds(monday), classId: 'recruit', tier: 1 }],
+      now: monday + 1000,
+    });
+    expect(sheet.challenge).toMatchObject({
+      classId: 'recruit',
+      pinned: true,
+      count: 1,
+      target: 2,
+      completed: false,
+    });
   });
 
   it('adds the balance note when push is far ahead of pull', () => {

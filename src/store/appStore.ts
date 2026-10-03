@@ -36,6 +36,9 @@
  *   (`mergeClassUnlocks`) and stores newly reached tiers in the `hero_classes` setting, stamped
  *   with the session that reached them; `selectClass` picks the class to wear, `markClassesSeen`
  *   clears the NEW badges. Cosmetic only: nothing else reads them.
+ * - Weekly class challenges (PLAN 6.9b, ADR-058): the first session of a week pins the worn
+ *   class's challenge (`class_challenges` setting) before it is applied; the pinned weeks go into
+ *   every `recompute` / `applySession`, so the challenge bonus is part of the derived XP.
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
  *
  * `createAppStore` takes its dependencies (database, built-in tree, clock, id source, file access) so
@@ -67,6 +70,13 @@ import { HERO_CLASSES } from '@/data/classes';
 import { testOutWarnings, trialSession } from '@/domain/assessment';
 import { backupFileName, parseBackup, serializeBackup } from '@/domain/backup';
 import {
+  challengePinsToRaw,
+  parseChallengePins,
+  pinWeek,
+  weeklyChallenges,
+  type ChallengePin,
+} from '@/domain/challenges';
+import {
   classFacts,
   classSettingsToRaw,
   classTier,
@@ -74,6 +84,7 @@ import {
   mergeClassUnlocks,
   parseClassSettings,
   seenAllTiers,
+  wornClass,
   type ClassSettings,
 } from '@/domain/classes';
 import {
@@ -194,6 +205,9 @@ export const TREE_MODE_SETTING = 'tree_view_mode';
 /** Setting key: the hero's classes (PLAN 6.9, `ClassSettings`: worn class, reached and seen tiers). */
 export const CLASS_SETTING = 'hero_classes';
 
+/** Setting key: the pinned weekly class challenges (PLAN 6.9b, `ChallengePin` list). */
+export const CHALLENGE_SETTING = 'class_challenges';
+
 /** File name prefix of the safety copy written before an import replaces the data. */
 export const SAFETY_COPY_PREFIX = 'skillforge-before-import';
 
@@ -292,6 +306,11 @@ export interface AppState {
    * session that reached it) and the tiers already seen in the class sheet.
    */
   classes: ClassSettings;
+  /**
+   * The weekly class challenges pinned so far (PLAN 6.9b), oldest first: one per week with a
+   * session, the class worn at its first session. Stored user data, like the history.
+   */
+  challengePins: readonly ChallengePin[];
   /** The plan preview being edited (PLAN 4.4); in memory only. */
   trainPlan?: SessionPlan;
   /** The session in progress, persisted after every change (resumed after a restart). */
@@ -530,13 +549,33 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       set({ ...changes, engine, classes });
     };
 
+    /** The pinned weekly challenges as the engine takes them. */
+    const engineChallenges = (pins: readonly ChallengePin[] = get().challengePins) =>
+      weeklyChallenges(pins, classDefinitions);
+
+    /**
+     * Pins the week of `at` to the worn class's challenge unless it has a pin (PLAN 6.9b). Returns
+     * whether a pin was added (then earlier sessions of that week need a full recompute).
+     */
+    const pinChallengeWeek = (at: number): boolean => {
+      const { challengePins, classes } = get();
+      const worn = wornClass(classDefinitions, classes);
+      const pins = pinWeek(challengePins, worn.classId, worn.tier, at);
+      if (pins === challengePins) return false;
+      setSetting(db, CHALLENGE_SETTING, challengePinsToRaw(pins));
+      set({ challengePins: pins });
+      return true;
+    };
+
     /** Applies a session that is already stored (incrementally, or by recomputing the past). */
     const applyStoredSession = (session: StoredSession): SessionResult => {
+      const pinned = pinChallengeWeek(session.startedAt);
       const { engine, sessions, userActions, nodes, sessionResults } = get();
       const allSessions = [...sessions, session].sort(compareHistory);
       const source: ClassTierUnlock = { at: session.startedAt, sessionId: session.id };
-      if (canApplyIncrementally(engine, session)) {
-        const step = applySession(engine, session, nodes);
+      const challenges = engineChallenges();
+      if (!pinned && canApplyIncrementally(engine, session)) {
+        const step = applySession(engine, session, nodes, challenges);
         commitEngine(
           step.state,
           {
@@ -547,7 +586,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         );
         return step.result;
       }
-      const rebuilt = recompute(nodes, allSessions, userActions);
+      const rebuilt = recompute(nodes, allSessions, userActions, challenges);
       commitEngine(
         rebuilt.state,
         { sessions: allSessions, sessionResults: resultsById(rebuilt.results) },
@@ -624,19 +663,27 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       equipmentProfiles: [],
       treeMode: DEFAULT_TREE_MODE,
       classes: EMPTY_CLASS_SETTINGS,
+      challengePins: [],
 
       loadAll() {
         const overlay = getOverlay(db)?.overlay ?? EMPTY_OVERLAY;
         const { nodes, issues: overlayIssues } = applyOverlay(baseNodes, overlay);
         const sessions = listStoredSessions(db);
         const userActions = listUserActions(db);
-        const { state: engine, results } = recompute(nodes, sessions, userActions);
+        const challengePins = parseChallengePins(getSetting(db, CHALLENGE_SETTING));
+        const { state: engine, results } = recompute(
+          nodes,
+          sessions,
+          userActions,
+          engineChallenges(challengePins),
+        );
         commitEngine(engine, {
           onboardingCompletedAt: parseOnboardingCompletedAt(
             getSetting(db, ONBOARDING_COMPLETED_SETTING),
           ),
           treeMode: parseTreeMode(getSetting(db, TREE_MODE_SETTING)),
           classes: parseClassSettings(getSetting(db, CLASS_SETTING), classDefinitions),
+          challengePins,
           loaded: true,
           nodes,
           overlay,
@@ -668,7 +715,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           commitEngine(step.state, { userActions: allActions });
           return step.result;
         }
-        const rebuilt = recompute(nodes, sessions, allActions);
+        const rebuilt = recompute(nodes, sessions, allActions, engineChallenges());
         commitEngine(rebuilt.state, {
           userActions: allActions,
           sessionResults: resultsById(rebuilt.results),
