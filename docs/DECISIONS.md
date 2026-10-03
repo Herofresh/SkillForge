@@ -1678,3 +1678,28 @@ Template:
   a release build (`npm run build:apk:universal`), not in Expo Go. Classes (6.9) can add a field
   to the snapshot (bump `WIDGET_SNAPSHOT_VERSION`; an unknown version shows the first-run state
   until the app writes a new one).
+
+## ADR-056: Widget sizes scale with the reported widget size; a generated picker preview (PLAN 6.6b)
+- Date: 2026-10-03 · Status: Accepted (extends ADR-055)
+- Context: the default 4 × 2 widget (≈ 336 × 214 dp on a Pixel 8 Pro) drew the scale-1 layout
+  sized for the 2-row minimum, leaving most of its height empty; the widget picker showed the app
+  icon because no `previewImage` was set.
+- Decision:
+  - **Scaling:** `widgetSizes(width, height)` in `nativeWidget.tsx` picks one scale for type,
+    icons, gaps and padding: `min(width / 220, height / 140)` rounded down to 0.25 steps, clamped
+    to 1–2, from the size the library reports to the task handler and `requestWidgetUpdate`.
+    Widgets narrower than `WIDGET_WIDE_MIN_DP` keep scale 1 (the compact layout). Icons round
+    down to multiples of 12 dp (the icon grid), so pixels stay whole. One scale for everything
+    keeps the proportions of the reviewed 6.6 layout instead of a second hand-tuned layout.
+    The 140 dp height base leaves room for the hero column's four lines and Jersey 15's line
+    height; a short, wide widget stays at a smaller scale.
+  - **Preview:** a static PNG drawn by `npm run icon:build` (`scripts/widgetPreview.ts`, reusing
+    the PNG encoder, raster helpers, icon grids and theme colors), committed as
+    `assets/images/widget-preview.png` and wired in through the plugin's `previewImage`. Text uses
+    the 3 × 5 preview font, since the scripts have no TTF rasterizer and a new image dependency
+    is not worth one picture. A Jest test fails if the committed PNG differs from the render.
+    Android 12's `previewLayout` (a live XML layout) is not supported by the plugin.
+  - `NavigationTheme` moved from `theme.ts` to `navigationTheme.ts`, so `theme.ts` has no
+    expo-router / React Native import and tsx scripts can read `Colors` and the icons.
+- Consequences: no data, schema or snapshot change (installing over 6.6 keeps everything). When
+  the widget's look changes, re-run `icon:build` for the preview.

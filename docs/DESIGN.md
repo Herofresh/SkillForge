@@ -327,12 +327,22 @@ Icons are the 12×12 grids as SVG strings (`iconSvg`, 24 dp, crisp edges).
 - **Right (from `WIDGET_WIDE_MIN_DP` = 220 dp wide, the default 4 × 2 size):** a small `shield` +
   the rank in its `RankColors` color, then up to three attributes ("PULL 12": caps label in
   `textMuted`, number in its `AttributeColors` color). A narrow (2-cell) widget keeps only the left.
+- **Size scaling (6.6b, ADR-056):** the sizes above are scale 1, the compact layout. A wide widget
+  scales type, icons, gaps and padding by `min(width / 220 dp, height / 140 dp)`, rounded down to
+  0.25 steps, between 1 and 2 (`widgetSizes`); icons stay on multiples of 12 dp so every grid
+  cell is whole (the small `shield` is ⅔ of the icon). The default 4 × 2 (≈ 336 × 214 dp on a
+  Pixel 8 Pro) draws at 1.5: status and rank 30 sp, numbers 36 sp, labels 15 sp, icons 36 dp.
+  A narrow widget (below 220 dp) always keeps scale 1.
 - **First run (no snapshot yet):** `sword` + "SkillForge" in gold + "OPEN THE APP TO BEGIN".
+- **Picker preview:** `assets/images/widget-preview.png` (app.json `previewImage`), drawn by
+  `npm run icon:build` from `scripts/widgetPreview.ts`: the 4 × 2 widget at scale 1.5 with sample
+  values, the same icons and colors, text in the 3 × 5 preview font (no TTF rasterizer in the
+  build). Re-run `icon:build` when the widget's look changes; a test fails if the PNG is stale.
 - Fonts: Jersey 15 and Silkscreen are copied into the APK by the plugin (`fonts` in app.json); if
   a font is missing Android falls back to the system font.
 - The whole widget is one tap target that opens the Train tab (`skillforge://train`), with the
   accessibility label "Open SkillForge on the Train tab". Screenshot:
-  `docs/screenshots/6.6-widget*.png`.
+  `docs/screenshots/6.6-widget*.png`, `docs/screenshots/6.6b-*.png` (scaled sizes, preview).
 
 ## 7. Motion
 
