@@ -1289,7 +1289,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   guide"; Settings → "How SkillForge works" lists every entry. Optional only: nothing pops up on
   its own, no onboarding change, no data change.
 - [x] 6.11 v0.6.0 release (6.9–6.10c), same routine: upgrade check from 0.1.0, 0.2.0, 0.3.0,
-  0.4.0 and 0.5.0, then both widgets on the install upgraded from 0.5.0 ([PR #58](https://github.com/Herofresh/SkillForge/pull/58))
+  0.4.0 and 0.5.0, then both widgets on the install upgraded from 0.5.0 ([PR #58](https://github.com/Herofresh/SkillForge/pull/58); release [v0.6.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.6.0))
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
