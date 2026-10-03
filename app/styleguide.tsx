@@ -2,6 +2,7 @@ import { Redirect, Stack } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { ClassEmblem } from '@/components/character/ClassEmblem';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import {
   AttributeColors,
@@ -30,6 +31,7 @@ import {
   XPBar,
 } from '@/components/ui';
 import { ANIMATION_CATALOGUE } from '@/data/animations';
+import { HERO_CLASSES } from '@/data/classes';
 import { ATTRIBUTES, TIERS } from '@/domain/types';
 
 /** Sample values for the demo bars only. */
@@ -153,6 +155,24 @@ export default function StyleGuideScreen() {
           </View>
         </Section>
 
+        <Section title="Class emblems">
+          <PixelText variant="small" tone="textMuted">
+            Each class locked, then at tiers I, II and III (PLAN 6.9).
+          </PixelText>
+          <View style={styles.section} testID="styleguide-classes">
+            {HERO_CLASSES.map((heroClass) => (
+              <View key={heroClass.id} style={styles.row}>
+                {[0, 1, 2, 3].slice(0, heroClass.tiers.length + 1).map((tier) => (
+                  <ClassEmblem key={tier} classId={heroClass.id} tier={tier} size={36} />
+                ))}
+                <PixelText variant="label" tone="textMuted" style={styles.classNames}>
+                  {heroClass.tiers.map((tier) => tier.name).join(' · ')}
+                </PixelText>
+              </View>
+            ))}
+          </View>
+        </Section>
+
         <Section title="Exercise animations">
           <View style={styles.wrap} testID="styleguide-animations">
             {ANIMATION_CATALOGUE.map((entry) => (
@@ -227,6 +247,9 @@ export default function StyleGuideScreen() {
 const styles = StyleSheet.create({
   section: {
     gap: Spacing.md,
+  },
+  classNames: {
+    flex: 1,
   },
   row: {
     flexDirection: 'row',

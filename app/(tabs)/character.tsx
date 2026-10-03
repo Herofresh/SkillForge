@@ -3,6 +3,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AttributeRadar } from '@/components/character/AttributeRadar';
+import { ClassBanner } from '@/components/character/ClassBanner';
+import { ClassSheet } from '@/components/character/ClassSheet';
 import { GoalProgressCard } from '@/components/character/GoalProgressCard';
 import { RankCrest } from '@/components/character/RankCrest';
 import { RankLadderSheet } from '@/components/character/RankLadderSheet';
@@ -29,7 +31,7 @@ import { useAppStore } from '@/store/useAppStore';
 
 /**
  * The character sheet (PLAN 4.5): hero, level and XP, rank crest (opens the rank ladder, PLAN 6.7),
- * the attribute radar with the push/pull balance note, streak and totals, goals along their paths
+ * the worn hero class (opens the class sheet, PLAN 6.9), the attribute radar with the push/pull balance note, streak and totals, goals along their paths
  * and the recent sessions (each opens its summary). Everything comes from `characterSheet` over the store's state.
  */
 export default function CharacterScreen() {
@@ -39,6 +41,7 @@ export default function CharacterScreen() {
   const sessionResults = useAppStore((state) => state.sessionResults);
   const goals = useAppStore((state) => state.goals);
   const heroName = useAppStore((state) => state.profile?.heroName);
+  const classes = useAppStore((state) => state.classes);
   // The streak depends on the time: read the clock whenever the tab comes into view.
   const [now, setNow] = useState(() => Date.now());
   useFocusEffect(useCallback(() => setNow(Date.now()), []));
@@ -50,10 +53,11 @@ export default function CharacterScreen() {
         sessions,
         sessionResults,
         goals,
+        classes,
         now,
         ...(heroName !== undefined ? { heroName } : {}),
       }),
-    [nodes, engine, sessions, sessionResults, goals, heroName, now],
+    [nodes, engine, sessions, sessionResults, goals, classes, heroName, now],
   );
   return <CharacterBody sheet={sheet} />;
 }
@@ -89,6 +93,14 @@ function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
   const router = useRouter();
   const [balanceAcknowledged, setBalanceAcknowledged] = useState(false);
   const [ladderOpen, setLadderOpen] = useState(false);
+  const [classesOpen, setClassesOpen] = useState(false);
+  const selectClass = useAppStore((state) => state.selectClass);
+  const markClassesSeen = useAppStore((state) => state.markClassesSeen);
+  const newClasses = sheet.classes.filter((row) => row.isNew).length;
+  const closeClasses = () => {
+    setClassesOpen(false);
+    markClassesSeen();
+  };
   const levelUpKey = useLevelUpKey(sheet.level.level);
   const largest = Math.max(1, ...sheet.radar.map((axis) => axis.value));
   const openNode = (nodeId: string) =>
@@ -137,8 +149,19 @@ function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
           onPress={() => setLadderOpen(true)}
           testID="character-rank"
         />
+        <View style={styles.divider}>
+          <ClassBanner
+            row={sheet.wornClass}
+            newCount={newClasses}
+            onPress={() => setClassesOpen(true)}
+            testID="character-class"
+          />
+        </View>
       </PixelFrame>
       {ladderOpen && <RankLadderSheet ladder={sheet.ladder} onClose={() => setLadderOpen(false)} />}
+      {classesOpen && (
+        <ClassSheet rows={sheet.classes} onWear={selectClass} onClose={closeClasses} />
+      )}
 
       <PixelFrame contentStyle={styles.gap} testID="character-attributes">
         <PixelText variant="label" tone="rune" accessibilityRole="header">

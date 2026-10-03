@@ -303,6 +303,47 @@ export const RANK_TITLES = ['Novice', 'Apprentice', 'Adept', 'Master', 'Legend']
 export type RankTitle = (typeof RANK_TITLES)[number];
 
 /**
+ * What a hero class tier needs (PLAN 6.9, ADR-057). Flat thresholds over values that only grow with
+ * training, so a rule once met stays met (and an unlock is kept anyway). Classes are cosmetic: no
+ * rule feeds back into XP, the generator or the safeguards.
+ * - `start`: every hero has it from the first day.
+ * - `stats`: at least these attribute points (every listed attribute).
+ * - `sessions`: at least `count` logged sessions.
+ * - `rank`: at least this rank.
+ */
+export type ClassRule =
+  | { kind: 'start' }
+  | { kind: 'stats'; points: Readonly<Partial<Record<Attribute, number>>> }
+  | { kind: 'sessions'; count: number }
+  | { kind: 'rank'; rank: RankTitle };
+
+/** One escalation step of a class: its title and what it needs. */
+export interface ClassTierDefinition {
+  /** The title the hero wears at this tier, e.g. "Veteran". */
+  name: string;
+  rule: ClassRule;
+}
+
+/** What the class rules need of a class (the full definitions live in `src/data/classes.ts`). */
+export interface ClassDefinition {
+  /** Stable snake_case id, never renamed (the hero's selection and unlocks reference it). */
+  id: string;
+  /** The class name, e.g. "Warrior" (the first tier's title). */
+  name: string;
+  /** Lowest first; each tier needs more of the same than the one before. */
+  tiers: readonly ClassTierDefinition[];
+}
+
+/** When a class tier was first reached: the time and, when a session did it, that session. */
+export interface ClassTierUnlock {
+  at: number;
+  sessionId?: string;
+}
+
+/** Reached tiers per class id: entry 0 is tier I, entry 1 tier II, … (a prefix, never with gaps). */
+export type ClassUnlocks = Readonly<Record<string, readonly ClassTierUnlock[]>>;
+
+/**
  * Advisory warnings (ADR-023). The engine computes them and the UI shows them with an acknowledge
  * step; they never block logging, Trials or test-outs.
  * - `straight_arm_min_weeks`: a straight-arm Trial before `MIN_WEEKS_AT_LEVEL` weeks of training.

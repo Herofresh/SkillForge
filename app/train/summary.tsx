@@ -1,16 +1,20 @@
 import { Stack, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 
+import { ClassUnlockPanel } from '@/components/character/ClassUnlockPanel';
 import { SafeguardWarningList, useAcknowledgements } from '@/components/SafeguardWarningList';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { SessionResultPanels } from '@/components/train/SessionResultPanels';
 import { EmptyState, PixelButton, PixelText, Screen } from '@/components/ui';
+import { HERO_CLASSES } from '@/data/classes';
+import { sessionClassTierUps, wornClass } from '@/domain/classes';
 import { summaryView, type SummaryView } from '@/domain/trainView';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
  * The session summary (PLAN 4.4): total XP with its bonuses, XP and outcome per exercise, level-ups
- * and unlocks with the pixel burst, the streak, and the advisory warnings the session raised
+ * and unlocks with the pixel burst, the streak, the hero classes it unlocked or raised a tier
+ * (PLAN 6.9, CLASS UNLOCKED! / TIER UP!, with "Wear"), and the advisory warnings the session raised
  * (ADR-023), each acknowledged before "Done".
  */
 export default function SessionSummaryScreen() {
@@ -37,6 +41,12 @@ export default function SessionSummaryScreen() {
 function SummaryBody({ view, playKey }: { view: SummaryView; playKey: string }) {
   const router = useRouter();
   const dismiss = useAppStore((state) => state.dismissTrainSummary);
+  const classes = useAppStore((state) => state.classes);
+  const selectClass = useAppStore((state) => state.selectClass);
+  const tierUps = useMemo(
+    () => sessionClassTierUps(HERO_CLASSES, classes.unlocks, playKey),
+    [classes.unlocks, playKey],
+  );
   const { acknowledged, acknowledge, allAcknowledged } = useAcknowledgements(view.warnings.length);
   const openNode = (nodeId: string) =>
     router.push({ pathname: '/node/[nodeId]', params: { nodeId } });
@@ -56,6 +66,13 @@ function SummaryBody({ view, playKey }: { view: SummaryView; playKey: string }) 
           playKey={playKey}
           subtitle="Session logged"
           onOpenNode={openNode}
+        />
+        <ClassUnlockPanel
+          tierUps={tierUps}
+          wornClassId={wornClass(HERO_CLASSES, classes).classId}
+          celebrate
+          playKey={playKey}
+          onWear={selectClass}
         />
 
         {view.warnings.length > 0 && (

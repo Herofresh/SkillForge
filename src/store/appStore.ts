@@ -32,6 +32,10 @@
  *   `saveNodeDraft`, `resetNode` and `setNodeHidden` change the overlay through `saveOverlay`
  *   (so a broken tree is never saved). `exportOverlay` / `shareOverlay` hand out the overlay as
  *   YAML; `previewOverlayImport` / `importOverlay` merge a shared one after a preview.
+ * - Hero classes (PLAN 6.9, ADR-057): every engine change re-checks the class rules
+ *   (`mergeClassUnlocks`) and stores newly reached tiers in the `hero_classes` setting, stamped
+ *   with the session that reached them; `selectClass` picks the class to wear, `markClassesSeen`
+ *   clears the NEW badges. Cosmetic only: nothing else reads them.
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
  *
  * `createAppStore` takes its dependencies (database, built-in tree, clock, id source, file access) so
@@ -59,8 +63,19 @@ import { insertSession, listStoredSessions } from '@/db/sessionRepository';
 import { getSetting, setSetting } from '@/db/settingsRepository';
 import { insertUserAction, listUserActions } from '@/db/userActionRepository';
 import { readUserData, replaceUserData } from '@/db/userDataRepository';
+import { HERO_CLASSES } from '@/data/classes';
 import { testOutWarnings, trialSession } from '@/domain/assessment';
 import { backupFileName, parseBackup, serializeBackup } from '@/domain/backup';
+import {
+  classFacts,
+  classSettingsToRaw,
+  classTier,
+  EMPTY_CLASS_SETTINGS,
+  mergeClassUnlocks,
+  parseClassSettings,
+  seenAllTiers,
+  type ClassSettings,
+} from '@/domain/classes';
 import {
   generateWorkout,
   plannedSets,
@@ -145,6 +160,8 @@ import {
 import {
   EQUIPMENT_TAGS,
   type Branch,
+  type ClassDefinition,
+  type ClassTierUnlock,
   type EquipmentProfile,
   type EquipmentTag,
   type ExerciseNode,
@@ -174,6 +191,9 @@ export const ONBOARDING_COMPLETED_SETTING = 'onboarding_completed_at';
 /** Setting key: the Tree tab's mode, Columns or Map (PLAN 5.1, `parseTreeMode`). */
 export const TREE_MODE_SETTING = 'tree_view_mode';
 
+/** Setting key: the hero's classes (PLAN 6.9, `ClassSettings`: worn class, reached and seen tiers). */
+export const CLASS_SETTING = 'hero_classes';
+
 /** File name prefix of the safety copy written before an import replaces the data. */
 export const SAFETY_COPY_PREFIX = 'skillforge-before-import';
 
@@ -201,6 +221,8 @@ export interface AppStoreDeps {
   newId?: (now: number) => string;
   /** Needed by `shareBackup` / `importBackupFromFile` and for the pre-import safety copy file. */
   files?: BackupFiles;
+  /** The hero classes (`HERO_CLASSES` by default). */
+  classes?: readonly ClassDefinition[];
 }
 
 export interface EquipmentProfileChanges {
@@ -265,6 +287,11 @@ export interface AppState {
   onboardingCompletedAt?: number;
   /** The Tree tab's mode (PLAN 5.1): the branch columns or the whole-tree map. */
   treeMode: TreeMode;
+  /**
+   * The hero's classes (PLAN 6.9): the worn class, every reached tier (kept forever, with the
+   * session that reached it) and the tiers already seen in the class sheet.
+   */
+  classes: ClassSettings;
   /** The plan preview being edited (PLAN 4.4); in memory only. */
   trainPlan?: SessionPlan;
   /** The session in progress, persisted after every change (resumed after a restart). */
@@ -318,6 +345,10 @@ export interface AppState {
   replayOnboarding(): void;
   /** Switches the Tree tab between Columns and Map and remembers it (setting `tree_view_mode`). */
   setTreeMode(mode: TreeMode): void;
+  /** Wears a reached class (PLAN 6.9). Throws for an unknown or not yet reached class. */
+  selectClass(classId: string): void;
+  /** Marks every reached class tier as seen (the class sheet was opened): no more NEW badges. */
+  markClassesSeen(): void;
   createEquipmentProfile(name: string, tags: readonly EquipmentTag[]): EquipmentProfile;
   updateEquipmentProfile(id: string, changes: EquipmentProfileChanges): void;
   deleteEquipmentProfile(id: string): void;
@@ -454,6 +485,7 @@ function requireName(name: string): string {
 
 export function createAppStore(deps: AppStoreDeps): AppStore {
   const { db, baseNodes } = deps;
+  const classDefinitions = deps.classes ?? HERO_CLASSES;
   const now = deps.now ?? Date.now;
   const newId = deps.newId ?? createId;
 
@@ -469,29 +501,58 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       return node;
     };
 
-    /** Stores the new engine state and rewrites the progress cache from it. */
-    const commitEngine = (engine: EngineState, changes: Partial<AppState>): void => {
+    /** Stores the class settings and shows them. */
+    const saveClasses = (classes: ClassSettings): void => {
+      setSetting(db, CLASS_SETTING, classSettingsToRaw(classes));
+      set({ classes });
+    };
+
+    /**
+     * Stores the new engine state and rewrites the progress cache from it. Class tiers the new
+     * state reaches are added to the stored ones, stamped with `source` (the session that got
+     * there; a load or import stamps the current time).
+     */
+    const commitEngine = (
+      engine: EngineState,
+      changes: Partial<AppState>,
+      source: ClassTierUnlock = { at: now() },
+    ): void => {
       replaceNodeProgress(db, engine.progress);
-      set({ ...changes, engine });
+      const current = changes.classes ?? get().classes;
+      const facts = classFacts(
+        changes.nodes ?? get().nodes,
+        engine,
+        (changes.sessions ?? get().sessions).length,
+      );
+      const merged = mergeClassUnlocks(classDefinitions, current.unlocks, facts, source);
+      const classes = merged.gained.length > 0 ? { ...current, unlocks: merged.unlocks } : current;
+      if (classes !== current) setSetting(db, CLASS_SETTING, classSettingsToRaw(classes));
+      set({ ...changes, engine, classes });
     };
 
     /** Applies a session that is already stored (incrementally, or by recomputing the past). */
     const applyStoredSession = (session: StoredSession): SessionResult => {
       const { engine, sessions, userActions, nodes, sessionResults } = get();
       const allSessions = [...sessions, session].sort(compareHistory);
+      const source: ClassTierUnlock = { at: session.startedAt, sessionId: session.id };
       if (canApplyIncrementally(engine, session)) {
         const step = applySession(engine, session, nodes);
-        commitEngine(step.state, {
-          sessions: allSessions,
-          sessionResults: { ...sessionResults, [session.id]: step.result },
-        });
+        commitEngine(
+          step.state,
+          {
+            sessions: allSessions,
+            sessionResults: { ...sessionResults, [session.id]: step.result },
+          },
+          source,
+        );
         return step.result;
       }
       const rebuilt = recompute(nodes, allSessions, userActions);
-      commitEngine(rebuilt.state, {
-        sessions: allSessions,
-        sessionResults: resultsById(rebuilt.results),
-      });
+      commitEngine(
+        rebuilt.state,
+        { sessions: allSessions, sessionResults: resultsById(rebuilt.results) },
+        source,
+      );
       return rebuilt.results.find((result) => result.sessionId === session.id) as SessionResult;
     };
 
@@ -562,6 +623,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       goals: [],
       equipmentProfiles: [],
       treeMode: DEFAULT_TREE_MODE,
+      classes: EMPTY_CLASS_SETTINGS,
 
       loadAll() {
         const overlay = getOverlay(db)?.overlay ?? EMPTY_OVERLAY;
@@ -574,6 +636,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
             getSetting(db, ONBOARDING_COMPLETED_SETTING),
           ),
           treeMode: parseTreeMode(getSetting(db, TREE_MODE_SETTING)),
+          classes: parseClassSettings(getSetting(db, CLASS_SETTING), classDefinitions),
           loaded: true,
           nodes,
           overlay,
@@ -676,6 +739,23 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       setTreeMode(mode) {
         setSetting(db, TREE_MODE_SETTING, mode);
         set({ treeMode: mode });
+      },
+
+      selectClass(classId) {
+        const definition = classDefinitions.find((entry) => entry.id === classId);
+        if (!definition) throw new Error(`Unknown class '${classId}'`);
+        const { classes } = get();
+        if (classTier(definition, classes.unlocks) === 0) {
+          throw new Error(`The class '${classId}' is not unlocked yet`);
+        }
+        saveClasses({ ...classes, selected: classId });
+      },
+
+      markClassesSeen() {
+        const { classes } = get();
+        const seen = seenAllTiers(classDefinitions, classes);
+        const changed = Object.keys(seen).some((id) => seen[id] !== classes.seen[id]);
+        if (changed) saveClasses({ ...classes, seen });
       },
 
       createEquipmentProfile(name, tags) {

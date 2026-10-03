@@ -8,10 +8,12 @@
  *    and the streak depend on the clock, so the widget re-evaluates them on every periodic update
  *    instead of showing a value frozen when the app last ran (no ✓ from yesterday after midnight).
  */
+import { HERO_CLASS_BY_ID, HERO_CLASSES } from '@/data/classes';
 import { isSameLocalDay } from '@/lib/time';
 
 import { computeCharacter } from './character';
 import { activeStreak } from './characterView';
+import { classTitle, EMPTY_CLASS_SETTINGS, wornClass, type ClassSettings } from './classes';
 import type { EngineState } from './recompute';
 import {
   ATTRIBUTES,
@@ -44,11 +46,18 @@ export interface WidgetSnapshot {
   lastSessionAt?: number;
   /** The strongest attributes with points, strongest first (at most `WIDGET_TOP_ATTRIBUTES`). */
   topAttributes: WidgetAttribute[];
+  /**
+   * The worn hero class and its tier (PLAN 6.9). Optional, so snapshots written before 6.9 still
+   * read (no version bump); an unknown class is left out.
+   */
+  heroClass?: { id: string; tier: number };
 }
 
 export interface WidgetSnapshotInput {
   nodes: readonly ExerciseNode[];
   engine: Pick<EngineState, 'progress' | 'totalXp' | 'streak' | 'lastSessionAt'>;
+  /** The stored class settings; none = the starting class. */
+  classes?: ClassSettings;
 }
 
 /** The attributes with points, strongest first; ties keep the `ATTRIBUTES` order. */
@@ -65,6 +74,7 @@ export function topAttributes(
 export function widgetSnapshot(input: WidgetSnapshotInput): WidgetSnapshot {
   const { nodes, engine } = input;
   const character = computeCharacter(nodes, engine.progress, engine.totalXp);
+  const worn = wornClass(HERO_CLASSES, input.classes ?? EMPTY_CLASS_SETTINGS);
   return {
     version: WIDGET_SNAPSHOT_VERSION,
     level: character.level,
@@ -72,6 +82,7 @@ export function widgetSnapshot(input: WidgetSnapshotInput): WidgetSnapshot {
     streak: engine.streak,
     ...(engine.lastSessionAt !== undefined ? { lastSessionAt: engine.lastSessionAt } : {}),
     topAttributes: topAttributes(character.attributes),
+    heroClass: { id: worn.classId, tier: worn.tier },
   };
 }
 
@@ -89,12 +100,15 @@ export type WidgetView =
       level: number;
       rank: RankTitle;
       topAttributes: WidgetAttribute[];
+      /** The worn class's title at its tier (e.g. "Veteran") and the class id (its color). */
+      heroClass?: { id: string; title: string };
     };
 
 export function widgetView(snapshot: WidgetSnapshot | undefined, now: number): WidgetView {
   if (snapshot === undefined) return { kind: 'empty', deepLink: WIDGET_DEEP_LINK };
   const trainedToday =
     snapshot.lastSessionAt !== undefined && isSameLocalDay(snapshot.lastSessionAt, now);
+  const heroClass = snapshot.heroClass && HERO_CLASS_BY_ID.get(snapshot.heroClass.id);
   return {
     kind: 'hero',
     deepLink: WIDGET_DEEP_LINK,
@@ -104,6 +118,14 @@ export function widgetView(snapshot: WidgetSnapshot | undefined, now: number): W
     level: snapshot.level,
     rank: snapshot.rank,
     topAttributes: snapshot.topAttributes,
+    ...(heroClass && snapshot.heroClass
+      ? {
+          heroClass: {
+            id: heroClass.id,
+            title: classTitle(heroClass, snapshot.heroClass.tier),
+          },
+        }
+      : {}),
   };
 }
 
@@ -140,6 +162,7 @@ export function parseWidgetSnapshot(text: string | undefined): WidgetSnapshot | 
   if (!(RANK_TITLES as readonly unknown[]).includes(rank)) return undefined;
   if (lastSessionAt !== undefined && !isCount(lastSessionAt)) return undefined;
   if (!Array.isArray(top) || !top.every(isWidgetAttribute)) return undefined;
+  const heroClass = readHeroClass(value.heroClass);
   return {
     version: WIDGET_SNAPSHOT_VERSION,
     level,
@@ -147,5 +170,15 @@ export function parseWidgetSnapshot(text: string | undefined): WidgetSnapshot | 
     streak,
     ...(lastSessionAt !== undefined ? { lastSessionAt } : {}),
     topAttributes: top,
+    ...(heroClass ? { heroClass } : {}),
   };
+}
+
+/** The snapshot's class, if it is a known class with a tier; anything else is left out. */
+function readHeroClass(value: unknown): { id: string; tier: number } | undefined {
+  if (!isRecord(value) || typeof value.id !== 'string' || !HERO_CLASS_BY_ID.has(value.id)) {
+    return undefined;
+  }
+  if (!isCount(value.tier) || !Number.isInteger(value.tier) || value.tier < 1) return undefined;
+  return { id: value.id, tier: value.tier };
 }

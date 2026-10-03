@@ -171,6 +171,24 @@ describe('characterSheet', () => {
       goals: [],
     });
     expect(sheet.balance).toBeUndefined();
+    // PLAN 6.9: every hero class, the starting one worn.
+    expect(sheet.wornClass).toMatchObject({ classId: 'recruit', status: 'worn', tier: 1 });
+    expect(sheet.classes.filter((row) => row.status === 'locked')).toHaveLength(
+      sheet.classes.length - 1,
+    );
+  });
+
+  it('wears the selected class from the stored settings', () => {
+    const sheet = characterSheet({
+      nodes: makeChain(),
+      engine: INITIAL_ENGINE_STATE,
+      sessions: [],
+      sessionResults: {},
+      goals: [],
+      classes: { selected: 'ranger', unlocks: { ranger: [{ at: 1 }] }, seen: {} },
+      now: 0,
+    });
+    expect(sheet.wornClass).toMatchObject({ classId: 'ranger', title: 'Ranger', isNew: true });
   });
 
   it('adds the balance note when push is far ahead of pull', () => {

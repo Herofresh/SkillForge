@@ -62,6 +62,16 @@ describe('widgetSnapshot', () => {
       rank: 'Novice',
       streak: 0,
       topAttributes: [],
+      heroClass: { id: 'recruit', tier: 1 },
+    });
+  });
+
+  it('carries the worn class and its tier (PLAN 6.9)', () => {
+    const classes = { selected: 'warrior', unlocks: { warrior: [{ at: 1 }, { at: 2 }] }, seen: {} };
+    const result = widgetSnapshot({ nodes: makeChain(), engine: INITIAL_ENGINE_STATE, classes });
+    expect(result.heroClass).toEqual({ id: 'warrior', tier: 2 });
+    expect(widgetView(result, at(2, 12))).toMatchObject({
+      heroClass: { id: 'warrior', title: 'Veteran' },
     });
   });
 
@@ -136,6 +146,16 @@ describe('widgetView', () => {
 });
 
 describe('parseWidgetSnapshot', () => {
+  it('reads a snapshot written before classes (no heroClass) and drops an unknown class', () => {
+    const { heroClass: _dropped, ...old } = snapshot({ heroClass: { id: 'monk', tier: 1 } });
+    expect(parseWidgetSnapshot(JSON.stringify(old))).toEqual(old);
+    expect(widgetView(old, at(2, 12))).not.toHaveProperty('heroClass');
+    const unknown = { ...old, heroClass: { id: 'necromancer', tier: 1 } };
+    expect(parseWidgetSnapshot(JSON.stringify(unknown))).toEqual(old);
+    const known = { ...old, heroClass: { id: 'monk', tier: 3 } };
+    expect(parseWidgetSnapshot(JSON.stringify(known))).toEqual(known);
+  });
+
   it.each([
     ['no file', undefined],
     ['broken JSON', '{"version":'],

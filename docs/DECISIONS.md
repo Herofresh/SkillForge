@@ -1706,3 +1706,81 @@ Template:
     expo-router / React Native import and tsx scripts can read `Colors` and the icons.
 - Consequences: no data, schema or snapshot change (installing over 6.6 keeps everything). When
   the widget's look changes, re-run `icon:build` for the preview.
+
+## ADR-057: Hero classes: cosmetic titles over flat, escalating thresholds, kept forever in a setting (PLAN 6.9)
+- Date: 2026-10-03 · Status: Accepted
+- Context: the user asked for classes the hero unlocks and can pick one to display (PLAN 6.9).
+  User decisions (2026-10-03): classes are **cosmetic only** (title, emblem, color; later outfits
+  for the 6.10 companion), no effect on XP, the generator or the safeguards; extend the list with
+  classic fantasy-RPG roles; locked classes show what they need (like the rank ladder); an
+  unlocked class stays unlocked forever and the hero picks one to wear. A second decision the same
+  day replaced the first draft's relative rules ("push is your top attribute", "core and mobility
+  in your top 3", "all six within 25 %"): progressing far in one area must never lock a hero out
+  of a class. So every rule is a **flat** threshold, mostly attribute points in one or two
+  attributes, and each class has **three escalating tiers** of the same requirement
+  (e.g. Warrior → Veteran → Warlord). Weekly class challenges were approved for later (6.9b).
+- Decision:
+  - **Data:** `HERO_CLASSES` in `src/data/classes.ts`, one source of truth: stable snake_case `id`,
+    `name`, `flavor`, `color` (a Palette key), a 12 × 12 `emblem` grid with the icon roles and
+    `emblemColors`, and `tiers` (`name` + `rule`). Rule kinds (`ClassRule` in `types.ts`): `start`,
+    `stats` (at least these points in every listed attribute), `sessions` (logged sessions),
+    `rank`. All grow monotonically with training, so "met once" = "met now" for a fixed tree.
+  - **15 classes:** Recruit (start); single attribute: Warrior (push 30 / 120 / 300), Ranger (pull
+    30 / 120 / 300), Monk (core 25 / 100 / 250), Barbarian (legs 25 / 70 / 120), Rogue (balance 20 /
+    60 / 150), Druid (mobility 20 / 60 / 150); two attributes: Paladin (push + pull 25 / 100 / 250
+    each), Samurai (pull + core 25+20 / 100+80 / 250+200, the lever path), Templar (push + core,
+    same numbers, the planche path), Bard (balance + mobility 15 / 50 / 120 each), Cleric (core +
+    mobility 20+15 / 80+50 / 200+120); all six: Knight (15 / 50 / 120 each); extras that are also
+    flat: Berserker (20 / 100 / 250 sessions), Sorcerer (rank Adept / Master / Legend, the
+    prestige tier "Ascendant").
+  - **Thresholds and the user's 100–1000 range:** the real scale is smaller. An attribute is
+    Σ `difficultyMult(ogLevel) × node level` (ADR-023): one Pull-up test-out gives Pull 9. A
+    simulation (the generator's own plans, every set done as prescribed, 3 sessions a week, Park
+    equipment, six goal profiles; script not committed) gave the main attribute ≈ 20–30 after 12
+    sessions (4 weeks), ≈ 100–190 after 52 (4 months) and ≈ 140–340 after 156 (a year). The
+    ceilings with **every** node at level 10 are push 1203, pull 1040, core 1145, but legs 213,
+    balance 483, mobility 563. So 100–1000 would put tier I months away and tier III out of reach
+    (legs could never get there); the tiers keep the intent instead: **tier I after a few weeks
+    of focused training (≈ 12–20 sessions), tier II after a few months (≈ 35–60), tier III a
+    long-term goal (≈ 100–200 sessions, about a year)**, with lower numbers for legs, balance and
+    mobility because those branches have fewer and easier nodes. First-reach times in the
+    simulation, e.g.: Druid I at 11 sessions (flexibility goals), Barbarian I at 12, Warrior I at
+    13, Ranger II at 42 and Ranger III at 106 (pull goals), Warrior III at 159 (push goals), Rogue
+    III at 168 (handstand goals). The numbers live only in the data file; a test keeps every stats
+    threshold below its attribute's all-mastered ceiling and checks that the tiers rise.
+    **The user approved these scaled thresholds (2026-10-03)** instead of a literal 100–1000 range.
+  - **Pure rules** (`src/domain/classes.ts`): `classFacts` (attributes and rank from
+    `computeCharacter`, the session count), `ruleParts` / `ruleMet` / `ruleFraction` (progress
+    per part, for the bars), `reachedTier` (tiers met, counted from I), `mergeClassUnlocks`,
+    `classLadder` (the sheet's rows), `wornClass`, `sessionClassTierUps`, NEW-badge helpers and
+    the setting's reader / writer. No threshold is copied; rank thresholds come from
+    `RANK_MIN_MEDIAN_OG_LEVEL`.
+  - **Persistence:** derived where possible (ADR-008): the store re-checks the rules on every
+    engine commit (`commitEngine`: load, session, Trial, self-unlock, import, overlay edit), so an
+    existing user sees every tier they already qualify for on the first start after the update,
+    and a restore recomputes them from history. Reached tiers are also **kept** in the
+    `hero_classes` setting (`{ version: 1, selected?, unlocks: { id: [{ at, sessionId? }] },
+    seen: { id: tier } }`) so a tier stays reached forever even if a tree edit (hiding a node) or a
+    later rule change lowers the numbers. `sessionId` marks the session that reached a tier (Train
+    summary celebration, past session); tiers found on a load are stamped with the load time.
+    `seen` drives the NEW tags (cleared when the class sheet closes). The starting class is never
+    stored. **No migration and no backup change:** settings are already a key → JSON map in the
+    database and in backups (`schemaVersion` stays 3; older backups import, and without the
+    setting the tiers are derived again). The reader drops unknown ids and broken entries.
+  - **UI:** the Character tab's rank panel gets a `ClassBanner` (emblem in its tier frame, the
+    tier's title in the class color, "Warrior · tier II of III", NEW count) that opens
+    `ClassSheet` (a `PixelModal` like the rank ladder: every class with worn / unlocked / locked
+    frames, the next tier's requirement with a bar and "Push 64 / 120", "Wear" buttons). The Train
+    summary shows `ClassUnlockPanel` with a `LevelUpBurst` (`BURST_TITLES.classUnlocked`
+    "CLASS UNLOCKED!", `classTierUp` "TIER UP!") and "Wear …"; a past session lists its tiers
+    without the burst.
+  - **Widget:** the snapshot gets an **optional** `heroClass { id, tier }` (no
+    `WIDGET_SNAPSHOT_VERSION` bump: old snapshots still read, an unknown class is dropped); the
+    wide widget shows the title as a caps label under the rank, in the class color. 6.10 will
+    redo the widget sizes; the picker preview PNG is unchanged.
+- Consequences: purely cosmetic, so no XP, generator or safeguard behaviour changed. Every engine
+  commit runs `computeCharacter` once more (O(nodes)); negligible. Rule kinds are few on purpose;
+  a new kind needs a case in `ruleParts` and words in `classText.ts`. If the attribute formula
+  changes, re-check the thresholds (the ceiling test catches impossible ones, not slow ones).
+  Renaming a class id loses the stored selection and unlock times (tiers are derived again), so
+  ids are stable forever like node ids.
