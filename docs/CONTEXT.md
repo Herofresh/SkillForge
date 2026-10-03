@@ -337,7 +337,10 @@ android/, builds/       GENERATED, gitignored: prebuild's native project and the
 drizzle.config.ts       drizzle-kit config (sqlite, expo driver, schema -> src/db/migrations)
 babel.config.js         babel-preset-expo + inline-import for .sql (also used by Jest)
 metro.config.js         Expo default + `sql` source extension
-jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests, a react-native-android-widget mock
+jest.config.js          Jest config: jest-expo preset, path aliases, per-checkout cache (node_modules/.cache/jest),
+                        maxWorkers 50% outside CI
+jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests, a react-native-android-widget mock,
+                        the 60 s timeout for heavy suites (src/components, scripts/appIcon)
 .maestro/               E2E flows: editor.yaml (clearState; custom exercise with a prerequisite,
                         cycle error, reset, My progressions share/import/delete, discard-changes
                         sheet; 4.7/4.8/5.2 screenshots), character.yaml (clearState; level/XP after a session, history →
@@ -351,7 +354,7 @@ jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests, 
 ```
 
 **Path alias:** `@/*` → `src/*` (and `@/assets/*` → `assets/*`). It's defined in `tsconfig.json`
-(Metro reads it) and mirrored in `package.json` → `jest.moduleNameMapper`. Change both together.
+(Metro reads it) and mirrored in `jest.config.js` → `moduleNameMapper`. Change both together.
 
 **Content flow:** `content/progressions/*.yaml` → `npm run progressions:build` (parse with
 `progressionFormat.ts`, check with `validate.ts`) → `progressions.generated.ts` + review sheet → app
@@ -635,7 +638,7 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 | `npm start` / `npx expo start` | Dev server. Scan the QR code with Expo Go on Android. |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint (`eslint .`, flat config in `eslint.config.js`) |
-| `npm test` | Jest (`jest-expo` preset). Tests live next to the code as `*.test.ts` (components: `*.test.tsx` with RNTL). |
+| `npm test` | Jest (`jest-expo` preset, config in `jest.config.js`). Tests live next to the code as `*.test.ts` (components: `*.test.tsx` with RNTL). Locally it uses half the cores (`maxWorkers: 50%`); CI keeps the default. |
 | `npm run format` / `npm run format:check` | Prettier write / check (config in `.prettierrc.json`) |
 | `npm run progressions:check` | Validate `content/progressions/*.yaml` and report stale generated files. Writes nothing. |
 | `npm run progressions:build` | Validate, then write `src/data/skills/progressions.generated.ts` and `docs/review/progression-matrix.md`. Run after every YAML edit. |
@@ -773,8 +776,14 @@ without `node_modules`, `android`, `builds` and `.git` to a short folder (e.g.
 - **Generated files:** never edit `src/data/skills/progressions.generated.ts` or
   `docs/review/progression-matrix.md` by hand; edit the YAML and run `npm run progressions:build`.
   Both are Prettier-ignored, as is `content/` (hand-formatted YAML).
-- **`yaml` in Jest:** `package.json` → `jest.moduleNameMapper` maps `yaml` to its CommonJS build,
+- **`yaml` in Jest:** `jest.config.js` → `moduleNameMapper` maps `yaml` to its CommonJS build,
   because jest-expo resolves the ESM browser entry otherwise.
+- **Jest timeouts and cache:** component suites (`src/components/**`) and `scripts/appIcon.test.ts`
+  get a 60 s timeout from `jest.setup.ts` (`UI_SUITE_TIMEOUT_MS`), because under a loaded machine
+  their tests took up to ~30 s; pure suites keep the 5 s default. Don't add per-test timeout
+  numbers: extend `HEAVY_SUITE_PATH` there, and prefer making the test cheaper (one query or one
+  assertion over a list instead of one per item). The transform cache is per checkout in
+  `node_modules/.cache/jest` (a shared `%TEMP%\jest` broke parallel worktree runs with EPERM).
 - **Home-screen widget (ADR-055):** never import `react-native-android-widget` or
   `src/widget/nativeWidget.tsx` statically; the library throws on import without its native module
   (Expo Go, Jest). Go through `loadNativeWidget()`. Widget components are called as plain

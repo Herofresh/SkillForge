@@ -41,9 +41,9 @@ async function renderMap(goals: string[] = [], progress = {}) {
 describe('TreeMap', () => {
   it('renders every node as a labelled button that opens it', async () => {
     const { onOpen } = await renderMap();
-    for (const node of ALL_NODES) {
-      expect(screen.getByTestId(`map-node-${node.id}`)).toBeOnTheScreen();
-    }
+    // One query for all nodes: a getByTestId per node walks the whole map once per node (slow).
+    const rendered = screen.getAllByTestId(/^map-node-/).map((element) => element.props.testID);
+    expect(rendered.sort()).toEqual(ALL_NODES.map((node) => `map-node-${node.id}`).sort());
     const user = userEvent.setup();
     await user.press(screen.getByRole('button', { name: /^Dead hang, Ready/ }));
     expect(onOpen).toHaveBeenCalledWith('dead_hang');

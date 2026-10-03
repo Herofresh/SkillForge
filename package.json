@@ -77,17 +77,6 @@
     "animations:sheet": "tsx scripts/animationSheetBuild.ts"
   },
   "private": true,
-  "jest": {
-    "preset": "jest-expo",
-    "moduleNameMapper": {
-      "^yaml$": "<rootDir>/node_modules/yaml/dist/index.js",
-      "^@/assets/(.*)$": "<rootDir>/assets/$1",
-      "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.ts"
-    ]
-  },
   "devEngines": {
     "packageManager": {
       "name": "npm",

@@ -130,8 +130,7 @@ describe('NodeEditorBody', () => {
       description: 'A dead hang gripping a towel over the bar.',
       prerequisites: [{ nodeId: 'dead_hang', kind: 'hard' }],
     });
-    // Types a name key by key through the whole form: slow when the full suite runs in parallel.
-  }, 20_000);
+  });
 
   it('shows a cycle inline, keeps Save off, and saves once it is removed', async () => {
     saveTowelHang();
