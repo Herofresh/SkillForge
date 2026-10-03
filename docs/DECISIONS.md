@@ -1981,3 +1981,43 @@ Template:
   every item and weapon in every pose and check it changes the picture and stays on the canvas. A
   new rule kind needs a case in `companionRuleProgress` and words in `companionText.ts`. Two widget
   providers now exist; a layout change re-runs `icon:build` for its preview.
+
+## ADR-060: "How it works": a guide built from the domain constants, reached through optional "i" buttons (PLAN 6.10c)
+- Date: 2026-10-03 · Status: Accepted (extends ADR-049's `InfoButton`; no change to any rule)
+- Context: user request (2026-10-03): "try to leave ways in the app to understand the systems and
+  offer tooltips for people that are interested". The game now has many systems (XP, skill levels
+  and Trials, safeguards, attributes, ranks, streak, classes, weekly challenge, companion,
+  generator, widgets, backups) whose rules lived only in the code and the docs. Explanations must
+  stay true when a constant is tuned, and must not get in the way of people who don't want them.
+- Decision:
+  - **Content** in `src/domain/guide.ts` (pure): `GUIDE_TOPICS` (12 stable ids) and one
+    `GuideEntry` each: a title, a 1–3 sentence `summary` (the sheet) and `more` paragraphs (the
+    page). Plain words, the app's own terms, no promises beyond the rules.
+  - **No number is typed into the text.** `guideFacts()` collects every number the text uses from
+    the module that owns it (`xp.ts`, `progression.ts`, `safeguards.ts`, `character.ts`,
+    `rankLadder.ts` (`branchesForMedian`), `companion.ts`, `generator.ts`, `train.ts`,
+    `onboarding.ts`, `widget.ts`, `src/data/classes.ts`, `src/data/companion/`); derived values
+    (the 7 of 12 rule, percentages, the level-gear list, the Warrior example) are computed from them.
+    `buildGuide(facts)` only formats. The test builds the guide a second time with every fact
+    changed (n → 10 n + 7, deep) and fails if any number (digits or a tier numeral) is the same in
+    both, or if the words around the numbers differ; a second test proves it catches a typed
+    "Level 2". Alternatives: a snapshot test (catches drift only after someone reads the diff),
+    or copying numbers into strings with a comment (drifts silently). Rejected.
+  - **Where it shows:** a `GuideButton` (the ADR-049 `InfoButton`, label "About <title>", hint
+    "Explains how it works", 48 dp target) next to each system: Character tab (XP bar → xp,
+    companion card header → companion, rank crest → ranks, class banner → classes, challenge card →
+    challenge, Attributes heading → attributes, streak/totals panel → streak); node detail (level /
+    XP row → skills, "Straight-arm" label → safeguards, Trial standard → skills); plan preview
+    header → generator; the summary's XP breakdown (also on a past session) → xp; warning lists
+    with a tendon warning → "Why these warnings?" → safeguards (`SafeguardGuideNote`, via
+    `hasTendonWarning`; not for the prerequisites note alone, so not in the unlock sheet); Settings →
+    "How SkillForge works" → widgets. The button opens `GuideSheet` (a `PixelModal`: the entry's
+    icon and summary, "More in the guide" → `/guide/[topic]`). Settings → "How SkillForge works" →
+    "Open the guide" → `/guide` lists every entry; each page shows the summary, the details and
+    "Next: <title>".
+  - **Optional and quiet** (ADR-023 spirit): nothing opens on its own, no onboarding change, no
+    first-run tips, no badges; the buttons are the existing small "i".
+- Consequences: no data, schema, backup or rule change. A new system gets a topic, its facts and
+  its text in `guide.ts`, an icon in `GUIDE_ICONS` and a `GuideButton` where it shows. Changing a
+  constant changes the guide with it; changing what a rule *does* still needs the guide's words
+  reviewed (the test only guards numbers).

@@ -201,3 +201,11 @@ export function prerequisitesWarning(
     severity: 'info',
   };
 }
+
+/**
+ * Whether any of `warnings` comes from a tendon safeguard (not the prerequisites note): the UI then
+ * offers the guide's safeguards entry next to them (PLAN 6.10c).
+ */
+export function hasTendonWarning(warnings: readonly SafeguardWarning[]): boolean {
+  return warnings.some((warning) => warning.code !== 'prerequisites_unmet');
+}

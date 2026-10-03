@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AttributeChips } from '@/components/node/AttributeChips';
+import { GuideButton } from '@/components/guide/GuideButton';
 import { CustomizeSection } from '@/components/node/CustomizeSection';
 import { DetailSection } from '@/components/node/DetailSection';
 import { NodeHeader } from '@/components/node/NodeHeader';
@@ -173,11 +174,14 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
             </PixelText>
             <PixelText>{formatWorkingRange(node.metric, node.workingRange)}</PixelText>
           </View>
-          <View style={styles.pair}>
-            <PixelText variant="label" tone="textMuted">
-              Trial standard
-            </PixelText>
-            <PixelText>{formatTrial(node.metric, node.trial)}</PixelText>
+          <View style={styles.trial}>
+            <View style={[styles.pair, styles.flex]}>
+              <PixelText variant="label" tone="textMuted">
+                Trial standard
+              </PixelText>
+              <PixelText>{formatTrial(node.metric, node.trial)}</PixelText>
+            </View>
+            <GuideButton topic="skills" testID="guide-trial" />
           </View>
         </DetailSection>
 
@@ -227,5 +231,13 @@ const styles = StyleSheet.create({
   },
   pair: {
     gap: Spacing.xs,
+  },
+  trial: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  flex: {
+    flex: 1,
   },
 });

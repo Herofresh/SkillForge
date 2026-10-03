@@ -5,7 +5,8 @@
 # (PLAN 6.9b): the Recruit's "2 sessions" card, its line in the class sheet, 1 / 2 on the first
 # session's summary, CHALLENGE COMPLETE! on a second one and the COMPLETE tag (6.9b screenshots).
 # The companion (PLAN 6.10) waits for the first quest, its Customize sheet opens and closes; after
-# the session it is fired up and a tap makes it wave (6.10 screenshots).
+# the session it is fired up and a tap makes it wave (6.10 screenshots). Its "i" opens the guide's
+# summary and page (PLAN 6.10c, 6.10c screenshots).
 # Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Character - level and XP after a logged session, history opens the session
@@ -71,6 +72,28 @@ name: Character - level and XP after a logged session, history opens the session
 - extendedWaitUntil:
     notVisible:
       id: 'companion-sheet'
+    timeout: 20000
+# 6.10c: the companion's "i" opens the guide's summary, "More in the guide" its page; back returns
+- tapOn:
+    id: 'guide-companion'
+- extendedWaitUntil:
+    visible:
+      id: 'guide-companion-sheet'
+    timeout: 20000
+- assertVisible: '.*never loses anything.*'
+- takeScreenshot: 6.10c-character-companion-sheet
+- tapOn:
+    id: 'guide-companion-sheet-more'
+- extendedWaitUntil:
+    visible:
+      id: 'guide-page-companion'
+    timeout: 20000
+- assertVisible: 'In detail'
+- takeScreenshot: 6.10c-guide-companion
+- back
+- extendedWaitUntil:
+    visible:
+      id: 'character-screen'
     timeout: 20000
 - scrollUntilVisible:
     element:

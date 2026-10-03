@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import type { SummaryView } from '@/domain/trainView';
 
 import { Spacing, TOUCH_TARGET } from '../theme';
+import { GuideButton } from '../guide/GuideButton';
 import { BURST_TITLES, LevelUpBurst, PixelFrame, PixelIcon, PixelText } from '../ui';
 
 type Props = {
@@ -18,7 +19,8 @@ type Props = {
 
 /**
  * What a session earned (PLAN 4.4, 4.5): total XP with its bonuses, the streak, level-ups, unlocks
- * and XP per exercise, with the session time and the time per exercise when known (PLAN 5.4).
+ * and XP per exercise, with the session time and the time per exercise when known (PLAN 5.4), and
+ * the guide's "i" next to the XP breakdown (PLAN 6.10c).
  * Shared by the fresh Train summary and a past session opened from the
  * Character tab.
  */
@@ -36,10 +38,15 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
         <PixelText variant="display" align="center" testID="summary-total-xp">
           {`+${view.totalXp} XP`}
         </PixelText>
-        <PixelText variant="small" tone="textMuted" align="center">
-          {`${view.exerciseXp} from exercises · +${view.completionBonus} completion · +${view.streakBonus} streak` +
-            (view.challengeBonus > 0 ? ` · +${view.challengeBonus} challenge` : '')}
-        </PixelText>
+        <View style={styles.row}>
+          <View style={styles.flex}>
+            <PixelText variant="small" tone="textMuted" align="center">
+              {`${view.exerciseXp} from exercises · +${view.completionBonus} completion · +${view.streakBonus} streak` +
+                (view.challengeBonus > 0 ? ` · +${view.challengeBonus} challenge` : '')}
+            </PixelText>
+          </View>
+          <GuideButton topic="xp" />
+        </View>
         {view.sessionTime !== undefined && (
           <View style={styles.time} testID="summary-session-time">
             <PixelIcon name="hourglass" />
@@ -169,6 +176,9 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   exerciseText: {
+    flex: 1,
+  },
+  flex: {
     flex: 1,
   },
 });

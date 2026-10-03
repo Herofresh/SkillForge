@@ -2,6 +2,7 @@ import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { GuideButton } from '@/components/guide/GuideButton';
 import { ExerciseInfoSheet } from '@/components/node/ExerciseInfoSheet';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { Spacing } from '@/components/theme';
@@ -20,7 +21,7 @@ type Sheet =
  * The plan preview (PLAN 4.4): the generated session by block with sets × target, rest, Trial and
  * swap/substitution markers, the generator's notes and the advisory warnings (ADR-023). The user may
  * swap an exercise for another of the same pattern, remove or add one, or tap its "i" for what it
- * is and its cues (PLAN 6.2); "Start session" goes ahead
+ * is and its cues (PLAN 6.2), or the header's "i" for how the plan is made (PLAN 6.10c); "Start session" goes ahead
  * once the warnings are acknowledged.
  */
 export default function PlanPreviewScreen() {
@@ -70,9 +71,12 @@ export default function PlanPreviewScreen() {
           <PixelText variant="label" tone="rune">
             {`${profileName} · ${plan.minutes} min`}
           </PixelText>
-          <PixelText variant="title" accessibilityRole="header">
-            Today&apos;s quest
-          </PixelText>
+          <View style={styles.header}>
+            <PixelText variant="title" accessibilityRole="header" style={styles.action}>
+              Today&apos;s quest
+            </PixelText>
+            <GuideButton topic="generator" />
+          </View>
           <PixelText variant="small" tone="textMuted" testID="plan-estimate">
             {`${plan.exercises.length} exercises · about ${planMinutes(plan.exercises)} min`}
           </PixelText>
@@ -203,5 +207,10 @@ const styles = StyleSheet.create({
   },
   action: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
 });

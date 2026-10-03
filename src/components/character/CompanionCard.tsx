@@ -7,6 +7,8 @@ import { FRAME_MS } from '@/lib/figureAnimation';
 import { Colors, PIXEL, Spacing } from '../theme';
 import { PixelButton, PixelFrame, PixelText } from '../ui';
 
+import { GuideButton } from '../guide/GuideButton';
+
 import { NewBadge } from './ClassBanner';
 import { CompanionSprite } from './CompanionSprite';
 import type { CompanionView } from './useCompanion';
@@ -23,7 +25,7 @@ type Props = {
 /**
  * The companion on the Character tab (PLAN 6.10): the hero as a small pixel character idling in
  * its mood, the mood in words, the class weapon it carries and a Customize button (with a NEW tag
- * for unseen accessories). Tapping it makes it wave. Its mood never costs anything: it only
+ * for unseen accessories), and an "i" for the guide (PLAN 6.10c). Tapping it makes it wave. Its mood never costs anything: it only
  * changes the pose and the line.
  */
 export function CompanionCard({ view, onCustomize, testID = 'companion' }: Props) {
@@ -37,9 +39,12 @@ export function CompanionCard({ view, onCustomize, testID = 'companion' }: Props
 
   return (
     <PixelFrame contentStyle={styles.gap} testID={testID}>
-      <PixelText variant="label" tone="rune" accessibilityRole="header">
-        Companion
-      </PixelText>
+      <View style={styles.row}>
+        <PixelText variant="label" tone="rune" accessibilityRole="header" style={styles.flex}>
+          Companion
+        </PixelText>
+        <GuideButton topic="companion" />
+      </View>
       <View style={styles.row}>
         <Pressable
           onPress={() => setWaving(true)}

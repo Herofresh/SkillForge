@@ -19,6 +19,7 @@ import {
 } from '../ui';
 
 import { CustomBadge } from '../editor/CustomBadge';
+import { GuideButton } from '../guide/GuideButton';
 import { GoalMarker } from '../tree/NodeTile';
 import { TILE_LOOKS } from '../tree/tileLook';
 
@@ -32,7 +33,8 @@ type Props = {
 
 /**
  * The top of the node detail, framed like its tree tile: big state icon, name, tier, OG level,
- * state, goal marker, and the level with its XP bar (the cap and banked XP explained). Plays
+ * state, goal marker, and the level with its XP bar (the cap and banked XP explained), with the
+ * guide's "i" for skill levels and, on a straight-arm skill, the safeguards (PLAN 6.10c). Plays
  * UNLOCKED! after a self-unlock and LEVEL UP! when the node's level rose while it was open.
  */
 export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
@@ -57,9 +59,12 @@ export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
               {formatOgLevel(node.ogLevel)}
             </PixelText>
             {node.straightArm && (
-              <PixelText variant="label" tone="ember">
-                Straight-arm
-              </PixelText>
+              <View style={styles.meta}>
+                <PixelText variant="label" tone="ember">
+                  Straight-arm
+                </PixelText>
+                <GuideButton topic="safeguards" />
+              </View>
             )}
           </View>
         </View>
@@ -106,6 +111,7 @@ export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
             testID="detail-xp"
           />
         </View>
+        <GuideButton topic="skills" />
       </View>
       {level.capped && (
         <PixelText variant="small" tone="gold">

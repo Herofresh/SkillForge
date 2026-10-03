@@ -149,6 +149,17 @@ describe('Train: the "i" opens the sheet without leaving the plan or session', (
     expect(screen.getByTestId('plan-preview')).toBeOnTheScreen();
   });
 
+  it('in the plan preview, how the plan is made (PLAN 6.10c)', async () => {
+    const user = userEvent.setup();
+    await render(<PlanPreviewScreen />);
+    await user.press(screen.getByRole('button', { name: 'About Workout generator' }));
+    expect(screen.getByTestId('guide-generator-sheet-summary')).toHaveTextContent(
+      /It is a suggestion/,
+    );
+    await user.press(screen.getByTestId('guide-generator-sheet-close'));
+    expect(screen.getByTestId('plan-preview')).toBeOnTheScreen();
+  });
+
   it('in the live session, for the current exercise; the session goes on', async () => {
     store.getState().startTraining();
     const current = store.getState().activeSession?.exercises[0];
