@@ -41,7 +41,7 @@ export const WIDGET_WIDE_MIN_DP = 220;
  * The scale 1 layout (the compact one) fits this width and height (dp); a bigger widget scales its
  * type, icons and gaps up by the smaller of the two ratios, so the content fills the 4 × 2 size.
  */
-const BASE_WIDTH_DP = WIDGET_WIDE_MIN_DP;
+const BASE_WIDTH_DP = 260;
 const BASE_HEIGHT_DP = 140;
 /** Largest scale, and the step it is rounded down to (keeps sizes on whole sp / dp values). */
 const MAX_SCALE = 2;
@@ -188,9 +188,25 @@ function Frame({
   );
 }
 
+/**
+ * How a column places its two rows. Scaled up, the rows spread over the full height (the width
+ * limits the scale, so a 4 × 2 widget has height to spare) and line up across both columns;
+ * compact, they stay centred.
+ */
+function columnStyle(sizes: WidgetSizes) {
+  return sizes.scale > 1
+    ? ({ height: 'match_parent', justifyContent: 'space-evenly' } as const)
+    : ({ justifyContent: 'center' } as const);
+}
+
 function StatusColumn({ view, sizes }: { view: HeroView; sizes: WidgetSizes }) {
   return (
-    <FlexWidget style={{ flexDirection: 'column', justifyContent: 'center', flex: 1 }}>
+    <FlexWidget
+      style={{
+        flexDirection: 'column',
+        flex: 1,
+        ...columnStyle(sizes),
+      }}>
       <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Icon name={view.trainedToday ? 'check' : 'hourglass'} size={sizes.icon} />
         <TextWidget
@@ -223,7 +239,12 @@ function StatusColumn({ view, sizes }: { view: HeroView; sizes: WidgetSizes }) {
 function HeroColumn({ view, sizes }: { view: HeroView; sizes: WidgetSizes }) {
   return (
     <FlexWidget
-      style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end' }}>
+      style={{
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        marginLeft: sizes.gap * 2,
+        ...columnStyle(sizes),
+      }}>
       <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Icon name="shield" size={sizes.smallIcon} />
         <TextWidget
@@ -236,29 +257,31 @@ function HeroColumn({ view, sizes }: { view: HeroView; sizes: WidgetSizes }) {
           }}
         />
       </FlexWidget>
-      {view.topAttributes.length === 0 ? (
-        <PixelLabel text="No stats yet" size={sizes.label} />
-      ) : (
-        view.topAttributes.map((entry) => (
-          <FlexWidget
-            key={entry.attribute}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginTop: Math.round(sizes.gap / 3),
-            }}>
-            <PixelLabel text={ATTRIBUTE_LABELS[entry.attribute]} size={sizes.label} />
-            <TextWidget
-              text={` ${entry.value}`}
+      <FlexWidget style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
+        {view.topAttributes.length === 0 ? (
+          <PixelLabel text="No stats yet" size={sizes.label} />
+        ) : (
+          view.topAttributes.map((entry) => (
+            <FlexWidget
+              key={entry.attribute}
               style={{
-                fontFamily: FontFamily.pixel,
-                fontSize: sizes.attribute,
-                color: color(AttributeColors[entry.attribute]),
-              }}
-            />
-          </FlexWidget>
-        ))
-      )}
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: Math.round(sizes.gap / 3),
+              }}>
+              <PixelLabel text={ATTRIBUTE_LABELS[entry.attribute]} size={sizes.label} />
+              <TextWidget
+                text={` ${entry.value}`}
+                style={{
+                  fontFamily: FontFamily.pixel,
+                  fontSize: sizes.attribute,
+                  color: color(AttributeColors[entry.attribute]),
+                }}
+              />
+            </FlexWidget>
+          ))
+        )}
+      </FlexWidget>
     </FlexWidget>
   );
 }

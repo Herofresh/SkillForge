@@ -328,11 +328,14 @@ Icons are the 12×12 grids as SVG strings (`iconSvg`, 24 dp, crisp edges).
   the rank in its `RankColors` color, then up to three attributes ("PULL 12": caps label in
   `textMuted`, number in its `AttributeColors` color). A narrow (2-cell) widget keeps only the left.
 - **Size scaling (6.6b, ADR-056):** the sizes above are scale 1, the compact layout. A wide widget
-  scales type, icons, gaps and padding by `min(width / 220 dp, height / 140 dp)`, rounded down to
+  scales type, icons, gaps and padding by `min(width / 260 dp, height / 140 dp)`, rounded down to
   0.25 steps, between 1 and 2 (`widgetSizes`); icons stay on multiples of 12 dp so every grid
-  cell is whole (the small `shield` is ⅔ of the icon). The default 4 × 2 (≈ 336 × 214 dp on a
-  Pixel 8 Pro) draws at 1.5: status and rank 30 sp, numbers 36 sp, labels 15 sp, icons 36 dp.
-  A narrow widget (below 220 dp) always keeps scale 1.
+  cell is whole (the small `shield` is ⅔ of the icon). The default 4 × 2 (≈ 395 × 250 dp on the
+  Pixel 8 Pro emulator) draws at 1.5: status and rank 30 sp, numbers 36 sp, labels 15 sp, icons 36 dp.
+  A narrow widget (below 220 dp) always keeps scale 1. The hero column keeps two gaps from the
+  status column. Scaled up, both columns spread their two rows over the full height
+  (`space-evenly`; the hero column's rows are the rank and the attribute block), so the status
+  lines up with the rank and the streak / level with the attributes; compact, they stay centred.
 - **First run (no snapshot yet):** `sword` + "SkillForge" in gold + "OPEN THE APP TO BEGIN".
 - **Picker preview:** `assets/images/widget-preview.png` (app.json `previewImage`), drawn by
   `npm run icon:build` from `scripts/widgetPreview.ts`: the 4 × 2 widget at scale 1.5 with sample

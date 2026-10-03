@@ -1681,18 +1681,21 @@ Template:
 
 ## ADR-056: Widget sizes scale with the reported widget size; a generated picker preview (PLAN 6.6b)
 - Date: 2026-10-03 · Status: Accepted (extends ADR-055)
-- Context: the default 4 × 2 widget (≈ 336 × 214 dp on a Pixel 8 Pro) drew the scale-1 layout
+- Context: the default 4 × 2 widget (≈ 395 × 250 dp on the Pixel 8 Pro emulator) drew the scale-1 layout
   sized for the 2-row minimum, leaving most of its height empty; the widget picker showed the app
   icon because no `previewImage` was set.
 - Decision:
   - **Scaling:** `widgetSizes(width, height)` in `nativeWidget.tsx` picks one scale for type,
-    icons, gaps and padding: `min(width / 220, height / 140)` rounded down to 0.25 steps, clamped
+    icons, gaps and padding: `min(width / 260, height / 140)` rounded down to 0.25 steps, clamped
     to 1–2, from the size the library reports to the task handler and `requestWidgetUpdate`.
     Widgets narrower than `WIDGET_WIDE_MIN_DP` keep scale 1 (the compact layout). Icons round
     down to multiples of 12 dp (the icon grid), so pixels stay whole. One scale for everything
     keeps the proportions of the reviewed 6.6 layout instead of a second hand-tuned layout.
-    The 140 dp height base leaves room for the hero column's four lines and Jersey 15's line
-    height; a short, wide widget stays at a smaller scale.
+    The 260 dp width base: with 220, the emulator's 4 × 2 drew at 1.75 and "Not yet today"
+    almost touched the rank. The 140 dp height base leaves room for the hero column's four lines and Jersey 15's line
+    height; a short, wide widget stays at a smaller scale. Since the width limits the scale, the
+    4 × 2 widget still has height to spare: scaled up, both columns spread their two rows over
+    the full height (`space-evenly`) instead of a third, height-driven scale.
   - **Preview:** a static PNG drawn by `npm run icon:build` (`scripts/widgetPreview.ts`, reusing
     the PNG encoder, raster helpers, icon grids and theme colors), committed as
     `assets/images/widget-preview.png` and wired in through the plugin's `previewImage`. Text uses

@@ -235,8 +235,18 @@
     (the picker PNG, written by `icon:build`, test fails if the committed PNG is stale),
     `previewImage` in app.json. `NavigationTheme` moved to `src/components/navigationTheme.ts`
     so `theme.ts` loads in tsx scripts (expo-router pulled React Native in).
-  - Verified: see the PR (emulator checks of 4 × 2, small and the picker preview; screenshots
-    `docs/screenshots/6.6b-*.png`).
+  - Verified: typecheck, lint, Jest, format:check, progressions:check;
+    `npm run build:apk:universal -- --clean` (signer check passed) in a short-path copy `D:\sfw2`
+    (native builds fail in `.claude/worktrees/`), then a second incremental build after the
+    final layout change; `adb install -r` over the 6.6 build on Pixel_8_Pro_API_35 (data kept).
+    The existing widget redrew at 4 × 2 (≈ 395 × 250 dp → scale 1.5, rows spread, clear gap
+    between "Not yet today" and the rank), at 2 columns it kept the compact layout, a freshly
+    added widget drew the same; the picker shows the pixel preview, "4 × 2". Screenshots
+    `docs/screenshots/6.6b-widget-{4x2,4x2-added,small,picker}.png`. Not verified: other
+    launchers / screen sizes (the scale steps down to 1.25 or 1 on narrower 4 × 2 cells), a
+    real phone.
+  - Tuning: a 220 dp width base drew the emulator's 4 × 2 at 1.75 and "Not yet today" nearly
+    touched the rank; 260 dp keeps it at 1.5.
   - Gotcha: the preview text is the 3 × 5 font in caps, not Jersey 15 (no TTF rasterizer in the
     scripts). If the widget's look changes, update `scripts/widgetPreview.ts` and re-run
     `npm run icon:build`.

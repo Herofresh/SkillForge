@@ -93,8 +93,8 @@ describe('widgetSizes', () => {
   });
 
   it('scales the default 4 x 2 widget up by the tighter side, in quarter steps', () => {
-    // Pixel 8 Pro, 4 x 2 cells: about 336 x 214 dp → width allows 1.52, height 1.53.
-    expect(widgetSizes(336, 214)).toMatchObject({
+    // Pixel 8 Pro emulator, 4 x 2 cells: about 395 x 250 dp → width allows 1.52, height 1.79.
+    expect(widgetSizes(395, 250)).toMatchObject({
       scale: 1.5,
       icon: 36,
       smallIcon: 24,
@@ -109,7 +109,7 @@ describe('widgetSizes', () => {
   });
 
   it('keeps icons on whole 12 x 12 grid cells and stops at the maximum scale', () => {
-    expect(widgetSizes(300, 182).icon).toBe(24); // scale 1.25 → 30 dp would blur the grid
+    expect(widgetSizes(330, 182).icon).toBe(24); // scale 1.25 → 30 dp would blur the grid
     const huge = widgetSizes(2000, 2000);
     expect(huge.scale).toBe(2);
     expect(huge.icon).toBe(48);
@@ -119,7 +119,7 @@ describe('widgetSizes', () => {
 describe('SkillForgeWidget sizes', () => {
   it('draws the status larger on the default 4 x 2 widget than on the minimum one', () => {
     const big = fontSizeOf(
-      <SkillForgeWidget view={hero} widthDp={336} heightDp={214} />,
+      <SkillForgeWidget view={hero} widthDp={395} heightDp={250} />,
       hero.status,
     );
     const small = fontSizeOf(
@@ -128,6 +128,15 @@ describe('SkillForgeWidget sizes', () => {
     );
     expect(big?.fontSize).toBe(30);
     expect(small?.fontSize).toBe(20);
+  });
+
+  it('spreads the status rows over the height only when scaled up', () => {
+    const justify = (widthDp: number, heightDp: number) =>
+      primitives(<SkillForgeWidget view={hero} widthDp={widthDp} heightDp={heightDp} />)
+        .filter((entry) => entry.type === 'FlexWidget')
+        .map((entry) => (entry.props.style as { justifyContent?: string }).justifyContent);
+    expect(justify(395, 250)).toContain('space-evenly');
+    expect(justify(WIDGET_WIDE_MIN_DP, 110)).not.toContain('space-evenly');
   });
 });
 

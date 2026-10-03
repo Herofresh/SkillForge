@@ -14,13 +14,13 @@ import { drawText, GLYPH_HEIGHT, textWidth } from './tinyFont';
 
 export const WIDGET_PREVIEW_PATH = 'assets/images/widget-preview.png';
 
-/** The default 4 × 2 widget on a Pixel 8 Pro launcher, in dp. */
-export const PREVIEW_WIDTH_DP = 336;
-export const PREVIEW_HEIGHT_DP = 214;
+/** The default 4 × 2 widget on the Pixel 8 Pro emulator's launcher, in dp. */
+export const PREVIEW_WIDTH_DP = 396;
+export const PREVIEW_HEIGHT_DP = 250;
 /** Image pixels per dp (an xhdpi-sized picture; launchers scale it to the picker cell). */
 export const PREVIEW_PX_PER_DP = 2;
 
-/** Sizes in dp, the widget's at scale 1.5 (`widgetSizes(336, 214)`). */
+/** Sizes in dp, the widget's at scale 1.5 (`widgetSizes(396, 250)`). */
 const ICON_DP = 36;
 const SMALL_ICON_DP = 24;
 const PADDING_DP = 15;
@@ -100,10 +100,12 @@ export function renderWidgetPreview(): RgbaImage {
     Colors.surface,
   );
 
-  // Status column, centred vertically: status row, then the streak / level row.
+  // Status column, spread like the widget's at scale > 1 (space-evenly): status row, then the
+  // streak / level row.
   const left = inset + PADDING_DP;
-  const columnHeight = ICON_DP + GAP_DP + ICON_DP;
-  const top = Math.round((PREVIEW_HEIGHT_DP - columnHeight) / 2);
+  const innerHeight = PREVIEW_HEIGHT_DP - 2 * (inset + PADDING_DP);
+  const spacing = Math.round((innerHeight - 2 * ICON_DP) / 3);
+  const top = inset + PADDING_DP + spacing;
   icon(image, 'check', left, top, ICON_DP);
   const textX = left + ICON_DP + GAP_DP;
   text(
@@ -115,7 +117,7 @@ export function renderWidgetPreview(): RgbaImage {
     TEXT_DP,
   );
 
-  const statsY = top + ICON_DP + GAP_DP;
+  const statsY = top + ICON_DP + spacing;
   icon(image, 'flame', left, statsY, ICON_DP);
   const blockHeight = textHeightDp(NUMBER_DP) + LABEL_DP * 2 + textHeightDp(LABEL_DP);
   const numberY = statsY + (ICON_DP - blockHeight) / 2;
@@ -126,12 +128,14 @@ export function renderWidgetPreview(): RgbaImage {
   text(image, SAMPLE.level, levelX, numberY, Colors.goldLight, NUMBER_DP);
   text(image, 'Level', levelX, labelY, Colors.textMuted, LABEL_DP);
 
-  // Hero column, right-aligned: shield + rank, then the top attributes.
+  // Hero column, right-aligned, its two rows level with the status column's: shield + rank, then
+  // the top attributes.
   const right = PREVIEW_WIDTH_DP - inset - PADDING_DP;
   const rowDp = textHeightDp(TEXT_DP);
   const rowGap = GAP_DP / 3;
-  const heroHeight = SMALL_ICON_DP + SAMPLE.attributes.length * (rowDp + rowGap);
-  const heroTop = Math.round((PREVIEW_HEIGHT_DP - heroHeight) / 2);
+  const heroTop = top + (ICON_DP - SMALL_ICON_DP) / 2;
+  const attributesHeight = SAMPLE.attributes.length * (rowDp + rowGap) - rowGap;
+  const attributesTop = statsY + (ICON_DP - attributesHeight) / 2;
   const rankWidth = textWidthDp(SAMPLE.rank, TEXT_DP);
   const shieldX = right - rankWidth - GAP_DP / 1.5 - SMALL_ICON_DP;
   icon(image, 'shield', shieldX, heroTop, SMALL_ICON_DP);
@@ -144,7 +148,7 @@ export function renderWidgetPreview(): RgbaImage {
     TEXT_DP,
   );
   SAMPLE.attributes.forEach((entry, index) => {
-    const rowY = heroTop + SMALL_ICON_DP + rowGap + index * (rowDp + rowGap);
+    const rowY = attributesTop + index * (rowDp + rowGap);
     const valueWidth = textWidthDp(entry.value, TEXT_DP);
     text(image, entry.value, right - valueWidth, rowY, entry.color, TEXT_DP);
     const labelWidth = textWidthDp(entry.label, LABEL_DP);
