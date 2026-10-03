@@ -92,10 +92,8 @@ describe('localWeekBounds', () => {
   });
 
   /**
-   * The EU clock-change weeks of 2026. Assigning `process.env.TZ` at runtime is not reliable in
-   * Jest workers (CI runs in UTC), so the expected length comes from the zone's own offsets: 168 h
-   * plus the hour the clock changed by. In a zone with DST (e.g. Europe/Vienna, where the app is
-   * developed) that is 167 and 169 h; in UTC both are 168 h.
+   * The EU clock-change weeks of 2026. jest.config.js pins TZ to Europe/Vienna for every run (CI
+   * included), so these weeks really are 167 and 169 h long.
    */
   it.each([
     ['spring', new Date(2026, 2, 29, 12), 23],
@@ -112,9 +110,8 @@ describe('localWeekBounds', () => {
     expect([endDate.getDay(), endDate.getHours(), endDate.getMinutes()]).toEqual([1, 0, 0]);
     const shiftHours = (endDate.getTimezoneOffset() - startDate.getTimezoneOffset()) / 60;
     expect((end - start) / MS_PER_HOUR).toBe(168 + shiftHours);
-    if (Intl.DateTimeFormat().resolvedOptions().timeZone === 'Europe/Vienna') {
-      expect((end - start) / MS_PER_HOUR).toBe(mondayDate === 23 ? 167 : 169);
-    }
+    expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe('Europe/Vienna');
+    expect((end - start) / MS_PER_HOUR).toBe(mondayDate === 23 ? 167 : 169);
   });
 });
 

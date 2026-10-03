@@ -830,6 +830,9 @@ without `node_modules`, `android`, `builds` and `.git` to a short folder (e.g.
   numbers: extend `HEAVY_SUITE_PATH` there, and prefer making the test cheaper (one query or one
   assertion over a list instead of one per item). The transform cache is per checkout in
   `node_modules/.cache/jest` (a shared `%TEMP%\jest` broke parallel worktree runs with EPERM).
+  Every run uses `TZ=Europe/Vienna`, set at the top of `jest.config.js` before workers start
+  (CI is UTC; assigning `process.env.TZ` inside a test is not reliable), so local-time tests such as
+  the 167 / 169 h DST weeks behave the same everywhere. Write local-time tests for that zone.
 - **Home-screen widget (ADR-055):** never import `react-native-android-widget` or
   `src/widget/nativeWidget.tsx` statically; the library throws on import without its native module
   (Expo Go, Jest). Go through `loadNativeWidget()`. Widget components are called as plain

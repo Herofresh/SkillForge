@@ -1,5 +1,11 @@
 // Jest config (moved out of package.json so it can carry comments). The per-suite timeout for the
 // heavy component suites lives in jest.setup.ts (UI_SUITE_TIMEOUT_MS).
+
+// One time zone for every run (local and CI, which is UTC): set here, before Jest starts its
+// workers, which inherit it. Assigning process.env.TZ inside a test is not reliable. Europe/Vienna
+// has DST, so the clock-change week tests check the real 167 / 169 h everywhere.
+process.env.TZ = 'Europe/Vienna';
+
 /** @type {import('jest').Config} */
 module.exports = {
   preset: 'jest-expo',
