@@ -9,6 +9,7 @@ import { ClassSheet } from '@/components/character/ClassSheet';
 import { CompanionCard } from '@/components/character/CompanionCard';
 import { CompanionSheet } from '@/components/character/CompanionSheet';
 import { useCompanion } from '@/components/character/useCompanion';
+import { GuideButton } from '@/components/guide/GuideButton';
 import { GoalProgressCard } from '@/components/character/GoalProgressCard';
 import { RankCrest } from '@/components/character/RankCrest';
 import { RankLadderSheet } from '@/components/character/RankLadderSheet';
@@ -36,7 +37,8 @@ import { useAppStore } from '@/store/useAppStore';
 /**
  * The character sheet (PLAN 4.5): hero, level and XP, the companion (PLAN 6.10), rank crest (opens the rank ladder, PLAN 6.7),
  * the worn hero class (opens the class sheet, PLAN 6.9) with its weekly challenge (PLAN 6.9b), the attribute radar with the push/pull balance note, streak and totals, goals along their paths
- * and the recent sessions (each opens its summary). Everything comes from `characterSheet` over the store's state.
+ * and the recent sessions (each opens its summary). An "i" next to each system opens the guide's
+ * summary of it (PLAN 6.10c). Everything comes from `characterSheet` over the store's state.
  */
 export default function CharacterScreen() {
   const nodes = useAppStore((state) => state.nodes);
@@ -162,12 +164,17 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
             playKey={levelUpKey}
           />
         )}
-        <XPBar
-          label={`To level ${sheet.level.level + 1}`}
-          fraction={sheet.level.fraction}
-          valueText={xpText}
-          testID="character-xp"
-        />
+        <View style={styles.row}>
+          <View style={styles.flex}>
+            <XPBar
+              label={`To level ${sheet.level.level + 1}`}
+              fraction={sheet.level.fraction}
+              valueText={xpText}
+              testID="character-xp"
+            />
+          </View>
+          <GuideButton topic="xp" />
+        </View>
         <PixelText variant="small" tone="textMuted" testID="character-total-xp">
           {`${sheet.totalXp} XP earned in total`}
         </PixelText>
@@ -176,23 +183,34 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
       <CompanionSection now={now} />
 
       <PixelFrame contentStyle={styles.gap}>
-        <RankCrest
-          rank={sheet.rank}
-          hint={sheet.rankHint}
-          onPress={() => setLadderOpen(true)}
-          testID="character-rank"
-        />
-        <View style={styles.divider}>
-          <ClassBanner
-            row={sheet.wornClass}
-            newCount={newClasses}
-            onPress={() => setClassesOpen(true)}
-            testID="character-class"
-          />
+        <View style={styles.row}>
+          <View style={styles.flex}>
+            <RankCrest
+              rank={sheet.rank}
+              hint={sheet.rankHint}
+              onPress={() => setLadderOpen(true)}
+              testID="character-rank"
+            />
+          </View>
+          <GuideButton topic="ranks" />
+        </View>
+        <View style={[styles.divider, styles.row]}>
+          <View style={styles.flex}>
+            <ClassBanner
+              row={sheet.wornClass}
+              newCount={newClasses}
+              onPress={() => setClassesOpen(true)}
+              testID="character-class"
+            />
+          </View>
+          <GuideButton topic="classes" />
         </View>
         {sheet.challenge && (
-          <View style={styles.divider}>
-            <ChallengeCard challenge={sheet.challenge} />
+          <View style={[styles.divider, styles.row]}>
+            <View style={styles.flex}>
+              <ChallengeCard challenge={sheet.challenge} />
+            </View>
+            <GuideButton topic="challenge" />
           </View>
         )}
       </PixelFrame>
@@ -202,9 +220,12 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
       )}
 
       <PixelFrame contentStyle={styles.gap} testID="character-attributes">
-        <PixelText variant="label" tone="rune" accessibilityRole="header">
-          Attributes
-        </PixelText>
+        <View style={styles.row}>
+          <PixelText variant="label" tone="rune" accessibilityRole="header" style={styles.flex}>
+            Attributes
+          </PixelText>
+          <GuideButton topic="attributes" />
+        </View>
         <AttributeRadar axes={sheet.radar} testID="attribute-radar" />
         {sheet.radar.every((axis) => axis.value === 0) && (
           <PixelText variant="small" tone="textMuted">
@@ -234,8 +255,8 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
         />
       )}
 
-      <PixelFrame variant="raised">
-        <View style={styles.stats}>
+      <PixelFrame variant="raised" contentStyle={styles.row}>
+        <View style={[styles.stats, styles.flex]}>
           <Stat icon="flame" label="Streak" value={sheet.streak} testID="stat-streak" />
           <Stat
             icon="scroll"
@@ -251,6 +272,7 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
             testID="stat-trials"
           />
         </View>
+        <GuideButton topic="streak" />
       </PixelFrame>
 
       <View style={styles.gap}>
@@ -320,6 +342,11 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
   hero: {
     flexDirection: 'row',

@@ -84,6 +84,9 @@ describe('CompanionCard', () => {
     expect(screen.getByTestId('companion-new')).toHaveTextContent('1 NEW');
     await user.press(screen.getByTestId('companion-customize'));
     expect(onCustomize).toHaveBeenCalled();
+    // The guide's "i" (PLAN 6.10c) explains the mood and the accessories.
+    await user.press(screen.getByRole('button', { name: 'About Companion' }));
+    expect(screen.getByTestId('guide-companion-sheet-summary')).toHaveTextContent(/never loses/);
   });
 
   it('waves on a tap and goes back to idling', async () => {

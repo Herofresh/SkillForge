@@ -1,6 +1,7 @@
 # Settings (PLAN 4.6): add and remove an equipment profile, export a backup (the share sheet opens
 # and is closed with back; skipped when none shows), the import's cancel paths (the confirmation,
-# then the file picker) and replaying onboarding (PLAN 5.10). Takes the 4.6 screenshots.
+# then the file picker), the guide (PLAN 6.10c: the widgets' "i", the guide list and one page) and
+# replaying onboarding (PLAN 5.10). Takes the 4.6 and 6.10c settings screenshots.
 # Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Settings - equipment profile, export, import cancel
@@ -153,12 +154,68 @@ name: Settings - equipment profile, export, import cancel
     visible:
       id: 'backup-canceled'
     timeout: 20000
+# How SkillForge works (PLAN 6.10c): the widgets' "i", then the guide, one page and back.
+- scrollUntilVisible:
+    element:
+      id: 'open-guide'
+    direction: DOWN
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'guide-widgets'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'guide-widgets'
+- extendedWaitUntil:
+    visible:
+      id: 'guide-widgets-sheet'
+    timeout: 20000
+- assertVisible: 'Home-screen widgets'
+- takeScreenshot: 6.10c-settings-widgets-sheet
+- tapOn:
+    id: 'guide-widgets-sheet-close'
+- extendedWaitUntil:
+    notVisible:
+      id: 'guide-widgets-sheet'
+    timeout: 20000
+- takeScreenshot: 6.10c-settings-panel
+- tapOn:
+    id: 'open-guide'
+- extendedWaitUntil:
+    visible:
+      id: 'guide-screen'
+    timeout: 20000
+- takeScreenshot: 6.10c-guide
+- scrollUntilVisible:
+    element:
+      id: 'guide-row-ranks'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'guide-row-ranks'
+- extendedWaitUntil:
+    visible:
+      id: 'guide-page-ranks'
+    timeout: 20000
+- assertVisible: '.*7 of the 12 branches.*'
+- takeScreenshot: 6.10c-guide-ranks
+- back
+- extendedWaitUntil:
+    visible:
+      id: 'guide-screen'
+    timeout: 20000
+- back
+- extendedWaitUntil:
+    visible:
+      id: 'settings-screen'
+    timeout: 20000
 # Replay onboarding (PLAN 5.10): the confirmation says the data stays; the intro opens with the
-# stored hero name, and finishing it lands on the tree again.
+# stored hero name, and finishing it lands on the tree again. It sits above the guide panel.
 - scrollUntilVisible:
     element:
       id: 'replay-onboarding'
-    direction: DOWN
+    direction: UP
     timeout: 60000
 - tapOn:
     id: 'replay-onboarding'

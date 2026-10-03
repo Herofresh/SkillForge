@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 
 import type { SafeguardWarning } from '@/domain/types';
 
+import { SafeguardGuideNote } from './guide/SafeguardGuideNote';
 import { WarningBanner } from './ui';
 
 /**
@@ -28,7 +29,10 @@ type Props = {
   testIDPrefix: string;
 };
 
-/** The advisory warnings before an action, each with its "I understand" (ADR-023). */
+/**
+ * The advisory warnings before an action, each with its "I understand" (ADR-023), and the guide's
+ * "i" when one of them is a tendon safeguard (PLAN 6.10c).
+ */
 export function SafeguardWarningList({
   warnings,
   acknowledged,
@@ -37,6 +41,7 @@ export function SafeguardWarningList({
 }: Props) {
   return (
     <>
+      <SafeguardGuideNote warnings={warnings} />
       {warnings.map((warning, index) => (
         <WarningBanner
           key={`${warning.code}-${index}`}

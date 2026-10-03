@@ -175,6 +175,20 @@ centred in a 48 dp target; it sits at the end of a tile's top row and of an `Exe
 then the cues as `small` bullets in a shadowless parchment frame with a scroll icon and a CUES
 label (the body scrolls above 360 dp), plus a primary "Open skill" in the Tree only. Map nodes open
 it on long press (too small for the button); the Legend mentions both ways.
+
+**How it works (PLAN 6.10c, ADR-060)** in `src/components/guide/`: the same `InfoButton` next to a
+game system opens `GuideSheet`, a `PixelModal` titled with the topic: the topic's pixel icon
+(36 dp, `GUIDE_ICONS`) beside the 1–3 sentence summary in `body`, then a primary "More in the
+guide" (scroll icon). The "i" sits at the end of the row it explains (XP bar, rank crest, class
+banner, challenge card, companion and Attributes headings, streak panel, node level row, the
+"Straight-arm" label, Trial standard, plan header, the summary's XP breakdown), and above warning
+lists with a tendon warning as a muted `small` "Why these warnings?". It never opens by itself and
+never adds a badge. Settings has a "How SkillForge works" `DetailSection` (info icon): a muted line,
+a secondary "Open the guide" and a "Home-screen widgets" row with its "i". The guide screen
+(`/guide`, header "How it works") starts with a parchment intro, then one raised, pressable row per
+topic: icon, heading, the summary in muted `small` (2 lines). A topic page (`/guide/[topic]`) is a
+gold frame (icon, title, summary) and a parchment "In detail" frame with `body` bullets, then a
+secondary "Next: <topic>". Screenshots: `docs/screenshots/6.10c-*.png`.
 Screenshots: `docs/screenshots/4.2-tree.png`, `4.3-node-detail.png`, `4.3-unlock.png`,
 `4.3-trial.png`.
 

@@ -248,6 +248,13 @@
   pose on the Train summary. Widgets: the existing one stays the small widget; a new large
   `SkillForgeCompanion` widget shows the companion in its mood with status, streak, level, rank and
   class. Contact sheets `docs/screenshots/6.10-*.png`.
+- How it works (6.10c, ADR-060, [PR #57](https://github.com/Herofresh/SkillForge/pull/57)): `src/domain/guide.ts` has one entry per system (12:
+  XP, skill levels and Trials, safeguards, attributes, ranks, streak, classes, weekly challenge,
+  companion, generator, widgets, backups and data), a short summary and details, every number taken
+  from the owning module's constants (a test fails on a number typed into the text). An "i"
+  (`GuideButton`) next to each system opens the summary with "More in the guide"; Settings → "How
+  SkillForge works" opens the guide list and each page. Optional only: nothing opens on its own.
+  Screenshots `docs/screenshots/6.10c-*.png`.
 
 ## Next up
 1. On the user's phone: install [v0.5.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.5.0)
@@ -262,6 +269,28 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **How it works (task 6.10c, ADR-060, [PR #57](https://github.com/Herofresh/SkillForge/pull/57)):**
+  - Code: `src/domain/guide.ts` (`GUIDE_TOPICS`, `guideFacts`, `buildGuide`, `GUIDE`,
+    `guideEntry`), `hasTendonWarning` in `safeguards.ts`; UI in `src/components/guide/`
+    (`GuideButton`, `GuideSheet`, `GuideRow` / `GuideArticle`, `GUIDE_ICONS`,
+    `SafeguardGuideNote`), `src/components/settings/GuidePanel.tsx`, routes `app/guide/index.tsx`
+    and `app/guide/[topic].tsx`. `InfoButton` got an optional `hint`.
+  - "i" buttons: Character tab (XP bar, companion header, rank crest, class banner, challenge
+    card, Attributes heading, streak panel), node detail (level row, "Straight-arm" label, Trial
+    standard), plan preview header, summary XP breakdown (also past sessions), warning lists with
+    a tendon warning ("Why these warnings?": Trial screens, plan preview, live session, summary),
+    Settings (widgets).
+  - Gotcha: write every number in the guide through `facts` (add a field to `GuideFacts` and fill
+    it in `guideFacts()`); the "no hand-written number" test treats tier numerals (I, II, III) as
+    numbers too, so avoid a standalone "I" in the text. A rule change (not just a constant) still
+    needs the words reviewed.
+  - Verified: typecheck, lint, format:check, progressions:check, full Jest (guide domain tests incl.
+    the perturbation check, component tests for the button, sheet, guide screens, settings panel,
+    warning note, companion card and plan preview); Maestro on Pixel_8_Pro_API_35 / Expo Go:
+    `settings.yaml` (widgets "i", guide list, Ranks page, back) and `character.yaml` (companion "i",
+    "More in the guide" → page, back) pass, plus `train.yaml` and `tree.yaml`. `train.yaml` now closes the swap sheet by id: `tapOn: 'Cancel'` also matched the backdrop, which is labelled "Cancel", and its tap swapped the warm-up. Not verified: a real phone, TalkBack.
+  - Ideas (not done): a "counts towards your weekly challenge" hint; a guide entry per tree state
+    (locked / ready / …) beside the Tree legend.
 - **Companion (task 6.10, ADR-059, [PR #56](https://github.com/Herofresh/SkillForge/pull/56)):**
   - Code: `src/domain/companion.ts` (mood, facts, rules, unlock merge, loadout, wardrobe, setting
     reader / writer), `src/data/companion/` (`accessories.ts` the one place for rules, `body.ts`
@@ -1213,6 +1242,14 @@ upgrade check from every earlier release). Any new table or column is additive a
   with its own sprite palette, 46 accessories, 15 class weapons, mood / victory / wave loops,
   `hero_companion` setting (no migration, backups unchanged), Customize sheet, NEW TRINKET! and the
   victory pose on the summary, the large `SkillForgeCompanion` widget.
+- [x] 6.10c How it works: explanations and tooltips (user request 2026-10-03: "leave ways in the
+  app to understand the systems and offer tooltips for people that are interested") (ADR-060,
+  [PR #57](https://github.com/Herofresh/SkillForge/pull/57)). A pure guide module with one entry per system (XP, skill levels and
+  Trials, safeguards, attributes, ranks, streak, classes, weekly challenge, companion, generator,
+  widgets, backups and data), every number taken from the domain constants; "i" buttons where each
+  system appears (Character tab, node detail, Train) that open a short summary with "More in the
+  guide"; Settings → "How SkillForge works" lists every entry. Optional only: nothing pops up on
+  its own, no onboarding change, no data change.
 - [ ] 6.11 v0.6.0 release (6.9–6.10), same routine.
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)

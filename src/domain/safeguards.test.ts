@@ -1,6 +1,7 @@
 import { makeNode, makeSession, makeSet } from '@/data/testFixtures';
 import {
   budgetExemptTrialSets,
+  hasTendonWarning,
   isStraightArmRested,
   isTrialOpenBySafeguards,
   lastStraightArmSessionAt,
@@ -191,5 +192,15 @@ describe('advisory warnings', () => {
       nodeId: 'tuck_front_lever',
       severity: 'info',
     });
+  });
+});
+
+describe('hasTendonWarning', () => {
+  it('is true for a tendon safeguard and false for the prerequisites note alone', () => {
+    const note = { code: 'prerequisites_unmet', message: 'note', severity: 'info' } as const;
+    const rest = { code: 'straight_arm_rest', message: 'rest', severity: 'warning' } as const;
+    expect(hasTendonWarning([])).toBe(false);
+    expect(hasTendonWarning([note])).toBe(false);
+    expect(hasTendonWarning([note, rest])).toBe(true);
   });
 });

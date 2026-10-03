@@ -56,7 +56,9 @@ name: Train - plan, live session, resume after a restart, summary
       id: 'swap-sheet'
     timeout: 20000
 - takeScreenshot: 4.4-swap
-- tapOn: 'Cancel'
+# By id: the backdrop is labelled "Cancel" too, and a tap on its centre lands on an option.
+- tapOn:
+    id: 'swap-sheet-close'
 - extendedWaitUntil:
     notVisible:
       id: 'swap-sheet'

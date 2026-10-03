@@ -73,7 +73,11 @@ app/                    expo-router screens (UI only, no game logic)
                         history and the node detail's history rows (PLAN 5.10); unknown id → not found
   (tabs)/settings.tsx   Settings (PLAN 4.6, ADR-035): hero name, equipment profiles (rename,
                         confirmed remove), backup export/import/undo, replay onboarding (5.10,
-                        ADR-046), about/credits, Style Guide
+                        ADR-046), "How SkillForge works" (GuidePanel: the guide + the widgets' "i",
+                        6.10c), about/credits, Style Guide
+  guide/                "How SkillForge works" (PLAN 6.10c, ADR-060), stack screens
+    index.tsx           every guide entry (GuideRow: icon, title, summary) → its page
+    [topic].tsx         one entry (GuideArticle: summary, details) + "Next: <title>"; unknown → note
   onboarding/           first-run flow (PLAN 4.1, ADR-031), a Stack; every step saves through the store
     _layout.tsx         Stack; redirects to /tree once onboarding is completed
     index.tsx           1 welcome + "Name your hero" (setHeroName)
@@ -189,6 +193,10 @@ src/
                         challengeContribution (per session; straight-arm never counts),
                         advanceChallenge (the engine step), challengeProgress, pins (pinWeek,
                         pinAt, weeklyChallenges, parse / toRaw of `class_challenges`), challengeView
+    guide.ts            "How SkillForge works" (PLAN 6.10c, ADR-060): GUIDE_TOPICS, guideFacts()
+                        (every number the text uses, from the owning modules), buildGuide(facts)
+                        (formatting only; the test rebuilds it with every fact changed and fails on
+                        a number typed into the text), GUIDE, guideEntry, isGuideTopic
     widget.ts           home-screen widget data (PLAN 6.6, ADR-055): widgetSnapshot (app state →
                         JSON-safe WidgetSnapshot), widgetView (snapshot + now → trained today via
                         isSameLocalDay, streak via activeStreak), parseWidgetSnapshot, topAttributes,
@@ -291,7 +299,11 @@ src/
     node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
                         NodeHistoryList (rows open the past session), AttributeChips (ATTRIBUTE_LABELS), UnlockSheet;
                         ExerciseInfoSheet (description + cues, the one sheet for Tree and Train, 6.2)
-                        and InfoButton (the "i" that opens it)
+                        and InfoButton (the "i" that opens it; the guide's "i" too)
+    guide/              the guide's UI (PLAN 6.10c): GuideButton (an InfoButton that opens
+                        GuideSheet: the entry's summary + "More in the guide"), GuideRow /
+                        GuideArticle (the guide screens), GUIDE_ICONS, SafeguardGuideNote ("Why these
+                        warnings?" above a list with a tendon warning)
     train/              Train flow parts: ExerciseCard (prescription, rest, markers, "i" via
                         onInfo), SetLogger
                         (timer + stepper + Log / Partial / Failed; logged-set lines open the
@@ -318,7 +330,8 @@ src/
                         confirmation (onboarding, Settings)
     settings/           BackupPanel (export, import confirm, rejection issues, undo), AboutPanel,
                         ProgressionsPanel (count of tree changes → My progressions),
-                        ReplayOnboardingPanel (confirm → replayOnboarding)
+                        ReplayOnboardingPanel (confirm → replayOnboarding), GuidePanel ("How
+                        SkillForge works": open the guide, the widgets' "i"; 6.10c)
     editor/             node editor (PLAN 4.7–4.8, ADR-036): NodeEditorBody (screen body: live
                         issues, Save/Cancel), NodeEditorForm (sections with inline IssueNotes),
                         PositionSheet, IssueNotes, CustomBadge, OverlayEntryRow, SharePanel;
@@ -501,6 +514,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Safety copy** | The backup of the current data that `importBackup` writes to `documents/backups/skillforge-before-import-<UTC>.json` before it replaces anything; importing it undoes the import. |
 | **Description** | A node's 1–3 plain sentences on what the exercise is and what it looks like (not the cues; PLAN 6.2, ADR-049). Required on built-in nodes (`validateNodes`), at most `MAX_DESCRIPTION_LENGTH` (300) characters; a user node saved before 6.2 may have `''` (shown as "No description yet…") and the editor asks for one on its next save. |
 | **Exercise info sheet** | `ExerciseInfoSheet`: name, description and cues over the current screen. Opened by the "i" (`InfoButton`) on Tree tiles, plan-preview cards and the live session's current exercise, or a long press on a tile / map node. Never navigates in Train; adds "Open skill" in the Tree. |
+| **Guide** | "How SkillForge works" (PLAN 6.10c, ADR-060): one entry per system (`GUIDE_TOPICS`: xp, skills, safeguards, attributes, ranks, streak, classes, challenge, companion, generator, widgets, data), a 1–3 sentence summary and details. Every number comes from the owning module's constants (`guideFacts`). Reached through a `GuideButton` "i" next to the system (Character tab, node detail, plan preview, session summary, warning lists, Settings → widgets) or Settings → How SkillForge works. Never opens on its own. |
 | **Exercise animation** | A small looping pixel figure doing the exercise (PLAN 6.4, ADR-053): 1–4 keyframe poses of a side-view stick figure (hip position + absolute joint angles) plus props (floor, wall, bar, rings, rail, parallettes, dip bars, box, pole), interpolated into stepped frames and rasterized to a 32×32 grid. A node without its own animation shows its first pattern's generic one. Shown in the node detail's About panel and the exercise info sheet; reduce motion shows the still keyframe. |
 | **Source** | `core` (built-in YAML) or `user` (from the overlay). |
 | **Review status** | `draft` or `coach_reviewed`, per node, with free-text `review.notes`. |

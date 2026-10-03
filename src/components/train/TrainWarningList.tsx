@@ -1,6 +1,7 @@
 import { warningKey } from '@/domain/train';
 import type { SafeguardWarning } from '@/domain/types';
 
+import { SafeguardGuideNote } from '../guide/SafeguardGuideNote';
 import { WarningBanner } from '../ui';
 
 type Props = {
@@ -15,10 +16,12 @@ type Props = {
 /**
  * The Train flow's advisory warnings (ADR-023), acknowledged by key: the list changes as the user
  * swaps, adds and logs, and a new warning shows up unacknowledged while old ones keep their answer.
+ * The guide's "i" leads them when one is a tendon safeguard (PLAN 6.10c).
  */
 export function TrainWarningList({ warnings, acknowledged, onAcknowledge, testIDPrefix }: Props) {
   return (
     <>
+      <SafeguardGuideNote warnings={warnings} />
       {warnings.map((warning, index) => {
         const key = warningKey(warning);
         return (
