@@ -227,7 +227,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Stable Jest runs (maintenance, PR_LINK):** component suites timed out (5 s default) only in
+- **Stable Jest runs (maintenance, [PR #50](https://github.com/Herofresh/SkillForge/pull/50)):** component suites timed out (5 s default) only in
   the full parallel `npm test` while other agents ran, and a shared `%TEMP%\jest` cache once failed
   with EPERM on rename. Now: the Jest config lives in `jest.config.js` (moved from `package.json`)
   with `cacheDirectory: <rootDir>/node_modules/.cache/jest` and `maxWorkers: '50%'` outside CI
@@ -940,7 +940,7 @@ compiled into a typed module for the app; users can layer their own changes on t
 - [x] 5.13 build:apk checks the signer before copying the APK (ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35))
 - [x] Maintenance: stable Jest runs under load: `jest.config.js` (per-checkout cache, `maxWorkers`
   50% outside CI), one 60 s timeout for heavy suites in `jest.setup.ts`, cheaper treeMap/appIcon
-  tests (PR_LINK)
+  tests ([PR #50](https://github.com/Herofresh/SkillForge/pull/50))
 
 ### Phase 6: Feature wave (user requests 2026-10-02)
 Work through these in order, one task per branch and PR. Until Phase 7, releases stay on the
