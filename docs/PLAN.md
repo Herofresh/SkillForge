@@ -238,7 +238,7 @@
   a badge count. Straight-arm work never counts; the generator and safeguards are unchanged.
   Character tab card under the class banner, summary panel with CHALLENGE COMPLETE!, the
   challenge per class in the class sheet. Screenshots `docs/screenshots/6.9b-*.png`.
-- Companion (6.10, ADR-059, PR_LINK): the hero as a JRPG-style chibi sprite on the Character tab
+- Companion (6.10, ADR-059, [PR #56](https://github.com/Herofresh/SkillForge/pull/56)): the hero as a JRPG-style chibi sprite on the Character tab
   (own panel under the hero panel): four moods by calendar days since the last session (happy,
   content, waiting, sad; never worse, nothing is ever lost, a session cheers it up at once), a
   wave on a tap, the worn class's weapon (tier III upgraded), 46 accessories in five slots earned
@@ -262,7 +262,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Companion (task 6.10, ADR-059, PR_LINK):**
+- **Companion (task 6.10, ADR-059, [PR #56](https://github.com/Herofresh/SkillForge/pull/56)):**
   - Code: `src/domain/companion.ts` (mood, facts, rules, unlock merge, loadout, wardrobe, setting
     reader / writer), `src/data/companion/` (`accessories.ts` the one place for rules, `body.ts`
     chibi parts and frame anchors, `art.ts` accessory and weapon parts, `weapons.ts`, `moods.ts`
@@ -1184,7 +1184,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   and rules are designed in its own ADR first. Done: 15 challenges in `src/data/classes.ts`,
   pinned per week by the first session, flat +50 XP once a week, badge count, Character card,
   summary CHALLENGE COMPLETE!, class sheet line; setting `class_challenges`, no migration.
-- [x] 6.10 Companion (user idea; ADR-059, PR_LINK): the hero as a small tamagotchi-style
+- [x] 6.10 Companion (user idea; ADR-059, [PR #56](https://github.com/Herofresh/SkillForge/pull/56)): the hero as a small tamagotchi-style
   pixel companion on the Character tab, customizable within limits. **User decisions
   (2026-10-03):**
   - Mood: it can get sad (after several days without training) but it never dies, never gets
