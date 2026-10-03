@@ -2,11 +2,13 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { HERO_CLASSES } from '@/data/classes';
 import { makeSession } from '@/data/testFixtures';
 import { ALL_NODES } from '@/data/skills';
 import { clearNodeProgress, readNodeProgress } from '@/db/nodeProgressRepository';
 import { listSessions } from '@/db/sessionRepository';
 import { openTestDatabase, type TestDatabase } from '@/db/testing/testDatabase';
+import { weeklyChallenges } from '@/domain/challenges';
 import { generateWorkout } from '@/domain/generator';
 import { recompute } from '@/domain/recompute';
 import type { LoggedSession } from '@/domain/types';
@@ -59,7 +61,10 @@ describe('app store', () => {
     const results = history.map((entry) => store.getState().logSession(entry));
 
     expect(listSessions(test.db)).toEqual(history);
-    const pure = recompute(ALL_NODES, history);
+    // The same pinned weekly challenges (PLAN 6.9b) give the same XP, bonus included.
+    const challenges = weeklyChallenges(store.getState().challengePins, HERO_CLASSES);
+    expect(challenges.length).toBeGreaterThan(0);
+    const pure = recompute(ALL_NODES, history, [], challenges);
     expect(store.getState().engine).toEqual(pure.state);
     expect(results).toEqual(pure.results);
     expect(readNodeProgress(test.db)).toEqual(pure.state.progress);
@@ -78,7 +83,8 @@ describe('app store', () => {
     const result = store.getState().logSession(session('early', 1));
 
     const history = [session('early', 1), session('late', 5)];
-    const pure = recompute(ALL_NODES, history);
+    const challenges = weeklyChallenges(store.getState().challengePins, HERO_CLASSES);
+    const pure = recompute(ALL_NODES, history, [], challenges);
     expect(store.getState().sessions.map((entry) => entry.id)).toEqual(['early', 'late']);
     expect(store.getState().engine).toEqual(pure.state);
     expect(result).toEqual(pure.results[0]);

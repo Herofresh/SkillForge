@@ -3,6 +3,7 @@
  * show, built from the session model (`train.ts`), the tree and a `SessionResult`. Pure, so screens
  * only render; the wording comes from `format.ts`.
  */
+import type { ChallengeStep } from './challenges';
 import { formatClock, formatPerformance, formatPrescription, formatRest } from './format';
 import type { SessionResult } from './recompute';
 import { elapsedSeconds, totalDurationSec } from './setTimer';
@@ -215,6 +216,10 @@ export interface SummaryView {
   exerciseXp: number;
   completionBonus: number;
   streakBonus: number;
+  /** The weekly class challenge bonus (PLAN 6.9b); 0 unless this session completed it. */
+  challengeBonus: number;
+  /** What the session did for its week's class challenge; absent without one. */
+  challenge?: ChallengeStep;
   streak: number;
   exercises: {
     nodeId: string;
@@ -263,6 +268,8 @@ export function summaryView(
     exerciseXp: result.xp.exerciseXp,
     completionBonus: result.xp.completionBonus,
     streakBonus: result.xp.streakBonus,
+    challengeBonus: result.xp.challengeBonus,
+    ...(result.challenge ? { challenge: result.challenge } : {}),
     streak: result.streak,
     exercises: result.exercises.map((exercise) => ({
       nodeId: exercise.nodeId,

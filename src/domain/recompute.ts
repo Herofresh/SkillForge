@@ -11,6 +11,7 @@
  * Nothing is blocked (ADR-023): Trials count on every node, safeguard violations and unmet
  * prerequisites only produce `SafeguardWarning`s.
  */
+import { advanceChallenge, type ChallengeStep, type ChallengeTally } from './challenges';
 import {
   addNodeXp,
   emptyProgress,
@@ -32,6 +33,7 @@ import type {
   SafeguardWarning,
   UserAction,
   UserActionKind,
+  WeeklyChallenge,
 } from './types';
 import { exerciseXp, isSessionComplete, nextStreak, sessionXp, type SessionXp } from './xp';
 
@@ -60,6 +62,8 @@ export interface EngineState {
   lastStraightArmSessionAt?: number;
   /** Replay position of the last applied entry (for `canApplyIncrementally`). */
   lastApplied?: HistoryPosition;
+  /** Running count of the latest weekly class challenge a session fell into (PLAN 6.9b). */
+  challenge?: ChallengeTally;
 }
 
 export const INITIAL_ENGINE_STATE: EngineState = { progress: {}, totalXp: 0, streak: 0 };
@@ -83,6 +87,8 @@ export interface SessionResult {
   unlocked: string[];
   /** Advisory warnings (safeguards, unmet prerequisites) for the summary; never blocking. */
   warnings: SafeguardWarning[];
+  /** What the session did for its week's class challenge (PLAN 6.9b); absent without one. */
+  challenge?: ChallengeStep;
 }
 
 export interface UserActionResult {
@@ -144,6 +150,7 @@ function applySessionWith(
   session: LoggedSession,
   nodes: readonly ExerciseNode[],
   lookup: NodeLookup,
+  challenges: readonly WeeklyChallenge[],
 ): { state: EngineState; result: SessionResult } {
   const statusBefore = resolveTree(nodes, state.progress);
   const progress: Record<string, NodeProgress> = { ...state.progress };
@@ -193,10 +200,12 @@ function applySessionWith(
     ),
   );
   const streak = nextStreak(state.streak, state.lastSessionAt, session.startedAt);
+  const challenge = advanceChallenge(state.challenge, challenges, session, lookup);
   const xp = sessionXp(
     exercises.map((exercise) => exercise.xp),
     isSessionComplete(knownSets),
     streak,
+    challenge.step?.completed ?? false,
   );
   const hasStraightArm = knownSets.some((set) => lookup.get(set.nodeId)?.straightArm);
 
@@ -211,11 +220,21 @@ function applySessionWith(
     lastSessionAt: session.startedAt,
     ...(lastStraightArmSessionAt !== undefined ? { lastStraightArmSessionAt } : {}),
     lastApplied: historyPosition(session),
+    ...(challenge.tally ? { challenge: challenge.tally } : {}),
   };
   const unlocked = newlyUnlocked(statusBefore, resolveTree(nodes, progress));
   return {
     state: nextState,
-    result: { sessionId: session.id, exercises, xp, streak, levelUps, unlocked, warnings },
+    result: {
+      sessionId: session.id,
+      exercises,
+      xp,
+      streak,
+      levelUps,
+      unlocked,
+      warnings,
+      ...(challenge.step ? { challenge: challenge.step } : {}),
+    },
   };
 }
 
@@ -249,13 +268,17 @@ function applyUserActionWith(
 const lookupOf = (nodes: readonly ExerciseNode[]): NodeLookup =>
   new Map(nodes.map((node) => [node.id, node]));
 
-/** Applies one logged session to `state` (the incremental path). */
+/**
+ * Applies one logged session to `state` (the incremental path). `challenges` are the pinned weekly
+ * class challenges (`weeklyChallenges`, PLAN 6.9b); pass the same ones as to `recompute`.
+ */
 export function applySession(
   state: EngineState,
   session: LoggedSession,
   nodes: readonly ExerciseNode[],
+  challenges: readonly WeeklyChallenge[] = [],
 ): { state: EngineState; result: SessionResult } {
-  return applySessionWith(state, session, nodes, lookupOf(nodes));
+  return applySessionWith(state, session, nodes, lookupOf(nodes), challenges);
 }
 
 /** Applies one user action (e.g. `self_unlock`) to `state` (the incremental path). */
@@ -270,13 +293,15 @@ export function applyUserAction(
 /**
  * Rebuilds the engine state from the full history: sessions and user actions are sorted into replay
  * order (`compareHistory`) and folded through the same steps as `applySession` / `applyUserAction`.
- * Deterministic for the same nodes and history. `results` holds one entry per session and
- * `actionResults` one per action, each in replay order.
+ * Deterministic for the same nodes, history and pinned weekly challenges (`challenges`, PLAN 6.9b:
+ * the session that completes a week's challenge gets its bonus). `results` holds one entry per
+ * session and `actionResults` one per action, each in replay order.
  */
 export function recompute(
   nodes: readonly ExerciseNode[],
   sessions: readonly LoggedSession[],
   actions: readonly UserAction[] = [],
+  challenges: readonly WeeklyChallenge[] = [],
 ): { state: EngineState; results: SessionResult[]; actionResults: UserActionResult[] } {
   const lookup = lookupOf(nodes);
   let state = INITIAL_ENGINE_STATE;
@@ -289,7 +314,7 @@ export function recompute(
       state = step.state;
       actionResults.push(step.result);
     } else {
-      const step = applySessionWith(state, entry, nodes, lookup);
+      const step = applySessionWith(state, entry, nodes, lookup, challenges);
       state = step.state;
       results.push(step.result);
     }

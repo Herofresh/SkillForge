@@ -8,6 +8,7 @@ import { HERO_CLASSES } from '@/data/classes';
 import { compareCodeUnits } from '@/lib/compare';
 
 import { goalPathNodes } from './assessment';
+import { challengeView, type ChallengePin, type ChallengeView } from './challenges';
 import {
   branchOgLevels,
   characterLevelProgress,
@@ -265,6 +266,8 @@ export interface CharacterSheet {
   classes: ClassRow[];
   /** The class the hero wears (one of `classes`). */
   wornClass: ClassRow;
+  /** This week's class challenge (PLAN 6.9b); absent when the class offers none. */
+  challenge?: ChallengeView;
   radar: RadarAxis[];
   /** Present when push and pull peaks are more than `PUSH_PULL_MAX_GAP` OG levels apart. */
   balance?: BalanceNote;
@@ -283,6 +286,8 @@ export interface CharacterSheetInput {
   heroName?: string;
   /** The stored class settings (PLAN 6.9); none = the starting class only. */
   classes?: ClassSettings;
+  /** The pinned weekly class challenges (PLAN 6.9b); none = a preview of the worn class's. */
+  challengePins?: readonly ChallengePin[];
   now: number;
 }
 
@@ -296,6 +301,14 @@ export function characterSheet(input: CharacterSheetInput): CharacterSheet {
     input.classes ?? EMPTY_CLASS_SETTINGS,
   );
   const wornClass = classes.find((row) => row.status === 'worn') as ClassRow;
+  const challenge = challengeView({
+    classes: HERO_CLASSES,
+    worn: { classId: wornClass.classId, tier: wornClass.tier },
+    pins: input.challengePins ?? [],
+    sessions,
+    nodes,
+    now,
+  });
   return {
     ...(heroName !== undefined ? { heroName } : {}),
     level: characterLevelProgress(engine.totalXp),
@@ -307,6 +320,7 @@ export function characterSheet(input: CharacterSheetInput): CharacterSheet {
     ladder: rankLadder(branchOgLevels(nodes, engine.progress)),
     classes,
     wornClass,
+    ...(challenge ? { challenge } : {}),
     radar: radarAxes(character.attributes),
     ...(character.pushPullWarning ? { balance: balanceNote(character.peakOgLevels) } : {}),
     streak: activeStreak(engine, now),

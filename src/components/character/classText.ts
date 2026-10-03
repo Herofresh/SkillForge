@@ -28,7 +28,10 @@ export function requirementText(rule: ClassRule): string {
   }
 }
 
-/** Where the hero stands on one part, e.g. "Push 12 / 30", "4 / 20 sessions", "Apprentice · OG 3 / 6". */
+/**
+ * Where the hero stands on one part, e.g. "Push 12 / 30", "4 / 20 sessions", "You are Novice · branch
+ * median Foundation · Adept at OG 6" (worded like the rank crest's hint).
+ */
 export function partText(part: RequirementPart): string {
   switch (part.kind) {
     case 'attribute':
@@ -36,6 +39,6 @@ export function partText(part: RequirementPart): string {
     case 'sessions':
       return `${part.current} / ${part.target} sessions`;
     case 'rank':
-      return `${part.currentRank} now · median ${formatOgLevel(part.current)} of ${formatOgLevel(part.target)}`;
+      return `You are ${part.currentRank} · branch median ${formatOgLevel(part.current)} · ${part.rank} at ${formatOgLevel(part.target)}`;
   }
 }

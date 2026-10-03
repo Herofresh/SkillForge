@@ -37,7 +37,8 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
           {`+${view.totalXp} XP`}
         </PixelText>
         <PixelText variant="small" tone="textMuted" align="center">
-          {`${view.exerciseXp} from exercises · +${view.completionBonus} completion · +${view.streakBonus} streak`}
+          {`${view.exerciseXp} from exercises · +${view.completionBonus} completion · +${view.streakBonus} streak` +
+            (view.challengeBonus > 0 ? ` · +${view.challengeBonus} challenge` : '')}
         </PixelText>
         {view.sessionTime !== undefined && (
           <View style={styles.time} testID="summary-session-time">

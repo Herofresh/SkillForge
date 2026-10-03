@@ -165,7 +165,7 @@ describe('Train view models', () => {
           trialPassed: false,
         },
       ],
-      xp: { exerciseXp: 25, completionBonus: 2, streakBonus: 1, total: 28 },
+      xp: { exerciseXp: 25, completionBonus: 2, streakBonus: 1, challengeBonus: 0, total: 28 },
       streak: 1,
       levelUps: [],
       unlocked: [],
@@ -210,7 +210,7 @@ describe('Train view models', () => {
           trialPassed: false,
         },
       ],
-      xp: { exerciseXp: 20, completionBonus: 2, streakBonus: 1, total: 23 },
+      xp: { exerciseXp: 20, completionBonus: 2, streakBonus: 1, challengeBonus: 0, total: 23 },
       streak: 2,
       levelUps: [{ nodeId: 'pull_up', from: 1, to: 2 }],
       unlocked: ['chin_up', 'missing'],
@@ -221,6 +221,7 @@ describe('Train view models', () => {
       exerciseXp: 20,
       completionBonus: 2,
       streakBonus: 1,
+      challengeBonus: 0,
       streak: 2,
       exercises: [
         {

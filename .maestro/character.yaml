@@ -1,7 +1,9 @@
 # Character tab (PLAN 4.5): from a fresh install the sheet shows level 1 and an empty history; after
 # a logged session it shows the earned XP and the session, which opens its summary. Takes the 4.5
 # screenshots. The rank crest opens and closes the rank ladder (PLAN 6.7, 6.7 screenshots); the class
-# banner opens and closes the class sheet (PLAN 6.9, 6.9 screenshots).
+# banner opens and closes the class sheet (PLAN 6.9, 6.9 screenshots). The weekly class challenge
+# (PLAN 6.9b): the Recruit's "2 sessions" card, its line in the class sheet, 1 / 2 on the first
+# session's summary, CHALLENGE COMPLETE! on a second one and the COMPLETE tag (6.9b screenshots).
 # Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Character - level and XP after a logged session, history opens the session
@@ -89,12 +91,17 @@ name: Character - level and XP after a logged session, history opens the session
 - assertVisible:
     id: 'class-sheet-warrior-progress'
     text: 'Push 0 / 30'
+- assertVisible:
+    id: 'class-sheet-recruit-challenge'
+    text: 'Weekly challenge: Train in 2 sessions'
 - takeScreenshot: 6.9-class-sheet
+- takeScreenshot: 6.9b-class-sheet
 - scrollUntilVisible:
     element:
       id: 'class-sheet-sorcerer-status'
     direction: DOWN
-    timeout: 30000
+    timeout: 60000
+    visibilityPercentage: 50
 - assertVisible:
     id: 'class-sheet-sorcerer-status'
     text: 'Locked'
@@ -107,61 +114,34 @@ name: Character - level and XP after a logged session, history opens the session
     timeout: 20000
 - assertVisible:
     id: 'character-screen'
+# 6.9b: the Recruit's weekly challenge, previewed until the first session of the week
+- scrollUntilVisible:
+    element:
+      id: 'character-challenge'
+    direction: DOWN
+    timeout: 30000
+- assertVisible:
+    id: 'character-challenge-goal'
+    text: 'Train in 2 sessions this week'
+- assertVisible:
+    id: 'character-challenge-count'
+    text: '0 / 2 sessions'
+- takeScreenshot: 6.9b-character-challenge
 # Log a short session: Train now (Home, 30 min) → start → log the first set → finish
-- tapOn: 'Train'
-- extendedWaitUntil:
-    visible:
-      id: 'train-now'
-    timeout: 20000
-- tapOn:
-    id: 'profile-home'
-- tapOn:
-    id: 'minutes-30'
-- tapOn:
-    id: 'train-now'
-- extendedWaitUntil:
-    visible:
-      id: 'plan-preview'
-    timeout: 20000
+- runFlow: subflows/log-short-session.yaml
+# 6.9b: the summary shows the challenge's progress (1 / 2)
 - scrollUntilVisible:
     element:
-      id: 'start-session'
+      id: 'summary-challenge'
     direction: DOWN
     timeout: 60000
-- tapOn:
-    id: 'start-session'
-- extendedWaitUntil:
-    visible:
-      id: 'live-session'
-    timeout: 20000
-- scrollUntilVisible:
-    element:
-      id: 'log-set'
-    direction: DOWN
-    timeout: 60000
-- tapOn:
-    id: 'log-set'
-- extendedWaitUntil:
-    visible:
-      id: 'rest-panel'
-    timeout: 20000
-- scrollUntilVisible:
-    element:
-      id: 'finish-session'
-    direction: DOWN
-    timeout: 60000
-- tapOn:
-    id: 'finish-session'
-- extendedWaitUntil:
-    visible:
-      id: 'finish-dialog'
-    timeout: 20000
-- tapOn:
-    id: 'finish-confirm'
-- extendedWaitUntil:
-    visible:
-      id: 'session-summary'
-    timeout: 20000
+- assertVisible:
+    id: 'summary-challenge-count'
+    text: '1 / 2 sessions'
+- assertVisible:
+    id: 'summary-challenge-line'
+    text: '\+1 this session'
+- takeScreenshot: 6.9b-summary-progress
 - scrollUntilVisible:
     element:
       id: 'summary-done'
@@ -206,3 +186,45 @@ name: Character - level and XP after a logged session, history opens the session
     visible:
       id: 'character-screen'
     timeout: 20000
+# 6.9b: a second session completes the Recruit's challenge: CHALLENGE COMPLETE! and the bonus
+- runFlow: subflows/log-short-session.yaml
+- scrollUntilVisible:
+    element:
+      id: 'summary-challenge'
+    direction: DOWN
+    timeout: 60000
+- assertVisible: 'CHALLENGE COMPLETE!'
+- assertVisible:
+    id: 'summary-challenge-line'
+    text: 'Complete! \+50 XP'
+- takeScreenshot: 6.9b-summary-complete
+- scrollUntilVisible:
+    element:
+      id: 'summary-done'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'summary-done'
+- extendedWaitUntil:
+    visible:
+      id: 'train-now'
+    timeout: 20000
+- tapOn: 'Character'
+- extendedWaitUntil:
+    visible:
+      id: 'character-screen'
+    timeout: 20000
+# The tab keeps its scroll position from the history above; the COMPLETE tag sits in an accessible
+# row (one element for Maestro), so check the texts.
+- scrollUntilVisible:
+    element:
+      id: 'character-challenge-count'
+    direction: UP
+    timeout: 60000
+    centerElement: true
+- assertVisible:
+    id: 'character-challenge-count'
+    text: '2 / 2 sessions'
+- assertVisible: 'Complete: \+50 XP earned'
+- assertVisible: 'Challenge badges: 1'
+- takeScreenshot: 6.9b-character-challenge-complete

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { HERO_CLASS_BY_ID } from '@/data/classes';
+import { classChallenge } from '@/domain/challenges';
 import { tierNumeral, type ClassRow, type ClassRowStatus } from '@/domain/classes';
 
 import { Colors, Spacing, TileFrames, type FrameStyle } from '../theme';
@@ -9,6 +10,7 @@ import { PixelButton, PixelFrame, PixelModal, PixelText, SegmentedBar } from '..
 
 import { NewBadge } from './ClassBanner';
 import { ClassEmblem, classColor } from './ClassEmblem';
+import { challengeGoalText } from './challengeText';
 import { partText, requirementText } from './classText';
 
 type Props = {
@@ -85,6 +87,10 @@ function ClassRowView({
   testID: string;
 }) {
   const heroClass = HERO_CLASS_BY_ID.get(row.classId);
+  const challenge = heroClass ? classChallenge(heroClass, row.tier) : undefined;
+  const challengeLine = challenge
+    ? `Weekly challenge: ${challengeGoalText(challenge.goal, challenge.target)}`
+    : undefined;
   const locked = row.status === 'locked';
   const tierLine =
     row.tierCount <= 1
@@ -99,6 +105,7 @@ function ClassRowView({
     tierLine,
     isNew ? 'New' : undefined,
     heroClass?.flavor,
+    challengeLine,
     row.next
       ? `${locked ? 'Unlock' : `Next tier, ${row.next.title}`}: ${requirementText(row.next.rule)}. ` +
         row.next.parts.map(partText).join(', ')
@@ -136,6 +143,11 @@ function ClassRowView({
           {heroClass.flavor}
         </PixelText>
       )}
+      {challengeLine && (
+        <PixelText variant="small" tone="rune" testID={`${testID}-challenge`}>
+          {challengeLine}
+        </PixelText>
+      )}
       <NextTier row={row} testID={testID} />
       {row.status === 'unlocked' && (
         <PixelButton
@@ -167,7 +179,8 @@ export function ClassSheet({ rows, onWear, onClose, testID = 'class-sheet' }: Pr
       <PixelText variant="small" tone="textMuted" testID={`${testID}-intro`}>
         Classes are titles your training earns. Each needs a fixed amount of attribute points (or
         sessions, or a rank) and grows over three tiers. They change only how your hero looks, and a
-        class you have earned stays yours. Pick one to wear.
+        class you have earned stays yours. Pick one to wear: it also offers an optional weekly
+        challenge.
       </PixelText>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.list}>
         {rows.map((row) => (

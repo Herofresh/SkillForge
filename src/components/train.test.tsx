@@ -376,6 +376,7 @@ describe('SessionResultPanels', () => {
       exerciseXp: 8,
       completionBonus: 1,
       streakBonus: 1,
+      challengeBonus: 0,
       streak: 1,
       exercises: [
         {

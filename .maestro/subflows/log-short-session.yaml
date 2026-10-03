@@ -1,0 +1,58 @@
+# Subflow (not run on its own): from the tabs, log a short session (Train → Home, 30 min → start →
+# log the first set → finish) and stop on its summary, so the caller can check it and tap Done.
+appId: host.exp.exponent
+---
+- tapOn: 'Train'
+- extendedWaitUntil:
+    visible:
+      id: 'train-now'
+    timeout: 20000
+- tapOn:
+    id: 'profile-home'
+- tapOn:
+    id: 'minutes-30'
+- tapOn:
+    id: 'train-now'
+- extendedWaitUntil:
+    visible:
+      id: 'plan-preview'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'start-session'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'start-session'
+- extendedWaitUntil:
+    visible:
+      id: 'live-session'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'log-set'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'log-set'
+- extendedWaitUntil:
+    visible:
+      id: 'rest-panel'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'finish-session'
+    direction: DOWN
+    timeout: 60000
+- tapOn:
+    id: 'finish-session'
+- extendedWaitUntil:
+    visible:
+      id: 'finish-dialog'
+    timeout: 20000
+- tapOn:
+    id: 'finish-confirm'
+- extendedWaitUntil:
+    visible:
+      id: 'session-summary'
+    timeout: 20000

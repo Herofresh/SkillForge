@@ -332,6 +332,45 @@ export interface ClassDefinition {
   name: string;
   /** Lowest first; each tier needs more of the same than the one before. */
   tiers: readonly ClassTierDefinition[];
+  /** The optional weekly challenge the class offers while worn (PLAN 6.9b, ADR-058). */
+  challenge?: ClassChallengeDefinition;
+}
+
+/**
+ * What a weekly class challenge counts (PLAN 6.9b, ADR-058). Counted per logged session, from its
+ * done sets (value above 0) on known nodes; straight-arm nodes never count, so a challenge never
+ * asks for more tendon load than the safeguards allow.
+ * - `sessions`: sessions with training.
+ * - `complete_sessions`: sessions without a skipped set.
+ * - `sessions_training`: sessions that train every listed attribute.
+ * - `exercises_training`: exercises (one node in one session) that train the attribute.
+ * - `trial_attempts`: Trials attempted (one per node and session).
+ */
+export type ChallengeGoal =
+  | { kind: 'sessions' }
+  | { kind: 'complete_sessions' }
+  | { kind: 'sessions_training'; attributes: readonly Attribute[] }
+  | { kind: 'exercises_training'; attribute: Attribute }
+  | { kind: 'trial_attempts' };
+
+/** A class's weekly challenge: what counts and how many, per tier (entry 0 = tier I). */
+export interface ClassChallengeDefinition {
+  goal: ChallengeGoal;
+  /** One target per tier; a tier beyond the list uses the last one. */
+  targets: readonly number[];
+}
+
+/**
+ * One week's challenge as the engine sees it: a fixed time window and what to reach in it. The
+ * window is stored with the week's pin, so a later time-zone change can't move it.
+ */
+export interface WeeklyChallenge {
+  /** Window start (local Monday 00:00 when pinned), ms since the Unix epoch, inclusive. */
+  start: number;
+  /** Window end (the next Monday 00:00), exclusive. */
+  end: number;
+  goal: ChallengeGoal;
+  target: number;
 }
 
 /** When a class tier was first reached: the time and, when a session did it, that session. */

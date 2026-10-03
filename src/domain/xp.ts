@@ -4,7 +4,8 @@
  * Pipeline: a set's volume is normalized to units (`setUnits`), the sets of one node in one session
  * form an exercise whose outcome is judged against the prescription (`classifyOutcome`), and the
  * exercise earns `units × difficultyMult(ogLevel) × outcomeMult` (`exerciseXp`). A session adds a
- * completion bonus and a streak bonus on top (`sessionXp`).
+ * completion bonus and a streak bonus on top (`sessionXp`), and the session that completes the
+ * week's class challenge a flat challenge bonus (PLAN 6.9b, ADR-058).
  */
 import { MS_PER_HOUR } from '@/lib/time';
 
@@ -38,6 +39,11 @@ export const STREAK_MAX_GAP_MS = 72 * MS_PER_HOUR;
 /** Streak bonus: +5 % per consecutive session after the first, at most +25 %. */
 export const STREAK_BONUS_PER_SESSION = 0.05;
 export const STREAK_BONUS_MAX = 0.25;
+/**
+ * Weekly class challenge bonus (ADR-058): flat character XP, once per week, paid by the session
+ * that completes the challenge. About a fifth to a third of a typical 45-minute session's XP.
+ */
+export const CLASS_CHALLENGE_BONUS_XP = 50;
 
 const repsOf = (performance: SetPerformance): number => performance.reps ?? 1;
 
@@ -140,23 +146,31 @@ export interface SessionXp {
   exerciseXp: number;
   completionBonus: number;
   streakBonus: number;
-  /** Character XP earned: exercise XP + both bonuses. */
+  /** `CLASS_CHALLENGE_BONUS_XP` when this session completed the week's class challenge, else 0. */
+  challengeBonus: number;
+  /** Character XP earned: exercise XP + all bonuses. */
   total: number;
 }
 
-/** Session XP = exercise XP + completion bonus + streak bonus (bonuses rounded to whole XP). */
+/**
+ * Session XP = exercise XP + completion bonus + streak bonus (bonuses rounded to whole XP) + the
+ * challenge bonus when `challengeCompleted`.
+ */
 export function sessionXp(
   exerciseXps: readonly number[],
   complete: boolean,
   streak: number,
+  challengeCompleted = false,
 ): SessionXp {
   const base = exerciseXps.reduce((sum, xp) => sum + xp, 0);
   const completionBonus = complete ? Math.round(base * COMPLETION_BONUS_RATIO) : 0;
   const streakBonus = Math.round(base * streakBonusRatio(streak));
+  const challengeBonus = challengeCompleted ? CLASS_CHALLENGE_BONUS_XP : 0;
   return {
     exerciseXp: base,
     completionBonus,
     streakBonus,
-    total: base + completionBonus + streakBonus,
+    challengeBonus,
+    total: base + completionBonus + streakBonus + challengeBonus,
   };
 }

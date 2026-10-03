@@ -33,6 +33,8 @@ export const BURST_TITLES = {
   classUnlocked: 'CLASS UNLOCKED!',
   /** A hero class reached a higher tier (PLAN 6.9). */
   classTierUp: 'TIER UP!',
+  /** The week's class challenge was completed (PLAN 6.9b). */
+  challengeComplete: 'CHALLENGE COMPLETE!',
 } as const;
 
 const PARTICLE_COUNT = 12;

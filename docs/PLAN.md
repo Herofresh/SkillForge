@@ -230,12 +230,20 @@
   TIER UP! on the summary. Reached tiers are derived from history on every load (existing users
   see theirs at once) and kept forever in the `hero_classes` setting. The widget shows the title
   under the rank. Screenshots `docs/screenshots/6.9-*.png`.
+- Weekly class challenge (6.9b, ADR-058, PR link below): the worn class offers one optional
+  challenge per local Monday–Sunday week (e.g. Ranger "Pull work in 2 sessions", Druid "3 mobility
+  exercises", Berserker 3 sessions, Sorcerer "Attempt 1 Trial"; a little more at tier II / III).
+  The first session of a week pins it (`class_challenges` setting), so switching classes can't
+  farm; completing it pays a flat +50 XP once (`CLASS_CHALLENGE_BONUS_XP`, part of recompute) and
+  a badge count. Straight-arm work never counts; the generator and safeguards are unchanged.
+  Character tab card under the class banner, summary panel with CHALLENGE COMPLETE!, the
+  challenge per class in the class sheet. Screenshots `docs/screenshots/6.9b-*.png`.
 
 ## Next up
 1. On the user's phone: install [v0.5.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.5.0)
    over the installed build (Update, no uninstall), add the SkillForge widget to the home screen
    and report what feels off. (v0.4.0 and v0.5.0 are published as GitHub pre-releases.)
-2. 6.9b Weekly class challenge (design + ADR first), 6.10 Companion (waiting for the user's
+2. 6.10 Companion (waiting for the user's
    decision on its design proposal). Then 6.11 (v0.6.0 release) and Phase 7 (Google Play); the user creates the upload key then
    (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
@@ -245,6 +253,28 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Weekly class challenge (task 6.9b, ADR-058):**
+  - Code: `src/domain/challenges.ts` (goal counting, `advanceChallenge` engine step, pins,
+    `challengeView`), `localWeekBounds` in `src/lib/time.ts`, `ChallengeGoal` /
+    `ClassChallengeDefinition` / `WeeklyChallenge` in `types.ts`, `challenge` per class in
+    `src/data/classes.ts` (the only place for targets), `CLASS_CHALLENGE_BONUS_XP` and
+    `SessionXp.challengeBonus` in `xp.ts`, `recompute` / `applySession` take the challenges
+    (`EngineState.challenge` tally, `SessionResult.challenge`); store: `challengePins`,
+    `CHALLENGE_SETTING` (`class_challenges`), `pinChallengeWeek` before applying a session (a new
+    pin forces a full recompute); UI: `ChallengeCard`, `ChallengeProgressPanel`,
+    `challengeText.ts`, a line per class in `ClassSheet`, `BURST_TITLES.challengeComplete`.
+  - Also the 6.9 review nit: the Sorcerer's rank progress reads "You are Novice · branch median
+    Foundation · Adept at OG 6".
+  - Verified: typecheck, lint, format:check, progressions:check, full Jest (83 suites, incl. week
+    boundaries, DST in Europe/Vienna, farming, incremental == full, upgrade, backups); Maestro
+    `character.yaml` on Pixel_8_Pro_API_35 / Expo Go (card 0 / 2, class sheet line, summary 1 / 2
+    "+1 this session", second session CHALLENGE COMPLETE! "+50 challenge", card COMPLETE and
+    "Challenge badges: 1"; new `subflows/log-short-session.yaml`; the Sorcerer scroll now uses
+    `visibilityPercentage: 50` because the rows are taller). Not verified on a device: a class
+    switch mid-week and the Monday rollover (store and domain tests cover them), a release
+    upgrade install (no migration; the store "upgrade" test covers it).
+  - Ideas (not done): a read-only "counts towards your weekly challenge" marker in the plan
+    preview; the challenge on the widget.
 - **Hero classes (task 6.9, ADR-057, [PR #54](https://github.com/Herofresh/SkillForge/pull/54)):**
   - Code: `src/data/classes.ts` (`HERO_CLASSES`: ids, tiers, emblems, colors; the only place for
     thresholds), `src/domain/classes.ts` (rules, ladder, setting reader/writer), `ClassRule` /
@@ -1102,10 +1132,12 @@ upgrade check from every earlier release). Any new table or column is additive a
   unlocks. 15 classes in `src/data/classes.ts`, rules in `src/domain/classes.ts`, the setting
   `hero_classes` (no migration, no backup version change), Character tab banner + class sheet,
   Train summary CLASS UNLOCKED! / TIER UP!, class title on the widget.
-- [ ] 6.9b Weekly class challenge (user approved 2026-10-03): the worn class offers one optional
+- [x] 6.9b Weekly class challenge (user approved 2026-10-03; ADR-058): the worn class offers one optional
   weekly challenge relevant to it (e.g. Ranger: 3 sessions with pull work this week), with a small
   bonus and a badge. A suggestion only, never blocking or pressuring (ADR-023 spirit). Bonus size
-  and rules are designed in its own ADR first.
+  and rules are designed in its own ADR first. Done: 15 challenges in `src/data/classes.ts`,
+  pinned per week by the first session, flat +50 XP once a week, badge count, Character card,
+  summary CHALLENGE COMPLETE!, class sheet line; setting `class_challenges`, no migration.
 - [ ] 6.10 Companion (user idea, do last): the hero as a small tamagotchi-style pixel character on
   the Character tab, customizable within limits; classes (6.9) and achievements unlock trinkets
   and outfits. **Starts with a design proposal for the user** (what reacts to training, what can be
