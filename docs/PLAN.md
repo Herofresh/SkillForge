@@ -1430,6 +1430,14 @@ upgrade check from every earlier release). Any new table or column is additive a
   (4.7–4.8, ADR-036); keep a changed draft across an app kill (5.2 only asks on leaving)
 - Polish extras (5.2, ADR-038): haptics on level-up/unlock (expo-haptics, optional), animate a
   newly lit edge on the tree map
+- Companion widget at 4 × 3 (after 6.12, ADR-062): the text column is sparse with large gaps, because
+  its width (next to the sprite) caps the text scale at ≈ 1.3 while the sprite takes the height. A
+  scoring tweak alone doesn't fix it (weighing the text scale squared picks the same layout; cubed
+  only shrinks the sprite and leaves more empty height). Ideas: a third text column / the rank and
+  class beside the stats at tall sizes, or let the column wrap the status and mood into wider lines
+- Widget text and the system font size (after 6.12, ADR-062): widget type is in dp and ignores
+  the font-scale setting; if a user asks, map the font scale onto `READABLE_SCALE` (the minimum
+  layout scale) so larger system text means a larger minimum, not clipping
 - Widget tap after a force stop (6.11): `react-native-android-widget` sends clicks as
   broadcasts, so after "Force stop" a tap does nothing until the app is opened once. Option: an
   activity `PendingIntent` for the plain "open Train" click (needs a look at the library's API)

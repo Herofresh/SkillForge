@@ -2116,7 +2116,11 @@ Template:
     `space-between` (the root box fills the widget), so what is left is small and even.
   - **Font sizes in dp** (`allowFontScaling: false`): the layout fits the text to the widget's
     size; the system font scale would make it overflow and clip. The user scales the widget by
-    resizing it instead.
+    resizing it instead. Trade-off (accessibility): widget text no longer follows Android's font
+    size setting, so a user who relies on large system text gets the same widget text as everyone
+    else; the floor is the layout's minimum (tests require scale ≥ 0.9, i.e. ≥ 9 dp caps labels;
+    at the common launcher sizes the labels come out 11–14 dp and the status 20 dp or more), and
+    resizing the widget is the only way to get bigger text.
   - **One layout for widget, preview and tests:** `nativeWidget.tsx` only maps the tree to
     `FlexWidget` / `TextWidget` / `SvgWidget`; `placeWidgetNodes` computes the same flex positions,
     which the picker previews (`scripts/widgetPreview.ts`, now both at their default size) draw
