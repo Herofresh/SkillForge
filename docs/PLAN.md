@@ -223,10 +223,9 @@
   the coordinator after the merge.
 
 ## Next up
-1. Coordinator: after this PR is merged, publish the GitHub pre-release `v0.5.0` with both APKs
-   and their SHA-256 (see the PR body). Then, on the user's phone: install v0.5.0 over the
-   installed build (Update, no uninstall), add the SkillForge widget to the home screen and
-   report what feels off.
+1. On the user's phone: install [v0.5.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.5.0)
+   over the installed build (Update, no uninstall), add the SkillForge widget to the home screen
+   and report what feels off. (v0.4.0 and v0.5.0 are published as GitHub pre-releases.)
 2. 6.9 Classes and 6.10 Companion: waiting for the user's decision on the design proposals.
    Then 6.11 (v0.6.0 release) and Phase 7 (Google Play); the user creates the upload key then
    (7.1).
@@ -1043,7 +1042,7 @@ upgrade check from every earlier release). Any new table or column is additive a
       lunge reach; contact sheets `docs/screenshots/6.4b-{flexibility,mobility,acrobatics}.png`)
       ([PR #44](https://github.com/Herofresh/SkillForge/pull/44))
 - [x] 6.5 v0.4.0 release (6.1–6.4 and 6.7): ADR-043 routine, upgrade check from 0.1.0, 0.2.0 and
-  0.3.0, including a custom exercise in the overlay ([PR #48](https://github.com/Herofresh/SkillForge/pull/48))
+  0.3.0, including a custom exercise in the overlay ([PR #48](https://github.com/Herofresh/SkillForge/pull/48); release [v0.4.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.4.0))
   - [x] Release prep, 6.3c review fixes: id tie-breaks compare code units (`compareCodeUnits`),
     not `localeCompare`, so order is the same on Hermes as in Node; the node editor shows only the
     advice about the node being edited (`warningsForNode`)
@@ -1063,7 +1062,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   thresholds) (ADR-054, [PR #47](https://github.com/Herofresh/SkillForge/pull/47))
 - [x] 6.8 v0.5.0 release (6.6; 6.7 already shipped in v0.4.0), same routine: upgrade check from
   0.1.0, 0.2.0, 0.3.0 and 0.4.0, then the widget on the upgraded install
-  ([PR #52](https://github.com/Herofresh/SkillForge/pull/52))
+  ([PR #52](https://github.com/Herofresh/SkillForge/pull/52); release [v0.5.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.5.0))
 - [ ] 6.9 Classes (user idea): classes the hero unlocks at certain levels, ranks or attribute
   profiles (e.g. a pull-strong hero unlocks a "Climber" class) and can pick one to display.
   **Starts with a short design proposal for the user** (class list, unlock rules, what a class
