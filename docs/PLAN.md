@@ -230,7 +230,7 @@
   TIER UP! on the summary. Reached tiers are derived from history on every load (existing users
   see theirs at once) and kept forever in the `hero_classes` setting. The widget shows the title
   under the rank. Screenshots `docs/screenshots/6.9-*.png`.
-- Weekly class challenge (6.9b, ADR-058, PR link below): the worn class offers one optional
+- Weekly class challenge (6.9b, ADR-058, [PR #55](https://github.com/Herofresh/SkillForge/pull/55)): the worn class offers one optional
   challenge per local Monday–Sunday week (e.g. Ranger "Pull work in 2 sessions", Druid "3 mobility
   exercises", Berserker 3 sessions, Sorcerer "Attempt 1 Trial"; a little more at tier II / III).
   The first session of a week pins it (`class_challenges` setting), so switching classes can't
@@ -253,7 +253,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Weekly class challenge (task 6.9b, ADR-058):**
+- **Weekly class challenge (task 6.9b, ADR-058, [PR #55](https://github.com/Herofresh/SkillForge/pull/55)):**
   - Code: `src/domain/challenges.ts` (goal counting, `advanceChallenge` engine step, pins,
     `challengeView`), `localWeekBounds` in `src/lib/time.ts`, `ChallengeGoal` /
     `ClassChallengeDefinition` / `WeeklyChallenge` in `types.ts`, `challenge` per class in
@@ -1132,7 +1132,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   unlocks. 15 classes in `src/data/classes.ts`, rules in `src/domain/classes.ts`, the setting
   `hero_classes` (no migration, no backup version change), Character tab banner + class sheet,
   Train summary CLASS UNLOCKED! / TIER UP!, class title on the widget.
-- [x] 6.9b Weekly class challenge (user approved 2026-10-03; ADR-058): the worn class offers one optional
+- [x] 6.9b Weekly class challenge (user approved 2026-10-03; ADR-058, [PR #55](https://github.com/Herofresh/SkillForge/pull/55)): the worn class offers one optional
   weekly challenge relevant to it (e.g. Ranger: 3 sessions with pull work this week), with a small
   bonus and a badge. A suggestion only, never blocking or pressuring (ADR-023 spirit). Bonus size
   and rules are designed in its own ADR first. Done: 15 challenges in `src/data/classes.ts`,
