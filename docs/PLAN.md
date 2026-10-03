@@ -1361,6 +1361,10 @@ upgrade check from every earlier release). Any new table or column is additive a
 - [ ] 7.7 Production release and an update routine (versionCode +1, AAB upload, release notes).
 
 ### Later / Backlog
+- Companion headgear readability (after 6.13, ADR-061): with full helmets, hoods and cowls
+  (crested_helm, green_hood, nightblade_cowl, shadow_mask) the man and woman read almost the same,
+  and faces under helmets are very dark. Ideas: a lighter eye/face pixel under the brim, the
+  woman's side locks or long hair showing under hoods/cowls as they already do under iron_helm
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
   Expo Go. Every UI task in Phase 4 should also add or extend a flow in `.maestro/`.
