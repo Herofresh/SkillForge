@@ -91,24 +91,30 @@ describe('localWeekBounds', () => {
     expect(localWeekBounds(sunday).end).toBe(localWeekBounds(nextMonday).start);
   });
 
-  describe('across daylight saving time (Europe/Vienna)', () => {
-    const originalTz = process.env.TZ;
-    beforeAll(() => {
-      process.env.TZ = 'Europe/Vienna';
-    });
-    afterAll(() => {
-      process.env.TZ = originalTz;
-    });
-
-    it('a week with the spring change is 167 hours, the autumn one 169', () => {
-      const spring = localWeekBounds(new Date(2026, 2, 29, 12).getTime()); // Sunday 29 March
-      expect(new Date(spring.start).getDate()).toBe(23);
-      expect((spring.end - spring.start) / MS_PER_HOUR).toBe(167);
-      const autumn = localWeekBounds(new Date(2026, 9, 25, 12).getTime()); // Sunday 25 October
-      expect(new Date(autumn.start).getDate()).toBe(19);
-      expect((autumn.end - autumn.start) / MS_PER_HOUR).toBe(169);
-      expect(new Date(autumn.end).getHours()).toBe(0);
-    });
+  /**
+   * The EU clock-change weeks of 2026. Assigning `process.env.TZ` at runtime is not reliable in
+   * Jest workers (CI runs in UTC), so the expected length comes from the zone's own offsets: 168 h
+   * plus the hour the clock changed by. In a zone with DST (e.g. Europe/Vienna, where the app is
+   * developed) that is 167 and 169 h; in UTC both are 168 h.
+   */
+  it.each([
+    ['spring', new Date(2026, 2, 29, 12), 23],
+    ['autumn', new Date(2026, 9, 25, 12), 19],
+  ])('the %s clock-change week runs Monday 00:00 to Monday 00:00', (_name, sunday, mondayDate) => {
+    const { start, end } = localWeekBounds(sunday.getTime());
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    expect([startDate.getDate(), startDate.getDay(), startDate.getHours()]).toEqual([
+      mondayDate,
+      1,
+      0,
+    ]);
+    expect([endDate.getDay(), endDate.getHours(), endDate.getMinutes()]).toEqual([1, 0, 0]);
+    const shiftHours = (endDate.getTimezoneOffset() - startDate.getTimezoneOffset()) / 60;
+    expect((end - start) / MS_PER_HOUR).toBe(168 + shiftHours);
+    if (Intl.DateTimeFormat().resolvedOptions().timeZone === 'Europe/Vienna') {
+      expect((end - start) / MS_PER_HOUR).toBe(mondayDate === 23 ? 167 : 169);
+    }
   });
 });
 

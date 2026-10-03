@@ -266,7 +266,7 @@
   - Also the 6.9 review nit: the Sorcerer's rank progress reads "You are Novice · branch median
     Foundation · Adept at OG 6".
   - Verified: typecheck, lint, format:check, progressions:check, full Jest (83 suites, incl. week
-    boundaries, DST in Europe/Vienna, farming, incremental == full, upgrade, backups); Maestro
+    boundaries, DST weeks (exact 167 / 169 h only where the machine zone has DST; CI in UTC checks the offset rule, since setting `process.env.TZ` at runtime does not work in Jest workers there), a skipped straight-arm set not breaking Knight, farming, incremental == full, upgrade, backups); Maestro
     `character.yaml` on Pixel_8_Pro_API_35 / Expo Go (card 0 / 2, class sheet line, summary 1 / 2
     "+1 this session", second session CHALLENGE COMPLETE! "+50 challenge", card COMPLETE and
     "Challenge badges: 1"; new `subflows/log-short-session.yaml`; the Sorcerer scroll now uses
