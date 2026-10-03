@@ -313,6 +313,27 @@ line around a `stone` disc, on the `night` background. Roles map to `Palette` ke
 - Editing: keep the silhouette mirror-symmetric (tested), keep details ≥ 2 cells so they survive
   48 px, rebuild, look at the preview, commit the PNGs.
 
+### Home-screen widget (PLAN 6.6, ADR-055)
+
+An Android widget (`src/widget/nativeWidget.tsx`) drawn with the library's RemoteViews primitives,
+so only plain boxes, text and SVG: no notched corners and no hard drop shadow. The frame is an
+`ink` outer line (one `PIXEL`), a `stoneEdge` inner line and the `stone` fill; square corners
+(Android 12+ launchers clip widgets to rounded corners anyway).
+Icons are the 12×12 grids as SVG strings (`iconSvg`, 24 dp, crisp edges).
+
+- **Left (always):** `check` + "Trained today" in `success`, or `hourglass` + "Not yet today" in
+  `gold` (Jersey 15, 20 sp); below, the `flame` with the streak in `ember` and the level in
+  `goldLight` (Jersey 15, 24 sp), each over a Silkscreen caps label in `textMuted` (10 sp).
+- **Right (from `WIDGET_WIDE_MIN_DP` = 220 dp wide, the default 4 × 2 size):** a small `shield` +
+  the rank in its `RankColors` color, then up to three attributes ("PULL 12": caps label in
+  `textMuted`, number in its `AttributeColors` color). A narrow (2-cell) widget keeps only the left.
+- **First run (no snapshot yet):** `sword` + "SkillForge" in gold + "OPEN THE APP TO BEGIN".
+- Fonts: Jersey 15 and Silkscreen are copied into the APK by the plugin (`fonts` in app.json); if
+  a font is missing Android falls back to the system font.
+- The whole widget is one tap target that opens the Train tab (`skillforge://train`), with the
+  accessibility label "Open SkillForge on the Train tab". Screenshot:
+  `docs/screenshots/6.6-widget*.png`.
+
 ## 7. Motion
 
 - Stepped, not smooth: `Easing.steps(Motion.burstSteps)` so movement reads like sprite frames.

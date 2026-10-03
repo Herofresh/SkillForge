@@ -1614,3 +1614,67 @@ Template:
 - Consequences: no data, schema or backup change. If the rank rule changes (e.g. a weighted mean),
   `branchesForMedian` and the progress text must change with it; the ladder test fails loudly
   when the thresholds and the count disagree.
+
+## ADR-055: Home-screen widget with react-native-android-widget, a snapshot file and "today" decided at render time (PLAN 6.6)
+- Date: 2026-10-03 · Status: Accepted
+- Context: the user asked for "an Android widget like in Duolingo that shows if you have done your
+  exercise today, your streak, maybe your level and stats, and when you click it it leads to the
+  train tab". A widget is native (an `AppWidgetProvider` with RemoteViews); Expo has no built-in
+  one. It must work with Expo SDK 57 / RN 0.86 (new architecture), `expo prebuild` and the local
+  Gradle build (ADR-039/047, no Expo account), must not break Expo Go development or Jest, and
+  must not show yesterday's ✓ after midnight.
+- Options:
+  - **`react-native-android-widget` 0.22.1** (MIT, Stefan Aleksovski; releases every few weeks,
+    latest 2026-08-17; peer `expo >= 54`): an Expo config plugin that writes the provider, the
+    `appwidget-provider` XML and the manifest entries; widgets are JSX trees of its primitives
+    (`FlexWidget`, `TextWidget`, `SvgWidget`, …) turned into RemoteViews natively; a headless JS
+    task handler draws the widget on add, resize and the periodic update; `OPEN_URI` click
+    actions open a deep link natively. It ships a TurboModule spec and uses `ReactHost` for the
+    headless task, so it runs on the new architecture. No network, no permissions, no analytics.
+    One exposure: its manifest adds an **exported, read-only content provider**
+    `${applicationId}.rnwidget.imageprovider` without a permission. It serves only the rendered
+    widget images from `filesDir/widget_images` (what the launcher shows; read mode only, paths
+    are checked to stay inside that folder), so the worst case is
+    another app reading images that are already on the home screen; no database or backup is
+    reachable through it.
+  - **Own config plugin + a small Kotlin provider** reading SharedPreferences written from JS:
+    no dependency, but we would write and maintain the plugin (manifest, XML, Kotlin file copy),
+    the RemoteViews layout in XML, the JS → SharedPreferences bridge (another native module) and
+    the pixel icons as drawables. Several hundred lines of native code nobody here tests.
+  - Expo's own `expo-widgets` (57.0.22) is iOS-first: its Android part is a stub (an empty Glance
+    widget, a few hundred bytes, no layout or data API) in SDK 57.
+- Decision:
+  - **`react-native-android-widget`** (MIT, licence checked in the package). One widget,
+    `SkillForge`: default 4 × 2 cells (`minWidth` 130 dp, `minHeight` 110 dp, resizable),
+    `updatePeriodMillis` 30 min (Android's minimum). Fonts Jersey 15 and Silkscreen are copied
+    into the APK by the plugin. Layout and colors: DESIGN.md → Home-screen widget.
+  - **Guarded:** the library's entry calls `TurboModuleRegistry.getEnforcing` on import, which
+    throws without the native module. `src/widget/widgetModule.ts` checks
+    `TurboModuleRegistry.get('AndroidWidget')` on Android and only then `require`s
+    `nativeWidget.tsx`, the one file that imports the library. In Expo Go, iOS, web and Jest
+    nothing loads; Jest also mocks the library in `jest.setup.ts`.
+  - **Data flow:** the app writes a `WidgetSnapshot` (`src/domain/widget.ts`: only what the
+    widget shows: level, rank, the engine's streak, `lastSessionAt`, top 3 attributes, from
+    `computeCharacter`; no hero name) to `widget-snapshot.json` in the document directory and
+    redraws the widget (`requestWidgetUpdate`). `startWidgetSync` (called by `startApp` after
+    `loadAll`) does that once, then whenever `engine` or `nodes` change in the store (a finished
+    session or Trial, a test-out, an import, an edited tree; one subscription instead of a call
+    in every action)
+    and every time the app comes to the foreground. The background task reads the file, not the
+    database: it runs while the app is closed and must stay cheap.
+  - **"Today" at render time:** the snapshot keeps raw values; `widgetView(snapshot, now)`
+    decides "trained today" (same **local** calendar day as `lastSessionAt`, `isSameLocalDay`)
+    and the streak (`activeStreak`, the Character tab's rule) whenever the widget is drawn. So the
+    30-minute update flips ✓ to "Not yet today" at most 30 min after midnight and drops an expired
+    streak, without the app running. An exact midnight alarm would need our own native code; not
+    worth it for a ≤ 30 min lag.
+  - **Entry:** `package.json` `main` is now `index.ts` (`import 'expo-router/entry'` + the task
+    registration), because Android may start the JS bundle only to draw the widget.
+  - **Tap:** the whole widget is an `OPEN_URI` to `skillforge://train` (expo-router path `/train`,
+    the Train tab; before onboarding the tabs redirect as usual).
+- Consequences: one MIT dependency with native code; a future SDK upgrade must check that it still
+  builds. No schema, backup or migration change: the snapshot file is derived and rewritten on
+  every start, so installing over an existing build keeps all data. The widget is testable only in
+  a release build (`npm run build:apk:universal`), not in Expo Go. Classes (6.9) can add a field
+  to the snapshot (bump `WIDGET_SNAPSHOT_VERSION`; an unknown version shows the first-run state
+  until the app writes a new one).

@@ -37,7 +37,29 @@
         }
       ],
       "expo-sqlite",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "react-native-android-widget",
+        {
+          "fonts": [
+            "./node_modules/@expo-google-fonts/jersey-15/400Regular/Jersey15_400Regular.ttf",
+            "./node_modules/@expo-google-fonts/silkscreen/400Regular/Silkscreen_400Regular.ttf"
+          ],
+          "widgets": [
+            {
+              "name": "SkillForge",
+              "label": "SkillForge",
+              "description": "Trained today, streak, level and rank",
+              "minWidth": "130dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
