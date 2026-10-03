@@ -873,7 +873,14 @@ Before publishing a release, check that it installs over the previous one with t
    check it still draws after `install -r`; then add the large "SkillForge Companion" widget (same
    picker entry, second preview): the sprite stands on the widget background, the data matches,
    a tap opens Train. A widget tap does nothing while the app is force-stopped (the library's
-   clicks are broadcasts); open the app once first.
+   clicks are broadcasts); open the app once first. Since v0.7.0 (6.12, 6.13): place both widgets
+   at the previous release's defaults before the update; after `install -r` they must redraw with
+   the current layout and sprite even before the app is opened; then add fresh ones at the
+   current defaults and switch Customize → Body / Hair style once (the Character tab and the
+   companion widgets follow).
+9. If the seed fails at `hideKeyboard` with the app gone to the home screen (Gboard shows only its
+   small floating hardware-keyboard toolbar, so Maestro's Back leaves the app), restart the
+   emulator and run it again (6.14).
 
 **Building in an agent worktree:** under `.claude/worktrees/<agent-…>/` the native CMake object
 paths get too long for Windows and Gradle fails with "ninja: error: manifest 'build.ninja' still
