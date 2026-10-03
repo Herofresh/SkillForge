@@ -206,7 +206,7 @@
   shared with the built-in Tuck front lever raise) all kept, no onboarding. The seed/verify flows
   now cover the user overlay. Screenshots `docs/screenshots/6.5-*.png`. The GitHub release is
   created by the coordinator after the merge.
-- Home-screen widget (6.6, ADR-055, PR_LINK): an Android widget (react-native-android-widget,
+- Home-screen widget (6.6, ADR-055, [PR #49](https://github.com/Herofresh/SkillForge/pull/49)): an Android widget (react-native-android-widget,
   MIT) shows "Trained today" / "Not yet today", the streak, level, rank and top 3 attributes in
   the pixel look; a tap opens the Train tab (`skillforge://train`). The app writes a snapshot file
   after loadAll, on data changes and on foreground; the widget decides "today" and the streak at
@@ -227,7 +227,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Home-screen widget (task 6.6, ADR-055, PR_LINK):**
+- **Home-screen widget (task 6.6, ADR-055, [PR #49](https://github.com/Herofresh/SkillForge/pull/49)):**
   - Code: `src/domain/widget.ts` (pure: `widgetSnapshot`, `widgetView`, `parseWidgetSnapshot`),
     `src/widget/` (`widgetModule.ts` guard, `nativeWidget.tsx` layout + task + redraw,
     `widgetStorage.ts` file, `widgetSync.ts` store subscription started from `bootstrap.ts`),
@@ -989,7 +989,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   - [x] Release prep, 6.3c review fixes: id tie-breaks compare code units (`compareCodeUnits`),
     not `localeCompare`, so order is the same on Hermes as in Node; the node editor shows only the
     advice about the node being edited (`warningsForNode`)
-- [x] 6.6 (ADR-055, PR_LINK) Android home-screen widget (like Duolingo): shows whether you trained today, the
+- [x] 6.6 (ADR-055, [PR #49](https://github.com/Herofresh/SkillForge/pull/49)) Android home-screen widget (like Duolingo): shows whether you trained today, the
   streak, the hero's level and rank, a few stats; tapping it opens the Train tab
   (`skillforge://train`). Needs native code: a config plugin / library that works with
   `expo prebuild` and the local `build:apk` (candidate: `react-native-android-widget`; check
