@@ -419,7 +419,7 @@ export function SkillForgeCompanionWidget({
             truncate="END"
             style={{
               fontFamily: FontFamily.pixel,
-              fontSize: sizes.rank,
+              fontSize: sizes.attribute,
               marginLeft: gap,
               color: color(view.trainedToday ? Colors.success : Colors.gold),
             }}

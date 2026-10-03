@@ -380,7 +380,7 @@ streak, level, rank, class, top attributes; the 6.6 provider, so placed widgets 
 the **large** `SkillForgeCompanion` widget (default 4 × 3): the same frame, the companion sprite in
 its mood (first frame, an SVG at a whole number of dp per pixel, 160 × 200 dp at 4 × 3) on a
 `surfaceRaised` rectangle on the left, and on the right, spread over the height: a small check /
-hourglass with the status in the rank size, the mood title as a gold-light caps label, the flame
+hourglass with the status in the attribute size, the mood title as a gold-light caps label, the flame
 with streak and level, and the shield with the rank over the class title. Its picker preview is
 `assets/images/widget-companion-preview.png`.
 

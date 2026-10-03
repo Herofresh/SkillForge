@@ -283,7 +283,22 @@
   - Weakest art: raised arms tuck beside the head, small weapons (daggers, axes, wand) are a few
     pixels, the sad pose hides the legs. Ideas: tier II recolours (the user allowed them), a
     second hairstyle.
-  - VERIFY_NOTES
+  - Verified: typecheck, lint, format:check, progressions:check, full Jest (88 suites: sprite
+    engine, every accessory and weapon in every pose, moods by calendar day, rules, unlock merge,
+    loadout, setting reader, store upgrade / backups / choices, components, widget snapshot and
+    both layouts, picker previews); contact sheets looked at (`docs/screenshots/6.10-*.png`,
+    before: `6.10-before-stick-figure.png`); Maestro `character.yaml` on Pixel_8_Pro_API_35 /
+    Expo Go (Restless new hero with the wooden sword, Customize sheet with skin chip and locked
+    items, Fired up after the session, wave on tap, victory pose on the summary; the 6.9b steps
+    pass too); release APK (`npm run build:apk:universal`, signer check passed, built in
+    `D:\sf610`) installed with `adb install -r` over an older install with data (hero Aria, 40 XP):
+    the Character tab showed the companion with "2 NEW" earned accessories at once, the picker
+    lists both widgets with their previews, the large widget drew the sprite with the real data and
+    survived a reinstall, the small one still draws, a tap opens Train
+    (`6.10-upgrade-character.png`, `6.10-widget-picker.png`, `6.10-widget-large.png`,
+    `6.10-widget-small.png`). Not verified: a real phone, the sad sprite on the widget after a real
+    6-day gap (unit tests cover the mood at render time), reduce motion on a device, the full
+    ADR-043 upgrade check from every release (6.11 does that).
 - **Weekly class challenge (task 6.9b, ADR-058, [PR #55](https://github.com/Herofresh/SkillForge/pull/55)):**
   - Code: `src/domain/challenges.ts` (goal counting, `advanceChallenge` engine step, pins,
     `challengeView`), `localWeekBounds` in `src/lib/time.ts`, `ChallengeGoal` /
