@@ -254,8 +254,8 @@
     `ClassBanner`, `ClassSheet`, `ClassUnlockPanel`, `classText.ts`; Style Guide → Class emblems;
     widget: optional `heroClass` in the snapshot, `ClassLabel` in `nativeWidget.tsx`.
   - Thresholds were scaled from the user's "100–1000" to the real attribute scale (ADR-057 has the
-    simulation and the ceilings); **the user should confirm the mapping** (PR body). Change them
-    only in `src/data/classes.ts`.
+    simulation and the ceilings); **the user approved these scaled thresholds (2026-10-03)**
+    instead of a literal 100–1000 range. Change them only in `src/data/classes.ts`.
   - Verified: typecheck, lint, format:check, progressions:check, full Jest (80 suites); Maestro
     `character.yaml` on Pixel_8_Pro_API_35 / Expo Go (banner shows Recruit, sheet opens with
     Recruit worn and locked classes with "Push 0 / 30", scroll to Sorcerer, close; screenshots

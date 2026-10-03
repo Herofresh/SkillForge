@@ -1748,6 +1748,7 @@ Template:
     13, Ranger II at 42 and Ranger III at 106 (pull goals), Warrior III at 159 (push goals), Rogue
     III at 168 (handstand goals). The numbers live only in the data file; a test keeps every stats
     threshold below its attribute's all-mastered ceiling and checks that the tiers rise.
+    **The user approved these scaled thresholds (2026-10-03)** instead of a literal 100–1000 range.
   - **Pure rules** (`src/domain/classes.ts`): `classFacts` (attributes and rank from
     `computeCharacter`, the session count), `ruleParts` / `ruleMet` / `ruleFraction` (progress
     per part, for the bars), `reachedTier` (tiers met, counted from I), `mergeClassUnlocks`,
