@@ -40,7 +40,8 @@ describe('syncWidget', () => {
   it('writes and draws the loaded state at once', () => {
     const { deps, written } = fakeDeps();
     syncWidget(fakeStore(), deps);
-    expect(written).toEqual([expect.objectContaining({ heroName: 'Aria', level: 1, streak: 0 })]);
+    expect(written).toEqual([expect.objectContaining({ level: 1, streak: 0 })]);
+    expect(written[0]).not.toHaveProperty('heroName');
     expect(deps.redraw).toHaveBeenCalledTimes(1);
   });
 
@@ -58,7 +59,9 @@ describe('syncWidget', () => {
     const store = fakeStore();
     syncWidget(store, deps);
     store.setState({ activeSession: {} as AppState['activeSession'] });
+    store.setState({ profile: { heroName: 'Bran', createdAt: 0 } });
     expect(written).toHaveLength(1);
+    expect(deps.redraw).toHaveBeenCalledTimes(1);
     store.setState({ engine: { ...INITIAL_ENGINE_STATE, streak: 1, lastSessionAt: 5 } });
     expect(written).toHaveLength(2);
     expect(written[1]).toMatchObject({ streak: 1, lastSessionAt: 5 });

@@ -36,7 +36,6 @@ export interface WidgetAttribute {
 /** What the app hands to the widget. Raw values only; clock-dependent parts are in `widgetView`. */
 export interface WidgetSnapshot {
   version: typeof WIDGET_SNAPSHOT_VERSION;
-  heroName?: string;
   level: number;
   rank: RankTitle;
   /** The engine's streak after the last session (`activeStreak` decides if it still holds). */
@@ -50,7 +49,6 @@ export interface WidgetSnapshot {
 export interface WidgetSnapshotInput {
   nodes: readonly ExerciseNode[];
   engine: Pick<EngineState, 'progress' | 'totalXp' | 'streak' | 'lastSessionAt'>;
-  heroName?: string;
 }
 
 /** The attributes with points, strongest first; ties keep the `ATTRIBUTES` order. */
@@ -65,11 +63,10 @@ export function topAttributes(
 }
 
 export function widgetSnapshot(input: WidgetSnapshotInput): WidgetSnapshot {
-  const { nodes, engine, heroName } = input;
+  const { nodes, engine } = input;
   const character = computeCharacter(nodes, engine.progress, engine.totalXp);
   return {
     version: WIDGET_SNAPSHOT_VERSION,
-    ...(heroName !== undefined ? { heroName } : {}),
     level: character.level,
     rank: character.rank,
     streak: engine.streak,
@@ -84,7 +81,6 @@ export type WidgetView =
   | {
       kind: 'hero';
       deepLink: string;
-      heroName?: string;
       trainedToday: boolean;
       /** "Trained today" / "Not yet today". */
       status: string;
@@ -102,7 +98,6 @@ export function widgetView(snapshot: WidgetSnapshot | undefined, now: number): W
   return {
     kind: 'hero',
     deepLink: WIDGET_DEEP_LINK,
-    ...(snapshot.heroName !== undefined ? { heroName: snapshot.heroName } : {}),
     trainedToday,
     status: trainedToday ? 'Trained today' : 'Not yet today',
     streak: activeStreak(snapshot, now),
@@ -128,7 +123,8 @@ function isWidgetAttribute(value: unknown): value is WidgetAttribute {
 
 /**
  * Reads a stored snapshot. Anything unreadable (no file yet, a half-written file, another version)
- * gives `undefined`, so the widget shows its first-run state instead of crashing.
+ * gives `undefined`, so the widget shows its first-run state instead of crashing. Unknown fields
+ * are ignored (e.g. `heroName`, which the first 6.6 builds wrote).
  */
 export function parseWidgetSnapshot(text: string | undefined): WidgetSnapshot | undefined {
   if (text === undefined) return undefined;
@@ -139,15 +135,13 @@ export function parseWidgetSnapshot(text: string | undefined): WidgetSnapshot | 
     return undefined;
   }
   if (!isRecord(value) || value.version !== WIDGET_SNAPSHOT_VERSION) return undefined;
-  const { heroName, level, rank, streak, lastSessionAt, topAttributes: top } = value;
-  if (heroName !== undefined && typeof heroName !== 'string') return undefined;
+  const { level, rank, streak, lastSessionAt, topAttributes: top } = value;
   if (!isCount(level) || !isCount(streak)) return undefined;
   if (!(RANK_TITLES as readonly unknown[]).includes(rank)) return undefined;
   if (lastSessionAt !== undefined && !isCount(lastSessionAt)) return undefined;
   if (!Array.isArray(top) || !top.every(isWidgetAttribute)) return undefined;
   return {
     version: WIDGET_SNAPSHOT_VERSION,
-    ...(heroName !== undefined ? { heroName } : {}),
     level,
     rank: rank as RankTitle,
     streak,

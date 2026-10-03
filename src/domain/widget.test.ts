@@ -30,7 +30,6 @@ const at = (day: number, hour: number, minute = 0): number =>
 
 const snapshot = (overrides: Partial<WidgetSnapshot> = {}): WidgetSnapshot => ({
   version: WIDGET_SNAPSHOT_VERSION,
-  heroName: 'Aria',
   level: 4,
   rank: 'Apprentice',
   streak: 3,
@@ -78,9 +77,8 @@ describe('widgetSnapshot', () => {
       lastSessionAt: 42,
     };
     const character = computeCharacter(nodes, engine.progress, engine.totalXp);
-    const result = widgetSnapshot({ nodes, engine, heroName: 'Aria' });
+    const result = widgetSnapshot({ nodes, engine });
     expect(result).toMatchObject({
-      heroName: 'Aria',
       level: character.level,
       rank: character.rank,
       streak: 2,
@@ -110,7 +108,6 @@ describe('widgetView', () => {
       streak: 3,
       level: 4,
       rank: 'Apprentice',
-      heroName: 'Aria',
       deepLink: WIDGET_DEEP_LINK,
     });
   });
@@ -146,16 +143,19 @@ describe('parseWidgetSnapshot', () => {
     ['an unknown rank', JSON.stringify({ ...snapshot(), rank: 'Emperor' })],
     ['a negative level', JSON.stringify({ ...snapshot(), level: -1 })],
     ['a bad attribute', JSON.stringify({ ...snapshot(), topAttributes: [{ attribute: 'x' }] })],
-    ['a non-string name', JSON.stringify({ ...snapshot(), heroName: 5 })],
     ['an array', '[]'],
   ])('ignores %s', (_label, text) => {
     expect(parseWidgetSnapshot(text)).toBeUndefined();
   });
 
   it('keeps a snapshot without the optional fields', () => {
-    const value = snapshot({ heroName: undefined, lastSessionAt: undefined });
-    delete value.heroName;
+    const value = snapshot({ lastSessionAt: undefined });
     delete value.lastSessionAt;
     expect(parseWidgetSnapshot(JSON.stringify(value))).toEqual(value);
+  });
+
+  it('reads an older file that still has heroName and drops the name', () => {
+    const value = snapshot();
+    expect(parseWidgetSnapshot(JSON.stringify({ ...value, heroName: 'Aria' }))).toEqual(value);
   });
 });

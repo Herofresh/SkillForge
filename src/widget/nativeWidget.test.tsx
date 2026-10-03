@@ -31,7 +31,6 @@ const texts = (node: ReactNode) =>
 const hero: WidgetView = {
   kind: 'hero',
   deepLink: WIDGET_DEEP_LINK,
-  heroName: 'Aria',
   trainedToday: true,
   status: 'Trained today',
   streak: 3,

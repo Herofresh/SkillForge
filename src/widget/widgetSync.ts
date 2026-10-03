@@ -1,7 +1,7 @@
 /**
  * Keeps the home-screen widget current (PLAN 6.6, ADR-055). After `loadAll`, the app writes a fresh
  * `WidgetSnapshot` and redraws the widget; then again whenever the parts the widget shows change
- * (a finished session or Trial, a test-out, an import, a renamed hero) and whenever the app comes to
+ * (a finished session or Trial, a test-out, an import, an edited tree) and whenever the app comes to
  * the foreground (the day may have changed). One store subscription covers every action that
  * changes the data, so no store action needs to know about the widget.
  */
@@ -23,11 +23,7 @@ export interface WidgetSyncDeps {
 }
 
 const snapshotOf = (state: AppState): WidgetSnapshot =>
-  widgetSnapshot({
-    nodes: state.nodes,
-    engine: state.engine,
-    ...(state.profile?.heroName !== undefined ? { heroName: state.profile.heroName } : {}),
-  });
+  widgetSnapshot({ nodes: state.nodes, engine: state.engine });
 
 /** Wires a store to the widget; returns a stop function. Pure wiring, tested with fakes. */
 export function syncWidget(store: AppStore, deps: WidgetSyncDeps): () => void {
@@ -56,8 +52,7 @@ export function syncWidget(store: AppStore, deps: WidgetSyncDeps): () => void {
     if (
       state.loaded !== previous.loaded ||
       state.engine !== previous.engine ||
-      state.nodes !== previous.nodes ||
-      state.profile !== previous.profile
+      state.nodes !== previous.nodes
     ) {
       push(false);
     }

@@ -1631,6 +1631,12 @@ Template:
     task handler draws the widget on add, resize and the periodic update; `OPEN_URI` click
     actions open a deep link natively. It ships a TurboModule spec and uses `ReactHost` for the
     headless task, so it runs on the new architecture. No network, no permissions, no analytics.
+    One exposure: its manifest adds an **exported, read-only content provider**
+    `${applicationId}.rnwidget.imageprovider` without a permission. It serves only the rendered
+    widget images from `filesDir/widget_images` (what the launcher shows; read mode only, paths
+    are checked to stay inside that folder), so the worst case is
+    another app reading images that are already on the home screen; no database or backup is
+    reachable through it.
   - **Own config plugin + a small Kotlin provider** reading SharedPreferences written from JS:
     no dependency, but we would write and maintain the plugin (manifest, XML, Kotlin file copy),
     the RemoteViews layout in XML, the JS → SharedPreferences bridge (another native module) and
@@ -1647,12 +1653,13 @@ Template:
     `TurboModuleRegistry.get('AndroidWidget')` on Android and only then `require`s
     `nativeWidget.tsx`, the one file that imports the library. In Expo Go, iOS, web and Jest
     nothing loads; Jest also mocks the library in `jest.setup.ts`.
-  - **Data flow:** the app writes a `WidgetSnapshot` (`src/domain/widget.ts`: hero name, level,
-    rank, the engine's streak, `lastSessionAt`, top 3 attributes, all from `computeCharacter`)
-    to `widget-snapshot.json` in the document directory and redraws the widget
-    (`requestWidgetUpdate`). `startWidgetSync` (called by `startApp` after `loadAll`) does that
-    once, then whenever `engine`, `nodes` or `profile` change in the store (a finished session or
-    Trial, a test-out, an import, a rename; one subscription instead of a call in every action)
+  - **Data flow:** the app writes a `WidgetSnapshot` (`src/domain/widget.ts`: only what the
+    widget shows: level, rank, the engine's streak, `lastSessionAt`, top 3 attributes, from
+    `computeCharacter`; no hero name) to `widget-snapshot.json` in the document directory and
+    redraws the widget (`requestWidgetUpdate`). `startWidgetSync` (called by `startApp` after
+    `loadAll`) does that once, then whenever `engine` or `nodes` change in the store (a finished
+    session or Trial, a test-out, an import, an edited tree; one subscription instead of a call
+    in every action)
     and every time the app comes to the foreground. The background task reads the file, not the
     database: it runs while the app is closed and must stay cheap.
   - **"Today" at render time:** the snapshot keeps raw values; `widgetView(snapshot, now)`
