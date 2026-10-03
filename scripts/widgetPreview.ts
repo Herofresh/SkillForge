@@ -209,7 +209,6 @@ export function renderCompanionWidgetPreview(): RgbaImage {
   const spriteW = SPRITE_WIDTH * COMPANION_SCALE;
   const spriteH = SPRITE_HEIGHT * COMPANION_SCALE;
   const spriteTop = (height - spriteH) / 2;
-  fillDp(image, left, spriteTop, spriteW, spriteH, Colors.surfaceRaised);
   const colors = companionColors({});
   drawGrid(image, companionStill('happy', SAMPLE_OUTFIT), (role) => colors[role], {
     cell: px(COMPANION_SCALE),

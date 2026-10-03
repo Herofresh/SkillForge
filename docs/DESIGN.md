@@ -378,8 +378,8 @@ line around a `stone` disc, on the `night` background. Roles map to `Palette` ke
 Two widgets since PLAN 6.10 (ADR-059): the **small** `SkillForge` widget below (training status,
 streak, level, rank, class, top attributes; the 6.6 provider, so placed widgets keep working) and
 the **large** `SkillForgeCompanion` widget (default 4 × 3): the same frame, the companion sprite in
-its mood (first frame, an SVG at a whole number of dp per pixel, 160 × 200 dp at 4 × 3) on a
-`surfaceRaised` rectangle on the left, and on the right, spread over the height: a small check /
+its mood (first frame, an SVG at a whole number of dp per pixel, 160 × 200 dp at 4 × 3) on the
+left, on a transparent background so it stands straight on the widget surface (no box), and on the right, spread over the height: a small check /
 hourglass with the status in the attribute size, the mood title as a gold-light caps label, the flame
 with streak and level, and the shield with the rank over the class title. Its picker preview is
 `assets/images/widget-companion-preview.png`.

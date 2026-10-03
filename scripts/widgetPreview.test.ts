@@ -80,6 +80,14 @@ describe('large widget picker preview (PLAN 6.10)', () => {
     expect(pixelAt(image, 0, 0)).toEqual(hexToRgba(Colors.ink));
   });
 
+  it('puts the companion straight on the widget surface, no lighter box behind it', () => {
+    const raised = hexToRgba(Colors.surfaceRaised).join(',');
+    for (let i = 0; i < image.data.length; i += 4) {
+      const key = Array.from(image.data.subarray(i, i + 4)).join(',');
+      if (key === raised) throw new Error(`Raised surface color at pixel ${i / 4}`);
+    }
+  });
+
   it('is committed as rendered (run npm run icon:build after changing it)', () => {
     const onDisk = readFileSync(join(ROOT, COMPANION_PREVIEW_PATH));
     expect(onDisk.equals(encodePng(image))).toBe(true);

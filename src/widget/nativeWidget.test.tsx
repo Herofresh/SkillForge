@@ -194,6 +194,15 @@ describe('SkillForgeCompanionWidget (PLAN 6.10)', () => {
     expect(sprite?.props.style).toMatchObject({ width: 160, height: 200 });
   });
 
+  it('draws the sprite on a transparent background, straight on the widget', () => {
+    const tree = <SkillForgeCompanionWidget view={withCompanion} widthDp={395} heightDp={380} />;
+    const sprite = primitives(tree).find(
+      (entry) => entry.type === 'SvgWidget' && String(entry.props.svg).includes('0 0 32 40'),
+    );
+    expect(sprite?.props.style).not.toHaveProperty('backgroundColor');
+    expect(String(sprite?.props.svg)).not.toMatch(/<rect/);
+  });
+
   it('opens the Train tab when tapped', () => {
     const [root] = primitives(
       <SkillForgeCompanionWidget view={withCompanion} widthDp={395} heightDp={380} />,

@@ -299,6 +299,10 @@
     `6.10-widget-small.png`). Not verified: a real phone, the sad sprite on the widget after a real
     6-day gap (unit tests cover the mood at render time), reduce motion on a device, the full
     ADR-043 upgrade check from every release (6.11 does that).
+  - Review tweak: the large widget's sprite no longer sits on a lighter `surfaceRaised` box (seen
+    in `6.10-widget-large.png`); its background is transparent, checked by the widget and preview
+    tests and the regenerated picker preview. The on-device check of this tweak happens in the
+    6.11 release (the screenshot above still shows the box).
 - **Weekly class challenge (task 6.9b, ADR-058, [PR #55](https://github.com/Herofresh/SkillForge/pull/55)):**
   - Code: `src/domain/challenges.ts` (goal counting, `advanceChallenge` engine step, pins,
     `challengeView`), `localWeekBounds` in `src/lib/time.ts`, `ChallengeGoal` /

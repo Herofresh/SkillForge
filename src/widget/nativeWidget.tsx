@@ -354,7 +354,10 @@ export function SkillForgeWidget({
 
 type HeroCompanion = NonNullable<HeroView['companion']>;
 
-/** The companion sprite as a crisp SVG string (its mood's first frame), `widthDp` wide. */
+/**
+ * The companion sprite as a crisp SVG string (its mood's first frame), `widthDp` wide. Only the
+ * sprite's pixels are painted: the background stays transparent, so it stands on the widget.
+ */
 export function companionSvg(companion: HeroCompanion, widthDp: number): string {
   const rows = companionStill(companion.mood, {
     loadout: companion.loadout,
@@ -397,11 +400,7 @@ export function SkillForgeCompanionWidget({
     <Frame view={view} sizes={sizes}>
       <SvgWidget
         svg={companionSvg(view.companion, SPRITE_WIDTH * scale)}
-        style={{
-          width: SPRITE_WIDTH * scale,
-          height: SPRITE_HEIGHT * scale,
-          backgroundColor: color(Colors.surfaceRaised),
-        }}
+        style={{ width: SPRITE_WIDTH * scale, height: SPRITE_HEIGHT * scale }}
       />
       <FlexWidget
         style={{
