@@ -271,7 +271,7 @@
   optional). Screenshots `docs/screenshots/6.13-*.png`.
 
 ## Next up
-0. 6.13 companion cooler look + woman body: review and merge [PR #60](https://github.com/Herofresh/SkillForge/pull/60).
+0. 6.13 companion cooler look + woman body: merged ([PR #60](https://github.com/Herofresh/SkillForge/pull/60)); ships with the next release.
 1. On the user's phone: install v0.6.0 (once published) over the installed build (Update, no
    uninstall), add the new SkillForge Companion widget and report what feels off.
 2. Phase 7 (Google Play), starting with **7.1: the user creates the upload key with `keytool`**
