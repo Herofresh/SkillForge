@@ -1807,8 +1807,10 @@ Template:
     (test), so a challenge fits a normal 2–4 sessions week and the generator's own plans meet it.
   - **Counting:** per logged session, from its done sets (value above 0) on known nodes;
     **straight-arm nodes never count** (no lever / planche volume and no early straight-arm Trial
-    is ever rewarded; the generator and `safeguards.ts` are unchanged). A session counts in the
-    week of its `startedAt`.
+    is ever rewarded; the generator and `safeguards.ts` are unchanged). Straight-arm sets are also
+    ignored when checking a session for skipped sets (`complete_sessions`), so skipping a lever or
+    planche set for the tendons never costs progress. A session counts in the week of its
+    `startedAt`.
   - **Week:** the local calendar week, Monday 00:00 to the next Monday 00:00 (`localWeekBounds` in
     `src/lib/time.ts`, calendar arithmetic: 167 / 169 h across DST). The window is stored with the
     pin, so a later time-zone change can't move a past week.

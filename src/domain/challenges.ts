@@ -79,7 +79,15 @@ export function challengeContribution(
     case 'sessions':
       return 1;
     case 'complete_sessions':
-      return isSessionComplete(session.sets.filter((set) => lookup.has(set.nodeId))) ? 1 : 0;
+      // A skipped straight-arm set (e.g. skipped for the tendons) never costs progress either.
+      return isSessionComplete(
+        session.sets.filter((set) => {
+          const node = lookup.get(set.nodeId);
+          return node !== undefined && !node.straightArm;
+        }),
+      )
+        ? 1
+        : 0;
     case 'sessions_training':
       return goal.attributes.every((attribute) =>
         nodeIds.some((nodeId) => trains(lookup.get(nodeId), attribute)),

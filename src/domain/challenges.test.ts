@@ -175,6 +175,25 @@ describe('challengeContribution', () => {
     expect(challengeContribution({ kind: 'complete_sessions' }, session, LOOKUP)).toBe(0);
     expect(challengeContribution({ kind: 'sessions' }, session, LOOKUP)).toBe(1);
   });
+
+  it('a skipped straight-arm set does not make a session incomplete (regression)', () => {
+    const session: LoggedSession = {
+      id: 's',
+      startedAt: MONDAY,
+      sets: [
+        makeSet({ sessionId: 's', nodeId: 'pull_up', setIndex: 0 }),
+        makeSet({
+          sessionId: 's',
+          nodeId: 'tuck_front_lever',
+          setIndex: 1,
+          metric: 'hold_s',
+          prescribed: { value: 10 },
+          actual: { value: 0 },
+        }),
+      ],
+    };
+    expect(challengeContribution({ kind: 'complete_sessions' }, session, LOOKUP)).toBe(1);
+  });
 });
 
 describe('advanceChallenge', () => {

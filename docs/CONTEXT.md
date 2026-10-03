@@ -570,7 +570,8 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
 - **Weekly class challenge** (PLAN 6.9b, ADR-058): week = local Monday 00:00 to the next Monday
   00:00 (`localWeekBounds`, 167 / 169 h across DST), stored with the pin. Count = Σ per session in
   the window of its contribution: done sets (value > 0) on known, non-straight-arm nodes; 1 per
-  session (`sessions`, `complete_sessions` without a skipped set, `sessions_training` training every
+  session (`sessions`, `complete_sessions` without a skipped set (straight-arm sets are ignored
+  in that check too), `sessions_training` training every
   listed attribute) or per node (`exercises_training`, `trial_attempts`). Target per tier in
   `HERO_CLASSES[].challenge.targets`. Completed when count ≥ target; the session that crosses it
   gets the bonus, at most once per week.
