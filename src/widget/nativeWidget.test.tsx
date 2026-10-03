@@ -1,18 +1,15 @@
 import type { ReactElement, ReactNode } from 'react';
 import { registerWidgetTaskHandler, requestWidgetUpdate } from 'react-native-android-widget';
 
-import { SPRITE_HEIGHT, SPRITE_WIDTH } from '@/data/companion';
 import { WIDGET_DEEP_LINK, type WidgetView } from '@/domain/widget';
 
 import {
   COMPANION_WIDGET_NAME,
-  companionScale,
   registerWidgetTask,
   SkillForgeCompanionWidget,
   SkillForgeWidget,
-  WIDGET_WIDE_MIN_DP,
-  widgetSizes,
 } from './nativeWidget';
+import { companionLayout, widgetLayout } from './widgetLayout';
 
 jest.mock('./widgetStorage', () => ({ readWidgetSnapshot: () => Promise.resolve(undefined) }));
 
@@ -37,6 +34,8 @@ const texts = (node: ReactNode) =>
     .filter((entry) => entry.type === 'TextWidget')
     .map((entry) => String(entry.props.text).trim());
 
+const boxes = (node: ReactNode) => primitives(node).filter((entry) => entry.type === 'FlexWidget');
+
 const hero: WidgetView = {
   kind: 'hero',
   deepLink: WIDGET_DEEP_LINK,
@@ -52,20 +51,17 @@ const hero: WidgetView = {
 };
 
 describe('SkillForgeWidget', () => {
-  it('shows status, streak, level, rank and top attributes when wide', () => {
-    const shown = texts(
-      <SkillForgeWidget view={hero} widthDp={WIDGET_WIDE_MIN_DP} heightDp={110} />,
-    );
+  it('shows status, streak, level, rank and top attributes on a 4 x 2 widget', () => {
+    const shown = texts(<SkillForgeWidget view={hero} widthDp={395} heightDp={250} />);
     expect(shown).toEqual(
       expect.arrayContaining(['Trained today', '3', '7', 'Apprentice', 'PULL', '12', 'CORE', '4']),
     );
   });
 
-  it('keeps to status, streak and level when narrow', () => {
-    const shown = texts(
-      <SkillForgeWidget view={hero} widthDp={WIDGET_WIDE_MIN_DP - 1} heightDp={110} />,
-    );
-    expect(shown).toEqual(expect.arrayContaining(['Trained today', '3', '7']));
+  it('keeps to status, streak and level when slim', () => {
+    const shown = texts(<SkillForgeWidget view={hero} widthDp={150} heightDp={100} />);
+    expect(shown).toEqual(expect.arrayContaining(['3', '7']));
+    expect(shown.join(' ')).toContain('Trained');
     expect(shown).not.toContain('Apprentice');
   });
 
@@ -79,68 +75,35 @@ describe('SkillForgeWidget', () => {
 
   it('asks to open the app before the first snapshot', () => {
     const view: WidgetView = { kind: 'empty', deepLink: WIDGET_DEEP_LINK };
-    expect(texts(<SkillForgeWidget view={view} widthDp={300} heightDp={120} />)).toContain(
-      'OPEN THE APP TO BEGIN',
-    );
+    const shown = texts(<SkillForgeWidget view={view} widthDp={395} heightDp={118} />);
+    expect(shown).toEqual(expect.arrayContaining(['SkillForge', 'OPEN THE APP TO BEGIN']));
   });
 });
 
-/** The font size of the first TextWidget showing `text`. */
-const fontSizeOf = (node: ReactNode, text: string) =>
-  primitives(node).find((entry) => entry.type === 'TextWidget' && entry.props.text === text)?.props
-    .style as { fontSize: number } | undefined;
-
-describe('widgetSizes', () => {
-  it('keeps the compact scale-1 sizes at the minimum and for narrow widgets', () => {
-    expect(widgetSizes(WIDGET_WIDE_MIN_DP, 110)).toMatchObject({ scale: 1, icon: 24, status: 20 });
-    expect(widgetSizes(160, 400)).toMatchObject({ scale: 1, icon: 24, number: 24, label: 10 });
-  });
-
-  it('scales the default 4 x 2 widget up by the tighter side, in quarter steps', () => {
-    // Pixel 8 Pro emulator, 4 x 2 cells: about 395 x 250 dp → width allows 1.52, height 1.79.
-    expect(widgetSizes(395, 250)).toMatchObject({
-      scale: 1.5,
-      icon: 36,
-      smallIcon: 24,
-      status: 30,
-      number: 36,
-      rank: 30,
-      attribute: 24,
-      label: 15,
-    });
-    // A wide but short widget is held back by its height.
-    expect(widgetSizes(500, 150).scale).toBe(1);
-  });
-
-  it('keeps icons on whole 12 x 12 grid cells and stops at the maximum scale', () => {
-    expect(widgetSizes(330, 182).icon).toBe(24); // scale 1.25 → 30 dp would blur the grid
-    const huge = widgetSizes(2000, 2000);
-    expect(huge.scale).toBe(2);
-    expect(huge.icon).toBe(48);
-  });
-});
-
-describe('SkillForgeWidget sizes', () => {
-  it('draws the status larger on the default 4 x 2 widget than on the minimum one', () => {
-    const big = fontSizeOf(
-      <SkillForgeWidget view={hero} widthDp={395} heightDp={250} />,
-      hero.status,
+describe('SkillForgeWidget draws its layout (PLAN 6.12)', () => {
+  it('draws the layout texts in dp sizes the system font scale cannot grow', () => {
+    const layout = widgetLayout(hero, 395, 118);
+    const drawn = primitives(<SkillForgeWidget view={hero} widthDp={395} heightDp={118} />).filter(
+      (entry) => entry.type === 'TextWidget',
     );
-    const small = fontSizeOf(
-      <SkillForgeWidget view={hero} widthDp={WIDGET_WIDE_MIN_DP} heightDp={110} />,
-      hero.status,
-    );
-    expect(big?.fontSize).toBe(30);
-    expect(small?.fontSize).toBe(20);
+    expect(drawn.length).toBeGreaterThan(0);
+    for (const entry of drawn) expect(entry.props.allowFontScaling).toBe(false);
+    const status = drawn.find((entry) => entry.props.text === hero.status);
+    expect(status?.props.style).toMatchObject({ fontSize: layout.sizes.status });
   });
 
-  it('spreads the status rows over the height only when scaled up', () => {
-    const justify = (widthDp: number, heightDp: number) =>
-      primitives(<SkillForgeWidget view={hero} widthDp={widthDp} heightDp={heightDp} />)
-        .filter((entry) => entry.type === 'FlexWidget')
-        .map((entry) => (entry.props.style as { justifyContent?: string }).justifyContent);
-    expect(justify(395, 250)).toContain('space-evenly');
-    expect(justify(WIDGET_WIDE_MIN_DP, 110)).not.toContain('space-evenly');
+  it('pads the frame as the layout says and lets the root box fill it', () => {
+    const layout = widgetLayout(hero, 395, 250);
+    const [, frame, root] = boxes(<SkillForgeWidget view={hero} widthDp={395} heightDp={250} />);
+    expect(frame.props.style).toMatchObject({ padding: layout.padding });
+    expect(root.props.style).toMatchObject({ width: 'match_parent', height: 'match_parent' });
+  });
+
+  it('spreads the rows over the height (space-evenly)', () => {
+    const justify = boxes(<SkillForgeWidget view={hero} widthDp={395} heightDp={250} />).map(
+      (entry) => (entry.props.style as { justifyContent?: string }).justifyContent,
+    );
+    expect(justify).toContain('space-evenly');
   });
 });
 
@@ -183,29 +146,31 @@ describe('SkillForgeCompanionWidget (PLAN 6.10)', () => {
       moodTitle: 'Fired up',
     },
   };
+  /** The one SVG that is not a 12 x 12 icon. */
+  const spriteOf = (tree: ReactNode) =>
+    primitives(tree).find(
+      (entry) =>
+        entry.type === 'SvgWidget' && !String(entry.props.svg).includes('viewBox="0 0 12 12"'),
+    );
 
   it('draws the companion next to status, mood, streak, level, rank and class', () => {
-    const tree = <SkillForgeCompanionWidget view={withCompanion} widthDp={395} heightDp={380} />;
+    const tree = <SkillForgeCompanionWidget view={withCompanion} widthDp={395} heightDp={250} />;
     expect(texts(tree)).toEqual(
       expect.arrayContaining(['Trained today', 'FIRED UP', '3', '7', 'Apprentice', 'WARRIOR']),
     );
-    const svgs = primitives(tree).filter((entry) => entry.type === 'SvgWidget');
-    const sprite = svgs.find((entry) =>
-      String(entry.props.svg).includes(`viewBox="0 0 ${SPRITE_WIDTH} ${SPRITE_HEIGHT}"`),
-    );
-    expect(sprite).toBeDefined();
+    const pixel = companionLayout(withCompanion, 395, 250).spritePixel ?? 0;
+    expect(pixel).toBeGreaterThanOrEqual(2);
+    const sprite = spriteOf(tree);
+    const [, columns, rows] = /viewBox="0 0 (\d+) (\d+)"/.exec(String(sprite?.props.svg)) ?? [];
     expect(sprite?.props.style).toMatchObject({
-      width: SPRITE_WIDTH * 5,
-      height: SPRITE_HEIGHT * 5,
+      width: Number(columns) * pixel,
+      height: Number(rows) * pixel,
     });
   });
 
   it('draws the sprite on a transparent background, straight on the widget', () => {
-    const tree = <SkillForgeCompanionWidget view={withCompanion} widthDp={395} heightDp={380} />;
-    const sprite = primitives(tree).find(
-      (entry) =>
-        entry.type === 'SvgWidget' &&
-        String(entry.props.svg).includes(`0 0 ${SPRITE_WIDTH} ${SPRITE_HEIGHT}`),
+    const sprite = spriteOf(
+      <SkillForgeCompanionWidget view={withCompanion} widthDp={395} heightDp={380} />,
     );
     expect(sprite?.props.style).not.toHaveProperty('backgroundColor');
     expect(String(sprite?.props.svg)).not.toMatch(/<rect/);
@@ -219,15 +184,9 @@ describe('SkillForgeCompanionWidget (PLAN 6.10)', () => {
   });
 
   it('falls back to the small layout before the app wrote a companion', () => {
-    const shown = texts(<SkillForgeCompanionWidget view={hero} widthDp={395} heightDp={380} />);
-    expect(shown).toEqual(expect.arrayContaining(['Trained today', 'Apprentice']));
-  });
-
-  it('draws the sprite at a whole number of dp per pixel', () => {
-    const sizes = { padding: 15 } as Parameters<typeof companionScale>[2];
-    expect(companionScale(395, 380, sizes)).toBe(5);
-    expect(companionScale(250, 180, sizes)).toBe(3);
-    expect(companionScale(100, 60, sizes)).toBe(2);
+    const tree = <SkillForgeCompanionWidget view={hero} widthDp={395} heightDp={250} />;
+    expect(texts(tree)).toEqual(expect.arrayContaining(['Trained today', 'Apprentice']));
+    expect(spriteOf(tree)).toBeUndefined();
   });
 
   it('has its own name, different from the small widget placed since 6.6', () => {

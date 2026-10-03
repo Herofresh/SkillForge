@@ -1324,6 +1324,10 @@ upgrade check from every earlier release). Any new table or column is additive a
   its own, no onboarding change, no data change.
 - [x] 6.11 v0.6.0 release (6.9–6.10c), same routine: upgrade check from 0.1.0, 0.2.0, 0.3.0,
   0.4.0 and 0.5.0, then both widgets on the install upgraded from 0.5.0 ([PR #58](https://github.com/Herofresh/SkillForge/pull/58); release [v0.6.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.6.0))
+- [~] 6.12 Widgets use their space (in-progress, agent `fix/widget-space`; user request 2026-10-03:
+  "I want the widget to use its space better or be smaller"): smaller default sizes, a layout per
+  size class (narrow / standard / wide / tall) that fills the height without clipping, regenerated
+  picker previews.
 - [x] 6.13 Companion: cooler look (user request 2026-10-03: "try to make the companion less cute
   and more cool"; ADR-061, [PR #60](https://github.com/Herofresh/SkillForge/pull/60)). Same art direction family (SNES-era FF
   field sprites, Octopath Traveler; original art), from chibi-cute to a cool, heroic hero: taller

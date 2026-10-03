@@ -409,12 +409,14 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
     widgets: {
       title: 'Home-screen widgets',
       summary:
-        'Two Android widgets: a small one with whether you trained today, your streak, level, ' +
-        `rank and top ${n(facts.widgetTopAttributes)} attributes, and a large one with your ` +
-        'companion. Tapping either opens Train.',
+        'Two Android widgets: a small one with whether you trained today, your streak and level ' +
+        `and, as space allows, your rank and up to ${n(facts.widgetTopAttributes)} top ` +
+        'attributes, and a large one with your companion. Tapping either opens Train.',
       more: [
         'Add them from your home screen: long-press an empty spot, choose Widgets and look ' +
           'for SkillForge.',
+        'Resize them as you like: the text and the companion grow with the widget, and a ' +
+          'bigger small widget shows more.',
         'They show what the app last saved on this phone. They update after every session and ' +
           'refresh on their own regularly, so shortly after midnight “trained today” is about the ' +
           'new day.',

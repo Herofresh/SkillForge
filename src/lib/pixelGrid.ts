@@ -96,6 +96,26 @@ export function gridSvg(
   );
 }
 
+/**
+ * The rows without their fully transparent edges (rows above and below, columns left and right),
+ * so a sprite drawn into a fixed canvas takes only the space its pixels need (the companion
+ * widget, PLAN 6.12). A grid without any painted cell comes back unchanged.
+ */
+export function trimPixelRows(rows: readonly string[]): string[] {
+  const painted = (cell: string | undefined) => cell !== undefined && !isTransparent(cell);
+  const filledRows = rows.flatMap((row, y) => ([...row].some(painted) ? [y] : []));
+  if (filledRows.length === 0) return [...rows];
+  const width = rows[0].length;
+  const filledColumns = Array.from({ length: width }, (_, x) => x).filter((x) =>
+    rows.some((row) => painted(row[x])),
+  );
+  const top = filledRows[0];
+  const bottom = filledRows[filledRows.length - 1];
+  const left = filledColumns[0];
+  const right = filledColumns[filledColumns.length - 1];
+  return rows.slice(top, bottom + 1).map((row) => row.slice(left, right + 1));
+}
+
 /** The distinct roles a grid uses, in order of first appearance. */
 export function gridRoles(grid: PixelGrid): string[] {
   return [...new Set(grid.runs.map((run) => run.role))];

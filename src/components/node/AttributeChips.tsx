@@ -2,18 +2,11 @@ import { StyleSheet, View } from 'react-native';
 
 import type { Attribute } from '@/domain/types';
 
+import { ATTRIBUTE_LABELS } from '../attributeLabels';
 import { AttributeColors, Colors, Spacing } from '../theme';
 import { PixelFrame, PixelText } from '../ui';
 
-/** Display names of the attributes (the domain names them, the UI words them). */
-export const ATTRIBUTE_LABELS: Readonly<Record<Attribute, string>> = {
-  push: 'Push',
-  pull: 'Pull',
-  core: 'Core',
-  legs: 'Legs',
-  balance: 'Balance',
-  mobility: 'Mobility',
-};
+export { ATTRIBUTE_LABELS };
 
 type Props = {
   attributes: readonly Attribute[];

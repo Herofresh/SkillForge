@@ -1,4 +1,14 @@
-import { gridPaths, gridRoles, gridSvg, parsePixelGrid } from './pixelGrid';
+import { gridPaths, gridRoles, gridSvg, parsePixelGrid, trimPixelRows } from './pixelGrid';
+
+describe('trimPixelRows', () => {
+  it('drops the transparent rows and columns around the painted cells', () => {
+    expect(trimPixelRows(['....', '.#..', '..+.', '....'])).toEqual(['#.', '.+']);
+  });
+
+  it('keeps a grid without painted cells as it is', () => {
+    expect(trimPixelRows(['..', '..'])).toEqual(['..', '..']);
+  });
+});
 
 describe('gridSvg', () => {
   it('draws one filled path per role, scaled to the size and with crisp edges', () => {
