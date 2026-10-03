@@ -25,8 +25,10 @@ import {
 import type { ReactNode } from 'react';
 
 import { ATTRIBUTE_LABELS } from '@/components/node/AttributeChips';
+import { Palette } from '@/components/palette';
 import { AttributeColors, Colors, FontFamily, PIXEL, RankColors } from '@/components/theme';
 import { iconSvg, type IconName } from '@/components/ui/icons';
+import { HERO_CLASS_BY_ID } from '@/data/classes';
 import { widgetView, type WidgetView } from '@/domain/widget';
 import { currentTime } from '@/lib/time';
 
@@ -236,6 +238,30 @@ function StatusColumn({ view, sizes }: { view: HeroView; sizes: WidgetSizes }) {
   );
 }
 
+/** The worn class's title (PLAN 6.9) under the rank, in the class color, one line at most. */
+function ClassLabel({
+  heroClass,
+  sizes,
+}: {
+  heroClass: NonNullable<HeroView['heroClass']>;
+  sizes: WidgetSizes;
+}) {
+  const classColor = HERO_CLASS_BY_ID.get(heroClass.id)?.color;
+  return (
+    <TextWidget
+      text={heroClass.title.toUpperCase()}
+      maxLines={1}
+      truncate="END"
+      style={{
+        fontFamily: FontFamily.caps,
+        fontSize: sizes.label,
+        letterSpacing: 0.05,
+        color: color(classColor ? Palette[classColor] : Colors.textMuted),
+      }}
+    />
+  );
+}
+
 function HeroColumn({ view, sizes }: { view: HeroView; sizes: WidgetSizes }) {
   return (
     <FlexWidget
@@ -245,17 +271,20 @@ function HeroColumn({ view, sizes }: { view: HeroView; sizes: WidgetSizes }) {
         marginLeft: sizes.gap * 2,
         ...columnStyle(sizes),
       }}>
-      <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Icon name="shield" size={sizes.smallIcon} />
-        <TextWidget
-          text={view.rank}
-          style={{
-            fontFamily: FontFamily.pixel,
-            fontSize: sizes.rank,
-            marginLeft: Math.round((sizes.gap * 2) / 3),
-            color: color(RankColors[view.rank]),
-          }}
-        />
+      <FlexWidget style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
+        <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Icon name="shield" size={sizes.smallIcon} />
+          <TextWidget
+            text={view.rank}
+            style={{
+              fontFamily: FontFamily.pixel,
+              fontSize: sizes.rank,
+              marginLeft: Math.round((sizes.gap * 2) / 3),
+              color: color(RankColors[view.rank]),
+            }}
+          />
+        </FlexWidget>
+        {view.heroClass ? <ClassLabel heroClass={view.heroClass} sizes={sizes} /> : null}
       </FlexWidget>
       <FlexWidget style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
         {view.topAttributes.length === 0 ? (

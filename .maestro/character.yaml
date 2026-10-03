@@ -1,6 +1,7 @@
 # Character tab (PLAN 4.5): from a fresh install the sheet shows level 1 and an empty history; after
 # a logged session it shows the earned XP and the session, which opens its summary. Takes the 4.5
-# screenshots. The rank crest opens and closes the rank ladder (PLAN 6.7, 6.7 screenshots).
+# screenshots. The rank crest opens and closes the rank ladder (PLAN 6.7, 6.7 screenshots); the class
+# banner opens and closes the class sheet (PLAN 6.9, 6.9 screenshots).
 # Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Character - level and XP after a logged session, history opens the session
@@ -65,6 +66,44 @@ name: Character - level and XP after a logged session, history opens the session
 - extendedWaitUntil:
     notVisible:
       id: 'rank-ladder'
+    timeout: 20000
+- assertVisible:
+    id: 'character-screen'
+# 6.9: a new hero wears the starting class; the banner opens the class sheet
+- assertVisible:
+    id: 'character-class-title'
+    text: 'Recruit'
+- takeScreenshot: 6.9-character-class
+- tapOn:
+    id: 'character-class'
+- extendedWaitUntil:
+    visible:
+      id: 'class-sheet'
+    timeout: 20000
+- assertVisible:
+    id: 'class-sheet-recruit-status'
+    text: 'Wearing'
+- assertVisible:
+    id: 'class-sheet-warrior-status'
+    text: 'Locked'
+- assertVisible:
+    id: 'class-sheet-warrior-progress'
+    text: 'Push 0 / 30'
+- takeScreenshot: 6.9-class-sheet
+- scrollUntilVisible:
+    element:
+      id: 'class-sheet-sorcerer-status'
+    direction: DOWN
+    timeout: 30000
+- assertVisible:
+    id: 'class-sheet-sorcerer-status'
+    text: 'Locked'
+- takeScreenshot: 6.9-class-sheet-locked
+- tapOn:
+    id: 'class-sheet-close'
+- extendedWaitUntil:
+    notVisible:
+      id: 'class-sheet'
     timeout: 20000
 - assertVisible:
     id: 'character-screen'

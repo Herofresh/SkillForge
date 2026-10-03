@@ -1,8 +1,10 @@
 /**
  * View models of the Character tab (PLAN 4.5): the character sheet (level, rank, attributes for the
- * radar, the push/pull balance note, streak, totals), the recent sessions list and the goals with
- * their progress along the goal paths. Pure: screens only render what these return.
+ * radar, the push/pull balance note, streak, totals, the hero classes of PLAN 6.9), the recent
+ * sessions list and the goals with their progress along the goal paths. Pure: screens only render
+ * what these return.
  */
+import { HERO_CLASSES } from '@/data/classes';
 import { compareCodeUnits } from '@/lib/compare';
 
 import { goalPathNodes } from './assessment';
@@ -13,6 +15,13 @@ import {
   RANK_MIN_MEDIAN_OG_LEVEL,
   type AttributeValues,
 } from './character';
+import {
+  classFacts,
+  classLadder,
+  EMPTY_CLASS_SETTINGS,
+  type ClassRow,
+  type ClassSettings,
+} from './classes';
 import { formatOgLevel } from './format';
 import { resolveNode, type ProgressMap } from './progression';
 import { rankLadder, type RankLadder } from './rankLadder';
@@ -252,6 +261,10 @@ export interface CharacterSheet {
   rankHint: string;
   /** Every rank and what the locked ones need (PLAN 6.7), opened from the rank crest. */
   ladder: RankLadder;
+  /** Every hero class with its tier and next requirement (PLAN 6.9), in `HERO_CLASSES` order. */
+  classes: ClassRow[];
+  /** The class the hero wears (one of `classes`). */
+  wornClass: ClassRow;
   radar: RadarAxis[];
   /** Present when push and pull peaks are more than `PUSH_PULL_MAX_GAP` OG levels apart. */
   balance?: BalanceNote;
@@ -268,6 +281,8 @@ export interface CharacterSheetInput {
   sessionResults: Readonly<Record<string, SessionResult>>;
   goals: readonly string[];
   heroName?: string;
+  /** The stored class settings (PLAN 6.9); none = the starting class only. */
+  classes?: ClassSettings;
   now: number;
 }
 
@@ -275,6 +290,12 @@ export function characterSheet(input: CharacterSheetInput): CharacterSheet {
   const { nodes, engine, sessions, sessionResults, goals, heroName, now } = input;
   const character = computeCharacter(nodes, engine.progress, engine.totalXp);
   const next = nextRank(character.rank);
+  const classes = classLadder(
+    HERO_CLASSES,
+    classFacts(nodes, engine, sessions.length),
+    input.classes ?? EMPTY_CLASS_SETTINGS,
+  );
+  const wornClass = classes.find((row) => row.status === 'worn') as ClassRow;
   return {
     ...(heroName !== undefined ? { heroName } : {}),
     level: characterLevelProgress(engine.totalXp),
@@ -284,6 +305,8 @@ export function characterSheet(input: CharacterSheetInput): CharacterSheet {
     ...(next ? { nextRank: next } : {}),
     rankHint: rankHint(character.medianOgLevel, next),
     ladder: rankLadder(branchOgLevels(nodes, engine.progress)),
+    classes,
+    wornClass,
     radar: radarAxes(character.attributes),
     ...(character.pushPullWarning ? { balance: balanceNote(character.peakOgLevels) } : {}),
     streak: activeStreak(engine, now),

@@ -170,6 +170,10 @@ src/
     rankLadder.ts       rank ladder view model (PLAN 6.7, ADR-054): rankLadder (every rank with
                         reached/current/next/locked, branches at its level, branches below),
                         branchesForMedian, rankRequirement, rankProgressText
+    classes.ts          hero classes (PLAN 6.9, ADR-057): classFacts, ruleParts / ruleMet (flat
+                        thresholds), reachedTier, mergeClassUnlocks (tiers kept forever), classLadder
+                        (class sheet rows), wornClass, sessionClassTierUps, NEW badges (seen tiers),
+                        parseClassSettings / classSettingsToRaw (the `hero_classes` setting)
     widget.ts           home-screen widget data (PLAN 6.6, ADR-055): widgetSnapshot (app state →
                         JSON-safe WidgetSnapshot), widgetView (snapshot + now → trained today via
                         isSameLocalDay, streak via activeStreak), parseWidgetSnapshot, topAttributes,
@@ -179,6 +183,8 @@ src/
     validate.ts         graph/content rules: validateNodes, validateTree (overlay: issues + warnings,
                         ADR-052), formatIssue
     progressionBuild.ts buildMatrix, renderGeneratedModule, renderReviewSheet (pure)
+    classes.ts          HERO_CLASSES: the 15 hero classes as typed data (ids, tiers with rules,
+                        flavor, color, 12×12 emblem), the one place for class thresholds (ADR-057)
     credits.ts          About screen content: CONTENT_SOURCES, FONT_CREDITS, OFL_CREDIT
     testFixtures.ts     synthetic nodes for unit tests
     skills/
@@ -220,7 +226,8 @@ src/
                         trainWarnings, acknowledgeTrainWarning, startTraining, logTrainingSet,
                         editTrainingSet / deleteTrainingSet / moveTrainingExercise (5.9),
                         skip/select/rest, finishTraining, abandonTraining; sessionResults (per
-                        session, PLAN 4.5); lastImport + undoLastImport (PLAN 4.6); editor (ADR-036):
+                        session, PLAN 4.5); classes + selectClass / markClassesSeen (PLAN 6.9, re-checked
+                        in every engine commit, `hero_classes` setting); lastImport + undoLastImport (PLAN 4.6); editor (ADR-036):
                         baseNodes, nodeDraft, newNodeDraft, nodeDraftIssues, saveNodeDraft,
                         resetNode, setNodeHidden, exportOverlay, shareOverlay, previewOverlayImport,
                         importOverlay (merge), pickOverlayFile
@@ -269,7 +276,8 @@ src/
     train/SessionResultPanels.tsx  XP, streak, level-ups, unlocks, exercises of a SessionResult
                         (Train summary and past session)
     character/          AttributeRadar (rasterized pixel radar), RankCrest (RANK_ICONS; a
-                        button with onPress), RankLadderSheet (PLAN 6.7), SessionHistoryRow,
+                        button with onPress), RankLadderSheet (PLAN 6.7), ClassEmblem / ClassBanner /
+                        ClassSheet / ClassUnlockPanel + classText.ts (PLAN 6.9), SessionHistoryRow,
                         GoalProgressCard
     equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form + the "Remove?"
                         confirmation (onboarding, Settings)
@@ -350,8 +358,8 @@ jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests, 
                         the 60 s timeout for heavy suites (src/components, scripts/appIcon)
 .maestro/               E2E flows: editor.yaml (clearState; custom exercise with a prerequisite,
                         cycle error, reset, My progressions share/import/delete, discard-changes
-                        sheet; 4.7/4.8/5.2 screenshots), character.yaml (clearState; level/XP after a session, history →
-                        past session; 4.5 screenshots), settings.yaml (profile add/remove, export share
+                        sheet; 4.7/4.8/5.2 screenshots), character.yaml (clearState; rank ladder, class sheet, level/XP after a
+                        session, history → past session; 4.5 / 6.7 / 6.9 screenshots), settings.yaml (profile add/remove, export share
                         sheet, import cancel, replay onboarding; 4.6 screenshots), map.yaml (Tree Map: zoom, pan, double tap,
                         focus, open a node, back to Columns; 5.1 screenshots), onboarding.yaml (fresh install, clearState), smoke.yaml (tabs + DB
                         proof), styleguide.yaml (UI kit), train.yaml (clearState; plan, live session,
@@ -436,7 +444,8 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
 | **User-placed node** | A user node, or a built-in node whose edit sets branch, order or og_level. Its order clashes are resolved in the merged tree and an og_level drop next to it is a warning, so a content update can't invalidate a saved overlay (ADR-052). |
-| **Widget snapshot** | The small JSON (`WidgetSnapshot`: level, rank, the engine's streak, `lastSessionAt`, top 3 attributes) the app writes to `widget-snapshot.json` for the home-screen widget. The widget derives "trained today" (same local calendar day as `lastSessionAt`) and the active streak from it at render time (ADR-055). |
+| **Hero class** | A cosmetic title the hero earns (PLAN 6.9, ADR-057): `HERO_CLASSES` in `src/data/classes.ts`. Every class but the starting Recruit has three **tiers** (e.g. Warrior → Veteran → Warlord) of flat thresholds (attribute points, sessions or rank) that only grow with training. Reached tiers are derived on every engine change and kept forever in the `hero_classes` setting; the hero wears one class. No effect on XP, the generator or the safeguards. |
+| **Widget snapshot** | The small JSON (`WidgetSnapshot`: level, rank, the engine's streak, `lastSessionAt`, top 3 attributes, optionally the worn hero class and tier, PLAN 6.9) the app writes to `widget-snapshot.json` for the home-screen widget. The widget derives "trained today" (same local calendar day as `lastSessionAt`) and the active streak from it at render time (ADR-055). |
 | **Session plan / active session** | The Train flow's editable plan preview (`SessionPlan`, in memory) and the started session (`ActiveSession`, the `active_session` draft) with its logged sets; `finishedSession` turns it into a `LoggedSession` (ADR-034). |
 | **Edit / reorder in the live session** | Tap a logged set's line to change its result (stepper, Save / Partial / Failed against its own prescription; its time stays) or delete it (confirmed; later sets move up, so `setIndex` stays the dense logging position). "Reorder" shows Up / Down per exercise; a strength pair moves as one (PLAN 5.9, ADR-045). |
 | **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics get a stopwatch. It can be paused and resumed (5.8, ADR-044; the paused time is not measured). Stored as timestamps plus the paused time (`ActiveSession.timer`), so it survives an app kill, paused too; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
@@ -543,6 +552,10 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
   than half) have a peak at its level; with an even count a high middle value can make up for a
   lower one, so a rank can also come with 6. The ladder shows "n of 7 branches at OG x or higher".
 - **Balance warning:** |push peak − pull peak| > 2 OG levels.
+- **Hero class tiers** (PLAN 6.9, ADR-057): a tier is reached when every part of its rule holds:
+  `stats` = each listed attribute ≥ its points, `sessions` = logged sessions ≥ count, `rank` =
+  rank ≥ the named one. Tiers count from I and stop at the first missed one. Thresholds only in
+  `src/data/classes.ts` (e.g. Warrior push 30 / 120 / 300).
 
 ## Generator *(Phase 2.5, ADR-024; constants in `src/domain/generator.ts` only)*
 
@@ -614,7 +627,8 @@ Schema in `src/db/schema.ts`; timestamps are integers in ms since the Unix epoch
     last_trained_at?, self_unlocked_at?)`: CACHE of `NodeProgress`, rewritten after every
     recompute/apply; safe to delete (`loadAll` rebuilds it identically)
   - `settings(key, value JSON)`: user settings: `onboarding_completed_at` (ADR-031),
-    `tree_view_mode` (`columns` | `map`, PLAN 5.1)
+    `tree_view_mode` (`columns` | `map`, PLAN 5.1), `hero_classes` (PLAN 6.9, ADR-057:
+    `{ version, selected?, unlocks: { classId: [{ at, sessionId? }] }, seen: { classId: tier } }`)
   - `progression_overlay(id = 1, revision, saved_at, body JSON)`: the current overlay in the
     `overlayToRaw` shape (ADR-028); `revision` counts saves
   - `active_session(id = 1, updated_at, body JSON)`: the Train flow's session in progress

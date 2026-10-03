@@ -222,12 +222,21 @@
   tap opened Train. Screenshots `docs/screenshots/6.8-*.png`. The GitHub release is created by
   the coordinator after the merge.
 
+- Hero classes (6.9, ADR-057, PR_LINK): 15 cosmetic classes (Recruit, then Warrior, Ranger,
+  Monk, Barbarian, Rogue, Druid, Paladin, Samurai, Templar, Bard, Cleric, Knight, Berserker,
+  Sorcerer), each with three tiers of flat thresholds (attribute points, sessions or rank). The
+  Character tab shows the worn class under the rank; it opens the class sheet (tiers, next
+  requirement with progress, Wear, NEW tags). A session that reaches a tier plays CLASS UNLOCKED! /
+  TIER UP! on the summary. Reached tiers are derived from history on every load (existing users
+  see theirs at once) and kept forever in the `hero_classes` setting. The widget shows the title
+  under the rank. Screenshots `docs/screenshots/6.9-*.png`.
+
 ## Next up
 1. On the user's phone: install [v0.5.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.5.0)
    over the installed build (Update, no uninstall), add the SkillForge widget to the home screen
    and report what feels off. (v0.4.0 and v0.5.0 are published as GitHub pre-releases.)
-2. 6.9 Classes and 6.10 Companion: waiting for the user's decision on the design proposals.
-   Then 6.11 (v0.6.0 release) and Phase 7 (Google Play); the user creates the upload key then
+2. 6.9b Weekly class challenge (design + ADR first), 6.10 Companion (waiting for the user's
+   decision on its design proposal). Then 6.11 (v0.6.0 release) and Phase 7 (Google Play); the user creates the upload key then
    (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -236,6 +245,26 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Hero classes (task 6.9, ADR-057, PR_LINK):**
+  - Code: `src/data/classes.ts` (`HERO_CLASSES`: ids, tiers, emblems, colors; the only place for
+    thresholds), `src/domain/classes.ts` (rules, ladder, setting reader/writer), `ClassRule` /
+    `ClassDefinition` / `ClassUnlocks` in `types.ts`; store: `classes` state, `CLASS_SETTING`
+    (`hero_classes`), `selectClass`, `markClassesSeen`, the re-check in `commitEngine` (sessions
+    stamp their tier-ups with `sessionId`); UI: `src/components/character/ClassEmblem`,
+    `ClassBanner`, `ClassSheet`, `ClassUnlockPanel`, `classText.ts`; Style Guide → Class emblems;
+    widget: optional `heroClass` in the snapshot, `ClassLabel` in `nativeWidget.tsx`.
+  - Thresholds were scaled from the user's "100–1000" to the real attribute scale (ADR-057 has the
+    simulation and the ceilings); **the user should confirm the mapping** (PR body). Change them
+    only in `src/data/classes.ts`.
+  - Verified: typecheck, lint, format:check, progressions:check, full Jest (80 suites); Maestro
+    `character.yaml` on Pixel_8_Pro_API_35 / Expo Go (banner shows Recruit, sheet opens with
+    Recruit worn and locked classes with "Push 0 / 30", scroll to Sorcerer, close; screenshots
+    `6.9-character-class`, `6.9-class-sheet`, `6.9-class-sheet-locked`). Not verified on a
+    device: an actual unlock / tier-up burst and "Wear" (a fresh E2E hero can't reach tier I;
+    covered by component and store tests), the widget label (needs a release build), an upgrade
+    install with real history (store test "upgrade" covers the logic). The 6.11 release upgrade
+    check should look at the class banner after the update.
+  - Ideas: 6.10 outfits per class / tier; the widget picker preview could show a class title.
 - **Release v0.5.0 (task 6.8, [PR #52](https://github.com/Herofresh/SkillForge/pull/52)):** ADR-043 routine. Both APKs built with `-- --clean` (new native
   dependency) in a short-path copy `D:\sf050` (checked identical to the branch with `diff -r`);
   signer check passed, `RELEASE_SIGNER_SHA256` unchanged. APKs and SHA-256: see the PR body; the
@@ -1063,11 +1092,20 @@ upgrade check from every earlier release). Any new table or column is additive a
 - [x] 6.8 v0.5.0 release (6.6; 6.7 already shipped in v0.4.0), same routine: upgrade check from
   0.1.0, 0.2.0, 0.3.0 and 0.4.0, then the widget on the upgraded install
   ([PR #52](https://github.com/Herofresh/SkillForge/pull/52); release [v0.5.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.5.0))
-- [ ] 6.9 Classes (user idea): classes the hero unlocks at certain levels, ranks or attribute
-  profiles (e.g. a pull-strong hero unlocks a "Climber" class) and can pick one to display.
-  **Starts with a short design proposal for the user** (class list, unlock rules, what a class
-  changes: title and look only, no gameplay effect unless the user wants one); then pure rules in
-  `src/domain/`, selection stored additively, shown on the Character tab and the widget.
+- [x] 6.9 Classes (user idea; ADR-057, PR_LINK): cosmetic hero classes the hero unlocks and
+  picks one to wear. User decisions (2026-10-03): cosmetic only (title, emblem, color; later
+  outfits for 6.10), no effect on XP, the generator or the safeguards; classic fantasy-RPG roles;
+  locked classes show what they need, like the rank ladder; an unlocked class stays unlocked
+  forever. Update the same day: no relative rules ("top attribute", "balanced stats"), only flat
+  thresholds (mostly attribute points in one or two attributes) that more training can never
+  un-meet, and three escalating tiers per class (e.g. Warrior → Veteran → Warlord), celebrated like
+  unlocks. 15 classes in `src/data/classes.ts`, rules in `src/domain/classes.ts`, the setting
+  `hero_classes` (no migration, no backup version change), Character tab banner + class sheet,
+  Train summary CLASS UNLOCKED! / TIER UP!, class title on the widget.
+- [ ] 6.9b Weekly class challenge (user approved 2026-10-03): the worn class offers one optional
+  weekly challenge relevant to it (e.g. Ranger: 3 sessions with pull work this week), with a small
+  bonus and a badge. A suggestion only, never blocking or pressuring (ADR-023 spirit). Bonus size
+  and rules are designed in its own ADR first.
 - [ ] 6.10 Companion (user idea, do last): the hero as a small tamagotchi-style pixel character on
   the Character tab, customizable within limits; classes (6.9) and achievements unlock trinkets
   and outfits. **Starts with a design proposal for the user** (what reacts to training, what can be

@@ -247,6 +247,25 @@ level), locked = the legendary silhouette (ink fill, gold-dark line, the emblem 
 name muted, a gold-dark bar of the branches already there). Each row is one accessible text with
 rank, state, requirement and progress. Screenshots: `docs/screenshots/6.7-*.png`.
 
+**Classes (PLAN 6.9, ADR-057)** in `src/components/character/`: under the rank crest, divided by
+a bronze rule, the `ClassBanner`: the class emblem (12 × 12 grid from `src/data/classes.ts`, 48 dp)
+in its tier frame, caps "Class", the tier's title in the class color (title), "Warrior · tier II
+of III" muted (or "Starting class"), rune caps "See all classes", and a gold "n NEW" tag while a
+reached tier is unseen. Tier frames (`classFrame`): locked = ink fill, gold-dark line, emblem
+gold-dark (the legendary silhouette); I = one line in the class color; II = two class-color lines;
+III = gold light + gold + the class color. Class colors are Palette keys chosen for ≥ 4.5:1 on
+both panels (tested): mist, ember, verdant, gold, blood, amethyst, lime, gold light, rune, bone,
+orchid, sky, steel, sunfire, arcane. The banner opens `ClassSheet`, a `PixelModal` "Classes"
+like the rank ladder: a muted intro, then one framed row per class (worn = double frame in its
+color, "Wearing" gold; unlocked = proficient gold frame, "Unlocked" rune, a secondary "Wear
+<title>" button with the helmet; locked = silhouette, "Locked" muted), the flavor line, and the
+next tier ("Next: Veteran (tier II) · Push 120" or "Unlock: Pull 30") with a 10-segment bar in
+the class color (gold-dark when locked) and "Push 64 / 120". NEW tags stay while the sheet is
+open; closing it marks them seen. The Train summary adds an arcane panel after the session
+panels: a CLASS UNLOCKED! (or TIER UP!) burst with the title, one line per class (emblem, title,
+"Warrior class unlocked" / "Warrior · tier II") and "Wear …". Style Guide → Class emblems shows
+every emblem locked and at tiers I–III. Screenshots: `docs/screenshots/6.9-*.png`.
+
 **Node editor and shared progressions (PLAN 4.7–4.8, ADR-036)** in `src/components/editor/`: the
 editor is a stack of `DetailSection` panels (an arcane "Exercise" panel for a custom node: name,
 metric chips, "Comes after" + `PositionSheet`, difficulty stepper, straight-arm chip; then
@@ -326,7 +345,9 @@ Icons are the 12×12 grids as SVG strings (`iconSvg`, 24 dp, crisp edges).
   `goldLight` (Jersey 15, 24 sp), each over a Silkscreen caps label in `textMuted` (10 sp).
 - **Right (from `WIDGET_WIDE_MIN_DP` = 220 dp wide, the default 4 × 2 size):** a small `shield` +
   the rank in its `RankColors` color, then up to three attributes ("PULL 12": caps label in
-  `textMuted`, number in its `AttributeColors` color). A narrow (2-cell) widget keeps only the left.
+  `textMuted`, number in its `AttributeColors` color). Under the rank, the worn hero class's title
+  as a Silkscreen caps label in the class color (PLAN 6.9; one line, truncated). A narrow (2-cell)
+  widget keeps only the left.
 - **Size scaling (6.6b, ADR-056):** the sizes above are scale 1, the compact layout. A wide widget
   scales type, icons, gaps and padding by `min(width / 260 dp, height / 140 dp)`, rounded down to
   0.25 steps, between 1 and 2 (`widgetSizes`); icons stay on multiples of 12 dp so every grid
@@ -360,8 +381,9 @@ Icons are the 12×12 grids as SVG strings (`iconSvg`, 24 dp, crisp edges).
   thread, the same stepped look as `Easing.steps`); the in-between poses are eased (smoothstep)
   between keyframes. With reduce motion they show one still keyframe and never move.
 - **Reveal moments (PLAN 5.2, ADR-038):** every celebration is a `LevelUpBurst` with a title from
-  `BURST_TITLES` (LEVEL UP!, UNLOCKED!, TESTED OUT!, QUEST COMPLETE). The ring bursts from the
-  title's centre. Where they play: Train summary (quest complete, first level-up, first unlock),
+  `BURST_TITLES` (LEVEL UP!, UNLOCKED!, TESTED OUT!, QUEST COMPLETE, CLASS UNLOCKED!, TIER UP!). The ring bursts from the
+  title's centre. Where they play: Train summary (quest complete, first level-up, first unlock, a class
+  unlocked or a class tier reached),
   Trial outcome (tested out; node detail and onboarding share `TrialOutcome`), onboarding summary
   (hero name + rank), node detail (UNLOCKED! after unlock anyway, else LEVEL UP! when the node's
   level rose while it was open), Character tab (LEVEL UP! when the character level rose). Level-ups
