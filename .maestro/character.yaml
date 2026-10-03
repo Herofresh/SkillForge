@@ -184,6 +184,13 @@ name: Character - level and XP after a logged session, history opens the session
     id: 'summary-challenge-line'
     text: '\+1 this session'
 - takeScreenshot: 6.9b-summary-progress
+# 6.10: the companion's victory pose on the summary
+- scrollUntilVisible:
+    element:
+      id: 'summary-companion'
+    direction: DOWN
+    timeout: 30000
+- takeScreenshot: 6.10-summary-victory
 - scrollUntilVisible:
     element:
       id: 'summary-done'
@@ -201,13 +208,18 @@ name: Character - level and XP after a logged session, history opens the session
     visible:
       id: 'character-screen'
     timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'character-total-xp'
+    direction: UP
+    timeout: 30000
 - assertVisible:
     id: 'character-total-xp'
     text: '[1-9][0-9]* XP earned in total'
 - assertVisible:
     id: 'character-xp'
 - takeScreenshot: 4.5-character
-# 6.10: a session cheers the companion up; a tap plays the exercise it trained
+# 6.10: a session cheers the companion up; a tap makes it wave
 - scrollUntilVisible:
     element:
       id: 'companion-mood'
