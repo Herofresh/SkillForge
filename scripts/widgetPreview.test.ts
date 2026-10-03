@@ -45,7 +45,7 @@ describe('widget picker preview', () => {
     ]);
   });
 
-  it('is the 4 x 2 widget at its pixel density', () => {
+  it('is the default 4 x 1 widget at its pixel density', () => {
     expect(image.width).toBe(PREVIEW_WIDTH_DP * PREVIEW_PX_PER_DP);
     expect(image.height).toBe(PREVIEW_HEIGHT_DP * PREVIEW_PX_PER_DP);
   });
@@ -74,7 +74,7 @@ describe('widget picker preview', () => {
 describe('large widget picker preview (PLAN 6.10)', () => {
   const image = renderCompanionWidgetPreview();
 
-  it('is the 4 x 3 widget at its pixel density, framed', () => {
+  it('is the default 4 x 2 widget at its pixel density, framed', () => {
     expect(image.width).toBe(COMPANION_PREVIEW_WIDTH_DP * PREVIEW_PX_PER_DP);
     expect(image.height).toBe(COMPANION_PREVIEW_HEIGHT_DP * PREVIEW_PX_PER_DP);
     expect(pixelAt(image, 0, 0)).toEqual(hexToRgba(Colors.ink));

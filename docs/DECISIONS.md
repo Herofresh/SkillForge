@@ -1680,7 +1680,7 @@ Template:
   until the app writes a new one).
 
 ## ADR-056: Widget sizes scale with the reported widget size; a generated picker preview (PLAN 6.6b)
-- Date: 2026-10-03 · Status: Accepted (extends ADR-055)
+- Date: 2026-10-03 · Status: Accepted (extends ADR-055); scaling rule superseded by ADR-062
 - Context: the default 4 × 2 widget (≈ 395 × 250 dp on the Pixel 8 Pro emulator) drew the scale-1 layout
   sized for the 2-row minimum, leaving most of its height empty; the widget picker showed the app
   icon because no `previewImage` was set.
@@ -1854,8 +1854,8 @@ Template:
   pins that week to the class worn now (a full recompute follows, so the result stays exact).
 
 ## ADR-059: Companion: a layered JRPG-style chibi sprite with moods, earned accessories, class weapons and a large widget (PLAN 6.10)
-- Date: 2026-10-03 · Status: Accepted (extends ADR-055/056; the exercise animations of ADR-053
-  stay as they are)
+- Date: 2026-10-03 · Status: Accepted (extends ADR-055/056; widget sizes and placement superseded by
+  ADR-062; the exercise animations of ADR-053 stay as they are)
 - Context: PLAN 6.10 (user idea): the hero as a small tamagotchi-style pixel companion on the
   Character tab, customizable within limits, with trinkets that training earns. **User decisions
   (2026-10-03):**
@@ -2065,3 +2065,73 @@ Template:
   argument (the widget passes it). Tests draw every accessory and weapon on both bodies in every
   animation and require each frame to be one connected piece standing on the ground row. New art
   must fit both bodies; check it with `npm run companion:sheet` (both bodies on every sheet).
+
+## ADR-062: Widgets use their space: smaller defaults and a measured layout per size class (PLAN 6.12)
+- Date: 2026-10-03 · Status: Accepted (replaces ADR-056's scaling rule and ADR-059's widget
+  placement; the widget names, snapshot and data flow of ADR-055/059 stay)
+- Context: the user (2026-10-03): "I want the widget to use its space better or be smaller". The
+  small widget (default 4 × 2) and the companion widget (default 4 × 3) left wide empty bands:
+  ADR-056 scaled one fixed two-column layout by the tighter of width and height, so a 4 × 2 widget
+  was held back by its width and kept a third of its height empty, and the companion's text
+  column filled less than half of a 4 × 3. Both defaults were also bigger than their content.
+- Options:
+  - Tune ADR-056's base sizes per widget: still one arrangement, so any aspect ratio other than the
+    tuned one leaves a band again.
+  - Hand-written layouts per cell count (4 × 1, 4 × 2, …): launchers report very different dp
+    sizes for the same cell count (4 or 5 columns, row heights 90–130 dp), so "4 × 2" is not one
+    size.
+  - **A small layout engine:** describe each arrangement as a tree, measure it with the real fonts,
+    and pick the arrangement and scale that fit the reported size best.
+- Decision:
+  - **Smaller defaults** (app.json): the small `SkillForge` widget **4 × 1** (`minWidth` 110 dp,
+    `minHeight` 40 dp, `maxResizeHeight` 300 dp: at most two rows, where its content still fills
+    the height); the companion widget **4 × 2** (`minWidth` 300 dp, `minHeight` 110 dp: its text
+    stays readable next to the sprite). Both stay resizable both ways; the provider names are
+    unchanged, so placed widgets keep working and simply redraw with the new layout.
+  - **`src/widget/widgetLayout.ts`** (pure, no library or React Native import) builds the content
+    as a tree of rows / columns (gap, align, justify, stretch), texts, icons and the sprite. It
+    measures texts with the fonts' advance widths and line heights (read once from the TTFs'
+    `hmtx` / `hhea` tables and kept as tables; Jersey 15 lines are 1.0 em, Silkscreen 1.28 em),
+    so "fits" means the real text fits.
+  - **Size classes** (arrangements): small widget `narrow` (status over streak / level),
+    `standard` (two columns: status and streak / level; rank, class and 0–3 attributes),
+    `wide` (one row), `tall` (one column of everything) and `grid` (status, streak / level, then
+    rank and attributes side by side); `narrow` and `tall` also try the status on two lines
+    ("Not yet" / "today") for slim widgets. Companion: `standard` (sprite left, a column of status,
+    mood, streak / level, rank), `wide` (sprite left, the lines as 2 × 2), `grid` (sprite on top,
+    2 × 2 under it), `tall` (sprite on top, the column under it).
+  - **Choice:** every arrangement at every scale from 0.6 to 3 in 0.05 steps (`widgetSizes(scale)`:
+    the 6.6 sizes × scale, icons on multiples of 12 dp, padding growing to 1.5 and at most 4 % of
+    the shorter side); the biggest scale where the content fits 97 % of the inner box. Score:
+    scale × (1 + 0.2 × extras shown) × height fill, where extras are the rank, the class and each
+    attribute; arrangements at scale 1 or more (the 6.6 sizes) always beat smaller ones, and
+    below that only scale × fill counts (on the emulator a 2 × 1 at 0.9 crammed in rank, class
+    and a stat in 9 dp labels; the two-line status at 1.1 reads better). The companion adds the
+    sprite size (whole dp per sprite pixel, 2 and up, crisp) and scores pixel × scale × fill,
+    readable text first (the sprite grows only while the text stays at scale 1 or more). The
+    sprite is its mood frame trimmed to the painted pixels (`trimPixelRows`): the 6.10 canvas
+    had empty rows above the head, which on the 4 × 3 widget showed as a band, and a pose's
+    width (a raised weapon, a kneeling sad pose) differs per mood; the layout uses the frame
+    it draws, so it works for any canvas size (6.13 made it 32 × 44). Free space is spread with `space-evenly` /
+    `space-between` (the root box fills the widget), so what is left is small and even.
+  - **Font sizes in dp** (`allowFontScaling: false`): the layout fits the text to the widget's
+    size; the system font scale would make it overflow and clip. The user scales the widget by
+    resizing it instead. Trade-off (accessibility): widget text no longer follows Android's font
+    size setting, so a user who relies on large system text gets the same widget text as everyone
+    else; the floor is the layout's minimum (tests require scale ≥ 0.9, i.e. ≥ 9 dp caps labels;
+    at the common launcher sizes the labels come out 11–14 dp and the status 20 dp or more), and
+    resizing the widget is the only way to get bigger text.
+  - **One layout for widget, preview and tests:** `nativeWidget.tsx` only maps the tree to
+    `FlexWidget` / `TextWidget` / `SvgWidget`; `placeWidgetNodes` computes the same flex positions,
+    which the picker previews (`scripts/widgetPreview.ts`, now both at their default size) draw
+    with the preview font. Tests check at the common launcher sizes (4- and 5-column grids) that
+    the content covers at least 80 % of the height, stays readable and every leaf is inside the
+    widget, for long and short texts.
+  - `ATTRIBUTE_LABELS` moved to the React-Native-free `src/components/attributeLabels.ts` (re-
+    exported from `AttributeChips`) so the layout and the scripts can use it.
+- Consequences: no data, snapshot or schema change; installing over v0.6.0 keeps everything and
+  placed widgets redraw at their current size. A new widget field becomes a node in the
+  arrangements (and an `extras` count if it is optional). A font change needs new advance tables.
+  The default sizes apply to newly added widgets only; a widget placed at 4 × 2 or 4 × 3 keeps
+  its size (now filled). On launchers whose one-row height is below 110 dp the companion widget
+  needs two rows.

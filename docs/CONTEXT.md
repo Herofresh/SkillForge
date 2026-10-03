@@ -105,9 +105,9 @@ scripts/
   iconBuild.ts          npm run icon:build: renders appIcon.ts to assets/images/*.png + the preview,
                         and widgetPreview.ts to assets/images/widget-preview.png and
                         widget-companion-preview.png
-  widgetPreview.ts      the widget picker previews (the large one with the companion, PLAN 6.10):
-                        the small 4 × 2 widget at scale 1.5 with sample values
-                        (icons + colors from the app, tinyFont text; PLAN 6.6b, ADR-056)
+  widgetPreview.ts      the widget picker previews: both widgets at their default size (small 4 × 1,
+                        companion 4 × 2) with sample values, placed by src/widget/widgetLayout.ts
+                        (icons, sprite + colors from the app, tinyFont text; PLAN 6.6b, 6.12)
   raster.ts, png.ts     tiny RGBA raster helpers and a minimal PNG encoder on node:zlib (no image deps)
   animationSheet.ts     contact sheets of the exercise animations (a row of frames per animation,
                         labelled with tinyFont.ts, a 3×5 pixel font); animationSheetBuild.ts is the
@@ -298,7 +298,8 @@ src/
                         transform; Focus, zoom −/+, "Switch to list"), MapCanvas (lane bands, edge
                         lines as Views), MapNode (fixed-size state-framed node button)
     node/               node detail parts: NodeHeader, DetailSection, PrerequisiteList,
-                        NodeHistoryList (rows open the past session), AttributeChips (ATTRIBUTE_LABELS), UnlockSheet;
+                        NodeHistoryList (rows open the past session), AttributeChips (re-exports
+                        ATTRIBUTE_LABELS from components/attributeLabels.ts, RN-free), UnlockSheet;
                         ExerciseInfoSheet (description + cues, the one sheet for Tree and Train, 6.2)
                         and InfoButton (the "i" that opens it; the guide's "i" too)
     guide/              the guide's UI (PLAN 6.10c): GuideButton (an InfoButton that opens
@@ -380,11 +381,17 @@ src/
   widget/               Android home-screen widget (PLAN 6.6, ADR-055; react-native-android-widget)
     widgetModule.ts     THE guard: widgetsAvailable() (Android + native module `AndroidWidget`),
                         loadNativeWidget() requires nativeWidget.tsx only then (Expo Go, Jest: undefined)
-    nativeWidget.tsx    the widget layouts: the small SkillForgeWidget (WIDGET_NAME, compact below
-                        WIDGET_WIDE_MIN_DP, widgetSizes scales it with the widget's size) and the
-                        large SkillForgeCompanionWidget (COMPANION_WIDGET_NAME, the companion sprite
-                        as an SVG, PLAN 6.10), registerWidgetTask (draws by widgetName),
-                        redrawWidgets (both);
+    widgetLayout.ts     pure (no library, no RN): what goes where at a widget size (PLAN 6.12,
+                        ADR-062). A layout tree (WidgetNode: box / text / icon / sprite), measured
+                        with the fonts' real advance widths and line heights (textWidthDp,
+                        lineHeightDp); every size class (narrow, standard, wide, tall, grid) at every
+                        scale (widgetSizes(scale)), the best that fits wins: widgetLayout (small),
+                        companionLayout (sprite size too); placeWidgetNodes = the flex positions
+                        (preview, tests)
+    nativeWidget.tsx    turns the layout tree into the library's primitives: the small
+                        SkillForgeWidget (WIDGET_NAME) and the large SkillForgeCompanionWidget
+                        (COMPANION_WIDGET_NAME, the companion sprite as an SVG, PLAN 6.10),
+                        registerWidgetTask (draws by widgetName), redrawWidgets (both);
                         the only file that imports the library ('use no memo': no React Compiler)
     widgetStorage.ts    the snapshot file `widget-snapshot.json` in the document directory
     widgetSync.ts       startWidgetSync(store) from bootstrap: write + redraw after loadAll, on
@@ -400,7 +407,8 @@ docs/                   PLAN, DECISIONS, CONTEXT, DESIGN (visual language), rese
 .github/workflows/ci.yml  CI (Node 24): typecheck, lint, format:check, test, progressions:check
 app.json                Expo config: version + android.versionCode (the one version source,
                         ADR-039), package at.skillforge.app, adaptive icon, plugins (incl. the
-                        widget: size, 30-min update, fonts copied into the APK, ADR-055)
+                        widgets: default / min / max size, 30-min update, fonts copied into the
+                        APK, ADR-055, ADR-062)
 eas.json                EAS profiles development / preview (APK) / production (AAB), version
                         source local; unused (no EAS, ADR-047)
 android/, builds/       GENERATED, gitignored: prebuild's native project and the copied APKs

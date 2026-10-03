@@ -397,50 +397,61 @@ line around a `stone` disc, on the `night` background. Roles map to `Palette` ke
 - Editing: keep the silhouette mirror-symmetric (tested), keep details ≥ 2 cells so they survive
   48 px, rebuild, look at the preview, commit the PNGs.
 
-### Home-screen widget (PLAN 6.6, ADR-055)
+### Home-screen widget (PLAN 6.6, ADR-055; layouts PLAN 6.12, ADR-062)
 
-Two widgets since PLAN 6.10 (ADR-059): the **small** `SkillForge` widget below (training status,
-streak, level, rank, class, top attributes; the 6.6 provider, so placed widgets keep working) and
-the **large** `SkillForgeCompanion` widget (default 4 × 3): the same frame, the companion sprite in
-its mood (first frame, an SVG at a whole number of dp per pixel, 160 × 200 dp at 4 × 3) on the
-left, on a transparent background so it stands straight on the widget surface (no box), and on the right, spread over the height: a small check /
-hourglass with the status in the attribute size, the mood title as a gold-light caps label, the flame
-with streak and level, and the shield with the rank over the class title. Its picker preview is
-`assets/images/widget-companion-preview.png`.
+Two widgets since PLAN 6.10 (ADR-059): the **small** `SkillForge` widget (training status,
+streak, level and, as space allows, rank, class and top attributes; the 6.6 provider, so placed
+widgets keep working) and the **large** `SkillForgeCompanion` widget (the companion sprite in its
+mood with status, mood, streak, level, rank and class). Since 6.12 both use whatever size they get:
+the content grows and reflows instead of leaving empty bands, and nothing is clipped.
 
-An Android widget (`src/widget/nativeWidget.tsx`) drawn with the library's RemoteViews primitives,
+Android widgets (`src/widget/nativeWidget.tsx`) drawn with the library's RemoteViews primitives,
 so only plain boxes, text and SVG: no notched corners and no hard drop shadow. The frame is an
 `ink` outer line (one `PIXEL`), a `stoneEdge` inner line and the `stone` fill; square corners
-(Android 12+ launchers clip widgets to rounded corners anyway).
-Icons are the 12×12 grids as SVG strings (`iconSvg`, 24 dp, crisp edges).
+(Android 12+ launchers clip widgets to rounded corners anyway). Icons are the 12×12 grids as SVG
+strings (`iconSvg`, crisp edges).
 
-- **Left (always):** `check` + "Trained today" in `success`, or `hourglass` + "Not yet today" in
-  `gold` (Jersey 15, 20 sp); below, the `flame` with the streak in `ember` and the level in
-  `goldLight` (Jersey 15, 24 sp), each over a Silkscreen caps label in `textMuted` (10 sp).
-- **Right (from `WIDGET_WIDE_MIN_DP` = 220 dp wide, the default 4 × 2 size):** a small `shield` +
-  the rank in its `RankColors` color, then up to three attributes ("PULL 12": caps label in
-  `textMuted`, number in its `AttributeColors` color). Under the rank, the worn hero class's title
-  as a Silkscreen caps label in the class color (PLAN 6.9; one line, truncated). A narrow (2-cell)
-  widget keeps only the left.
-- **Size scaling (6.6b, ADR-056):** the sizes above are scale 1, the compact layout. A wide widget
-  scales type, icons, gaps and padding by `min(width / 260 dp, height / 140 dp)`, rounded down to
-  0.25 steps, between 1 and 2 (`widgetSizes`); icons stay on multiples of 12 dp so every grid
-  cell is whole (the small `shield` is ⅔ of the icon). The default 4 × 2 (≈ 395 × 250 dp on the
-  Pixel 8 Pro emulator) draws at 1.5: status and rank 30 sp, numbers 36 sp, labels 15 sp, icons 36 dp.
-  A narrow widget (below 220 dp) always keeps scale 1. The hero column keeps two gaps from the
-  status column. Scaled up, both columns spread their two rows over the full height
-  (`space-evenly`; the hero column's rows are the rank and the attribute block), so the status
-  lines up with the rank and the streak / level with the attributes; compact, they stay centred.
-- **First run (no snapshot yet):** `sword` + "SkillForge" in gold + "OPEN THE APP TO BEGIN".
-- **Picker preview:** `assets/images/widget-preview.png` (app.json `previewImage`), drawn by
-  `npm run icon:build` from `scripts/widgetPreview.ts`: the 4 × 2 widget at scale 1.5 with sample
-  values, the same icons and colors, text in the 3 × 5 preview font (no TTF rasterizer in the
-  build). Re-run `icon:build` when the widget's look changes; a test fails if the PNG is stale.
+- **Pieces (scale 1 sizes, all in dp):** `check` + "Trained today" in `success`, or `hourglass` +
+  "Not yet today" in `gold` (Jersey 15, 20; icon 24); the `flame` with the streak in `ember` and
+  the level in `goldLight` (Jersey 15, 24), each over a Silkscreen caps label in `textMuted` (10);
+  a small `shield` (⅔ of the icon) + the rank in its `RankColors` color (Jersey 15, 20) over the
+  worn class's title as a caps label in the class color (PLAN 6.9); attributes "PULL 12" (caps
+  label in `textMuted`, number in its `AttributeColors` color, 16), strongest first; the
+  companion's mood title as a caps label in `goldLight`.
+- **Size classes** (`src/widget/widgetLayout.ts`): small widget `narrow` (status over streak /
+  level; slim widgets), `standard` (two columns: status over streak / level, rank and class over
+  0–3 attributes; the default 4 × 1), `wide` (one row), `grid` (status, streak / level, then rank
+  and attributes side by side; 4 × 2), `tall` (one column of everything); slim widgets may break
+  the status into two lines ("Not yet" / "today"). Companion: `standard` (sprite left, a column of
+  status, mood, streak / level, rank; the default 4 × 2), `wide` (sprite left, the lines as 2 × 2;
+  4 × 1), `grid` (sprite on top, 2 × 2 under it; 4 × 3), `tall` (sprite on top, the column under it).
+- **Scaling and choice (ADR-062):** every class is measured with the fonts' real widths and line
+  heights at every scale from 0.6 to 3 (type, icons, gaps × scale; icons on multiples of 12 dp;
+  padding up to 1.5 × and at most 4 % of the shorter side). The biggest scale that fits wins,
+  weighed by what it shows (rank, class, each attribute) and how much of the height it covers;
+  text below scale 1 only when nothing else fits. Free space is spread with `space-evenly` /
+  `space-between`, so the rows line up over the full height. Font sizes are dp, not sp
+  (`allowFontScaling: false`): the layout fits the text to the widget, the system font size
+  would clip it; a bigger widget is the way to bigger text.
+- **Companion sprite:** its mood's first frame trimmed to its painted pixels (`trimPixelRows`), a
+  whole number of dp per sprite pixel (2 and up, crisp), on a transparent background so it stands
+  straight on the widget surface (no box). It grows while the text stays at scale 1 or more (on
+  the Pixel 8 Pro's 4 × 2, 4–5 dp per pixel, most of the height, next to the lines at 1.5–1.7).
+- **Sizes (app.json):** small default 4 × 1 (min 110 × 40 dp, at most 300 dp tall: two rows),
+  companion default 4 × 2 (min 300 × 110 dp); both resizable both ways.
+- **First run (no snapshot yet):** `sword` + "SkillForge" in gold + "OPEN THE APP TO BEGIN", in a
+  row or stacked.
+- **Picker previews:** `assets/images/widget-preview.png` and `widget-companion-preview.png`
+  (app.json `previewImage`), drawn by `npm run icon:build` from `scripts/widgetPreview.ts`: each
+  widget at its default size with sample values, placed by the same layout (`placeWidgetNodes`),
+  the same icons, sprite and colors, text in the 3 × 5 preview font (no TTF rasterizer in the
+  build). Re-run `icon:build` when the widget's look changes; a test fails if a PNG is stale.
 - Fonts: Jersey 15 and Silkscreen are copied into the APK by the plugin (`fonts` in app.json); if
   a font is missing Android falls back to the system font.
 - The whole widget is one tap target that opens the Train tab (`skillforge://train`), with the
-  accessibility label "Open SkillForge on the Train tab". Screenshot:
-  `docs/screenshots/6.6-widget*.png`, `docs/screenshots/6.6b-*.png` (scaled sizes, preview).
+  accessibility label "Open SkillForge on the Train tab". Screenshots:
+  `docs/screenshots/6.6-widget*.png`, `6.6b-*.png`, `6.11-widget-*.png` (before 6.12) and
+  `6.12-*.png` (the layouts per size).
 
 ## 7. Motion
 
