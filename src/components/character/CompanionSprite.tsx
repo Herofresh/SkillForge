@@ -19,7 +19,7 @@ type Props = {
   animation: CompanionAnimation;
   outfit: CompanionOutfit;
   look: CompanionLook;
-  /** dp per sprite pixel (the sprite is 32 × 40 pixels). */
+  /** dp per sprite pixel (the sprite is `SPRITE_WIDTH` × `SPRITE_HEIGHT` pixels). */
   scale?: number;
   testID?: string;
 };
@@ -27,8 +27,8 @@ type Props = {
 const GRID = { width: SPRITE_WIDTH, height: SPRITE_HEIGHT };
 
 /**
- * The companion sprite (PLAN 6.10): a JRPG-style chibi hero in the hero's accessories, class
- * weapon and colours, playing one of its frame loops. Reduce motion shows its first frame.
+ * The companion sprite (PLAN 6.10 / 6.13): a JRPG-style field-sprite hero (man or woman) in the
+ * hero's accessories, class weapon, colours and hair style, playing one of its frame loops. Reduce motion shows its first frame.
  * Decorative: the card next to it says the mood in words.
  */
 export function CompanionSprite({ animation, outfit, look, scale = 4, testID }: Props) {
@@ -38,9 +38,11 @@ export function CompanionSprite({ animation, outfit, look, scale = 4, testID }: 
   return (
     <PixelSprite
       testID={testID}
-      cacheKey={`companion:${motion}:${animation}:${JSON.stringify(outfit)}`}
+      cacheKey={`companion:${motion}:${animation}:${JSON.stringify(outfit)}:${look.body ?? ''}:${look.hairStyle ?? ''}`}
       frames={() =>
-        reduceMotion ? [companionStill(animation, outfit)] : companionFrames(animation, outfit)
+        reduceMotion
+          ? [companionStill(animation, outfit, look)]
+          : companionFrames(animation, outfit, look)
       }
       colors={colors}
       scale={scale}

@@ -1,8 +1,9 @@
 /**
- * CLI behind `npm run companion:sheet` (runs via tsx, PLAN 6.10, ADR-059): contact sheets of the
- * companion sprite for review: every animation (moods, victory, wave) for a few outfits, every
- * accessory in four poses (per slot), every class weapon (base and tier III) and the colour looks.
- * Writes docs/screenshots/6.10-*.png; commit the results.
+ * CLI behind `npm run companion:sheet` (runs via tsx, PLAN 6.10 / 6.13, ADR-059 / ADR-061):
+ * contact sheets of the companion sprite for review, for both bodies: every animation (moods,
+ * victory, salute) for a few outfits, every accessory in four poses (per slot), every class weapon
+ * (base and tier III), the colour looks and the hair styles. Writes docs/screenshots/6.13-*.png;
+ * commit the results.
  *
  * While tuning art: `npm run companion:sheet -- --only iron_helm,warrior,legend --cell 8 --out <png>`
  * (accessory ids, class ids for weapons, outfit labels).
@@ -19,10 +20,12 @@ import {
   COMPANION_TINTS,
   companionColors,
   companionFrame,
+  HAIR_STYLES,
   type CompanionAnimation,
   type CompanionLook,
   type CompanionOutfit,
 } from '@/data/companion';
+import { COMPANION_BODIES } from '@/domain/companion';
 import { COMPANION_SLOTS } from '@/domain/types';
 
 import { renderFrameSheet, type FrameRow } from './animationSheet';
@@ -32,6 +35,7 @@ import { encodePng } from './png';
 const ROOT = process.cwd();
 /** Image pixels per sprite pixel on the sheets. */
 const CELL = 4;
+const PREFIX = 'docs/screenshots/6.13';
 
 const colorsFor = (look: CompanionLook = {}) => {
   const colors = companionColors(look);
@@ -39,25 +43,40 @@ const colorsFor = (look: CompanionLook = {}) => {
 };
 
 /** The distinct frames of an animation (holds not repeated). */
-const framesOf = (animation: CompanionAnimation, outfit: CompanionOutfit) =>
-  COMPANION_ANIMATIONS[animation].map((frame) => companionFrame(frame, outfit));
+const framesOf = (animation: CompanionAnimation, outfit: CompanionOutfit, look?: CompanionLook) =>
+  COMPANION_ANIMATIONS[animation].map((frame) => companionFrame(frame, outfit, look));
 
-const first = (animation: CompanionAnimation, outfit: CompanionOutfit) =>
-  companionFrame(COMPANION_ANIMATIONS[animation][0], outfit);
+const first = (animation: CompanionAnimation, outfit: CompanionOutfit, look?: CompanionLook) =>
+  companionFrame(COMPANION_ANIMATIONS[animation][0], outfit, look);
 
-/** An outfit in its key poses: content, happy (mid-hop), waiting, sad, victory. */
-function posesRow(label: string, outfit: CompanionOutfit, look?: CompanionLook): FrameRow {
+/** An outfit in its key poses: content, happy (raised), waiting, sad, victory, salute. */
+function posesRow(label: string, outfit: CompanionOutfit, look: CompanionLook = {}): FrameRow {
   return {
     label,
     frames: [
-      first('content', outfit),
-      framesOf('happy', outfit)[1],
-      first('waiting', outfit),
-      first('sad', outfit),
-      first('victory', outfit),
+      first('content', outfit, look),
+      framesOf('happy', outfit, look)[1],
+      first('waiting', outfit, look),
+      first('sad', outfit, look),
+      first('victory', outfit, look),
+      first('wave', outfit, look),
     ],
     colorOf: colorsFor(look),
   };
+}
+
+/** Four poses for the man, then the same four for the woman. */
+function bothBodiesRow(label: string, outfit: CompanionOutfit, look: CompanionLook = {}): FrameRow {
+  const poses = (body: (typeof COMPANION_BODIES)[number]) => {
+    const withBody = { ...look, body };
+    return [
+      first('content', outfit, withBody),
+      framesOf('happy', outfit, withBody)[1],
+      first('waiting', outfit, withBody),
+      first('sad', outfit, withBody),
+    ];
+  };
+  return { label, frames: [...poses('man'), ...poses('woman')], colorOf: colorsFor(look) };
 }
 
 const OUTFITS: readonly { label: string; outfit: CompanionOutfit; look?: CompanionLook }[] = [
@@ -71,7 +90,7 @@ const OUTFITS: readonly { label: string; outfit: CompanionOutfit; look?: Compani
       loadout: { head: 'rope_headband', hands: 'leather_bracers', body: 'travelers_tunic' },
       weapon: { classId: 'recruit', upgraded: false },
     },
-    look: { skin: 'tan', hair: 'chestnut', outfit: 'forest' },
+    look: { skin: 'tan', hair: 'chestnut', outfit: 'forest', hairStyle: 'ponytail' },
   },
   {
     label: 'warrior',
@@ -138,14 +157,25 @@ const OUTFITS: readonly { label: string; outfit: CompanionOutfit; look?: Compani
   },
 ];
 
-const weaponRow = (classId: string): FrameRow => ({
-  label: classId,
-  frames: [false, true].flatMap((upgraded) => {
-    const outfit: CompanionOutfit = { loadout: {}, weapon: { classId, upgraded } };
-    return [first('content', outfit), framesOf('happy', outfit)[1], first('sad', outfit)];
-  }),
-  colorOf: colorsFor(),
-});
+const weaponRow = (classId: string): FrameRow => {
+  const base: CompanionOutfit = { loadout: {}, weapon: { classId, upgraded: false } };
+  const upgraded: CompanionOutfit = { loadout: {}, weapon: { classId, upgraded: true } };
+  const woman: CompanionLook = { body: 'woman' };
+  return {
+    label: classId,
+    frames: [
+      first('content', base),
+      framesOf('happy', base)[1],
+      first('waiting', base),
+      first('sad', base),
+      first('content', upgraded, woman),
+      framesOf('happy', upgraded, woman)[1],
+      first('wave', upgraded, woman),
+      first('sad', upgraded, woman),
+    ],
+    colorOf: colorsFor(),
+  };
+};
 
 function argument(name: string): string | undefined {
   const index = process.argv.indexOf(`--${name}`);
@@ -160,8 +190,13 @@ function write(path: string, rows: FrameRow[], cell: number) {
   console.log(`Wrote ${path} (${image.width}×${image.height}, ${rows.length} rows)`);
 }
 
+/** Every outfit for the man, then for the woman. */
 const outfitRows = (outfits: typeof OUTFITS) =>
-  outfits.map((entry) => posesRow(entry.label, entry.outfit, entry.look));
+  outfits.flatMap((entry) =>
+    COMPANION_BODIES.map((body) =>
+      posesRow(`${entry.label} ${body}`, entry.outfit, { ...entry.look, body }),
+    ),
+  );
 
 const only = argument('only');
 if (only !== undefined) {
@@ -170,7 +205,7 @@ if (only !== undefined) {
     argument('out') ?? 'companion.png',
     [
       ...ACCESSORIES.filter((item) => wanted.includes(item.id)).map((item) =>
-        posesRow(item.id, { loadout: { [item.slot]: item.id } }),
+        bothBodiesRow(item.id, { loadout: { [item.slot]: item.id } }),
       ),
       ...CLASS_WEAPONS.filter((weapon) => wanted.includes(weapon.classId)).map((weapon) =>
         weaponRow(weapon.classId),
@@ -182,45 +217,52 @@ if (only !== undefined) {
 } else {
   const sample = OUTFITS[2];
   write(
-    'docs/screenshots/6.10-companion-moods.png',
-    (['happy', 'content', 'waiting', 'sad', 'victory', 'wave'] as const).map((animation) => ({
-      label: animation,
-      frames: framesOf(animation, sample.outfit),
-      colorOf: colorsFor(sample.look),
-    })),
+    `${PREFIX}-companion-moods.png`,
+    COMPANION_BODIES.flatMap((body) =>
+      (['happy', 'content', 'waiting', 'sad', 'victory', 'wave'] as const).map((animation) => ({
+        label: `${animation} ${body}`,
+        frames: framesOf(animation, sample.outfit, { ...sample.look, body }),
+        colorOf: colorsFor(sample.look),
+      })),
+    ),
     CELL,
   );
   for (const slot of COMPANION_SLOTS) {
     write(
-      `docs/screenshots/6.10-accessories-${slot}.png`,
+      `${PREFIX}-accessories-${slot}.png`,
       ACCESSORIES.filter((item) => item.slot === slot).map((item) =>
-        posesRow(item.id, { loadout: { [slot]: item.id } }),
+        bothBodiesRow(item.id, { loadout: { [slot]: item.id } }),
       ),
       CELL,
     );
   }
   write(
-    'docs/screenshots/6.10-weapons.png',
+    `${PREFIX}-weapons.png`,
     CLASS_WEAPONS.map((weapon) => weaponRow(weapon.classId)),
     CELL,
   );
-  write('docs/screenshots/6.10-companion-outfits.png', outfitRows(OUTFITS), CELL);
+  write(`${PREFIX}-companion-outfits.png`, outfitRows(OUTFITS), CELL);
+  const recruit: CompanionOutfit = { loadout: {}, weapon: { classId: 'recruit', upgraded: false } };
   write(
-    'docs/screenshots/6.10-companion-looks.png',
-    COMPANION_TINTS.map((tint, index) => {
-      const look = {
-        skin: tint.id,
-        hair: COMPANION_HAIRS[index % COMPANION_HAIRS.length].id,
-        outfit: COMPANION_DYES[index % COMPANION_DYES.length].id,
-      };
-      return {
-        label: `${look.skin} ${look.hair} ${look.outfit}`,
-        frames: [
-          first('content', { loadout: {}, weapon: { classId: 'recruit', upgraded: false } }),
-        ],
-        colorOf: colorsFor(look),
-      };
-    }),
+    `${PREFIX}-companion-looks.png`,
+    [
+      ...COMPANION_TINTS.map((tint, index) => {
+        const look = {
+          skin: tint.id,
+          hair: COMPANION_HAIRS[index % COMPANION_HAIRS.length].id,
+          outfit: COMPANION_DYES[index % COMPANION_DYES.length].id,
+        };
+        return {
+          label: `${look.skin} ${look.hair} ${look.outfit}`,
+          frames: COMPANION_BODIES.flatMap((body) =>
+            HAIR_STYLES.map((style) =>
+              first('content', recruit, { ...look, body, hairStyle: style.id }),
+            ),
+          ),
+          colorOf: colorsFor(look),
+        };
+      }),
+    ],
     CELL,
   );
 }

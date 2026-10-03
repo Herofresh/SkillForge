@@ -4,7 +4,12 @@
  * specular) with warm highlights and slightly muted mid-tones, which the 25 UI colours can't give.
  * Original colours, picked for this sprite (no game's palette is copied). Skin, hair and outfit
  * are the hero's choices; every other material is fixed.
+ *
+ * PLAN 6.13 (ADR-061, "less cute, more cool"): more contrast and less pastel: darker outlines (a
+ * stronger silhouette on the dark UI), deeper shadows, cooler metal highlights and a steel-blue
+ * iris instead of big round eyes; no blush.
  */
+import type { CompanionLookChoice } from '@/domain/companion';
 import type { FinalCell, Tone } from '@/lib/sprite';
 
 /** A ramp, darkest first: outline, shadow, base, light, and an optional specular highlight. */
@@ -18,32 +23,32 @@ export interface LookOption {
 
 /** Skin tones; the first is the default. */
 export const COMPANION_TINTS: readonly LookOption[] = [
-  { id: 'fair', name: 'Fair', ramp: ['#7d4630', '#d39470', '#ecbf98', '#f9dcbb'] },
-  { id: 'porcelain', name: 'Porcelain', ramp: ['#8a4f3c', '#e0a98a', '#f6d2b6', '#fff0de'] },
-  { id: 'tan', name: 'Tan', ramp: ['#6b3a24', '#b8774e', '#d69a6a', '#ecc196'] },
-  { id: 'olive', name: 'Olive', ramp: ['#5a3a20', '#a4784a', '#c49a68', '#dcbb8c'] },
-  { id: 'brown', name: 'Brown', ramp: ['#4a2618', '#8a5434', '#a96e47', '#c68d62'] },
-  { id: 'deep', name: 'Deep', ramp: ['#2e160e', '#5e3523', '#7a4a31', '#9a6646'] },
+  { id: 'fair', name: 'Fair', ramp: ['#40201a', '#b06c54', '#dea07e', '#f4caa4'] },
+  { id: 'porcelain', name: 'Porcelain', ramp: ['#4a2620', '#bc8270', '#eabfa2', '#fde2ca'] },
+  { id: 'tan', name: 'Tan', ramp: ['#361b10', '#94573a', '#c2845a', '#e2ae86'] },
+  { id: 'olive', name: 'Olive', ramp: ['#30200e', '#835e38', '#b0885a', '#d2ae80'] },
+  { id: 'brown', name: 'Brown', ramp: ['#24120a', '#6c3e26', '#965e3c', '#ba8258'] },
+  { id: 'deep', name: 'Deep', ramp: ['#140806', '#46251a', '#6a4230', '#906048'] },
 ];
 
 /** Hair colours; the first is the default. */
 export const COMPANION_HAIRS: readonly LookOption[] = [
-  { id: 'brown', name: 'Brown', ramp: ['#2d1a12', '#5b3a26', '#7c5236', '#a0714a'] },
-  { id: 'black', name: 'Black', ramp: ['#141018', '#2b2533', '#3d3548', '#5a5068'] },
-  { id: 'blond', name: 'Blond', ramp: ['#6b4a1a', '#c99a3a', '#e8c45a', '#f8e48a'] },
-  { id: 'red', name: 'Red', ramp: ['#4a1410', '#a03a22', '#cc5a2e', '#e88a4a'] },
-  { id: 'chestnut', name: 'Chestnut', ramp: ['#3a1e10', '#7a4020', '#9c5a2c', '#c07a44'] },
-  { id: 'silver', name: 'Silver', ramp: ['#4a4a5a', '#9a9cb0', '#c4c6d6', '#eceef6'] },
+  { id: 'brown', name: 'Brown', ramp: ['#150b07', '#462a1a', '#70472c', '#a2704a'] },
+  { id: 'black', name: 'Black', ramp: ['#08070c', '#1c1926', '#332e46', '#5c5878'] },
+  { id: 'blond', name: 'Blond', ramp: ['#3e280c', '#a07226', '#d8aa46', '#f6e086'] },
+  { id: 'red', name: 'Red', ramp: ['#280806', '#7a2418', '#b44228', '#e47a46'] },
+  { id: 'chestnut', name: 'Chestnut', ramp: ['#1c0c06', '#5a2c14', '#8a4824', '#b8723c'] },
+  { id: 'silver', name: 'Silver', ramp: ['#22242e', '#767a98', '#b0b4cc', '#eef0fa'] },
 ];
 
 /** Outfit dyes (shirt, cloaks, headband, plumes, banners); the first is the default. */
 export const COMPANION_DYES: readonly LookOption[] = [
-  { id: 'azure', name: 'Azure', ramp: ['#102446', '#2a5a9a', '#3f7fc8', '#79b0ec'] },
-  { id: 'crimson', name: 'Crimson', ramp: ['#3e0f16', '#8e2230', '#c23a44', '#e8646a'] },
-  { id: 'forest', name: 'Forest', ramp: ['#10301a', '#2d6a3a', '#44904e', '#74bc6c'] },
-  { id: 'royal', name: 'Royal', ramp: ['#24133e', '#553088', '#7748b4', '#a47ce0'] },
-  { id: 'ember', name: 'Ember', ramp: ['#4a1e08', '#a8501a', '#d87428', '#f4a44c'] },
-  { id: 'ash', name: 'Ash', ramp: ['#2a2a34', '#5e6070', '#868aa0', '#b8bccc'] },
+  { id: 'azure', name: 'Azure', ramp: ['#08122a', '#1c3c74', '#2e60aa', '#5a94d6'] },
+  { id: 'crimson', name: 'Crimson', ramp: ['#22050a', '#6a1420', '#a42834', '#d44e56'] },
+  { id: 'forest', name: 'Forest', ramp: ['#08180c', '#1c4a28', '#2e703e', '#589e5c'] },
+  { id: 'royal', name: 'Royal', ramp: ['#120824', '#3a206c', '#5a369c', '#8862ca'] },
+  { id: 'ember', name: 'Ember', ramp: ['#2a0e04', '#7e360e', '#b4581c', '#e68838'] },
+  { id: 'ash', name: 'Ash', ramp: ['#121218', '#3a3c4a', '#5e6276', '#9094a8'] },
 ];
 
 export const DEFAULT_TINT_ID = COMPANION_TINTS[0].id;
@@ -52,23 +57,23 @@ export const DEFAULT_DYE_ID = COMPANION_DYES[0].id;
 
 /** The materials parts and accessories are drawn in. `skin`, `hair` and `outfit` are the hero's. */
 export const FIXED_MATERIALS: Readonly<Record<string, Ramp>> = {
-  pants: ['#1e1a26', '#3a3448', '#524a64', '#6e6684'],
-  boots: ['#24140c', '#4a2c18', '#6a4224', '#8a5a32'],
-  leather: ['#2e1a0e', '#6a4224', '#8e5c32', '#b47e48'],
-  iron: ['#22242e', '#5e6476', '#9aa2b4', '#cfd6e2', '#ffffff'],
-  darkIron: ['#100e16', '#2c2a38', '#45425a', '#6a6688', '#a8a6c8'],
-  gold: ['#4a2e08', '#a87418', '#e0a830', '#f6d468', '#fff6c8'],
-  bone: ['#5a5244', '#c8bca0', '#ece2c8', '#fffaee'],
-  fur: ['#34323e', '#6e6a7c', '#9a96a8', '#c4c0d0'],
-  leaf: ['#0e2a14', '#2a6a30', '#46984a', '#86c86a'],
-  night: ['#0a0812', '#1e1a30', '#2e2846', '#463e66'],
-  red: ['#3a0c10', '#8a1c24', '#c8303a', '#ee6066', '#ffc0c0'],
-  rune: ['#0c3a44', '#2a8a9a', '#4ccfe0', '#a8f4fc', '#ffffff'],
-  arcane: ['#2a1450', '#6a3cb4', '#9a6cf0', '#ccb4ff', '#ffffff'],
-  fire: ['#5a1606', '#c84a12', '#f08a26', '#ffd060', '#fff6c8'],
-  wood: ['#2a180c', '#5a3a1e', '#7a5230', '#9c7044'],
-  orchid: ['#4a1438', '#b04c8c', '#e07cbc', '#ffb0e0'],
-  robe: ['#4a1e08', '#b05a14', '#e08a2a', '#f8b858'],
+  pants: ['#0e0c14', '#2c2838', '#443e56', '#625a7a'],
+  boots: ['#100804', '#331e0e', '#52321a', '#764e2a'],
+  leather: ['#170c06', '#4b2c15', '#744628', '#a0683e'],
+  iron: ['#0e1018', '#424a5e', '#8690a8', '#c6d2e6', '#f4faff'],
+  darkIron: ['#060509', '#1a1824', '#323048', '#54527a', '#9a9ccc'],
+  gold: ['#281604', '#86560e', '#ca9226', '#f2ca5a', '#fff4c0'],
+  bone: ['#322c22', '#a29878', '#dad0b0', '#f8f2de'],
+  fur: ['#1a1822', '#52505e', '#84808e', '#b4b0c0'],
+  leaf: ['#05140a', '#1a4a22', '#2e7836', '#60a856'],
+  night: ['#040308', '#13101e', '#231e34', '#3a3456'],
+  red: ['#1e0408', '#6e121e', '#ae2432', '#e04e58', '#ffb0b0'],
+  rune: ['#04242c', '#1c6c7c', '#3abacc', '#9cf0fa', '#ffffff'],
+  arcane: ['#140830', '#502696', '#8256de', '#bea2ff', '#ffffff'],
+  fire: ['#320c04', '#a6380c', '#e2781e', '#ffc84e', '#fff4c0'],
+  wood: ['#160c05', '#452e18', '#684828', '#8c683e'],
+  orchid: ['#2a0a20', '#8a3870', '#c666a6', '#f2a0d2'],
+  robe: ['#2c0d04', '#8a4410', '#c67222', '#eea44c'],
 };
 
 /** Materials that get a specular glint on their lit top-left corners. */
@@ -82,13 +87,12 @@ export const SHINY_MATERIALS: ReadonlySet<string> = new Set([
   'fire',
 ]);
 
-/** Fixed colours: eyes, mouth, blush, sparkles, glows, the ground shadow. */
+/** Fixed colours: eyes, mouth, sparkles, glows, the ground shadow. */
 export const FIXED_COLOURS: Readonly<Record<string, string>> = {
-  eye: '#1e1424',
-  eyeShine: '#ffffff',
-  mouth: '#7a2e2a',
-  blush: '#f09a8c',
-  shadow: '#08060e',
+  eye: '#0e0a12',
+  iris: '#3c5a7c',
+  mouth: '#7a3a30',
+  shadow: '#06050a',
   sparkGold: '#fff2a8',
   sparkWhite: '#ffffff',
   sparkRune: '#8ef0fc',
@@ -135,12 +139,11 @@ export function companionRole(cell: FinalCell): string {
   return String.fromCharCode(ROLE_BASE + material * TONES_PER_MATERIAL + TONE_INDEX[cell.tone]);
 }
 
-/** The hero's colour choices (ids of `COMPANION_TINTS`, `COMPANION_HAIRS`, `COMPANION_DYES`). */
-export interface CompanionLook {
-  skin?: string;
-  hair?: string;
-  outfit?: string;
-}
+/**
+ * The hero's look: colour ids (`COMPANION_TINTS`, `COMPANION_HAIRS`, `COMPANION_DYES`), the
+ * hair style and the body (PLAN 6.13). The stored shape lives in the domain.
+ */
+export type CompanionLook = CompanionLookChoice;
 
 const pick = (options: readonly LookOption[], id: string | undefined) =>
   (options.find((option) => option.id === id) ?? options[0]).ramp;

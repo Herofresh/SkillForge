@@ -70,7 +70,7 @@ type Props = {
   colors: Readonly<Record<string, string>>;
   /** dp per grid cell; a whole number keeps every cell crisp. */
   scale: number;
-  /** Grid size in cells (32 × 32 for the exercise figures, 32 × 40 for the companion). */
+  /** Grid size in cells (32 × 32 for the exercise figures, `SPRITE_SIZE` for the companion). */
   grid: { width: number; height: number };
   testID?: string;
 };

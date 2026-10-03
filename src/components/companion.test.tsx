@@ -135,6 +135,31 @@ describe('CompanionSheet', () => {
     await user.press(screen.getByTestId('companion-sheet-outfit-crimson'));
     expect(onLook).toHaveBeenCalledWith({ outfit: 'crimson' });
   });
+
+  it('offers the body (man by default, PLAN 6.13) and the hair styles of either body', async () => {
+    const onLook = jest.fn();
+    const user = userEvent.setup();
+    await render(
+      <CompanionSheet view={view()} onEquip={jest.fn()} onLook={onLook} onClose={jest.fn()} />,
+    );
+    expect(screen.getByTestId('companion-sheet-body-man')).toHaveTextContent('Man');
+    expect(screen.getByTestId('companion-sheet-body-man')).toBeChecked();
+    expect(screen.getByTestId('companion-sheet-body-woman')).not.toBeChecked();
+    await user.press(screen.getByTestId('companion-sheet-body-woman'));
+    expect(onLook).toHaveBeenCalledWith({ body: 'woman' });
+    await user.press(screen.getByTestId('companion-sheet-hairstyle-long'));
+    expect(onLook).toHaveBeenCalledWith({ hairStyle: 'long' });
+    await render(
+      <CompanionSheet
+        view={{ ...view(), look: { body: 'woman' } }}
+        onEquip={jest.fn()}
+        onLook={jest.fn()}
+        onClose={jest.fn()}
+      />,
+    );
+    // A woman who never chose a style wears the long hair.
+    expect(screen.getByTestId('companion-sheet-hairstyle-long')).toBeChecked();
+  });
 });
 
 describe('TrinketUnlockPanel', () => {

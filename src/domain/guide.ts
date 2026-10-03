@@ -382,7 +382,8 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         `It can earn ${n(facts.accessoryCount)} accessories: rank gear, gear at character ` +
           `levels ${list(facts.levelAccessories.map((level) => n(level)))}, milestones and ` +
           'class tiers. Earned ones are kept forever.',
-        'Choose what it wears and its skin, hair and outfit colours with Customize.',
+        'Choose what it wears, its body (man or woman), hair style and its skin, hair and ' +
+          'outfit colours with Customize.',
         'It carries the weapon of the class you wear, upgraded from tier ' +
           `${tierNumeral(facts.upgradedWeaponTier)}. A ${facts.startingClass} carries a ` +
           `${facts.startingWeapon}.`,

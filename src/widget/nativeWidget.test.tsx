@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { registerWidgetTaskHandler, requestWidgetUpdate } from 'react-native-android-widget';
 
+import { SPRITE_HEIGHT, SPRITE_WIDTH } from '@/data/companion';
 import { WIDGET_DEEP_LINK, type WidgetView } from '@/domain/widget';
 
 import {
@@ -189,15 +190,22 @@ describe('SkillForgeCompanionWidget (PLAN 6.10)', () => {
       expect.arrayContaining(['Trained today', 'FIRED UP', '3', '7', 'Apprentice', 'WARRIOR']),
     );
     const svgs = primitives(tree).filter((entry) => entry.type === 'SvgWidget');
-    const sprite = svgs.find((entry) => String(entry.props.svg).includes('viewBox="0 0 32 40"'));
+    const sprite = svgs.find((entry) =>
+      String(entry.props.svg).includes(`viewBox="0 0 ${SPRITE_WIDTH} ${SPRITE_HEIGHT}"`),
+    );
     expect(sprite).toBeDefined();
-    expect(sprite?.props.style).toMatchObject({ width: 160, height: 200 });
+    expect(sprite?.props.style).toMatchObject({
+      width: SPRITE_WIDTH * 5,
+      height: SPRITE_HEIGHT * 5,
+    });
   });
 
   it('draws the sprite on a transparent background, straight on the widget', () => {
     const tree = <SkillForgeCompanionWidget view={withCompanion} widthDp={395} heightDp={380} />;
     const sprite = primitives(tree).find(
-      (entry) => entry.type === 'SvgWidget' && String(entry.props.svg).includes('0 0 32 40'),
+      (entry) =>
+        entry.type === 'SvgWidget' &&
+        String(entry.props.svg).includes(`0 0 ${SPRITE_WIDTH} ${SPRITE_HEIGHT}`),
     );
     expect(sprite?.props.style).not.toHaveProperty('backgroundColor');
     expect(String(sprite?.props.svg)).not.toMatch(/<rect/);

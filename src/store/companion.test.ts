@@ -93,10 +93,16 @@ describe('the companion in the store (PLAN 6.10)', () => {
     store.getState().equipAccessory('cloak', null);
     store.getState().setCompanionLook({ skin: 'tan' });
     store.getState().setCompanionLook({ outfit: 'crimson' });
+    store.getState().setCompanionLook({ body: 'woman', hairStyle: 'ponytail' });
     store.getState().markAccessoriesSeen();
     const reloaded = storeFor(test).getState().companion;
     expect(reloaded.equipped).toEqual({ head: 'band', cloak: null });
-    expect(reloaded.look).toEqual({ skin: 'tan', outfit: 'crimson' });
+    expect(reloaded.look).toEqual({
+      skin: 'tan',
+      outfit: 'crimson',
+      body: 'woman',
+      hairStyle: 'ponytail',
+    });
     expect([...reloaded.seen].sort()).toEqual(['band', 'cap']);
     test.close();
   });
@@ -131,13 +137,13 @@ describe('the companion in the store (PLAN 6.10)', () => {
     const test = await openTestDatabase();
     const store = storeFor(test);
     store.getState().logSession(hang('s1', 0));
-    store.getState().setCompanionLook({ hair: 'red' });
+    store.getState().setCompanionLook({ hair: 'red', body: 'woman' });
     const { text } = store.getState().exportBackup();
 
     const other = await openTestDatabase();
     const restored = storeFor(other);
     expect(restored.getState().importBackup(text).status).toBe('imported');
-    expect(restored.getState().companion.look).toEqual({ hair: 'red' });
+    expect(restored.getState().companion.look).toEqual({ hair: 'red', body: 'woman' });
     expect(restored.getState().companion.unlocks.cap).toEqual({ at: DAY0, sessionId: 's1' });
 
     const backup = JSON.parse(text);

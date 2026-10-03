@@ -19,6 +19,8 @@ import {
   sessionAccessoryUnlocks,
   type CompanionFacts,
   type CompanionSettings,
+  DEFAULT_COMPANION_BODY,
+  parseCompanionLook,
 } from './companion';
 import type { AccessoryDefinition } from './types';
 
@@ -219,10 +221,27 @@ describe('the stored setting', () => {
     const settings: CompanionSettings = {
       unlocks: { band: { at: 1, sessionId: 's1' }, cloak: { at: 2 } },
       equipped: { head: 'band', cloak: null },
-      look: { skin: 'copper', hair: 'red', outfit: 'azure' },
+      look: { skin: 'copper', hair: 'red', outfit: 'azure', hairStyle: 'long', body: 'woman' },
       seen: ['band'],
     };
     expect(parseCompanionSettings(companionSettingsToRaw(settings), ITEMS)).toEqual(settings);
+  });
+
+  it('reads the body (PLAN 6.13): missing = the default body, unknown values dropped', () => {
+    expect(DEFAULT_COMPANION_BODY).toBe('man');
+    expect(parseCompanionLook({ body: 'woman' })).toEqual({ body: 'woman' });
+    expect(parseCompanionLook({ body: 'man', hairStyle: 'ponytail' })).toEqual({
+      body: 'man',
+      hairStyle: 'ponytail',
+    });
+    expect(parseCompanionLook({ skin: 'tan' })).toEqual({ skin: 'tan' });
+    expect(parseCompanionLook({ body: 'dragon', hairStyle: 5 })).toEqual({});
+    expect(parseCompanionLook({ body: 'WOMAN' })).toEqual({});
+    expect(parseCompanionLook('junk')).toEqual({});
+    // A setting written before 6.13 has no body: it reads as before.
+    expect(parseCompanionSettings({ version: 1, look: { hair: 'red' } }, ITEMS).look).toEqual({
+      hair: 'red',
+    });
   });
 
   it('reads anything broken as empty and drops unknown or misplaced entries', () => {

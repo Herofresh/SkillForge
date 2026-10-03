@@ -210,13 +210,25 @@ describe('parseWidgetSnapshot', () => {
       companion: {
         loadout: { head: 'hooded_cloak', cloak: 'hooded_cloak', aura: 'gone' },
         weapon: { classId: 'monk', upgraded: 'yes' },
-        look: { skin: 4, hair: 'red' },
+        look: { skin: 4, hair: 'red', body: 'centaur' },
       },
     };
     expect(parseWidgetSnapshot(JSON.stringify(misplaced))?.companion).toEqual({
       loadout: { cloak: 'hooded_cloak' },
       weapon: { classId: 'monk', upgraded: false },
       look: { hair: 'red' },
+    });
+    const woman = {
+      ...old,
+      companion: {
+        loadout: {},
+        weapon: { classId: 'monk', upgraded: false },
+        look: { body: 'woman', hairStyle: 'ponytail' },
+      },
+    };
+    expect(parseWidgetSnapshot(JSON.stringify(woman))?.companion?.look).toEqual({
+      body: 'woman',
+      hairStyle: 'ponytail',
     });
   });
 

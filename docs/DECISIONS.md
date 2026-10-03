@@ -2021,3 +2021,47 @@ Template:
   its text in `guide.ts`, an icon in `GUIDE_ICONS` and a `GuideButton` where it shows. Changing a
   constant changes the guide with it; changing what a rule *does* still needs the guide's words
   reviewed (the test only guards numbers).
+
+## ADR-061: Companion: a cooler, taller hero and a choice of body (PLAN 6.13)
+- Date: 2026-10-03 · Status: Accepted (extends ADR-059; the engine, the accessory list, rules,
+  ids and the stored setting stay; only the art and an optional look field change)
+- Context: user request (2026-10-03): "try to make the companion less cute and more cool", in the
+  same art direction family (SNES-era FF field sprites, Octopath Traveler; original art, nothing
+  copied): less chibi, a determined face, more contrast, heroic poses, every accessory and weapon
+  still readable, saved loadouts drawn as before in the new style. **User addition (same day):** a
+  body choice "Man" / "Woman" in Customize, stored additively in `hero_companion`, missing = the
+  current body, a distinct, equally cool woman in practical adventurer clothing (not a recolour,
+  not sexualised), hair styles that suit both, every accessory, weapon and pose for both.
+- Decision:
+  - **Proportions:** canvas 32 × 44 (`SPRITE_SIZE`, the one constant everything reads); the hero
+    stands 38 px with a 12 × 10 head box (about a quarter of the height), a 12-wide V-shaped torso
+    with a baldric, 3-wide arms and 17-row legs. 44 rows (not 48) keep the large widget at 3 dp per
+    pixel at its 250 × 180 dp minimum (`companionScale` unchanged); the Character tab shows it at
+    4 dp (128 × 176 dp).
+  - **Face and hair:** narrow eyes (dark + a steel-blue iris pixel) under a low brow in the hair's
+    outline tone, a short set mouth (a one-sided smirk when happy, a lowered brow for victory),
+    closed eyes when resting; no glint, no blush. Hair styles are parts of their own: `top`
+    (volume; hidden by helmets, hoods and hats via `hidesHair`), `locks` (fringe, side locks)
+    and `back` (long hair, ponytail; sways with the cloak).
+  - **Palette:** darker outlines and deeper shadows on every ramp, less pastel skin and dyes, cooler
+    iron highlights; the selective outline stays (never pure black). Cloaks get fold lines.
+  - **Poses:** happy brandishes the weapon (hold, lift, back to the shoulder), content holds it
+    upright at the shoulder and shifts its weight (cloak and hair sway 1–2 px), waiting crosses its
+    arms with the weapon planted on the ground beside it and glances around, sad rests on one knee
+    with the head bowed, a hand on the planted weapon (resting, never hurt), victory a fist on the
+    hip, the weapon high, a wide stance, the tap a salute with a nod. Weapons are drawn held,
+    lowered (point down) or planted; staffs, the bow, the lute and the wand stay upright
+    (`plant: 'upright'`), the katana is planted mirrored. A shield goes to the ground when the left
+    hand is busy (crossed arms, salute, kneeling).
+  - **Bodies:** `COMPANION_BODIES = ['man', 'woman']`; `look.body` and `look.hairStyle` are new
+    optional fields of `CompanionLookChoice`, read by `parseCompanionLook` (setting and widget
+    snapshot alike): an unknown body is dropped (= Man), a style id is kept as text (unknown = the
+    body's default: Man spiky, Woman long). Both bodies share every anchor; the woman has narrower
+    shoulders (arms inset 1 px), a softer jaw, lash pixels, a fitted jerkin and a split travelling
+    skirt over the same trousers and boots. No migration, no `schemaVersion` or
+    `WIDGET_SNAPSHOT_VERSION` bump: the fields are optional and backups carry settings as before.
+- Consequences: purely visual plus two optional look fields; no XP, rule, generator or safeguard
+  change. `companionFrame` / `companionFrames` / `companionStill` take the look as a third
+  argument (the widget passes it). Tests draw every accessory and weapon on both bodies in every
+  animation and require each frame to be one connected piece standing on the ground row. New art
+  must fit both bodies; check it with `npm run companion:sheet` (both bodies on every sheet).
