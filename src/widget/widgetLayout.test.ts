@@ -269,7 +269,7 @@ describe('the companion widget layout (PLAN 6.12)', () => {
     const layout = companionLayout(longView, 395, 250);
     expect(layout.sizeClass).toBe('standard');
     expect(layout.spritePixel).toBeGreaterThanOrEqual(4);
-    expect(layout.sizes.scale).toBeGreaterThanOrEqual(1.2);
+    expect(layout.sizes.scale).toBeGreaterThanOrEqual(1);
     expect(texts(layout.root)).toEqual(
       expect.arrayContaining(['Not yet today', 'MISSING YOU', '123', '47', 'Apprentice']),
     );

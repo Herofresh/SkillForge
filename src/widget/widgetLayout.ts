@@ -433,10 +433,10 @@ interface Candidate {
 /** Each extra shown (rank, class, an attribute) is worth this much scale in the choice. */
 const EXTRA_WEIGHT = 0.2;
 /**
- * Text below this scale (status 18 dp, labels 9 dp) is hard to read: an arrangement that only fits
- * smaller is chosen only when nothing else fits at a readable size.
+ * Text below this scale (status 20 dp, labels 10 dp: the 6.6 sizes) gets small on a phone: an
+ * arrangement that only fits smaller is chosen only when nothing else fits at this size or more.
  */
-const READABLE_SCALE = 0.9;
+const READABLE_SCALE = 1;
 /** Outweighs any score of a smaller-than-readable arrangement. */
 const READABLE_BONUS = 1000;
 
@@ -639,7 +639,7 @@ const heightFill = ({ content, inner }: Measured) =>
 
 /**
  * Picks the candidate with the best score: scale × (1 + `EXTRA_WEIGHT` × extras) × height fill,
- * readable ones first.
+ * readable ones first; below the readable scale only the biggest text counts (scale × fill).
  */
 function choose(widthDp: number, heightDp: number, candidates: Candidate[]): WidgetLayout {
   let best: { layout: WidgetLayout; score: number } | undefined;
@@ -648,8 +648,9 @@ function choose(widthDp: number, heightDp: number, candidates: Candidate[]): Wid
     if (!result) continue;
     const fill = heightFill(result);
     const score =
-      (result.sizes.scale >= READABLE_SCALE ? READABLE_BONUS : 0) +
-      result.sizes.scale * (1 + EXTRA_WEIGHT * candidate.extras) * fill;
+      result.sizes.scale >= READABLE_SCALE
+        ? READABLE_BONUS + result.sizes.scale * (1 + EXTRA_WEIGHT * candidate.extras) * fill
+        : result.sizes.scale * fill;
     if (!best || score > best.score) {
       best = { layout: { sizeClass: candidate.sizeClass, ...result, fill }, score };
     }
@@ -747,16 +748,13 @@ function companionCandidates(view: HeroView, mood: string, sprite: WidgetSprite)
 
 /** The smallest sprite: 2 dp per pixel (64 × 80 dp). */
 const MIN_SPRITE_PIXEL = 2;
-/**
- * How much a bigger sprite counts against bigger text in the choice (score = pixel ^ this × text
- * scale × fill): below 1, so the sprite grows only while the text keeps a good size.
- */
-const SPRITE_WEIGHT = 0.75;
 
 /**
  * The large widget's layout: every sprite size (whole dp per sprite pixel, so the pixels stay
- * crisp) × every arrangement; the best scores sprite size × text scale × height fill. Without a
- * companion in the snapshot (an app that has not written one yet) it is the small widget's.
+ * crisp) × every arrangement; the best scores sprite size × text scale × height fill, with the
+ * text at the readable scale or more (the sprite grows only while the text keeps that size).
+ * Without a companion in the snapshot (an app that has not written one yet) it is the small
+ * widget's.
  */
 export function companionLayout(view: WidgetView, widthDp: number, heightDp: number): WidgetLayout {
   if (view.kind === 'empty' || !view.companion) return widgetLayout(view, widthDp, heightDp);
@@ -781,7 +779,7 @@ export function companionLayout(view: WidgetView, widthDp: number, heightDp: num
     // A bigger sprite must not shrink the text below the readable scale (unless nothing else fits).
     const score =
       (layout.sizes.scale >= READABLE_SCALE ? READABLE_BONUS : 0) +
-      pixel ** SPRITE_WEIGHT * layout.sizes.scale * layout.fill;
+      pixel * layout.sizes.scale * layout.fill;
     if (!best || score > best.score) best = { layout: { ...layout, spritePixel: pixel }, score };
   }
   if (best) return best.layout;

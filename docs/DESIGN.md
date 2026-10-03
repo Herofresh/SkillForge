@@ -429,7 +429,7 @@ strings (`iconSvg`, crisp edges).
   heights at every scale from 0.6 to 3 (type, icons, gaps × scale; icons on multiples of 12 dp;
   padding up to 1.5 × and at most 4 % of the shorter side). The biggest scale that fits wins,
   weighed by what it shows (rank, class, each attribute) and how much of the height it covers;
-  text below scale 0.9 only when nothing else fits. Free space is spread with `space-evenly` /
+  text below scale 1 only when nothing else fits. Free space is spread with `space-evenly` /
   `space-between`, so the rows line up over the full height. Font sizes are dp, not sp
   (`allowFontScaling: false`): the layout fits the text to the widget, the system font size
   would clip it; a bigger widget is the way to bigger text.

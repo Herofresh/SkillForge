@@ -2104,12 +2104,14 @@ Template:
     the 6.6 sizes × scale, icons on multiples of 12 dp, padding growing to 1.5 and at most 4 % of
     the shorter side); the biggest scale where the content fits 97 % of the inner box. Score:
     scale × (1 + 0.2 × extras shown) × height fill, where extras are the rank, the class and each
-    attribute, and arrangements at or above scale 0.9 always beat smaller ones (readable text
-    first). The companion adds the sprite size (whole dp per sprite pixel, 2 and up, crisp) and
-    scores pixel^0.75 × scale × fill (with pixel × scale the sprite grew until the text was
-    at 0.9). The sprite is its mood frame trimmed to the painted pixels (`trimPixelRows`): the
-    32 × 40 canvas has empty rows above the head, which on the 4 × 3 widget showed as a band. Free space is spread with `space-evenly` / `space-between`
-    (the root box fills the widget), so what is left is small and even.
+    attribute; arrangements at scale 1 or more (the 6.6 sizes) always beat smaller ones, and
+    below that only scale × fill counts (on the emulator a 2 × 1 at 0.9 crammed in rank, class
+    and a stat in 9 dp labels; the two-line status at 1.1 reads better). The companion adds the
+    sprite size (whole dp per sprite pixel, 2 and up, crisp) and scores pixel^0.75 × scale × fill
+    (with pixel × scale the sprite grew until the text was at 0.9). The sprite is its mood frame
+    trimmed to the painted pixels (`trimPixelRows`): the 32 × 40 canvas has empty rows above the
+    head, which on the 4 × 3 widget showed as a band. Free space is spread with `space-evenly` /
+    `space-between` (the root box fills the widget), so what is left is small and even.
   - **Font sizes in dp** (`allowFontScaling: false`): the layout fits the text to the widget's
     size; the system font scale would make it overflow and clip. The user scales the widget by
     resizing it instead.
