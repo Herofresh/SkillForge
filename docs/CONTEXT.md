@@ -848,15 +848,23 @@ Before publishing a release, check that it installs over the previous one with t
    `Success`; `INSTALL_FAILED_UPDATE_INCOMPATIBLE` means the signer changed,
    `INSTALL_FAILED_VERSION_DOWNGRADE` a versionCode that isn't higher.
 6. `npm run e2e -- .maestro/release/upgrade-verify.yaml`: the hero, goal, session and XP are still
-   there, onboarding isn't shown again and "Lever hold" is still in the Front lever column. The
-   flows take the screenshots `5.7-upgrade-before` / `5.7-upgrade-after` and
-   `upgrade-before-overlay` / `upgrade-after-overlay` (copy them from Maestro's test folder to
-   `docs/screenshots/`).
+   there, onboarding isn't shown again and "Lever hold" is still in the Front lever column. Since
+   v0.6.0 it also checks that the companion card, the class banner and the weekly challenge
+   render (ids only, no texts). The flows take the screenshots `5.7-upgrade-before` /
+   `5.7-upgrade-after`, `upgrade-before-overlay` / `upgrade-after-overlay` and
+   `6.11-upgrade-companion` / `6.11-upgrade-character` (copy them from Maestro's test folder,
+   `~/.maestro/tests/<run>/…/takeScreenshot/`, to `docs/screenshots/`). Don't run the flows while
+   a Gradle build is running: the slow emulator turns swipes into taps.
 7. Repeat 3–6 for **every** earlier release a user may still have (`gh release list`), not only
    the last one.
 8. Since v0.5.0 (widget, ADR-055): on one upgraded install, add the SkillForge widget (long-press
    the home screen → Widgets → search "SkillForge" → tap the preview → Add). It must show the
    seeded data (Trained today, streak 1, level 1, Novice, Pull 8) and a tap must open Train.
+   Since v0.6.0 (6.10): place the small widget on the previous release **before** the update and
+   check it still draws after `install -r`; then add the large "SkillForge Companion" widget (same
+   picker entry, second preview): the sprite stands on the widget background, the data matches,
+   a tap opens Train. A widget tap does nothing while the app is force-stopped (the library's
+   clicks are broadcasts); open the app once first.
 
 **Building in an agent worktree:** under `.claude/worktrees/<agent-…>/` the native CMake object
 paths get too long for Windows and Gradle fails with "ninja: error: manifest 'build.ninja' still

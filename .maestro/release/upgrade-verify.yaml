@@ -25,6 +25,28 @@ name: Upgrade check 2 - data survives the update
 - assertVisible:
     id: 'character-total-xp'
     text: '40 XP earned in total'
+# Since v0.6.0 (6.9, 6.9b, 6.10): the systems derived from the old history render after the
+# update: the companion card, the worn class (Recruit or an earned class) and the weekly challenge.
+# No texts asserted: the mood, class and count depend on the release and the day of the seed.
+- scrollUntilVisible:
+    element:
+      id: 'companion-mood'
+    direction: DOWN
+    timeout: 30000
+- assertVisible:
+    id: 'companion-weapon'
+- takeScreenshot: 6.11-upgrade-companion
+- scrollUntilVisible:
+    element:
+      id: 'character-class-title'
+    direction: DOWN
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: 'character-challenge-goal'
+    direction: DOWN
+    timeout: 30000
+- takeScreenshot: 6.11-upgrade-character
 - scrollUntilVisible:
     element:
       id: 'goal-pull_up'

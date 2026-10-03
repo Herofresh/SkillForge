@@ -255,13 +255,22 @@
   (`GuideButton`) next to each system opens the summary with "More in the guide"; Settings → "How
   SkillForge works" opens the guide list and each page. Optional only: nothing opens on its own.
   Screenshots `docs/screenshots/6.10c-*.png`.
+- Release v0.6.0 (6.11, [PR #58](https://github.com/Herofresh/SkillForge/pull/58)): version 0.6.0 / versionCode 6 with classes (6.9), the weekly
+  class challenge (6.9b), the companion and the large widget (6.10) and the guide (6.10c).
+  Upgrade check passed on the emulator from **v0.1.0-preview1, v0.2.0, v0.3.0, v0.4.0 and
+  v0.5.0** (hero, goal, session, 40 XP, "Lever hold" kept, no onboarding; the companion card,
+  class banner and weekly challenge render from the old history). The small widget placed on
+  0.5.0 kept working after the update (now with the class title); the new large companion widget
+  was added and drew the sprite straight on the widget background. Screenshots
+  `docs/screenshots/6.11-*.png`. The GitHub release is created by the coordinator after the
+  merge. **Phase 6 is complete.**
 
 ## Next up
-1. On the user's phone: install [v0.5.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.5.0)
-   over the installed build (Update, no uninstall), add the SkillForge widget to the home screen
-   and report what feels off. (v0.4.0 and v0.5.0 are published as GitHub pre-releases.)
-2. 6.11 (v0.6.0 release; its upgrade check should look at the companion and both widgets) and Phase 7 (Google Play); the user creates the upload key then
-   (7.1).
+1. On the user's phone: install v0.6.0 (once published) over the installed build (Update, no
+   uninstall), add the new SkillForge Companion widget and report what feels off.
+2. Phase 7 (Google Play), starting with **7.1: the user creates the upload key with `keytool`**
+   (an agent gives the exact command and the backup advice; the key never enters the repo), then
+   7.2 `npm run build:aab` signed with it.
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -269,6 +278,35 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Release v0.6.0 (task 6.11, [PR #58](https://github.com/Herofresh/SkillForge/pull/58)):** ADR-043 routine. Both APKs built with `-- --clean`
+  in a short-path copy `D:\sf060` (`diff -r` against the branch: identical, excluding
+  `node_modules`, `android`, `builds`, `.git`, `.expo`); signer check passed,
+  `RELEASE_SIGNER_SHA256` unchanged. APKs and SHA-256: see the PR body; the coordinator
+  publishes them.
+  - Upgrade check on Pixel_8_Pro_API_35 from every earlier release (fresh install of the
+    release's universal APK, `upgrade-seed.yaml`, `adb install -r` 0.6.0 → `Success`,
+    versionCode 6, `upgrade-verify.yaml`): v0.1.0-preview1, v0.2.0, v0.3.0, v0.4.0, v0.5.0 all
+    passed with the final flows.
+  - `upgrade-verify.yaml` now also scrolls to the companion card (mood + weapon), the class
+    banner and the weekly challenge (no texts asserted; they depend on the release and the day)
+    and takes `6.11-upgrade-companion` / `6.11-upgrade-character`. After every upgrade the hero
+    was Recruit, the companion "Fired up" with the wooden sword and "2 NEW" accessories, and the
+    challenge counted the seeded session (1 / 2).
+  - Widgets (upgrade from v0.5.0): the small widget was placed on 0.5.0 before the update; after
+    `install -r` it redrew with the same data plus "RECRUIT" under the rank. The picker lists
+    both widgets with their previews; the large SkillForge Companion widget (4 × 3) drew the
+    sprite directly on the widget background (no lighter box: the 6.10 review tweak is checked),
+    Trained today, Fired up, streak 1, level 1, Novice, Recruit. A tap on either opens Train.
+  - Settings → How SkillForge works (list, Companion page) and all seven Character tab "i"
+    buttons (XP, companion, rank, class, challenge, attributes, streak) opened and closed on the
+    upgraded release install (an ad-hoc Maestro flow, not committed).
+  - Gotcha: running the seed flow while Gradle builds makes the emulator so slow that swipes land
+    as taps (the 0.1.0 seed once ticked "Rings" and timed out). Build first, then run the flows.
+  - Finding (not a regression, library behaviour): after `am force-stop` a widget tap does
+    nothing until the app is opened once; `react-native-android-widget` sends clicks as
+    broadcasts, which Android doesn't deliver to a force-stopped app. Backlog entry added.
+  - Not verified: a real phone, the sad sprite after a real gap, importing an old backup into
+    0.6.0 (Jest only).
 - **How it works (task 6.10c, ADR-060, [PR #57](https://github.com/Herofresh/SkillForge/pull/57)):**
   - Code: `src/domain/guide.ts` (`GUIDE_TOPICS`, `guideFacts`, `buildGuide`, `GUIDE`,
     `guideEntry`), `hasTendonWarning` in `safeguards.ts`; UI in `src/components/guide/`
@@ -1250,7 +1288,8 @@ upgrade check from every earlier release). Any new table or column is additive a
   system appears (Character tab, node detail, Train) that open a short summary with "More in the
   guide"; Settings → "How SkillForge works" lists every entry. Optional only: nothing pops up on
   its own, no onboarding change, no data change.
-- [ ] 6.11 v0.6.0 release (6.9–6.10), same routine.
+- [x] 6.11 v0.6.0 release (6.9–6.10c), same routine: upgrade check from 0.1.0, 0.2.0, 0.3.0,
+  0.4.0 and 0.5.0, then both widgets on the install upgraded from 0.5.0 ([PR #58](https://github.com/Herofresh/SkillForge/pull/58))
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
@@ -1301,5 +1340,8 @@ upgrade check from every earlier release). Any new table or column is additive a
   (4.7–4.8, ADR-036); keep a changed draft across an app kill (5.2 only asks on leaving)
 - Polish extras (5.2, ADR-038): haptics on level-up/unlock (expo-haptics, optional), animate a
   newly lit edge on the tree map
+- Widget tap after a force stop (6.11): `react-native-android-widget` sends clicks as
+  broadcasts, so after "Force stop" a tap does nothing until the app is opened once. Option: an
+  activity `PendingIntent` for the plain "open Train" click (needs a look at the library's API)
 - E2E (5.8 review): `train.yaml` asserts the rest panel right after set 1, which races the 30 s rest
   when the emulator is slow; wait on something that doesn't expire
