@@ -63,7 +63,39 @@ describe('widgetSnapshot', () => {
       streak: 0,
       topAttributes: [],
       heroClass: { id: 'recruit', tier: 1 },
+      companion: { loadout: {}, weapon: { classId: 'recruit', upgraded: false }, look: {} },
     });
+  });
+
+  it('carries what the companion wears and the worn class weapon (PLAN 6.10)', () => {
+    const classes = {
+      selected: 'warrior',
+      unlocks: { warrior: [{ at: 1 }, { at: 2 }, { at: 3 }] },
+      seen: {},
+    };
+    const companion = {
+      unlocks: { rope_headband: { at: 1 }, iron_helm: { at: 2 }, hooded_cloak: { at: 3 } },
+      equipped: { cloak: null },
+      look: { skin: 'copper' },
+      seen: [],
+    };
+    const result = widgetSnapshot({
+      nodes: makeChain(),
+      engine: { ...INITIAL_ENGINE_STATE, lastSessionAt: at(2, 18) },
+      classes,
+      companion,
+    });
+    expect(result.companion).toEqual({
+      loadout: { head: 'iron_helm' },
+      weapon: { classId: 'warrior', upgraded: true },
+      look: { skin: 'copper' },
+    });
+    // The mood is decided when the widget draws.
+    expect(widgetView(result, at(2, 20))).toMatchObject({
+      companion: { mood: 'happy', moodTitle: 'Fired up' },
+    });
+    expect(widgetView(result, at(12, 9))).toMatchObject({ companion: { mood: 'sad' } });
+    expect(parseWidgetSnapshot(JSON.stringify(result))).toEqual(result);
   });
 
   it('carries the worn class and its tier (PLAN 6.9)', () => {
@@ -166,6 +198,26 @@ describe('parseWidgetSnapshot', () => {
     ['an array', '[]'],
   ])('ignores %s', (_label, text) => {
     expect(parseWidgetSnapshot(text)).toBeUndefined();
+  });
+
+  it('reads a snapshot written before the companion, and drops a broken companion', () => {
+    const old = snapshot();
+    expect(widgetView(old, at(2, 12))).not.toHaveProperty('companion');
+    const broken = { ...old, companion: { loadout: {}, weapon: { classId: 'necromancer' } } };
+    expect(parseWidgetSnapshot(JSON.stringify(broken))).toEqual(old);
+    const misplaced = {
+      ...old,
+      companion: {
+        loadout: { head: 'hooded_cloak', cloak: 'hooded_cloak', aura: 'gone' },
+        weapon: { classId: 'monk', upgraded: 'yes' },
+        look: { skin: 4, hair: 'red' },
+      },
+    };
+    expect(parseWidgetSnapshot(JSON.stringify(misplaced))?.companion).toEqual({
+      loadout: { cloak: 'hooded_cloak' },
+      weapon: { classId: 'monk', upgraded: false },
+      look: { hair: 'red' },
+    });
   });
 
   it('keeps a snapshot without the optional fields', () => {

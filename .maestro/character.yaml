@@ -4,6 +4,8 @@
 # banner opens and closes the class sheet (PLAN 6.9, 6.9 screenshots). The weekly class challenge
 # (PLAN 6.9b): the Recruit's "2 sessions" card, its line in the class sheet, 1 / 2 on the first
 # session's summary, CHALLENGE COMPLETE! on a second one and the COMPLETE tag (6.9b screenshots).
+# The companion (PLAN 6.10) waits for the first quest, its Customize sheet opens and closes; after
+# the session it is fired up and a tap makes it wave (6.10 screenshots).
 # Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Character - level and XP after a logged session, history opens the session
@@ -38,9 +40,49 @@ name: Character - level and XP after a logged session, history opens the session
 - assertVisible:
     id: 'character-total-xp'
     text: '0 XP earned in total'
+# 6.10: the companion waits for the first quest and carries the Recruit's wooden sword
 - assertVisible:
-    id: 'attribute-radar'
+    id: 'companion-mood'
+    text: 'Restless'
+- assertVisible:
+    id: 'companion-weapon'
+    text: 'Wooden training sword'
+- takeScreenshot: 6.10-character-companion
+- tapOn:
+    id: 'companion-customize'
+- extendedWaitUntil:
+    visible:
+      id: 'companion-sheet'
+    timeout: 20000
+- assertVisible:
+    id: 'companion-sheet-weapon'
+    text: 'Wooden training sword'
+- tapOn:
+    id: 'companion-sheet-skin-tan'
+- takeScreenshot: 6.10-customize
+- scrollUntilVisible:
+    element:
+      id: 'companion-sheet-head-golden_crown-locked'
+    direction: DOWN
+    timeout: 30000
+- takeScreenshot: 6.10-customize-locked
+- tapOn:
+    id: 'companion-sheet-close'
+- extendedWaitUntil:
+    notVisible:
+      id: 'companion-sheet'
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'attribute-radar'
+    direction: DOWN
+    timeout: 30000
 # 6.7: the rank crest opens the rank ladder: Novice is the hero's rank, Apprentice the next one
+- scrollUntilVisible:
+    element:
+      id: 'character-rank'
+    direction: UP
+    timeout: 30000
 - tapOn:
     id: 'character-rank'
 - extendedWaitUntil:
@@ -142,6 +184,13 @@ name: Character - level and XP after a logged session, history opens the session
     id: 'summary-challenge-line'
     text: '\+1 this session'
 - takeScreenshot: 6.9b-summary-progress
+# 6.10: the companion's victory pose on the summary
+- scrollUntilVisible:
+    element:
+      id: 'summary-companion'
+    direction: DOWN
+    timeout: 30000
+- takeScreenshot: 6.10-summary-victory
 - scrollUntilVisible:
     element:
       id: 'summary-done'
@@ -159,12 +208,30 @@ name: Character - level and XP after a logged session, history opens the session
     visible:
       id: 'character-screen'
     timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'character-total-xp'
+    direction: UP
+    timeout: 30000
 - assertVisible:
     id: 'character-total-xp'
     text: '[1-9][0-9]* XP earned in total'
 - assertVisible:
     id: 'character-xp'
 - takeScreenshot: 4.5-character
+# 6.10: a session cheers the companion up; a tap makes it wave
+- scrollUntilVisible:
+    element:
+      id: 'companion-mood'
+    direction: DOWN
+    timeout: 30000
+- assertVisible:
+    id: 'companion-mood'
+    text: 'Fired up'
+- takeScreenshot: 6.10-character-companion-happy
+- tapOn:
+    id: 'companion-sprite'
+- takeScreenshot: 6.10-companion-tap
 - scrollUntilVisible:
     element:
       id: 'recent-session-0'

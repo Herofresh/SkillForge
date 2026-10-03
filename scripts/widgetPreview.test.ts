@@ -7,9 +7,13 @@ import { Colors } from '@/components/theme';
 import { encodePng } from './png';
 import { hexToRgba, pixelAt } from './raster';
 import {
+  COMPANION_PREVIEW_HEIGHT_DP,
+  COMPANION_PREVIEW_PATH,
+  COMPANION_PREVIEW_WIDTH_DP,
   PREVIEW_HEIGHT_DP,
   PREVIEW_PX_PER_DP,
   PREVIEW_WIDTH_DP,
+  renderCompanionWidgetPreview,
   renderWidgetPreview,
   WIDGET_PREVIEW_PATH,
 } from './widgetPreview';
@@ -34,9 +38,10 @@ function widgetConfigs(): WidgetConfig[] {
 describe('widget picker preview', () => {
   const image = renderWidgetPreview();
 
-  it('is the preview image app.json gives the widget', () => {
-    expect(widgetConfigs().map((widget) => widget.previewImage)).toEqual([
-      `./${WIDGET_PREVIEW_PATH}`,
+  it('is the preview image app.json gives each widget', () => {
+    expect(widgetConfigs().map((widget) => [widget.name, widget.previewImage])).toEqual([
+      ['SkillForge', `./${WIDGET_PREVIEW_PATH}`],
+      ['SkillForgeCompanion', `./${COMPANION_PREVIEW_PATH}`],
     ]);
   });
 
@@ -62,6 +67,29 @@ describe('widget picker preview', () => {
 
   it('is committed as rendered (run npm run icon:build after changing it)', () => {
     const onDisk = readFileSync(join(ROOT, WIDGET_PREVIEW_PATH));
+    expect(onDisk.equals(encodePng(image))).toBe(true);
+  });
+});
+
+describe('large widget picker preview (PLAN 6.10)', () => {
+  const image = renderCompanionWidgetPreview();
+
+  it('is the 4 x 3 widget at its pixel density, framed', () => {
+    expect(image.width).toBe(COMPANION_PREVIEW_WIDTH_DP * PREVIEW_PX_PER_DP);
+    expect(image.height).toBe(COMPANION_PREVIEW_HEIGHT_DP * PREVIEW_PX_PER_DP);
+    expect(pixelAt(image, 0, 0)).toEqual(hexToRgba(Colors.ink));
+  });
+
+  it('puts the companion straight on the widget surface, no lighter box behind it', () => {
+    const raised = hexToRgba(Colors.surfaceRaised).join(',');
+    for (let i = 0; i < image.data.length; i += 4) {
+      const key = Array.from(image.data.subarray(i, i + 4)).join(',');
+      if (key === raised) throw new Error(`Raised surface color at pixel ${i / 4}`);
+    }
+  });
+
+  it('is committed as rendered (run npm run icon:build after changing it)', () => {
+    const onDisk = readFileSync(join(ROOT, COMPANION_PREVIEW_PATH));
     expect(onDisk.equals(encodePng(image))).toBe(true);
   });
 });

@@ -4,7 +4,10 @@ import { registerWidgetTaskHandler, requestWidgetUpdate } from 'react-native-and
 import { WIDGET_DEEP_LINK, type WidgetView } from '@/domain/widget';
 
 import {
+  COMPANION_WIDGET_NAME,
+  companionScale,
   registerWidgetTask,
+  SkillForgeCompanionWidget,
   SkillForgeWidget,
   WIDGET_WIDE_MIN_DP,
   widgetSizes,
@@ -164,5 +167,62 @@ describe('the widget task', () => {
     } as unknown as Parameters<typeof handler>[0]);
     expect(renderWidget).not.toHaveBeenCalled();
     expect(requestWidgetUpdate).not.toHaveBeenCalled();
+  });
+});
+
+describe('SkillForgeCompanionWidget (PLAN 6.10)', () => {
+  const withCompanion: WidgetView = {
+    ...hero,
+    heroClass: { id: 'warrior', title: 'Warrior' },
+    companion: {
+      loadout: { head: 'iron_helm' },
+      weapon: { classId: 'warrior', upgraded: false },
+      look: {},
+      mood: 'happy',
+      moodTitle: 'Fired up',
+    },
+  };
+
+  it('draws the companion next to status, mood, streak, level, rank and class', () => {
+    const tree = <SkillForgeCompanionWidget view={withCompanion} widthDp={395} heightDp={380} />;
+    expect(texts(tree)).toEqual(
+      expect.arrayContaining(['Trained today', 'FIRED UP', '3', '7', 'Apprentice', 'WARRIOR']),
+    );
+    const svgs = primitives(tree).filter((entry) => entry.type === 'SvgWidget');
+    const sprite = svgs.find((entry) => String(entry.props.svg).includes('viewBox="0 0 32 40"'));
+    expect(sprite).toBeDefined();
+    expect(sprite?.props.style).toMatchObject({ width: 160, height: 200 });
+  });
+
+  it('draws the sprite on a transparent background, straight on the widget', () => {
+    const tree = <SkillForgeCompanionWidget view={withCompanion} widthDp={395} heightDp={380} />;
+    const sprite = primitives(tree).find(
+      (entry) => entry.type === 'SvgWidget' && String(entry.props.svg).includes('0 0 32 40'),
+    );
+    expect(sprite?.props.style).not.toHaveProperty('backgroundColor');
+    expect(String(sprite?.props.svg)).not.toMatch(/<rect/);
+  });
+
+  it('opens the Train tab when tapped', () => {
+    const [root] = primitives(
+      <SkillForgeCompanionWidget view={withCompanion} widthDp={395} heightDp={380} />,
+    );
+    expect(root.props).toMatchObject({ clickActionData: { uri: 'skillforge://train' } });
+  });
+
+  it('falls back to the small layout before the app wrote a companion', () => {
+    const shown = texts(<SkillForgeCompanionWidget view={hero} widthDp={395} heightDp={380} />);
+    expect(shown).toEqual(expect.arrayContaining(['Trained today', 'Apprentice']));
+  });
+
+  it('draws the sprite at a whole number of dp per pixel', () => {
+    const sizes = { padding: 15 } as Parameters<typeof companionScale>[2];
+    expect(companionScale(395, 380, sizes)).toBe(5);
+    expect(companionScale(250, 180, sizes)).toBe(3);
+    expect(companionScale(100, 60, sizes)).toBe(2);
+  });
+
+  it('has its own name, different from the small widget placed since 6.6', () => {
+    expect(COMPANION_WIDGET_NAME).not.toBe('SkillForge');
   });
 });

@@ -29,13 +29,20 @@ import { Palette } from '@/components/palette';
 import { AttributeColors, Colors, FontFamily, PIXEL, RankColors } from '@/components/theme';
 import { iconSvg, type IconName } from '@/components/ui/icons';
 import { HERO_CLASS_BY_ID } from '@/data/classes';
+import { companionColors, companionStill, SPRITE_HEIGHT, SPRITE_WIDTH } from '@/data/companion';
 import { widgetView, type WidgetView } from '@/domain/widget';
+import { gridSvg, parsePixelGrid } from '@/lib/pixelGrid';
 import { currentTime } from '@/lib/time';
 
 import { readWidgetSnapshot } from './widgetStorage';
 
-/** The widget's name in app.json (`react-native-android-widget` plugin → `widgets[].name`). */
+/**
+ * The widgets' names in app.json (`react-native-android-widget` plugin → `widgets[].name`). The
+ * small one keeps the 6.6 name, so a widget placed before 6.10 stays placed and keeps working;
+ * the large one is new (PLAN 6.10, ADR-059).
+ */
 export const WIDGET_NAME = 'SkillForge';
+export const COMPANION_WIDGET_NAME = 'SkillForgeCompanion';
 /** From this width (dp) on, the widget shows the rank and the top attributes next to the status. */
 export const WIDGET_WIDE_MIN_DP = 220;
 
@@ -345,6 +352,129 @@ export function SkillForgeWidget({
   );
 }
 
+type HeroCompanion = NonNullable<HeroView['companion']>;
+
+/**
+ * The companion sprite as a crisp SVG string (its mood's first frame), `widthDp` wide. Only the
+ * sprite's pixels are painted: the background stays transparent, so it stands on the widget.
+ */
+export function companionSvg(companion: HeroCompanion, widthDp: number): string {
+  const rows = companionStill(companion.mood, {
+    loadout: companion.loadout,
+    weapon: companion.weapon,
+  });
+  const colors = companionColors(companion.look);
+  return gridSvg(parsePixelGrid(rows), widthDp, (role) => colors[role]);
+}
+
+/**
+ * dp per sprite pixel for the large widget: as big as the height and ~45 % of the width allow,
+ * whole numbers only (crisp pixels), at least 2.
+ */
+export function companionScale(widthDp: number, heightDp: number, sizes: WidgetSizes): number {
+  const height = heightDp - 2 * (sizes.padding + 2 * PIXEL);
+  return Math.max(2, Math.floor(Math.min(height / SPRITE_HEIGHT, (widthDp * 0.45) / SPRITE_WIDTH)));
+}
+
+/**
+ * The large widget (PLAN 6.10): the companion in its mood on the left; on the right the training
+ * status, the mood, streak and level, and the rank with the worn class. Without a companion in
+ * the snapshot (an app that has not written one yet) it falls back to the small layout.
+ */
+export function SkillForgeCompanionWidget({
+  view,
+  widthDp,
+  heightDp,
+}: {
+  view: WidgetView;
+  widthDp: number;
+  heightDp: number;
+}) {
+  if (view.kind === 'empty' || !view.companion) {
+    return <SkillForgeWidget view={view} widthDp={widthDp} heightDp={heightDp} />;
+  }
+  const sizes = widgetSizes(widthDp, heightDp);
+  const scale = companionScale(widthDp, heightDp, sizes);
+  const gap = Math.round(sizes.gap / 2);
+  return (
+    <Frame view={view} sizes={sizes}>
+      <SvgWidget
+        svg={companionSvg(view.companion, SPRITE_WIDTH * scale)}
+        style={{ width: SPRITE_WIDTH * scale, height: SPRITE_HEIGHT * scale }}
+      />
+      <FlexWidget
+        style={{
+          flexDirection: 'column',
+          flex: 1,
+          height: 'match_parent',
+          justifyContent: 'space-evenly',
+          marginLeft: sizes.gap * 2,
+        }}>
+        <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Icon name={view.trainedToday ? 'check' : 'hourglass'} size={sizes.smallIcon} />
+          <TextWidget
+            text={view.status}
+            maxLines={1}
+            truncate="END"
+            style={{
+              fontFamily: FontFamily.pixel,
+              fontSize: sizes.attribute,
+              marginLeft: gap,
+              color: color(view.trainedToday ? Colors.success : Colors.gold),
+            }}
+          />
+        </FlexWidget>
+        <PixelLabel text={view.companion.moodTitle} size={sizes.label} tone={Colors.goldLight} />
+        <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Icon name="flame" size={sizes.smallIcon} />
+          <FlexWidget style={{ flexDirection: 'column', marginLeft: gap }}>
+            <PixelNumber text={String(view.streak)} size={sizes.number} tone={Colors.ember} />
+            <PixelLabel text="Streak" size={sizes.label} />
+          </FlexWidget>
+          <FlexWidget style={{ flexDirection: 'column', marginLeft: sizes.gap * 2 }}>
+            <PixelNumber text={String(view.level)} size={sizes.number} tone={Colors.goldLight} />
+            <PixelLabel text="Level" size={sizes.label} />
+          </FlexWidget>
+        </FlexWidget>
+        <FlexWidget style={{ flexDirection: 'column' }}>
+          <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Icon name="shield" size={sizes.smallIcon} />
+            <TextWidget
+              text={view.rank}
+              style={{
+                fontFamily: FontFamily.pixel,
+                fontSize: sizes.rank,
+                marginLeft: gap,
+                color: color(RankColors[view.rank]),
+              }}
+            />
+          </FlexWidget>
+          {view.heroClass ? <ClassLabel heroClass={view.heroClass} sizes={sizes} /> : null}
+        </FlexWidget>
+      </FlexWidget>
+    </Frame>
+  );
+}
+
+/** The widget for `name` (the small or the large one). */
+function WidgetFor({
+  name,
+  view,
+  widthDp,
+  heightDp,
+}: {
+  name: string;
+  view: WidgetView;
+  widthDp: number;
+  heightDp: number;
+}) {
+  return name === COMPANION_WIDGET_NAME ? (
+    <SkillForgeCompanionWidget view={view} widthDp={widthDp} heightDp={heightDp} />
+  ) : (
+    <SkillForgeWidget view={view} widthDp={widthDp} heightDp={heightDp} />
+  );
+}
+
 /** The view as of now from the stored snapshot (the clock decides "today" and the streak). */
 async function currentView(): Promise<WidgetView> {
   return widgetView(await readWidgetSnapshot(), currentTime());
@@ -358,7 +488,8 @@ async function handleWidgetTask({
   // A click opens the deep link natively (OPEN_URI); a removed widget needs nothing drawn.
   if (widgetAction === 'WIDGET_CLICK' || widgetAction === 'WIDGET_DELETED') return;
   renderWidget(
-    <SkillForgeWidget
+    <WidgetFor
+      name={widgetInfo.widgetName}
       view={await currentView()}
       widthDp={widgetInfo.width}
       heightDp={widgetInfo.height}
@@ -371,13 +502,15 @@ export function registerWidgetTask(): void {
   registerWidgetTaskHandler(handleWidgetTask);
 }
 
-/** Redraws every placed SkillForge widget from the stored snapshot (after the app wrote it). */
+/** Redraws every placed SkillForge widget, small and large, from the stored snapshot. */
 export async function redrawWidgets(): Promise<void> {
   const view = await currentView();
-  await requestWidgetUpdate({
-    widgetName: WIDGET_NAME,
-    renderWidget: (info) => (
-      <SkillForgeWidget view={view} widthDp={info.width} heightDp={info.height} />
-    ),
-  });
+  for (const name of [WIDGET_NAME, COMPANION_WIDGET_NAME]) {
+    await requestWidgetUpdate({
+      widgetName: name,
+      renderWidget: (info) => (
+        <WidgetFor name={name} view={view} widthDp={info.width} heightDp={info.height} />
+      ),
+    });
+  }
 }

@@ -282,6 +282,31 @@ XP"), the goal, the bar, "1 / 2 sessions" and "+1 this session" / "Complete! +50
 complete this week"; the XP line adds "· +50 challenge". The class sheet shows each class's
 "Weekly challenge: …" in rune under its flavor line. Screenshots: `docs/screenshots/6.9b-*.png`.
 
+**Companion (PLAN 6.10, ADR-059)** in `src/components/character/`. **Two styles on purpose: the
+companion is a JRPG-style chibi sprite; the exercise animations stay stick figures** (they show a
+human body's movement more clearly). The companion is original pixel art inspired by SNES-era
+Final Fantasy field sprites and Octopath Traveler (nothing copied): a 32 × 40 front-facing chibi
+with a big head (about half its height), two eyes with a white glint, mouth and blush, a hair shape,
+a tunic with belt and hem, hands and boots, a soft dark ground shadow. Every material is shaded in
+code from a 4–5 step ramp of its own (`src/data/companion/looks.ts`; outline, shadow, base, light,
+specular on metal, gold and gems), light from the top left, warm highlights, slightly muted
+mid-tones, and outlined selectively in the darkest step of the colour it borders, never pure black.
+Skin (6), hair (6) and outfit dye (6) are the hero's choices. Animations are stepped loops of
+`FRAME_MS` frames with holds: happy (fists up, a hop, weapon raised, smile), content (a 1 px breath),
+waiting (eyes left and right, a foot tap), sad (sitting, head down, eyes down, weapon on the
+ground; slower), victory (weapon raised; Train summary), wave (on a tap). `CompanionCard` is its own
+stone panel under the hero panel (rune caps "Companion"): the sprite at 4 dp per pixel on a raised
+stage with a 1 dp `border` line, the mood title in gold ("Fired up", "Rested", "Restless", "Missing
+you"), one kind `small` line ("Misses training with you. One session cheers it up."), the weapon's
+name as a muted caps label, and a secondary "Customize" button with the helmet plus an "n NEW" tag.
+Moods are poses, never penalties. `CompanionSheet` (`PixelModal` "Customize"): a 3 dp-per-pixel
+preview, the weapon ("Comes with the class you wear"), chips for Skin, Hair and Outfit, then one
+section per slot (bronze rule, heading, the worn item's flavour, chips "None" + the earned items,
+"· NEW" on unseen ones) and the locked items as muted name + gold "Character level 10 · Level 4 /
+10" lines with a gold-dark left rule. The Train summary adds a gold panel with a NEW TRINKET! burst
+and one line per accessory ("Iron helm" / "Head · Warrior class, tier I"), and the companion in its
+victory pose ("Victory!"). Contact sheets: `npm run companion:sheet` → `docs/screenshots/6.10-*.png`.
+
 **Node editor and shared progressions (PLAN 4.7–4.8, ADR-036)** in `src/components/editor/`: the
 editor is a stack of `DetailSection` panels (an arcane "Exercise" panel for a custom node: name,
 metric chips, "Comes after" + `PositionSheet`, difficulty stepper, straight-arm chip; then
@@ -350,6 +375,15 @@ line around a `stone` disc, on the `night` background. Roles map to `Palette` ke
 
 ### Home-screen widget (PLAN 6.6, ADR-055)
 
+Two widgets since PLAN 6.10 (ADR-059): the **small** `SkillForge` widget below (training status,
+streak, level, rank, class, top attributes; the 6.6 provider, so placed widgets keep working) and
+the **large** `SkillForgeCompanion` widget (default 4 × 3): the same frame, the companion sprite in
+its mood (first frame, an SVG at a whole number of dp per pixel, 160 × 200 dp at 4 × 3) on the
+left, on a transparent background so it stands straight on the widget surface (no box), and on the right, spread over the height: a small check /
+hourglass with the status in the attribute size, the mood title as a gold-light caps label, the flame
+with streak and level, and the shield with the rank over the class title. Its picker preview is
+`assets/images/widget-companion-preview.png`.
+
 An Android widget (`src/widget/nativeWidget.tsx`) drawn with the library's RemoteViews primitives,
 so only plain boxes, text and SVG: no notched corners and no hard drop shadow. The frame is an
 `ink` outer line (one `PIXEL`), a `stoneEdge` inner line and the `stone` fill; square corners
@@ -391,6 +425,8 @@ Icons are the 12×12 grids as SVG strings (`iconSvg`, 24 dp, crisp edges).
 - **Reduce motion:** every animation checks `useReducedMotion()` (Reanimated). With it on, show the
   end state immediately (the burst shows only the title; sheets appear without sliding).
 - Buttons animate by position only (the press drop), no fades.
+- **The companion's idle loops (PLAN 6.10, ADR-059)** repeat too, in the same stepped sprite
+  frames; with reduce motion they show their first frame.
 - **Exercise animations loop (PLAN 6.4, ADR-053):** the one exception to "short, never loop".
   They explain a movement rather than celebrate, so they repeat: sprite frames of `FRAME_MS`
   (160 ms) each, switched in whole steps (a linear ramp floored to the frame index on the UI
@@ -398,9 +434,9 @@ Icons are the 12×12 grids as SVG strings (`iconSvg`, 24 dp, crisp edges).
   between keyframes. With reduce motion they show one still keyframe and never move.
 - **Reveal moments (PLAN 5.2, ADR-038):** every celebration is a `LevelUpBurst` with a title from
   `BURST_TITLES` (LEVEL UP!, UNLOCKED!, TESTED OUT!, QUEST COMPLETE, CLASS UNLOCKED!, TIER UP!,
-  CHALLENGE COMPLETE!). The ring bursts from the
+  CHALLENGE COMPLETE!, NEW TRINKET!). The ring bursts from the
   title's centre. Where they play: Train summary (quest complete, first level-up, first unlock, a class
-  unlocked or a class tier reached),
+  unlocked or a class tier reached, a companion accessory earned),
   Trial outcome (tested out; node detail and onboarding share `TrialOutcome`), onboarding summary
   (hero name + rank), node detail (UNLOCKED! after unlock anyway, else LEVEL UP! when the node's
   level rose while it was open), Character tab (LEVEL UP! when the character level rose). Level-ups

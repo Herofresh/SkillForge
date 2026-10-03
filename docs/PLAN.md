@@ -238,13 +238,22 @@
   a badge count. Straight-arm work never counts; the generator and safeguards are unchanged.
   Character tab card under the class banner, summary panel with CHALLENGE COMPLETE!, the
   challenge per class in the class sheet. Screenshots `docs/screenshots/6.9b-*.png`.
+- Companion (6.10, ADR-059, [PR #56](https://github.com/Herofresh/SkillForge/pull/56)): the hero as a JRPG-style chibi sprite on the Character tab
+  (own panel under the hero panel): four moods by calendar days since the last session (happy,
+  content, waiting, sad; never worse, nothing is ever lost, a session cheers it up at once), a
+  wave on a tap, the worn class's weapon (tier III upgraded), 46 accessories in five slots earned
+  by flat rules (rank, level, class tiers, sessions, best streak, Trials) and kept forever in the
+  `hero_companion` setting (existing users get theirs on the first start), a Customize sheet
+  (slots, skin / hair / outfit, locked items with what earns them), NEW TRINKET! and the victory
+  pose on the Train summary. Widgets: the existing one stays the small widget; a new large
+  `SkillForgeCompanion` widget shows the companion in its mood with status, streak, level, rank and
+  class. Contact sheets `docs/screenshots/6.10-*.png`.
 
 ## Next up
 1. On the user's phone: install [v0.5.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.5.0)
    over the installed build (Update, no uninstall), add the SkillForge widget to the home screen
    and report what feels off. (v0.4.0 and v0.5.0 are published as GitHub pre-releases.)
-2. 6.10 Companion (waiting for the user's
-   decision on its design proposal). Then 6.11 (v0.6.0 release) and Phase 7 (Google Play); the user creates the upload key then
+2. 6.11 (v0.6.0 release; its upgrade check should look at the companion and both widgets) and Phase 7 (Google Play); the user creates the upload key then
    (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
@@ -253,6 +262,47 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Companion (task 6.10, ADR-059, [PR #56](https://github.com/Herofresh/SkillForge/pull/56)):**
+  - Code: `src/domain/companion.ts` (mood, facts, rules, unlock merge, loadout, wardrobe, setting
+    reader / writer), `src/data/companion/` (`accessories.ts` the one place for rules, `body.ts`
+    chibi parts and frame anchors, `art.ts` accessory and weapon parts, `weapons.ts`, `moods.ts`
+    frame loops, `looks.ts` sprite palette, `index.ts` composer), `src/lib/sprite.ts` (generic
+    layered sprite: parts, regions, computed shading, selective outline, glow, ground shadow),
+    `PixelSprite` (UI kit; `PixelAnimation` now uses it too); store: `companion` state,
+    `COMPANION_SETTING` (`hero_companion`), `equipAccessory`, `setCompanionLook`,
+    `markAccessoriesSeen`, the re-check in `commitEngine` after the class tiers; UI:
+    `CompanionCard`, `CompanionSprite`, `CompanionSheet`, `CompanionVictory`,
+    `TrinketUnlockPanel`, `useCompanion`, `companionText`; widget: optional `companion` in the
+    snapshot, `SkillForgeCompanionWidget`, second provider `SkillForgeCompanion` in app.json,
+    `widget-companion-preview.png`.
+  - Art workflow: `npm run companion:sheet -- --only <ids> --cell 8 --out <png>`, look at it,
+    tune the part grids (uppercase = material, auto-shaded; lowercase = its shadow), re-run the
+    full sheet and commit. Before / after: the first draft (stick figure with a chunky build) was
+    replaced by the sprite on the user's art direction; the exercise animations are unchanged.
+  - "7/30-day streak" = the app's streak (sessions ≤ 72 h apart), best ever reached.
+  - Weakest art: raised arms tuck beside the head, small weapons (daggers, axes, wand) are a few
+    pixels, the sad pose hides the legs. Ideas: tier II recolours (the user allowed them), a
+    second hairstyle.
+  - Verified: typecheck, lint, format:check, progressions:check, full Jest (88 suites: sprite
+    engine, every accessory and weapon in every pose, moods by calendar day, rules, unlock merge,
+    loadout, setting reader, store upgrade / backups / choices, components, widget snapshot and
+    both layouts, picker previews); contact sheets looked at (`docs/screenshots/6.10-*.png`,
+    before: `6.10-before-stick-figure.png`); Maestro `character.yaml` on Pixel_8_Pro_API_35 /
+    Expo Go (Restless new hero with the wooden sword, Customize sheet with skin chip and locked
+    items, Fired up after the session, wave on tap, victory pose on the summary; the 6.9b steps
+    pass too); release APK (`npm run build:apk:universal`, signer check passed, built in
+    `D:\sf610`) installed with `adb install -r` over an older install with data (hero Aria, 40 XP):
+    the Character tab showed the companion with "2 NEW" earned accessories at once, the picker
+    lists both widgets with their previews, the large widget drew the sprite with the real data and
+    survived a reinstall, the small one still draws, a tap opens Train
+    (`6.10-upgrade-character.png`, `6.10-widget-picker.png`, `6.10-widget-large.png`,
+    `6.10-widget-small.png`). Not verified: a real phone, the sad sprite on the widget after a real
+    6-day gap (unit tests cover the mood at render time), reduce motion on a device, the full
+    ADR-043 upgrade check from every release (6.11 does that).
+  - Review tweak: the large widget's sprite no longer sits on a lighter `surfaceRaised` box (seen
+    in `6.10-widget-large.png`); its background is transparent, checked by the widget and preview
+    tests and the regenerated picker preview. The on-device check of this tweak happens in the
+    6.11 release (the screenshot above still shows the box).
 - **Weekly class challenge (task 6.9b, ADR-058, [PR #55](https://github.com/Herofresh/SkillForge/pull/55)):**
   - Code: `src/domain/challenges.ts` (goal counting, `advanceChallenge` engine step, pins,
     `challengeView`), `localWeekBounds` in `src/lib/time.ts`, `ChallengeGoal` /
@@ -1138,11 +1188,31 @@ upgrade check from every earlier release). Any new table or column is additive a
   and rules are designed in its own ADR first. Done: 15 challenges in `src/data/classes.ts`,
   pinned per week by the first session, flat +50 XP once a week, badge count, Character card,
   summary CHALLENGE COMPLETE!, class sheet line; setting `class_challenges`, no migration.
-- [ ] 6.10 Companion (user idea, do last): the hero as a small tamagotchi-style pixel character on
-  the Character tab, customizable within limits; classes (6.9) and achievements unlock trinkets
-  and outfits. **Starts with a design proposal for the user** (what reacts to training, what can be
-  customized, which unlocks; no punishing mechanics in the spirit of ADR-023). Reuses the 6.4
-  skeleton and pixel renderer.
+- [x] 6.10 Companion (user idea; ADR-059, [PR #56](https://github.com/Herofresh/SkillForge/pull/56)): the hero as a small tamagotchi-style
+  pixel companion on the Character tab, customizable within limits. **User decisions
+  (2026-10-03):**
+  - Mood: it can get sad (after several days without training) but it never dies, never gets
+    sick, never loses anything; training cheers it up. No punishment (ADR-023).
+  - Accessories fit milestones, ranks, levels and classes/tiers, fantasy-RPG styled; every unlock
+    rule is flat and monotonic like the classes (once earned, kept forever). The list shown to the
+    user is the spec: rank (rope headband, leather bracers, iron circlet, knight's mantle, golden
+    crown + golden aura), character level 5/10/20/35/50/75 (traveler's tunic, hooded cloak,
+    chainmail vest, runed gauntlets, dragonscale armour, phoenix cloak), milestones (first Trial
+    trial medallion, streak 7 ember aura, streak 30 flame aura, first elite-skill Trial star-forged
+    halo, 50 sessions veteran's scarf, 100 sessions war banner) and one item for tier I and one for
+    tier III of every class. Colour choices for skin, hair and outfit.
+  - A weapon slot that is not chosen: the companion carries the worn class's weapon (it identifies
+    the class), tier III upgraded, the Recruit a wooden training sword.
+  - Widgets: a small one (training status, streak, stats; the existing widget, so placed widgets
+    keep working) and a large one (the companion plus a few key stats).
+  - Art direction: not the stick figure; an original chibi sprite inspired by SNES-era Final
+    Fantasy field sprites and Octopath Traveler (big head, face, hair, clothes, hands, boots;
+    selective outline, 3–4 tone shading from the top left, ground shadow; layered parts; idle,
+    cheer, sad and victory loops). The exercise animations stay stick figures on purpose.
+  Built: `src/lib/sprite.ts` (layered parts, computed shading and outline), a 32 × 40 chibi body
+  with its own sprite palette, 46 accessories, 15 class weapons, mood / victory / wave loops,
+  `hero_companion` setting (no migration, backups unchanged), Customize sheet, NEW TRINKET! and the
+  victory pose on the summary, the large `SkillForgeCompanion` widget.
 - [ ] 6.11 v0.6.0 release (6.9–6.10), same routine.
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)

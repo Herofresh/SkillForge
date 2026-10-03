@@ -74,7 +74,8 @@
     "build:apk": "tsx scripts/buildApk.ts",
     "build:apk:universal": "tsx scripts/buildApk.ts --universal",
     "icon:build": "tsx scripts/iconBuild.ts",
-    "animations:sheet": "tsx scripts/animationSheetBuild.ts"
+    "animations:sheet": "tsx scripts/animationSheetBuild.ts",
+    "companion:sheet": "tsx scripts/companionSheetBuild.ts"
   },
   "private": true,
   "devEngines": {

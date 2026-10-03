@@ -382,6 +382,40 @@ export interface ClassTierUnlock {
 /** Reached tiers per class id: entry 0 is tier I, entry 1 tier II, … (a prefix, never with gaps). */
 export type ClassUnlocks = Readonly<Record<string, readonly ClassTierUnlock[]>>;
 
+/** Where a companion accessory sits on the hero (PLAN 6.10); one accessory per slot. */
+export const COMPANION_SLOTS = ['head', 'cloak', 'body', 'hands', 'aura'] as const;
+export type CompanionSlot = (typeof COMPANION_SLOTS)[number];
+
+/**
+ * What earns a companion accessory (PLAN 6.10, ADR-059). Like the class rules: flat thresholds
+ * over values that only grow with training, and an earned accessory is kept forever anyway.
+ * Cosmetic only.
+ * - `sessions`: at least `count` logged sessions.
+ * - `level`: at least this character level.
+ * - `rank`: at least this rank.
+ * - `class`: the class `classId` at tier `tier` or higher.
+ * - `streak`: a streak of at least `count` sessions reached at some point (the best streak).
+ * - `trials`: at least `count` Trials passed (tested out or earned).
+ * - `eliteTrial`: a Trial passed on an elite-tier node (a legendary skill).
+ */
+export type CompanionRule =
+  | { kind: 'sessions'; count: number }
+  | { kind: 'level'; level: number }
+  | { kind: 'rank'; rank: RankTitle }
+  | { kind: 'class'; classId: string; tier: number }
+  | { kind: 'streak'; count: number }
+  | { kind: 'trials'; count: number }
+  | { kind: 'eliteTrial' };
+
+/** What the unlock rules need of an accessory (the full definitions are in `src/data/companion.ts`). */
+export interface AccessoryDefinition {
+  /** Stable snake_case id, never renamed (the stored loadout and unlocks reference it). */
+  id: string;
+  name: string;
+  slot: CompanionSlot;
+  rule: CompanionRule;
+}
+
 /**
  * Advisory warnings (ADR-023). The engine computes them and the UI shows them with an acknowledge
  * step; they never block logging, Trials or test-outs.

@@ -39,6 +39,10 @@
  * - Weekly class challenges (PLAN 6.9b, ADR-058): the first session of a week pins the worn
  *   class's challenge (`class_challenges` setting) before it is applied; the pinned weeks go into
  *   every `recompute` / `applySession`, so the challenge bonus is part of the derived XP.
+ * - Companion (PLAN 6.10, ADR-059): every engine change also re-checks the accessory rules
+ *   (`mergeAccessoryUnlocks`, after the class tiers, which some rules need) and keeps newly earned
+ *   accessories in the `hero_companion` setting, stamped like the class tiers; `equipAccessory`,
+ *   `setCompanionLook` and `markAccessoriesSeen` store the hero's choices. Cosmetic only.
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
  *
  * `createAppStore` takes its dependencies (database, built-in tree, clock, id source, file access) so
@@ -67,6 +71,7 @@ import { getSetting, setSetting } from '@/db/settingsRepository';
 import { insertUserAction, listUserActions } from '@/db/userActionRepository';
 import { readUserData, replaceUserData } from '@/db/userDataRepository';
 import { HERO_CLASSES } from '@/data/classes';
+import { ACCESSORIES } from '@/data/companion/accessories';
 import { testOutWarnings, trialSession } from '@/domain/assessment';
 import { backupFileName, parseBackup, serializeBackup } from '@/domain/backup';
 import {
@@ -87,6 +92,16 @@ import {
   wornClass,
   type ClassSettings,
 } from '@/domain/classes';
+import {
+  companionFacts,
+  companionSettingsToRaw,
+  EMPTY_COMPANION_SETTINGS,
+  equipAccessory,
+  mergeAccessoryUnlocks,
+  parseCompanionSettings,
+  type CompanionLookChoice,
+  type CompanionSettings,
+} from '@/domain/companion';
 import {
   generateWorkout,
   plannedSets,
@@ -171,7 +186,9 @@ import {
 import {
   EQUIPMENT_TAGS,
   type Branch,
+  type AccessoryDefinition,
   type ClassDefinition,
+  type CompanionSlot,
   type ClassTierUnlock,
   type EquipmentProfile,
   type EquipmentTag,
@@ -207,6 +224,8 @@ export const CLASS_SETTING = 'hero_classes';
 
 /** Setting key: the pinned weekly class challenges (PLAN 6.9b, `ChallengePin` list). */
 export const CHALLENGE_SETTING = 'class_challenges';
+/** Setting key: the companion (PLAN 6.10, `CompanionSettings`: earned accessories, loadout, look). */
+export const COMPANION_SETTING = 'hero_companion';
 
 /** File name prefix of the safety copy written before an import replaces the data. */
 export const SAFETY_COPY_PREFIX = 'skillforge-before-import';
@@ -237,6 +256,8 @@ export interface AppStoreDeps {
   files?: BackupFiles;
   /** The hero classes (`HERO_CLASSES` by default). */
   classes?: readonly ClassDefinition[];
+  /** The companion's accessories (`ACCESSORIES` by default). */
+  accessories?: readonly AccessoryDefinition[];
 }
 
 export interface EquipmentProfileChanges {
@@ -311,6 +332,11 @@ export interface AppState {
    * session, the class worn at its first session. Stored user data, like the history.
    */
   challengePins: readonly ChallengePin[];
+  /**
+   * The companion (PLAN 6.10): every earned accessory (kept forever, with the session that earned
+   * it), what the hero chose to wear per slot, the look and the accessories already seen.
+   */
+  companion: CompanionSettings;
   /** The plan preview being edited (PLAN 4.4); in memory only. */
   trainPlan?: SessionPlan;
   /** The session in progress, persisted after every change (resumed after a restart). */
@@ -368,6 +394,12 @@ export interface AppState {
   selectClass(classId: string): void;
   /** Marks every reached class tier as seen (the class sheet was opened): no more NEW badges. */
   markClassesSeen(): void;
+  /** Wears an earned accessory in its slot, or clears the slot with `null` (PLAN 6.10). Throws for an unknown, wrong-slot or unearned one. */
+  equipAccessory(slot: CompanionSlot, accessoryId: string | null): void;
+  /** Changes the companion's skin, hair or outfit color (ids from `src/data/companion/looks.ts`). */
+  setCompanionLook(look: CompanionLookChoice): void;
+  /** Marks every earned accessory as seen (the customize sheet was opened): no more NEW badges. */
+  markAccessoriesSeen(): void;
   createEquipmentProfile(name: string, tags: readonly EquipmentTag[]): EquipmentProfile;
   updateEquipmentProfile(id: string, changes: EquipmentProfileChanges): void;
   deleteEquipmentProfile(id: string): void;
@@ -505,6 +537,7 @@ function requireName(name: string): string {
 export function createAppStore(deps: AppStoreDeps): AppStore {
   const { db, baseNodes } = deps;
   const classDefinitions = deps.classes ?? HERO_CLASSES;
+  const accessoryDefinitions = deps.accessories ?? ACCESSORIES;
   const now = deps.now ?? Date.now;
   const newId = deps.newId ?? createId;
 
@@ -526,10 +559,16 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       set({ classes });
     };
 
+    /** Stores the companion settings and shows them. */
+    const saveCompanion = (companion: CompanionSettings): void => {
+      setSetting(db, COMPANION_SETTING, companionSettingsToRaw(companion));
+      set({ companion });
+    };
+
     /**
-     * Stores the new engine state and rewrites the progress cache from it. Class tiers the new
-     * state reaches are added to the stored ones, stamped with `source` (the session that got
-     * there; a load or import stamps the current time).
+     * Stores the new engine state and rewrites the progress cache from it. Class tiers and
+     * companion accessories the new state reaches are added to the stored ones, stamped with
+     * `source` (the session that got there; a load or import stamps the current time).
      */
     const commitEngine = (
       engine: EngineState,
@@ -546,7 +585,25 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       const merged = mergeClassUnlocks(classDefinitions, current.unlocks, facts, source);
       const classes = merged.gained.length > 0 ? { ...current, unlocks: merged.unlocks } : current;
       if (classes !== current) setSetting(db, CLASS_SETTING, classSettingsToRaw(classes));
-      set({ ...changes, engine, classes });
+      const companionNow = changes.companion ?? get().companion;
+      const earned = mergeAccessoryUnlocks(
+        accessoryDefinitions,
+        companionNow.unlocks,
+        companionFacts({
+          nodes: changes.nodes ?? get().nodes,
+          engine,
+          sessionCount: (changes.sessions ?? get().sessions).length,
+          sessionResults: changes.sessionResults ?? get().sessionResults,
+          classUnlocks: classes.unlocks,
+        }),
+        source,
+      );
+      const companion =
+        earned.gained.length > 0 ? { ...companionNow, unlocks: earned.unlocks } : companionNow;
+      if (companion !== companionNow) {
+        setSetting(db, COMPANION_SETTING, companionSettingsToRaw(companion));
+      }
+      set({ ...changes, engine, classes, companion });
     };
 
     /** The pinned weekly challenges as the engine takes them. */
@@ -664,6 +721,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       treeMode: DEFAULT_TREE_MODE,
       classes: EMPTY_CLASS_SETTINGS,
       challengePins: [],
+      companion: EMPTY_COMPANION_SETTINGS,
 
       loadAll() {
         const overlay = getOverlay(db)?.overlay ?? EMPTY_OVERLAY;
@@ -684,6 +742,10 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           treeMode: parseTreeMode(getSetting(db, TREE_MODE_SETTING)),
           classes: parseClassSettings(getSetting(db, CLASS_SETTING), classDefinitions),
           challengePins,
+          companion: parseCompanionSettings(
+            getSetting(db, COMPANION_SETTING),
+            accessoryDefinitions,
+          ),
           loaded: true,
           nodes,
           overlay,
@@ -803,6 +865,22 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const seen = seenAllTiers(classDefinitions, classes);
         const changed = Object.keys(seen).some((id) => seen[id] !== classes.seen[id]);
         if (changed) saveClasses({ ...classes, seen });
+      },
+
+      equipAccessory(slot, accessoryId) {
+        saveCompanion(equipAccessory(accessoryDefinitions, get().companion, slot, accessoryId));
+      },
+
+      setCompanionLook(look) {
+        const { companion } = get();
+        saveCompanion({ ...companion, look: { ...companion.look, ...look } });
+      },
+
+      markAccessoriesSeen() {
+        const { companion } = get();
+        const unseen = Object.keys(companion.unlocks).filter((id) => !companion.seen.includes(id));
+        if (unseen.length > 0)
+          saveCompanion({ ...companion, seen: [...companion.seen, ...unseen] });
       },
 
       createEquipmentProfile(name, tags) {

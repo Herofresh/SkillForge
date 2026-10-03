@@ -23,7 +23,12 @@ export interface WidgetSyncDeps {
 }
 
 const snapshotOf = (state: AppState): WidgetSnapshot =>
-  widgetSnapshot({ nodes: state.nodes, engine: state.engine, classes: state.classes });
+  widgetSnapshot({
+    nodes: state.nodes,
+    engine: state.engine,
+    classes: state.classes,
+    companion: state.companion,
+  });
 
 /** Wires a store to the widget; returns a stop function. Pure wiring, tested with fakes. */
 export function syncWidget(store: AppStore, deps: WidgetSyncDeps): () => void {
@@ -53,7 +58,8 @@ export function syncWidget(store: AppStore, deps: WidgetSyncDeps): () => void {
       state.loaded !== previous.loaded ||
       state.engine !== previous.engine ||
       state.nodes !== previous.nodes ||
-      state.classes !== previous.classes
+      state.classes !== previous.classes ||
+      state.companion !== previous.companion
     ) {
       push(false);
     }

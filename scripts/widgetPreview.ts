@@ -3,10 +3,19 @@
  * PNG of the default 4 × 2 widget with sample values, drawn from the same pixel icons and colors
  * as `src/widget/nativeWidget.tsx` (at its 1.5 scale). Text uses the 3 × 5 preview font, since
  * the build has no TTF rasterizer; the real widget draws Jersey 15 and Silkscreen. Written by
- * `npm run icon:build` to the path app.json's widget `previewImage` points at.
+ * `npm run icon:build` to the path app.json's widget `previewImage` points at. The large widget's
+ * preview (PLAN 6.10) shows the companion next to the stats.
  */
+import { Palette } from '@/components/palette';
 import { AttributeColors, Colors, PIXEL, RankColors } from '@/components/theme';
 import { iconCellColor, iconGrid, type IconName, type IconRole } from '@/components/ui/icons';
+import {
+  companionColors,
+  companionStill,
+  SPRITE_HEIGHT,
+  SPRITE_WIDTH,
+  type CompanionOutfit,
+} from '@/data/companion';
 
 import type { RgbaImage } from './png';
 import { createImage, drawGrid, fillRect, hexToRgba } from './raster';
@@ -162,5 +171,66 @@ export function renderWidgetPreview(): RgbaImage {
       LABEL_DP,
     );
   });
+  return image;
+}
+
+// --- The large widget with the companion (PLAN 6.10) ------------------------------------------
+
+export const COMPANION_PREVIEW_PATH = 'assets/images/widget-companion-preview.png';
+
+/** The default 4 × 3 widget on the Pixel 8 Pro emulator's launcher, in dp. */
+export const COMPANION_PREVIEW_WIDTH_DP = 396;
+export const COMPANION_PREVIEW_HEIGHT_DP = 380;
+
+/** dp per sprite pixel (`companionScale` at this size). */
+const COMPANION_SCALE = 5;
+
+/** Sample companion: a Warrior a few weeks in, trained today. */
+const SAMPLE_OUTFIT: CompanionOutfit = {
+  loadout: {
+    head: 'iron_helm',
+    cloak: 'hooded_cloak',
+    hands: 'leather_bracers',
+    aura: 'trial_medallion',
+  },
+  weapon: { classId: 'warrior', upgraded: false },
+};
+
+/** The large widget's picker preview: frame, the companion, and the status and stats column. */
+export function renderCompanionWidgetPreview(): RgbaImage {
+  const width = COMPANION_PREVIEW_WIDTH_DP;
+  const height = COMPANION_PREVIEW_HEIGHT_DP;
+  const image = createImage(px(width), px(height), Colors.ink);
+  fillDp(image, PIXEL, PIXEL, width - 2 * PIXEL, height - 2 * PIXEL, Colors.border);
+  const inset = 2 * PIXEL;
+  fillDp(image, inset, inset, width - 2 * inset, height - 2 * inset, Colors.surface);
+
+  const left = inset + PADDING_DP;
+  const spriteW = SPRITE_WIDTH * COMPANION_SCALE;
+  const spriteH = SPRITE_HEIGHT * COMPANION_SCALE;
+  const spriteTop = (height - spriteH) / 2;
+  const colors = companionColors({});
+  drawGrid(image, companionStill('happy', SAMPLE_OUTFIT), (role) => colors[role], {
+    cell: px(COMPANION_SCALE),
+    x: px(left),
+    y: px(spriteTop),
+  });
+
+  // The column: status, mood, streak and level, rank and class, spread over the height.
+  const x = left + spriteW + 2 * GAP_DP;
+  const after = x + SMALL_ICON_DP + GAP_DP / 2;
+  const row = (i: number) => inset + PADDING_DP + 40 + i * 80;
+  icon(image, 'check', x, row(0), SMALL_ICON_DP);
+  text(image, 'Trained', after, row(0) + 4, Colors.success, TEXT_DP);
+  text(image, 'Fired up', x, row(1), Colors.goldLight, LABEL_DP);
+  icon(image, 'flame', x, row(2) - 20, SMALL_ICON_DP);
+  text(image, SAMPLE.streak, after, row(2) - 24, Colors.ember, NUMBER_DP);
+  text(image, 'Streak', after, row(2), Colors.textMuted, LABEL_DP);
+  const levelX = after + textWidthDp('Streak', LABEL_DP) + 2 * GAP_DP;
+  text(image, SAMPLE.level, levelX, row(2) - 24, Colors.goldLight, NUMBER_DP);
+  text(image, 'Level', levelX, row(2), Colors.textMuted, LABEL_DP);
+  icon(image, 'shield', x, row(3) - 20, SMALL_ICON_DP);
+  text(image, SAMPLE.rank, after, row(3) - 16, RankColors.Adept, TEXT_DP);
+  text(image, 'Warrior', x, row(3) + 12, Palette.ember, LABEL_DP);
   return image;
 }
