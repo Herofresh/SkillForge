@@ -287,13 +287,12 @@
   created by the coordinator after the merge.
 
 ## Next up
-0. 6.14 v0.7.0 release: [PR #63](https://github.com/Herofresh/SkillForge/pull/63) waits for a reviewer agent; then the coordinator publishes
-   the GitHub release v0.7.0 with the two APKs and the release notes from the PR body.
 1. Phase 7 (Google Play), starting with **7.1: the user creates the upload key with `keytool`**
    (the exact command and the backup advice have already been given to the user; the key never
    enters the repo), then 7.2 `npm run build:aab` signed with it.
-2. On the user's phone: install v0.7.0 (once published) over the installed build (Update, no
-   uninstall), check both widgets and the Man / Woman choice and report what feels off.
+2. On the user's phone: install [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0)
+   over the installed build (Update, no uninstall), check both widgets and the Man / Woman choice
+   and report what feels off.
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -1411,7 +1410,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   (`look.hairStyle`, unset = the body's default).
 - [x] 6.14 v0.7.0 release (6.12 widgets, 6.13 cooler companion + Man/Woman), same routine: upgrade
   check from 0.1.0, 0.2.0, 0.3.0, 0.4.0, 0.5.0 and 0.6.0, then both widgets on the install upgraded
-  from 0.6.0 ([PR #63](https://github.com/Herofresh/SkillForge/pull/63))
+  from 0.6.0 ([PR #63](https://github.com/Herofresh/SkillForge/pull/63); release [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0))
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
