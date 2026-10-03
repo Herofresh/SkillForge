@@ -255,7 +255,7 @@
   (`GuideButton`) next to each system opens the summary with "More in the guide"; Settings → "How
   SkillForge works" opens the guide list and each page. Optional only: nothing opens on its own.
   Screenshots `docs/screenshots/6.10c-*.png`.
-- Release v0.6.0 (6.11, PR_LINK): version 0.6.0 / versionCode 6 with classes (6.9), the weekly
+- Release v0.6.0 (6.11, [PR #58](https://github.com/Herofresh/SkillForge/pull/58)): version 0.6.0 / versionCode 6 with classes (6.9), the weekly
   class challenge (6.9b), the companion and the large widget (6.10) and the guide (6.10c).
   Upgrade check passed on the emulator from **v0.1.0-preview1, v0.2.0, v0.3.0, v0.4.0 and
   v0.5.0** (hero, goal, session, 40 XP, "Lever hold" kept, no onboarding; the companion card,
@@ -278,7 +278,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Release v0.6.0 (task 6.11, PR_LINK):** ADR-043 routine. Both APKs built with `-- --clean`
+- **Release v0.6.0 (task 6.11, [PR #58](https://github.com/Herofresh/SkillForge/pull/58)):** ADR-043 routine. Both APKs built with `-- --clean`
   in a short-path copy `D:\sf060` (`diff -r` against the branch: identical, excluding
   `node_modules`, `android`, `builds`, `.git`, `.expo`); signer check passed,
   `RELEASE_SIGNER_SHA256` unchanged. APKs and SHA-256: see the PR body; the coordinator
@@ -1289,7 +1289,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   guide"; Settings → "How SkillForge works" lists every entry. Optional only: nothing pops up on
   its own, no onboarding change, no data change.
 - [x] 6.11 v0.6.0 release (6.9–6.10c), same routine: upgrade check from 0.1.0, 0.2.0, 0.3.0,
-  0.4.0 and 0.5.0, then both widgets on the install upgraded from 0.5.0 (PR_LINK)
+  0.4.0 and 0.5.0, then both widgets on the install upgraded from 0.5.0 ([PR #58](https://github.com/Herofresh/SkillForge/pull/58))
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
