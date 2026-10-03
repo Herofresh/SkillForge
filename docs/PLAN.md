@@ -227,6 +227,17 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Stable Jest runs (maintenance, PR_LINK):** component suites timed out (5 s default) only in
+  the full parallel `npm test` while other agents ran, and a shared `%TEMP%\jest` cache once failed
+  with EPERM on rename. Now: the Jest config lives in `jest.config.js` (moved from `package.json`)
+  with `cacheDirectory: <rootDir>/node_modules/.cache/jest` and `maxWorkers: '50%'` outside CI
+  (CI unchanged); `jest.setup.ts` gives `src/components/**` and `scripts/appIcon.test.ts` a 60 s
+  timeout (`UI_SUITE_TIMEOUT_MS`, `HEAVY_SUITE_PATH`), replacing the editor test's own `20_000`.
+  The treeMap "every node" test uses one `getAllByTestId` instead of 155 `getByTestId` walks, and
+  the appIcon palette test asserts once instead of ~20k times. Still the slowest: the editor's
+  "adds a custom exercise" (types a name key by key; 5–13 s under load) and every TreeMap render
+  (~1.2 s for 155 nodes). Pure suites keep 5 s; `overlayUpgrade` (~6 s) is synchronous, so the
+  timeout never applies to it.
 - **Home-screen widget (task 6.6, ADR-055, [PR #49](https://github.com/Herofresh/SkillForge/pull/49)):**
   - Code: `src/domain/widget.ts` (pure: `widgetSnapshot`, `widgetView`, `parseWidgetSnapshot`),
     `src/widget/` (`widgetModule.ts` guard, `nativeWidget.tsx` layout + task + redraw,
@@ -927,6 +938,9 @@ compiled into a typed module for the app; users can layer their own changes on t
 #### Next
 - [x] 5.12 Confirm before removing an equipment profile in onboarding ([PR #34](https://github.com/Herofresh/SkillForge/pull/34))
 - [x] 5.13 build:apk checks the signer before copying the APK (ADR-043 update, [PR #35](https://github.com/Herofresh/SkillForge/pull/35))
+- [x] Maintenance: stable Jest runs under load: `jest.config.js` (per-checkout cache, `maxWorkers`
+  50% outside CI), one 60 s timeout for heavy suites in `jest.setup.ts`, cheaper treeMap/appIcon
+  tests (PR_LINK)
 
 ### Phase 6: Feature wave (user requests 2026-10-02)
 Work through these in order, one task per branch and PR. Until Phase 7, releases stay on the

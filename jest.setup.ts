@@ -18,3 +18,14 @@ jest.mock('react-native-reanimated', () => ({
   ...jest.requireActual('react-native-reanimated/mock'),
   useReducedMotion: () => false,
 }));
+
+// Heavy suites (PLAN maintenance): component suites render real screens (the map draws every node,
+// the editor and live session run a real store) and scripts/appIcon renders the icon bitmaps. Alone
+// they take 1-5 s per test, but in a full parallel run beside other work they have taken up to
+// ~30 s, past Jest's 5 s default. They get one generous timeout here instead of per-test numbers;
+// a hung test still fails (later), and assertion failures are unaffected. Pure suites keep 5 s.
+const UI_SUITE_TIMEOUT_MS = 60_000;
+const HEAVY_SUITE_PATH = /[\\/](src[\\/]components|scripts[\\/]appIcon\.test)[\\/.]/;
+if (HEAVY_SUITE_PATH.test(expect.getState().testPath ?? '')) {
+  jest.setTimeout(UI_SUITE_TIMEOUT_MS);
+}

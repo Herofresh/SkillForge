@@ -141,11 +141,15 @@ describe('app icon assets', () => {
         rgbaKey(hexToRgba(Palette[key])),
       ),
     );
+    // Collect the offenders and assert once: an expect per sampled pixel (~20k) is slow under load.
+    const offPalette: string[] = [];
     for (let y = 0; y < full.height; y += 7) {
       for (let x = 0; x < full.width; x += 7) {
-        expect(allowed.has(rgbaKey(pixelAt(full, x, y)))).toBe(true);
+        const key = rgbaKey(pixelAt(full, x, y));
+        if (!allowed.has(key)) offPalette.push(`${x},${y}: ${key}`);
       }
     }
+    expect(offPalette).toEqual([]);
     expect(rgbaKey(pixelAt(full, 0, 0))).toBe(rgbaKey(hexToRgba(Palette[BACKGROUND_COLOR])));
   });
 
