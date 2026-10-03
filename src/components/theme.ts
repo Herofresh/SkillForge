@@ -3,7 +3,6 @@
  * grimoire. This is the ONLY place for colors (the raw hex values sit in `palette.ts`), fonts, spacing, borders and frame styles; import the
  * tokens, never copy a hex value or a font name into a component.
  */
-import { DarkTheme, type Theme } from 'expo-router';
 
 import type { TileState } from '@/domain/treeView';
 import type { Attribute, Branch, RankTitle, Tier } from '@/domain/types';
@@ -231,17 +230,3 @@ export const Motion = {
   burstSteps: 8,
   burstDistance: 64,
 } as const;
-
-/** Navigation theme derived from {@link Colors}. */
-export const NavigationTheme: Theme = {
-  ...DarkTheme,
-  colors: {
-    ...DarkTheme.colors,
-    primary: Colors.gold,
-    background: Colors.background,
-    card: Colors.surface,
-    text: Colors.text,
-    border: Colors.ink,
-    notification: Colors.arcane,
-  },
-};

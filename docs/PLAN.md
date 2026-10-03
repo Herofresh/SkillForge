@@ -211,7 +211,9 @@
   the pixel look; a tap opens the Train tab (`skillforge://train`). The app writes a snapshot file
   after loadAll, on data changes and on foreground; the widget decides "today" and the streak at
   draw time (30-minute updates, so it flips ≤ 30 min after midnight). Only in release builds; Expo
-  Go and Jest skip it. Screenshots `docs/screenshots/6.6-widget-*.png`.
+  Go and Jest skip it. Screenshots `docs/screenshots/6.6-widget-*.png`. 6.6b (ADR-056): the
+  layout scales with the widget's size (the 4 × 2 widget draws at 1.5) and the widget picker
+  shows a pixel preview (`assets/images/widget-preview.png`).
 
 ## Next up
 1. Coordinator: after this PR is merged, publish the GitHub pre-release `v0.4.0` with both APKs
@@ -227,6 +229,27 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Widget polish (task 6.6b, ADR-056, [PR #51](https://github.com/Herofresh/SkillForge/pull/51)):**
+  - Code: `widgetSizes` in `src/widget/nativeWidget.tsx` (one scale for type, icons, gaps from
+    the reported width and height; tests in `nativeWidget.test.tsx`), `scripts/widgetPreview.ts`
+    (the picker PNG, written by `icon:build`, test fails if the committed PNG is stale),
+    `previewImage` in app.json. `NavigationTheme` moved to `src/components/navigationTheme.ts`
+    so `theme.ts` loads in tsx scripts (expo-router pulled React Native in).
+  - Verified: typecheck, lint, Jest, format:check, progressions:check;
+    `npm run build:apk:universal -- --clean` (signer check passed) in a short-path copy `D:\sfw2`
+    (native builds fail in `.claude/worktrees/`), then a second incremental build after the
+    final layout change; `adb install -r` over the 6.6 build on Pixel_8_Pro_API_35 (data kept).
+    The existing widget redrew at 4 × 2 (≈ 395 × 250 dp → scale 1.5, rows spread, clear gap
+    between "Not yet today" and the rank), at 2 columns it kept the compact layout, a freshly
+    added widget drew the same; the picker shows the pixel preview, "4 × 2". Screenshots
+    `docs/screenshots/6.6b-widget-{4x2,4x2-added,small,picker}.png`. Not verified: other
+    launchers / screen sizes (the scale steps down to 1.25 or 1 on narrower 4 × 2 cells), a
+    real phone.
+  - Tuning: a 220 dp width base drew the emulator's 4 × 2 at 1.75 and "Not yet today" nearly
+    touched the rank; 260 dp keeps it at 1.5.
+  - Gotcha: the preview text is the 3 × 5 font in caps, not Jersey 15 (no TTF rasterizer in the
+    scripts). If the widget's look changes, update `scripts/widgetPreview.ts` and re-run
+    `npm run icon:build`.
 - **Stable Jest runs (maintenance, [PR #50](https://github.com/Herofresh/SkillForge/pull/50)):** component suites timed out (5 s default) only in
   the full parallel `npm test` while other agents ran, and a shared `%TEMP%\jest` cache once failed
   with EPERM on rename. Now: the Jest config lives in `jest.config.js` (moved from `package.json`)
@@ -1010,6 +1033,10 @@ upgrade check from every earlier release). Any new table or column is additive a
   licence and SDK 57 support in the ADR). The app writes the widget's data after every
   session / load and the widget refreshes at midnight so "today" flips. Not testable in Expo
   Go: verify on the emulator with the release APK and add a screenshot.
+  - [x] 6.6b widget polish (ADR-056, [PR #51](https://github.com/Herofresh/SkillForge/pull/51)): the layout scales with the widget's size
+    (`widgetSizes`; the default 4 × 2 draws at 1.5: bigger status, streak, level, rank and
+    attributes, compact layout kept below 220 dp wide); a pixel picker preview
+    (`assets/images/widget-preview.png`, `previewImage`, drawn by `npm run icon:build`)
 - [x] 6.7 Rank ladder: tapping the rank crest on the Character tab opens all ranks, the reached
   ones and the still locked ones with what each needs (from `character.ts`, no copied
   thresholds) (ADR-054, [PR #47](https://github.com/Herofresh/SkillForge/pull/47))

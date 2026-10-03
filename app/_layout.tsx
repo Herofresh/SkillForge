@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { DataGate } from '@/components/DataGate';
 import { FONT_ASSETS } from '@/components/fonts';
-import { NavigationTheme } from '@/components/theme';
+import { NavigationTheme } from '@/components/navigationTheme';
 
 export default function RootLayout() {
   // A font error isn't fatal: the app falls back to the system font.

@@ -3,7 +3,7 @@
  * with nearest-neighbour cells, composite layers, mask, and downscale for previews. Pure functions
  * on {@link RgbaImage}; no I/O.
  */
-import { parsePixelGrid } from '@/lib/pixelGrid';
+import { parsePixelGrid, type PixelGrid } from '@/lib/pixelGrid';
 
 import type { RgbaImage } from './png';
 
@@ -38,7 +38,14 @@ export function pixelAt(image: RgbaImage, x: number, y: number): Rgba {
 }
 
 /** Paints a rectangle (clipped to the image) in one opaque color. */
-function fillRect(image: RgbaImage, x0: number, y0: number, w: number, h: number, rgba: Rgba) {
+export function fillRect(
+  image: RgbaImage,
+  x0: number,
+  y0: number,
+  w: number,
+  h: number,
+  rgba: Rgba,
+) {
   const x1 = Math.min(image.width, x0 + w);
   const y1 = Math.min(image.height, y0 + h);
   for (let y = Math.max(0, y0); y < y1; y += 1) {
@@ -55,17 +62,19 @@ export interface GridPlacement {
 }
 
 /**
- * Draws a pixel grid (rows of role characters, `.` empty, see src/lib/pixelGrid.ts) onto `image`.
- * `colorOf` maps a role to a `#RRGGBB` color, or `undefined` to leave the cell empty.
+ * Draws a pixel grid (rows of role characters, `.` empty, or an already parsed grid, see
+ * src/lib/pixelGrid.ts) onto `image`. `colorOf` maps a role to a `#RRGGBB` color, or `undefined`
+ * to leave the cell empty.
  */
 export function drawGrid(
   image: RgbaImage,
-  rows: readonly string[],
+  grid: readonly string[] | PixelGrid,
   colorOf: (role: string) => string | undefined,
   placement: GridPlacement,
 ): RgbaImage {
   const { cell } = placement;
-  for (const run of parsePixelGrid(rows).runs) {
+  const parsed = 'runs' in grid ? grid : parsePixelGrid(grid);
+  for (const run of parsed.runs) {
     const color = colorOf(run.role);
     if (color === undefined) continue;
     fillRect(

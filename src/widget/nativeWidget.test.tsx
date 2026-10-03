@@ -3,7 +3,12 @@ import { registerWidgetTaskHandler, requestWidgetUpdate } from 'react-native-and
 
 import { WIDGET_DEEP_LINK, type WidgetView } from '@/domain/widget';
 
-import { registerWidgetTask, SkillForgeWidget, WIDGET_WIDE_MIN_DP } from './nativeWidget';
+import {
+  registerWidgetTask,
+  SkillForgeWidget,
+  WIDGET_WIDE_MIN_DP,
+  widgetSizes,
+} from './nativeWidget';
 
 jest.mock('./widgetStorage', () => ({ readWidgetSnapshot: () => Promise.resolve(undefined) }));
 
@@ -44,20 +49,24 @@ const hero: WidgetView = {
 
 describe('SkillForgeWidget', () => {
   it('shows status, streak, level, rank and top attributes when wide', () => {
-    const shown = texts(<SkillForgeWidget view={hero} widthDp={WIDGET_WIDE_MIN_DP} />);
+    const shown = texts(
+      <SkillForgeWidget view={hero} widthDp={WIDGET_WIDE_MIN_DP} heightDp={110} />,
+    );
     expect(shown).toEqual(
       expect.arrayContaining(['Trained today', '3', '7', 'Apprentice', 'PULL', '12', 'CORE', '4']),
     );
   });
 
   it('keeps to status, streak and level when narrow', () => {
-    const shown = texts(<SkillForgeWidget view={hero} widthDp={WIDGET_WIDE_MIN_DP - 1} />);
+    const shown = texts(
+      <SkillForgeWidget view={hero} widthDp={WIDGET_WIDE_MIN_DP - 1} heightDp={110} />,
+    );
     expect(shown).toEqual(expect.arrayContaining(['Trained today', '3', '7']));
     expect(shown).not.toContain('Apprentice');
   });
 
   it('opens the Train tab when tapped', () => {
-    const [root] = primitives(<SkillForgeWidget view={hero} widthDp={300} />);
+    const [root] = primitives(<SkillForgeWidget view={hero} widthDp={300} heightDp={120} />);
     expect(root.props).toMatchObject({
       clickAction: 'OPEN_URI',
       clickActionData: { uri: 'skillforge://train' },
@@ -66,9 +75,68 @@ describe('SkillForgeWidget', () => {
 
   it('asks to open the app before the first snapshot', () => {
     const view: WidgetView = { kind: 'empty', deepLink: WIDGET_DEEP_LINK };
-    expect(texts(<SkillForgeWidget view={view} widthDp={300} />)).toContain(
+    expect(texts(<SkillForgeWidget view={view} widthDp={300} heightDp={120} />)).toContain(
       'OPEN THE APP TO BEGIN',
     );
+  });
+});
+
+/** The font size of the first TextWidget showing `text`. */
+const fontSizeOf = (node: ReactNode, text: string) =>
+  primitives(node).find((entry) => entry.type === 'TextWidget' && entry.props.text === text)?.props
+    .style as { fontSize: number } | undefined;
+
+describe('widgetSizes', () => {
+  it('keeps the compact scale-1 sizes at the minimum and for narrow widgets', () => {
+    expect(widgetSizes(WIDGET_WIDE_MIN_DP, 110)).toMatchObject({ scale: 1, icon: 24, status: 20 });
+    expect(widgetSizes(160, 400)).toMatchObject({ scale: 1, icon: 24, number: 24, label: 10 });
+  });
+
+  it('scales the default 4 x 2 widget up by the tighter side, in quarter steps', () => {
+    // Pixel 8 Pro emulator, 4 x 2 cells: about 395 x 250 dp → width allows 1.52, height 1.79.
+    expect(widgetSizes(395, 250)).toMatchObject({
+      scale: 1.5,
+      icon: 36,
+      smallIcon: 24,
+      status: 30,
+      number: 36,
+      rank: 30,
+      attribute: 24,
+      label: 15,
+    });
+    // A wide but short widget is held back by its height.
+    expect(widgetSizes(500, 150).scale).toBe(1);
+  });
+
+  it('keeps icons on whole 12 x 12 grid cells and stops at the maximum scale', () => {
+    expect(widgetSizes(330, 182).icon).toBe(24); // scale 1.25 → 30 dp would blur the grid
+    const huge = widgetSizes(2000, 2000);
+    expect(huge.scale).toBe(2);
+    expect(huge.icon).toBe(48);
+  });
+});
+
+describe('SkillForgeWidget sizes', () => {
+  it('draws the status larger on the default 4 x 2 widget than on the minimum one', () => {
+    const big = fontSizeOf(
+      <SkillForgeWidget view={hero} widthDp={395} heightDp={250} />,
+      hero.status,
+    );
+    const small = fontSizeOf(
+      <SkillForgeWidget view={hero} widthDp={WIDGET_WIDE_MIN_DP} heightDp={110} />,
+      hero.status,
+    );
+    expect(big?.fontSize).toBe(30);
+    expect(small?.fontSize).toBe(20);
+  });
+
+  it('spreads the status rows over the height only when scaled up', () => {
+    const justify = (widthDp: number, heightDp: number) =>
+      primitives(<SkillForgeWidget view={hero} widthDp={widthDp} heightDp={heightDp} />)
+        .filter((entry) => entry.type === 'FlexWidget')
+        .map((entry) => (entry.props.style as { justifyContent?: string }).justifyContent);
+    expect(justify(395, 250)).toContain('space-evenly');
+    expect(justify(WIDGET_WIDE_MIN_DP, 110)).not.toContain('space-evenly');
   });
 });
 
