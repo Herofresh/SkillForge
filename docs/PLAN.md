@@ -269,9 +269,17 @@
   instead of a chibi, as a man or a woman (Customize → Body) with Spiky / Long / Ponytail hair;
   every accessory and weapon re-fitted, stored data unchanged (`look.body` / `look.hairStyle` are
   optional). Screenshots `docs/screenshots/6.13-*.png`.
+- Widgets use their space (6.12, ADR-062, [PR #62](https://github.com/Herofresh/SkillForge/pull/62)): smaller defaults (small widget 4 × 1, at
+  most two rows; companion widget 4 × 2, min 300 × 110 dp) and a pure layout engine
+  (`src/widget/widgetLayout.ts`) that measures every size class (narrow, standard, wide, tall,
+  grid) with the fonts' real widths at every scale and picks the one that fills the reported size,
+  so content grows and reflows instead of leaving empty bands, nothing clipped. The companion
+  sprite is trimmed to its painted pixels. Picker previews drawn from the same layout. Screenshots
+  `docs/screenshots/6.12-*.png`.
 
 ## Next up
 0. 6.13 companion cooler look + woman body: merged ([PR #60](https://github.com/Herofresh/SkillForge/pull/60)); ships with the next release.
+   6.12 widgets use their space: [PR #62](https://github.com/Herofresh/SkillForge/pull/62) waits for a reviewer agent; ships with the next release.
 1. On the user's phone: install v0.6.0 (once published) over the installed build (Update, no
    uninstall), add the new SkillForge Companion widget and report what feels off.
 2. Phase 7 (Google Play), starting with **7.1: the user creates the upload key with `keytool`**
@@ -284,6 +292,30 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Widgets use their space (task 6.12, ADR-062, [PR #62](https://github.com/Herofresh/SkillForge/pull/62)):**
+  - Code: `src/widget/widgetLayout.ts` (pure; font advance tables from the TTFs, `widgetSizes(scale)`,
+    the layout tree, `measureWidgetNode`, `placeWidgetNodes`, `widgetLayout`, `companionLayout`);
+    `nativeWidget.tsx` only renders the tree; `trimPixelRows` in `src/lib/pixelGrid.ts`;
+    `ATTRIBUTE_LABELS` now lives in `src/components/attributeLabels.ts` (re-exported).
+  - Sizes: app.json small 4 × 1 (min 110 × 40 dp, `maxResizeHeight` 300 dp), companion 4 × 2
+    (min 300 × 110 dp). Provider names unchanged: placed widgets keep their size and redraw.
+  - Emulator (Pixel_8_Pro_API_35, release APK built with `-- --clean` in `D:\sf612`, signer check
+    passed, installed with `install -r` over v0.6.0): the 4 × 2 small widget placed on 0.6.0
+    redrew as `grid` filling the height; a new small widget at the default 4 × 1 (395 × 115 dp)
+    drew `standard` with rank, class and Pull; resized to 2 × 1 it drew `narrow` with the status
+    on two lines; the companion 4 × 3 placed on 0.6.0 drew the 6.13 sprite full height next to
+    the column; a new companion at the default 4 × 2 drew sprite + column; nothing clipped.
+    Screenshots `6.12-small-4x1`, `6.12-small-4x2-and-2x1`, `6.12-companion-4x3-and-4x2`,
+    `6.12-widget-picker`.
+  - Gotcha: the library reports portrait widgets as min width × **max** height (e.g. ≈ 260 dp for
+    a 4 × 2 whose view is ≈ 245 dp), and the host scales the bitmap to fit, so the device can show
+    a slightly different scale than a test at 395 × 249 predicts. Fine-tune with the screenshots,
+    not only the tests.
+  - Tuning knobs (all named constants in `widgetLayout.ts`): `EXTRA_WEIGHT` (how much showing
+    rank / class / attributes is worth vs. bigger text), `READABLE_SCALE` (1 = the 6.6 sizes),
+    `FIT_SHARE`, `PADDING_MAX_SHARE`. At 4 × 3 the companion's text column is spread with gaps
+    (the sprite takes the height); if the user wants bigger text there, weigh the sprite less.
+  - The `D:\sf612` copy (with node_modules and android/) can be deleted.
 - **Companion: cooler look (task 6.13, ADR-061, [PR #60](https://github.com/Herofresh/SkillForge/pull/60)):**
   - Code: `src/data/companion/body.ts` (`SPRITE_SIZE` 32 × 44, the one size constant the UI,
     widget and scripts read; `BODY_SHAPES` man / woman; `HAIR_STYLES` spiky / long / ponytail with
@@ -1324,10 +1356,11 @@ upgrade check from every earlier release). Any new table or column is additive a
   its own, no onboarding change, no data change.
 - [x] 6.11 v0.6.0 release (6.9–6.10c), same routine: upgrade check from 0.1.0, 0.2.0, 0.3.0,
   0.4.0 and 0.5.0, then both widgets on the install upgraded from 0.5.0 ([PR #58](https://github.com/Herofresh/SkillForge/pull/58); release [v0.6.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.6.0))
-- [~] 6.12 Widgets use their space (in-progress, agent `fix/widget-space`; user request 2026-10-03:
-  "I want the widget to use its space better or be smaller"): smaller default sizes, a layout per
-  size class (narrow / standard / wide / tall) that fills the height without clipping, regenerated
-  picker previews.
+- [x] 6.12 Widgets use their space (user request 2026-10-03: "I want the widget to use its space
+  better or be smaller"; ADR-062, [PR #62](https://github.com/Herofresh/SkillForge/pull/62)): smaller defaults (small 4 × 1, companion 4 × 2), a measured
+  layout per size class (narrow / standard / wide / tall / grid) that fills the height without
+  clipping (tested at 4- and 5-column launcher sizes), the companion sprite trimmed to its pixels,
+  regenerated picker previews.
 - [x] 6.13 Companion: cooler look (user request 2026-10-03: "try to make the companion less cute
   and more cool"; ADR-061, [PR #60](https://github.com/Herofresh/SkillForge/pull/60)). Same art direction family (SNES-era FF
   field sprites, Octopath Traveler; original art), from chibi-cute to a cool, heroic hero: taller
