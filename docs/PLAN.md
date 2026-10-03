@@ -229,7 +229,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Widget polish (task 6.6b, ADR-056):**
+- **Widget polish (task 6.6b, ADR-056, [PR #51](https://github.com/Herofresh/SkillForge/pull/51)):**
   - Code: `widgetSizes` in `src/widget/nativeWidget.tsx` (one scale for type, icons, gaps from
     the reported width and height; tests in `nativeWidget.test.tsx`), `scripts/widgetPreview.ts`
     (the picker PNG, written by `icon:build`, test fails if the committed PNG is stale),
@@ -1033,7 +1033,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   licence and SDK 57 support in the ADR). The app writes the widget's data after every
   session / load and the widget refreshes at midnight so "today" flips. Not testable in Expo
   Go: verify on the emulator with the release APK and add a screenshot.
-  - [x] 6.6b widget polish (ADR-056, PR link follows): the layout scales with the widget's size
+  - [x] 6.6b widget polish (ADR-056, [PR #51](https://github.com/Herofresh/SkillForge/pull/51)): the layout scales with the widget's size
     (`widgetSizes`; the default 4 × 2 draws at 1.5: bigger status, streak, level, rank and
     attributes, compact layout kept below 220 dp wide); a pixel picker preview
     (`assets/images/widget-preview.png`, `previewImage`, drawn by `npm run icon:build`)
