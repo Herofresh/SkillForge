@@ -222,7 +222,7 @@
   tap opened Train. Screenshots `docs/screenshots/6.8-*.png`. The GitHub release is created by
   the coordinator after the merge.
 
-- Hero classes (6.9, ADR-057, PR_LINK): 15 cosmetic classes (Recruit, then Warrior, Ranger,
+- Hero classes (6.9, ADR-057, [PR #54](https://github.com/Herofresh/SkillForge/pull/54)): 15 cosmetic classes (Recruit, then Warrior, Ranger,
   Monk, Barbarian, Rogue, Druid, Paladin, Samurai, Templar, Bard, Cleric, Knight, Berserker,
   Sorcerer), each with three tiers of flat thresholds (attribute points, sessions or rank). The
   Character tab shows the worn class under the rank; it opens the class sheet (tiers, next
@@ -245,7 +245,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Hero classes (task 6.9, ADR-057, PR_LINK):**
+- **Hero classes (task 6.9, ADR-057, [PR #54](https://github.com/Herofresh/SkillForge/pull/54)):**
   - Code: `src/data/classes.ts` (`HERO_CLASSES`: ids, tiers, emblems, colors; the only place for
     thresholds), `src/domain/classes.ts` (rules, ladder, setting reader/writer), `ClassRule` /
     `ClassDefinition` / `ClassUnlocks` in `types.ts`; store: `classes` state, `CLASS_SETTING`
@@ -1092,7 +1092,7 @@ upgrade check from every earlier release). Any new table or column is additive a
 - [x] 6.8 v0.5.0 release (6.6; 6.7 already shipped in v0.4.0), same routine: upgrade check from
   0.1.0, 0.2.0, 0.3.0 and 0.4.0, then the widget on the upgraded install
   ([PR #52](https://github.com/Herofresh/SkillForge/pull/52); release [v0.5.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.5.0))
-- [x] 6.9 Classes (user idea; ADR-057, PR_LINK): cosmetic hero classes the hero unlocks and
+- [x] 6.9 Classes (user idea; ADR-057, [PR #54](https://github.com/Herofresh/SkillForge/pull/54)): cosmetic hero classes the hero unlocks and
   picks one to wear. User decisions (2026-10-03): cosmetic only (title, emblem, color; later
   outfits for 6.10), no effect on XP, the generator or the safeguards; classic fantasy-RPG roles;
   locked classes show what they need, like the rank ladder; an unlocked class stays unlocked
