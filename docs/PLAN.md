@@ -276,15 +276,24 @@
   so content grows and reflows instead of leaving empty bands, nothing clipped. The companion
   sprite is trimmed to its painted pixels. Picker previews drawn from the same layout. Screenshots
   `docs/screenshots/6.12-*.png`.
+- Release v0.7.0 (6.14, [PR #63](https://github.com/Herofresh/SkillForge/pull/63)): version 0.7.0 / versionCode 7 with the widgets that use
+  their space (6.12) and the cooler companion with the Man / Woman body and hair styles (6.13).
+  Upgrade check passed on the emulator from **v0.1.0-preview1, v0.2.0, v0.3.0, v0.4.0, v0.5.0 and
+  v0.6.0** (hero, goal, session, 40 XP, "Lever hold" kept, no onboarding; the new sprite renders
+  from the old history, Man by default). Both widgets placed on 0.6.0 at the old defaults (small
+  4 × 2, companion 4 × 3) redrew after the update with the new layouts and sprite; fresh ones at
+  the new defaults (4 × 1, 4 × 2) drew correctly; Woman + ponytail updated the Character tab and
+  both companion widgets. Screenshots `docs/screenshots/6.14-*.png`. The GitHub release is
+  created by the coordinator after the merge.
 
 ## Next up
-0. 6.13 companion cooler look + woman body: merged ([PR #60](https://github.com/Herofresh/SkillForge/pull/60)); ships with the next release.
-   6.12 widgets use their space: [PR #62](https://github.com/Herofresh/SkillForge/pull/62) waits for a reviewer agent; ships with the next release.
-1. On the user's phone: install v0.6.0 (once published) over the installed build (Update, no
-   uninstall), add the new SkillForge Companion widget and report what feels off.
-2. Phase 7 (Google Play), starting with **7.1: the user creates the upload key with `keytool`**
-   (an agent gives the exact command and the backup advice; the key never enters the repo), then
-   7.2 `npm run build:aab` signed with it.
+0. 6.14 v0.7.0 release: [PR #63](https://github.com/Herofresh/SkillForge/pull/63) waits for a reviewer agent; then the coordinator publishes
+   the GitHub release v0.7.0 with the two APKs and the release notes from the PR body.
+1. Phase 7 (Google Play), starting with **7.1: the user creates the upload key with `keytool`**
+   (the exact command and the backup advice have already been given to the user; the key never
+   enters the repo), then 7.2 `npm run build:aab` signed with it.
+2. On the user's phone: install v0.7.0 (once published) over the installed build (Update, no
+   uninstall), check both widgets and the Man / Woman choice and report what feels off.
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -292,6 +301,30 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Release v0.7.0 (task 6.14, [PR #63](https://github.com/Herofresh/SkillForge/pull/63)):** ADR-043 routine. Both APKs built with `-- --clean`
+  in a short-path copy `D:\sf070` (`diff -r` against the branch: identical, excluding
+  `node_modules`, `android`, `builds`, `.git`, `.expo`); signer check passed,
+  `RELEASE_SIGNER_SHA256` unchanged. APKs and SHA-256: see the PR body; the coordinator
+  publishes them. The `D:\sf070` copy can be deleted.
+  - Upgrade check on Pixel_8_Pro_API_35 from every earlier release (fresh install of the
+    release's universal APK, `upgrade-seed.yaml`, `adb install -r` 0.7.0 → `Success`,
+    versionCode 7, `upgrade-verify.yaml`): v0.1.0-preview1, v0.2.0, v0.3.0, v0.4.0, v0.5.0,
+    v0.6.0 all passed; no flow changes. After every upgrade the companion is the 6.13 man
+    (spiky hair, Recruit's wooden sword, "Fired up").
+  - Widgets (upgrade from v0.6.0): the small widget (4 × 2) and the companion widget (4 × 3)
+    were placed on 0.6.0 at its defaults. Right after `install -r`, before the app was opened,
+    both redrew: the small one as `grid` filling the height, the companion with the new man
+    sprite full height next to the column. The picker shows the new defaults (4 × 1, 4 × 2)
+    with the new previews; fresh widgets drew `standard` (small) and sprite + column
+    (companion), nothing clipped. A tap opens Train.
+  - Body: Customize → Woman + Ponytail changed the Character tab sprite and both companion
+    widgets; switching the body back to Man keeps the chosen hair style (man with a ponytail,
+    as ADR-061 stores `hairStyle` separately); Spiky restored the original look.
+  - Gotcha (emulator, not the app): on the first boot of this session the seed failed three
+    times at `hideKeyboard` (Gboard showed only its floating hardware-keyboard toolbar, so
+    Maestro's Back left the app). Restarting the emulator fixed it; added to CONTEXT.md.
+  - Not verified: a real phone, importing an old backup into 0.7.0 (Jest only), a widget at
+    a 5-column launcher on a device.
 - **Widgets use their space (task 6.12, ADR-062, [PR #62](https://github.com/Herofresh/SkillForge/pull/62)):**
   - Code: `src/widget/widgetLayout.ts` (pure; font advance tables from the TTFs, `widgetSizes(scale)`,
     the layout tree, `measureWidgetNode`, `placeWidgetNodes`, `widgetLayout`, `companionLayout`);
@@ -1376,6 +1409,9 @@ upgrade check from every earlier release). Any new table or column is additive a
   heroic woman (narrower shoulders, softer jaw, lashes, a fitted jerkin with a split travelling
   skirt; practical, not sexualised); hair styles Spiky / Long / Ponytail for both bodies
   (`look.hairStyle`, unset = the body's default).
+- [x] 6.14 v0.7.0 release (6.12 widgets, 6.13 cooler companion + Man/Woman), same routine: upgrade
+  check from 0.1.0, 0.2.0, 0.3.0, 0.4.0, 0.5.0 and 0.6.0, then both widgets on the install upgraded
+  from 0.6.0 ([PR #63](https://github.com/Herofresh/SkillForge/pull/63))
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
