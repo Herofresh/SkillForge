@@ -38,15 +38,26 @@ function fillRect(image: RgbaImage, x: number, y: number, w: number, h: number, 
   }
 }
 
-/** One row per entry: the label, then each frame on a stone panel. */
-export function renderSheet(entries: readonly SheetEntry[], cell = SHEET_CELL): RgbaImage {
-  const FRAME_PX = FIGURE_GRID * cell;
-  const frames = entries.map((entry) => animationFrames(entry.animation));
-  const columns = Math.max(1, ...frames.map((list) => list.length));
-  const width = GAP + LABEL_WIDTH + columns * (FRAME_PX + GAP);
-  const height = GAP + entries.length * (FRAME_PX + GAP);
+/** A labelled row of finished frames (grid rows) and how its roles are colored. */
+export interface FrameRow {
+  label: string;
+  frames: readonly (readonly string[])[];
+  colorOf: (role: string) => string | undefined;
+}
+
+/**
+ * One row per entry: the label, then each frame on a stone panel. Also draws the companion
+ * sheets (PLAN 6.10), whose frames carry accessories and their own colors.
+ */
+export function renderFrameSheet(rows: readonly FrameRow[], cell = SHEET_CELL): RgbaImage {
+  const first = rows[0]?.frames[0];
+  const FRAME_W = (first?.[0]?.length ?? FIGURE_GRID) * cell;
+  const FRAME_PX = (first?.length ?? FIGURE_GRID) * cell;
+  const columns = Math.max(1, ...rows.map((row) => row.frames.length));
+  const width = GAP + LABEL_WIDTH + columns * (FRAME_W + GAP);
+  const height = GAP + rows.length * (FRAME_PX + GAP);
   const image = createImage(width, height, BACKGROUND);
-  entries.forEach((entry, row) => {
+  rows.forEach((entry, row) => {
     const y = GAP + row * (FRAME_PX + GAP);
     const label = entry.label.slice(0, Math.floor(LABEL_WIDTH / (4 * LABEL_SCALE)) - 1);
     drawText(
@@ -57,11 +68,23 @@ export function renderSheet(entries: readonly SheetEntry[], cell = SHEET_CELL): 
       LABEL_COLOR,
       LABEL_SCALE,
     );
-    frames[row].forEach((rows, column) => {
-      const x = GAP + LABEL_WIDTH + column * (FRAME_PX + GAP);
-      fillRect(image, x, y, FRAME_PX, FRAME_PX, PANEL);
-      drawGrid(image, rows, colorOf, { cell, x, y });
+    entry.frames.forEach((rows, column) => {
+      const x = GAP + LABEL_WIDTH + column * (FRAME_W + GAP);
+      fillRect(image, x, y, FRAME_W, FRAME_PX, PANEL);
+      drawGrid(image, rows, entry.colorOf, { cell, x, y });
     });
   });
   return image;
+}
+
+/** One row per animation: the label, then each frame on a stone panel. */
+export function renderSheet(entries: readonly SheetEntry[], cell = SHEET_CELL): RgbaImage {
+  return renderFrameSheet(
+    entries.map((entry) => ({
+      label: entry.label,
+      frames: animationFrames(entry.animation),
+      colorOf,
+    })),
+    cell,
+  );
 }

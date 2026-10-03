@@ -4,12 +4,15 @@ import { StyleSheet } from 'react-native';
 
 import { ChallengeProgressPanel } from '@/components/character/ChallengeProgressPanel';
 import { ClassUnlockPanel } from '@/components/character/ClassUnlockPanel';
+import { TrinketUnlockPanel } from '@/components/character/TrinketUnlockPanel';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { Spacing } from '@/components/theme';
 import { SessionResultPanels } from '@/components/train/SessionResultPanels';
 import { EmptyState, PixelFrame, PixelText, Screen } from '@/components/ui';
 import { HERO_CLASSES } from '@/data/classes';
+import { ACCESSORIES } from '@/data/companion/accessories';
 import { sessionClassTierUps, wornClass } from '@/domain/classes';
+import { sessionAccessoryUnlocks } from '@/domain/companion';
 import { formatShortDate } from '@/domain/format';
 import { summaryView } from '@/domain/trainView';
 import { useAppStore } from '@/store/useAppStore';
@@ -32,6 +35,7 @@ export default function PastSessionScreen() {
   const nodes = useAppStore((state) => state.nodes);
   const classes = useAppStore((state) => state.classes);
   const challengePins = useAppStore((state) => state.challengePins);
+  const companion = useAppStore((state) => state.companion);
   const tierUps = useMemo(
     () =>
       sessionId === undefined ? [] : sessionClassTierUps(HERO_CLASSES, classes.unlocks, sessionId),
@@ -72,6 +76,11 @@ export default function PastSessionScreen() {
           {...(view.challenge ? { step: view.challenge } : {})}
           pins={challengePins}
           bonus={view.challengeBonus}
+          celebrate={false}
+          playKey={session.id}
+        />
+        <TrinketUnlockPanel
+          accessoryIds={sessionAccessoryUnlocks(ACCESSORIES, companion.unlocks, session.id)}
           celebrate={false}
           playKey={session.id}
         />

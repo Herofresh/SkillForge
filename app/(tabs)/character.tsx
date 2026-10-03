@@ -6,6 +6,9 @@ import { AttributeRadar } from '@/components/character/AttributeRadar';
 import { ChallengeCard } from '@/components/character/ChallengeCard';
 import { ClassBanner } from '@/components/character/ClassBanner';
 import { ClassSheet } from '@/components/character/ClassSheet';
+import { CompanionCard } from '@/components/character/CompanionCard';
+import { CompanionSheet } from '@/components/character/CompanionSheet';
+import { useCompanion } from '@/components/character/useCompanion';
 import { GoalProgressCard } from '@/components/character/GoalProgressCard';
 import { RankCrest } from '@/components/character/RankCrest';
 import { RankLadderSheet } from '@/components/character/RankLadderSheet';
@@ -31,7 +34,7 @@ import { characterSheet, type CharacterSheet } from '@/domain/characterView';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
- * The character sheet (PLAN 4.5): hero, level and XP, rank crest (opens the rank ladder, PLAN 6.7),
+ * The character sheet (PLAN 4.5): hero, level and XP, the companion (PLAN 6.10), rank crest (opens the rank ladder, PLAN 6.7),
  * the worn hero class (opens the class sheet, PLAN 6.9) with its weekly challenge (PLAN 6.9b), the attribute radar with the push/pull balance note, streak and totals, goals along their paths
  * and the recent sessions (each opens its summary). Everything comes from `characterSheet` over the store's state.
  */
@@ -62,7 +65,7 @@ export default function CharacterScreen() {
       }),
     [nodes, engine, sessions, sessionResults, goals, classes, challengePins, heroName, now],
   );
-  return <CharacterBody sheet={sheet} />;
+  return <CharacterBody sheet={sheet} now={now} />;
 }
 
 function Stat({
@@ -92,7 +95,32 @@ function Stat({
   );
 }
 
-function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
+/** The companion (PLAN 6.10): its card, and the customize sheet it opens. */
+function CompanionSection({ now }: { now: number }) {
+  const view = useCompanion(now);
+  const [open, setOpen] = useState(false);
+  const equipAccessory = useAppStore((state) => state.equipAccessory);
+  const setCompanionLook = useAppStore((state) => state.setCompanionLook);
+  const markAccessoriesSeen = useAppStore((state) => state.markAccessoriesSeen);
+  return (
+    <>
+      <CompanionCard view={view} onCustomize={() => setOpen(true)} />
+      {open && (
+        <CompanionSheet
+          view={view}
+          onEquip={equipAccessory}
+          onLook={setCompanionLook}
+          onClose={() => {
+            setOpen(false);
+            markAccessoriesSeen();
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
   const router = useRouter();
   const [balanceAcknowledged, setBalanceAcknowledged] = useState(false);
   const [ladderOpen, setLadderOpen] = useState(false);
@@ -144,6 +172,8 @@ function CharacterBody({ sheet }: { sheet: CharacterSheet }) {
           {`${sheet.totalXp} XP earned in total`}
         </PixelText>
       </PixelFrame>
+
+      <CompanionSection now={now} />
 
       <PixelFrame contentStyle={styles.gap}>
         <RankCrest

@@ -35,6 +35,8 @@ export const BURST_TITLES = {
   classTierUp: 'TIER UP!',
   /** The week's class challenge was completed (PLAN 6.9b). */
   challengeComplete: 'CHALLENGE COMPLETE!',
+  /** The companion earned an accessory (PLAN 6.10). */
+  newTrinket: 'NEW TRINKET!',
 } as const;
 
 const PARTICLE_COUNT = 12;

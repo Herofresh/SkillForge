@@ -38,3 +38,18 @@ export function isSameLocalDay(a: number, b: number): boolean {
     first.getDate() === second.getDate()
   );
 }
+
+/** Midnight (local time) of the day `at` falls on. */
+function localMidnight(at: number): number {
+  const date = new Date(at);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+/**
+ * Calendar days from `from` to `to` in the device's time zone: 0 on the same day, 1 for
+ * yesterday → today, whatever the hours (the companion's mood, PLAN 6.10). Rounded, so a
+ * daylight-saving day of 23 or 25 hours still counts as one.
+ */
+export function localDaysBetween(from: number, to: number): number {
+  return Math.round((localMidnight(to) - localMidnight(from)) / MS_PER_DAY);
+}

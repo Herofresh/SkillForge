@@ -99,13 +99,16 @@ scripts/
   appIcon.ts            the app icon as a 32×32 pixel grid (roles → Palette keys), the asset list
                         (paths, sizes, cell size per layer) and the preview sheet (PLAN 5.6, ADR-042)
   iconBuild.ts          npm run icon:build: renders appIcon.ts to assets/images/*.png + the preview,
-                        and widgetPreview.ts to assets/images/widget-preview.png
-  widgetPreview.ts      the widget picker preview: the 4 × 2 widget at scale 1.5 with sample values
+                        and widgetPreview.ts to assets/images/widget-preview.png and
+                        widget-companion-preview.png
+  widgetPreview.ts      the widget picker previews (the large one with the companion, PLAN 6.10):
+                        the small 4 × 2 widget at scale 1.5 with sample values
                         (icons + colors from the app, tinyFont text; PLAN 6.6b, ADR-056)
   raster.ts, png.ts     tiny RGBA raster helpers and a minimal PNG encoder on node:zlib (no image deps)
   animationSheet.ts     contact sheets of the exercise animations (a row of frames per animation,
                         labelled with tinyFont.ts, a 3×5 pixel font); animationSheetBuild.ts is the
-                        npm run animations:sheet CLI (PLAN 6.4, ADR-053)
+                        npm run animations:sheet CLI (PLAN 6.4, ADR-053); renderFrameSheet also
+                        draws companionSheetBuild.ts, the npm run companion:sheet CLI (PLAN 6.10)
 src/
   domain/               PURE TS game rules. No React/Expo/DB imports (ADR-009)
     types.ts            single source of shared types (nodes, issues, overlay, logged sets, progress)
@@ -174,6 +177,13 @@ src/
                         thresholds), reachedTier, mergeClassUnlocks (tiers kept forever), classLadder
                         (class sheet rows), wornClass, sessionClassTierUps, NEW badges (seen tiers),
                         parseClassSettings / classSettingsToRaw (the `hero_classes` setting)
+    companion.ts        the companion (PLAN 6.10, ADR-059): companionMood (happy / content /
+                        waiting / sad by local days since the last session), moodLine, MOOD_TITLES,
+                        companionFacts + companionRuleProgress (flat accessory rules),
+                        mergeAccessoryUnlocks (kept forever), sessionAccessoryUnlocks,
+                        companionLoadout (choice, cleared, else the grandest earned per slot),
+                        companionWardrobe (customize sheet rows), equipAccessory, the
+                        `hero_companion` setting reader / writer
     challenges.ts       weekly class challenges (PLAN 6.9b, ADR-058): classChallenge /
                         weeklyChallenge (goal + target per tier, local Mon–Sun week),
                         challengeContribution (per session; straight-arm never counts),
@@ -190,6 +200,19 @@ src/
     progressionBuild.ts buildMatrix, renderGeneratedModule, renderReviewSheet (pure)
     classes.ts          HERO_CLASSES: the 15 hero classes as typed data (ids, tiers with rules,
                         flavor, color, 12×12 emblem), the one place for class thresholds (ADR-057)
+    companion/          the companion sprite as typed data (PLAN 6.10, ADR-059)
+      accessories.ts    ACCESSORIES: 46 accessories (slot, flavour, flat unlock rule), the one place
+                        for their rules
+      body.ts           the chibi body: HEAD, TORSO, arm and leg parts, frame anchors (BodyFrame,
+                        STAND, armPlacement), faces, regions; 32 × 40 sprite
+      art.ts            ACCESSORY_ART (head / back / front parts, region recolours, auras) and
+                        WEAPON_ART (one per class, tier III material swaps), GEAR_LEGEND
+      weapons.ts        CLASS_WEAPONS + weaponFor(classId, tier): the worn class's weapon
+      moods.ts          COMPANION_ANIMATIONS: frame loops per mood, the victory pose, the wave
+      looks.ts          the sprite palette (ramps per material, skin / hair / outfit options),
+                        companionRole, companionColors(look)
+      index.ts          companionFrame / companionFrames / companionStill (grids for app, widget,
+                        sheets)
     credits.ts          About screen content: CONTENT_SOURCES, FONT_CREDITS, OFL_CREDIT
     testFixtures.ts     synthetic nodes for unit tests
     skills/
@@ -232,7 +255,9 @@ src/
                         editTrainingSet / deleteTrainingSet / moveTrainingExercise (5.9),
                         skip/select/rest, finishTraining, abandonTraining; sessionResults (per
                         session, PLAN 4.5); classes + selectClass / markClassesSeen (PLAN 6.9, re-checked
-                        in every engine commit, `hero_classes` setting); challengePins (PLAN 6.9b: the
+                        in every engine commit, `hero_classes` setting); companion + equipAccessory /
+                        setCompanionLook / markAccessoriesSeen (PLAN 6.10, accessories re-checked
+                        after the class tiers, `hero_companion` setting); challengePins (PLAN 6.9b: the
                         first session of a week pins the worn class's challenge, `class_challenges`
                         setting, passed to every recompute / applySession); lastImport + undoLastImport (PLAN 4.6); editor (ADR-036):
                         baseNodes, nodeDraft, newNodeDraft, nodeDraftIssues, saveNodeDraft,
@@ -285,7 +310,9 @@ src/
     character/          AttributeRadar (rasterized pixel radar), RankCrest (RANK_ICONS; a
                         button with onPress), RankLadderSheet (PLAN 6.7), ClassEmblem / ClassBanner /
                         ClassSheet / ClassUnlockPanel + classText.ts (PLAN 6.9), ChallengeCard /
-                        ChallengeProgressPanel + challengeText.ts (PLAN 6.9b), SessionHistoryRow,
+                        ChallengeProgressPanel + challengeText.ts (PLAN 6.9b), CompanionCard /
+                        CompanionSprite / CompanionSheet / CompanionVictory / TrinketUnlockPanel +
+                        useCompanion.ts + companionText.ts (PLAN 6.10), SessionHistoryRow,
                         GoalProgressCard
     equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form + the "Remove?"
                         confirmation (onboarding, Settings)
@@ -313,7 +340,8 @@ src/
       *.tsx             Screen, PixelFrame, PixelText, PixelButton, PixelIcon, SegmentedBar, XPBar,
                         StatBar, LevelBadge, TierChip, WarningBanner, PixelModal, EmptyState,
                         LevelUpBurst (+ BURST_TITLES), PixelTextInput, PixelChip, NumberStepper,
-                        PixelAnimation (looping exercise figure, 6.4)
+                        PixelAnimation (looping exercise figure, 6.4), PixelSprite (stepped frames
+                        of any pixel grids on the UI thread; PixelAnimation and the companion use it)
       figurePalette.ts  FIGURE_COLORS: animation roles → Palette keys (also used by the sheet script)
       useLevelUpKey.ts  replay key for a LEVEL UP! burst when a level rises while mounted (5.2)
       useNow.ts         the screen clock: re-renders once a second while active (rest, timers)
@@ -332,19 +360,24 @@ src/
                         (pan/zoom worklets: zoomAround, clampPan, fitBox), figure.ts (side-view
                         stick figure: Pose, jointsOf, interpolatePose, solveLimb), figureRaster.ts
                         (pose + props → 32×32 role grid), figureAnimation.ts (keyframes → stepped
-                        frames, FRAME_MS, stillFrame) (PLAN 6.4, ADR-053)
+                        frames, FRAME_MS, stillFrame) (PLAN 6.4, ADR-053), sprite.ts (layered
+                        sprites: SpriteCanvas, parts with material / region legends, top-left
+                        shading, selective outline, glow, sparkles, ground shadow; PLAN 6.10)
   widget/               Android home-screen widget (PLAN 6.6, ADR-055; react-native-android-widget)
     widgetModule.ts     THE guard: widgetsAvailable() (Android + native module `AndroidWidget`),
                         loadNativeWidget() requires nativeWidget.tsx only then (Expo Go, Jest: undefined)
-    nativeWidget.tsx    the widget layout (SkillForgeWidget, WIDGET_NAME, compact below
-                        WIDGET_WIDE_MIN_DP, widgetSizes scales it with the widget's size),
-                        registerWidgetTask (background draws), redrawWidgets;
+    nativeWidget.tsx    the widget layouts: the small SkillForgeWidget (WIDGET_NAME, compact below
+                        WIDGET_WIDE_MIN_DP, widgetSizes scales it with the widget's size) and the
+                        large SkillForgeCompanionWidget (COMPANION_WIDGET_NAME, the companion sprite
+                        as an SVG, PLAN 6.10), registerWidgetTask (draws by widgetName),
+                        redrawWidgets (both);
                         the only file that imports the library ('use no memo': no React Compiler)
     widgetStorage.ts    the snapshot file `widget-snapshot.json` in the document directory
     widgetSync.ts       startWidgetSync(store) from bootstrap: write + redraw after loadAll, on
                         engine/nodes changes and on foreground (syncWidget, tested with fakes)
 index.ts                app entry (package.json main): expo-router/entry + the widget task registration
-assets/images/          app icon, adaptive icon layers, splash, favicon, widget-preview.png: GENERATED by
+assets/images/          app icon, adaptive icon layers, splash, favicon, widget-preview.png,
+                        widget-companion-preview.png: GENERATED by
                         npm run icon:build
 docs/                   PLAN, DECISIONS, CONTEXT, DESIGN (visual language), research
   screenshots/          emulator screenshots per UI task (<phase>-<screen>.png)
@@ -454,6 +487,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
 | **User-placed node** | A user node, or a built-in node whose edit sets branch, order or og_level. Its order clashes are resolved in the merged tree and an og_level drop next to it is a warning, so a content update can't invalidate a saved overlay (ADR-052). |
 | **Hero class** | A cosmetic title the hero earns (PLAN 6.9, ADR-057): `HERO_CLASSES` in `src/data/classes.ts`. Every class but the starting Recruit has three **tiers** (e.g. Warrior → Veteran → Warlord) of flat thresholds (attribute points, sessions or rank) that only grow with training. Reached tiers are derived on every engine change and kept forever in the `hero_classes` setting; the hero wears one class. No effect on XP, the generator or the safeguards. |
+| **Companion** | The hero as a small JRPG-style chibi sprite on the Character tab, the Train summary and the large widget (PLAN 6.10, ADR-059). Its **mood** (happy / content / waiting / sad) follows the calendar days since the last session and only changes its pose and one line; it never loses anything. It wears **accessories** (`ACCESSORIES`, five slots) that flat rules over rank, level, class tiers, sessions, best streak and Trials earn and that are kept forever in the `hero_companion` setting, the worn class's **weapon** (upgraded at tier III), and the hero's skin / hair / outfit colours. Cosmetic only. The exercise animations stay stick figures on purpose. |
 | **Weekly class challenge** | An optional goal the worn hero class offers for each calendar week (PLAN 6.9b, ADR-058), e.g. Ranger "Pull work in 2 sessions". The first session of a week **pins** it (`class_challenges` setting), so switching classes changes it only next Monday. Completing it pays `CLASS_CHALLENGE_BONUS_XP` once and counts as a badge; missing it costs nothing. Straight-arm work never counts; the generator and the safeguards ignore it. |
 | **Widget snapshot** | The small JSON (`WidgetSnapshot`: level, rank, the engine's streak, `lastSessionAt`, top 3 attributes, optionally the worn hero class and tier, PLAN 6.9) the app writes to `widget-snapshot.json` for the home-screen widget. The widget derives "trained today" (same local calendar day as `lastSessionAt`) and the active streak from it at render time (ADR-055). |
 | **Session plan / active session** | The Train flow's editable plan preview (`SessionPlan`, in memory) and the started session (`ActiveSession`, the `active_session` draft) with its logged sets; `finishedSession` turns it into a `LoggedSession` (ADR-034). |
@@ -567,6 +601,12 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
   `stats` = each listed attribute ≥ its points, `sessions` = logged sessions ≥ count, `rank` =
   rank ≥ the named one. Tiers count from I and stop at the first missed one. Thresholds only in
   `src/data/classes.ts` (e.g. Warrior push 30 / 120 / 300).
+- **Companion mood** (PLAN 6.10, ADR-059): `d` = local calendar days from the last session to now
+  (`localDaysBetween`): `d = 0` happy, `1 ≤ d ≤ CONTENT_MAX_DAYS` (2) content, `≤ WAITING_MAX_DAYS`
+  (5) waiting, later sad; no session yet = waiting. Constants in `src/domain/companion.ts`.
+- **Companion accessories**: earned when the rule holds (`rank` ≥, `level` ≥, `class` tier ≥,
+  `sessions` ≥, best `streak` ≥, passed `trials` ≥, `eliteTrial` = a Trial passed on an
+  elite-tier node); kept forever. Rules only in `src/data/companion/accessories.ts`.
 - **Weekly class challenge** (PLAN 6.9b, ADR-058): week = local Monday 00:00 to the next Monday
   00:00 (`localWeekBounds`, 167 / 169 h across DST), stored with the pin. Count = Σ per session in
   the window of its contribution: done sets (value > 0) on known, non-straight-arm nodes; 1 per
@@ -649,7 +689,9 @@ Schema in `src/db/schema.ts`; timestamps are integers in ms since the Unix epoch
     `tree_view_mode` (`columns` | `map`, PLAN 5.1), `hero_classes` (PLAN 6.9, ADR-057:
     `{ version, selected?, unlocks: { classId: [{ at, sessionId? }] }, seen: { classId: tier } }`),
     `class_challenges` (PLAN 6.9b, ADR-058: `{ version, pins: [{ start, end, classId, tier }] }`,
-    one pin per week with a session; user data like the history, recompute needs it for the bonus)
+    one pin per week with a session; user data like the history, recompute needs it for the bonus),
+    `hero_companion` (PLAN 6.10, ADR-059: `{ version, unlocks: { accessoryId: { at, sessionId? } },
+    equipped: { slot: accessoryId | null }, look: { skin?, hair?, outfit? }, seen: [accessoryId] }`)
   - `progression_overlay(id = 1, revision, saved_at, body JSON)`: the current overlay in the
     `overlayToRaw` shape (ADR-028); `revision` counts saves
   - `active_session(id = 1, updated_at, body JSON)`: the Train flow's session in progress
@@ -692,7 +734,8 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 | `npm run build:apk` | Local release APK for phones (arm64-v8a) in `builds/`, no Expo account (ADR-039). `-- --clean` recreates android/, `-- --skip-prebuild` only runs Gradle, `-- --abis=a,b` picks ABIs. ~14 min cold, a few minutes incremental. |
 | `npm run build:apk:universal` | The same with arm64-v8a + x86_64, so it also runs on the x86_64 emulator |
 | `npm run animations:sheet` | Render the exercise animations as contact sheets to `docs/screenshots/6.4a-*.png` (v_pull, iconic, patterns). While tuning: `-- --only pull_up,pattern:core --cell 8 --out <png>`. Look at them after every pose change; commit the PNGs. |
-| `npm run icon:build` | Render the pixel-art app icon (`scripts/appIcon.ts`) to every PNG app.json points at (`assets/images/`) and `docs/screenshots/5.6-app-icon.png`, plus the widget picker preview (`scripts/widgetPreview.ts` → `assets/images/widget-preview.png`). Run after editing the grid; commit the PNGs. |
+| `npm run companion:sheet` | Render the companion sprite's contact sheets to `docs/screenshots/6.10-*.png` (animations, accessories per slot, weapons, outfits, looks). While tuning: `-- --only iron_helm,warrior,legend --cell 8 --out <png>` (accessory ids, class ids for weapons, outfit labels). Look at them after every art change; commit the PNGs. |
+| `npm run icon:build` | Render the pixel-art app icon (`scripts/appIcon.ts`) to every PNG app.json points at (`assets/images/`) and `docs/screenshots/5.6-app-icon.png`, plus the widget picker previews (`scripts/widgetPreview.ts` → `assets/images/widget-preview.png`, `widget-companion-preview.png`). Run after editing the grid; commit the PNGs. |
 | `npx expo-doctor` | Checks dependency versions and config against the SDK |
 | `npx expo install <pkg>` | Add a dependency at the SDK-compatible version (prefer it over `npm install`) |
 

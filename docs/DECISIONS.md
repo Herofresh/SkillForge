@@ -1852,3 +1852,132 @@ Template:
   to it on the next recompute (like an XP formula change; the pin keeps only class and tier).
   Renaming a class id drops its past bonuses. A session logged into a past week without a pin
   pins that week to the class worn now (a full recompute follows, so the result stays exact).
+
+## ADR-059: Companion: a layered JRPG-style chibi sprite with moods, earned accessories, class weapons and a large widget (PLAN 6.10)
+- Date: 2026-10-03 · Status: Accepted (extends ADR-055/056; the exercise animations of ADR-053
+  stay as they are)
+- Context: PLAN 6.10 (user idea): the hero as a small tamagotchi-style pixel companion on the
+  Character tab, customizable within limits, with trinkets that training earns. **User decisions
+  (2026-10-03):**
+  - The hero as a small tamagotchi-style pixel companion, customizable within limits: accessories
+    per slot and colour choices for skin, hair and outfit.
+  - Mood: it can get sad (after several days without training) but it **never dies, never gets
+    sick, never loses anything**; training cheers it up. No punishment (ADR-023).
+  - Accessories fit milestones, ranks, levels and classes/tiers, fantasy-RPG styled; every unlock
+    rule is **flat and monotonic** like the classes (once earned, kept forever). The list shown to
+    the user is the spec (below). A class's tier II may later get a recolour of its tier I item.
+  - A **weapon slot that is not chosen**: the companion carries the weapon of the class the hero
+    wears (it identifies the class; wearing another class changes it); tiers I–II show the base
+    weapon, tier III an upgraded (glowing or ornate) one; the Recruit a wooden training sword.
+  - Widgets: **small** = clean, only training status, streak and stats (the existing content);
+    **large** = the companion plus a few key stats, clean but not empty. Widgets that users already
+    placed must keep working.
+  - **Art direction:** the first draft reused the exercise stick figure (ADR-053) with a chunkier
+    build; the user found it "a bit too weird" and asked for a companion inspired by classic
+    SNES-era Final Fantasy field sprites and Octopath Traveler's pixel sprites, as **original** art
+    (inspiration only, nothing copied): a proper chibi sprite with a big head, a readable face, a
+    hair shape, a solid body in clothes, hands and boots; a selective outline in a darker shade of
+    the fill (not pure black); 3–4 tone shading per material with light from the top left, warm
+    highlights, slightly muted mid-tones; a soft ground shadow; layered parts so accessories,
+    colours and weapons compose; short JRPG frame loops (idle, cheer, sad, a victory pose). The
+    user then clarified: this style is for the **companion only**; the **exercise animations stay
+    stick figures** on purpose, because those show a human body's movement more clearly.
+- Decision:
+  - **Sprite engine (`src/lib/sprite.ts`, pure):** parts are rows of characters whose legend names
+    a *material* and a *region* (or a fixed colour for eyes and sparkles); a `SpriteCanvas` draws
+    parts at anchors (mirrored or rotated a quarter turn), regions can be recoloured, and
+    `finishSprite` shades every material cell from its neighbours (bottom and right edges and
+    cells under another material in shadow, top and left edges lit, a specular top-left corner on
+    shiny materials), adds the selective outline (each empty cell next to the sprite takes the
+    outline tone of the material it borders), then an aura glow, sparkles and the ground shadow.
+    Shading is computed, not drawn, so a recoloured part (chainmail instead of cloth, another
+    skin) keeps its light.
+  - **Sprite palette (`src/data/companion/looks.ts`):** its own 4–5 step ramps per material
+    (skin ×6, hair ×6, outfit dye ×6, plus leather, iron, dark iron, gold, bone, fur, leaf, night
+    cloth, red, rune, arcane, fire, wood, orchid, robe, pants, boots), original colours. The UI
+    palette (DESIGN.md) has too few steps for sprite shading; the companion is art like the app
+    icon, so it gets its own ramps. Output cells are one role character per material × tone.
+  - **Body (`body.ts`):** a 32 × 40 front-facing chibi (head box 14 × 13 with hair, eyes with a
+    glint, mouth and blush; torso with neck, belt and tunic hem; arms down / up / out / hugging;
+    legs standing / hopping / tapping / sitting). Frames are anchor sets (`BodyFrame`): head,
+    torso, arm poses, legs and face; accessories and weapons are placed from the anchors, so they
+    follow every frame.
+  - **Animations (`moods.ts`):** stepped frame loops with holds, `FRAME_MS` per step: `happy`
+    cheers with both fists up and hops (weapon raised, smile), `content` breathes (a 1 px bob),
+    `waiting` looks left and right and taps a foot, `sad` sits with knees up, head down, eyes down
+    and its weapon (and shield) on the ground (slower), `victory` raises the weapon (Train
+    summary), `wave` waves (a tap on the companion; replaces the first draft's "play the last
+    trained exercise", which doesn't fit the sprite style).
+  - **Moods** (`companionMood(lastSessionAt, now)`, by local calendar days since the last
+    session): happy on a day with a session, content for 1–2 days (rest days are part of
+    training), waiting for 3–5 days or before the first session, sad from day 6 on. Never worse than
+    sad; the next session makes it happy at once. One kind line per mood ("Misses training with
+    you. One session cheers it up."). Nothing is ever taken away.
+  - **Accessories** (`accessories.ts`, art in `art.ts`, 46 items, five slots: head, cloak & back,
+    body, hands & arms, aura & emblem). An item is a head part, a back part (cloaks, banner, lute),
+    a part behind the head, a front part (collars, pendants, beads), region recolours (chainmail
+    torso with a ring pattern, leather or iron forearms, robes over legs), hand or shoulder parts
+    (shield, pauldrons) and/or an aura (glow + sparkles). Rule kinds (`CompanionRule`): `rank`,
+    `level`, `class` (class at a tier), `sessions`, `streak` (best streak ever), `trials`,
+    `eliteTrial`. The list:
+    - Rank: Novice rope headband (every hero), Apprentice leather bracers, Adept iron circlet,
+      Master knight's mantle, Legend golden crown + golden aura.
+    - Character level: 5 traveler's tunic, 10 hooded cloak, 20 chainmail vest, 35 runed
+      gauntlets, 50 dragonscale armour, 75 phoenix cloak.
+    - Milestones: first Trial passed trial medallion; streak 7 ember aura; streak 30 flame aura; a
+      Trial passed on an elite-tier node star-forged halo; 50 sessions veteran's scarf; 100
+      sessions war banner. "7-day / 30-day streak" uses the app's streak (sessions at most 72 h
+      apart, ADR-019), the best ever reached, so a break never takes it back.
+    - Class tier I / tier III: Warrior iron helm / horned warlord helm; Ranger green hood /
+      leaf-woven warden cloak; Monk prayer beads / grandmaster robe; Barbarian fur pelt / bone
+      crown; Rogue shadow mask / nightblade cowl; Druid antler wreath / living crown of leaves;
+      Paladin shield / lightbringer halo; Samurai hachimaki / kabuto helm; Templar tabard / grand
+      templar cape; Bard feathered cap / lute (on the back); Cleric holy symbol / mitre; Knight
+      crested helm / high lord cape; Berserker war paint / skull pauldrons; Sorcerer pointed hat /
+      arcane aura.
+  - **Weapons** (`weapons.ts`, art in `art.ts`): one upright part per class with its grip cell,
+    held in the right hand (the fist is drawn over the grip), raised in cheer and victory, laid on
+    the ground when sad; tier III swaps materials (iron → rune, wood → leaf or gold, …) and adds
+    glints. Recruit wooden training sword, Warrior longsword (runeblade), Ranger longbow, Monk
+    quarterstaff, Barbarian greataxe, Rogue twin daggers, Druid gnarled staff, Paladin warhammer,
+    Samurai katana, Templar mace, Bard lute, Cleric holy mace, Knight sword and a round shield,
+    Berserker twin axes, Sorcerer wand. Shown, not chosen; not stored.
+  - **Persistence** (like ADR-057): derived where possible (ADR-008) and kept forever. The store
+    re-checks the rules on every engine commit after the class tiers (`commitEngine`), stamps new
+    accessories with the session that earned them (Train summary) or the load time, and keeps them
+    in the `hero_companion` setting: `{ version: 1, unlocks: { id: { at, sessionId? } }, equipped:
+    { slot: id | null }, look: { skin?, hair?, outfit? }, seen: [id] }`. An existing user's first
+    start after the update earns every accessory their history already qualifies for. A slot the
+    hero never chose for shows the last earned item of that slot (catalogue order runs humble →
+    grand), so earned gear appears at once; `null` = cleared on purpose. **No migration and no
+    backup change:** settings travel in backups as before (`schemaVersion` unchanged); an older
+    backup without the setting earns the accessories again from the history. The reader drops
+    unknown ids, misplaced items and broken entries.
+  - **UI:** `CompanionCard` (its own panel under the hero panel, apart from the class banner and
+    challenge card): the sprite at 4 dp per pixel on a raised stage, mood title and line, the
+    weapon's name, "Customize" with an "n NEW" tag; a tap waves. `CompanionSheet` (`PixelModal`
+    "Customize"): a live preview, the weapon ("comes with the class you wear"), skin / hair /
+    outfit chips, then per slot "None" and the earned items as chips, and the locked ones with what
+    earns them and the progress ("Character level 10 · Level 4 / 10"). Closing it marks the earned
+    items seen. The Train summary shows `TrinketUnlockPanel` with a **NEW TRINKET!** burst
+    (`BURST_TITLES.newTrinket`) and `CompanionVictory` (the victory pose); a past session lists the
+    trinkets quietly. The idle loops are, like the exercise animations, an exception to "never
+    loop"; reduce motion shows the first frame. `PixelSprite` (UI kit) plays any frame list and now
+    also backs `PixelAnimation`.
+  - **Widgets:** the existing `SkillForge` widget stays the **small** one (same provider name, so
+    placed widgets keep working; content unchanged, description reworded). A new
+    `SkillForgeCompanion` widget is the **large** one (default 4 × 3, min 250 × 180 dp): the
+    sprite as an SVG string (`gridSvg` of its mood's first frame, `SvgWidget`, a whole number of dp
+    per pixel, 5 at 4 × 3 = 160 × 200 dp) on the left; status, mood, streak and level, rank and
+    class title on the right. The snapshot gets an **optional** `companion { loadout, weapon, look }`
+    (no `WIDGET_SNAPSHOT_VERSION` bump; older snapshots read, broken parts are dropped); the mood
+    is decided at render time from `lastSessionAt`, so the 30-minute update turns the companion sad
+    without the app running. `redrawWidgets` redraws both names; the task handler draws by
+    `widgetInfo.widgetName`. Picker preview `assets/images/widget-companion-preview.png`
+    (`icon:build`).
+- Consequences: cosmetic only: no XP, generator, challenge or safeguard change. Every engine commit
+  evaluates the accessory rules once more (O(nodes)). Accessory ids are stable forever (stored).
+  New art is a part grid plus a look at the contact sheet (`npm run companion:sheet`); tests draw
+  every item and weapon in every pose and check it changes the picture and stays on the canvas. A
+  new rule kind needs a case in `companionRuleProgress` and words in `companionText.ts`. Two widget
+  providers now exist; a layout change re-runs `icon:build` for its preview.

@@ -9,16 +9,30 @@
  *    instead of showing a value frozen when the app last ran (no ✓ from yesterday after midnight).
  */
 import { HERO_CLASS_BY_ID, HERO_CLASSES } from '@/data/classes';
+import { ACCESSORIES, ACCESSORY_BY_ID } from '@/data/companion/accessories';
+import { CLASS_WEAPONS, weaponFor } from '@/data/companion/weapons';
 import { isSameLocalDay } from '@/lib/time';
 
 import { computeCharacter } from './character';
 import { activeStreak } from './characterView';
 import { classTitle, EMPTY_CLASS_SETTINGS, wornClass, type ClassSettings } from './classes';
+import {
+  companionLoadout,
+  companionMood,
+  EMPTY_COMPANION_SETTINGS,
+  MOOD_TITLES,
+  type CompanionLoadout,
+  type CompanionLookChoice,
+  type CompanionMood,
+  type CompanionSettings,
+} from './companion';
 import type { EngineState } from './recompute';
 import {
   ATTRIBUTES,
   RANK_TITLES,
+  COMPANION_SLOTS,
   type Attribute,
+  type CompanionSlot,
   type ExerciseNode,
   type RankTitle,
 } from './types';
@@ -51,6 +65,18 @@ export interface WidgetSnapshot {
    * read (no version bump); an unknown class is left out.
    */
   heroClass?: { id: string; tier: number };
+  /**
+   * What the companion wears (PLAN 6.10), for the large widget. Optional like `heroClass` (no
+   * version bump); the mood is decided at render time from `lastSessionAt`.
+   */
+  companion?: WidgetCompanion;
+}
+
+/** The companion's outfit as the widget draws it. */
+export interface WidgetCompanion {
+  loadout: CompanionLoadout;
+  weapon: { classId: string; upgraded: boolean };
+  look: CompanionLookChoice;
 }
 
 export interface WidgetSnapshotInput {
@@ -58,6 +84,8 @@ export interface WidgetSnapshotInput {
   engine: Pick<EngineState, 'progress' | 'totalXp' | 'streak' | 'lastSessionAt'>;
   /** The stored class settings; none = the starting class. */
   classes?: ClassSettings;
+  /** The stored companion settings; none = no accessories, default colors. */
+  companion?: CompanionSettings;
 }
 
 /** The attributes with points, strongest first; ties keep the `ATTRIBUTES` order. */
@@ -83,6 +111,19 @@ export function widgetSnapshot(input: WidgetSnapshotInput): WidgetSnapshot {
     ...(engine.lastSessionAt !== undefined ? { lastSessionAt: engine.lastSessionAt } : {}),
     topAttributes: topAttributes(character.attributes),
     heroClass: { id: worn.classId, tier: worn.tier },
+    companion: widgetCompanion(input.companion ?? EMPTY_COMPANION_SETTINGS, worn),
+  };
+}
+
+function widgetCompanion(
+  settings: CompanionSettings,
+  worn: { classId: string; tier: number },
+): WidgetCompanion {
+  const weapon = weaponFor(worn.classId, worn.tier);
+  return {
+    loadout: companionLoadout(ACCESSORIES, settings),
+    weapon: { classId: weapon.classId, upgraded: weapon.upgraded },
+    look: settings.look,
   };
 }
 
@@ -102,6 +143,8 @@ export type WidgetView =
       topAttributes: WidgetAttribute[];
       /** The worn class's title at its tier (e.g. "Veteran") and the class id (its color). */
       heroClass?: { id: string; title: string };
+      /** The companion in its mood at render time (the large widget). */
+      companion?: WidgetCompanion & { mood: CompanionMood; moodTitle: string };
     };
 
 export function widgetView(snapshot: WidgetSnapshot | undefined, now: number): WidgetView {
@@ -109,6 +152,7 @@ export function widgetView(snapshot: WidgetSnapshot | undefined, now: number): W
   const trainedToday =
     snapshot.lastSessionAt !== undefined && isSameLocalDay(snapshot.lastSessionAt, now);
   const heroClass = snapshot.heroClass && HERO_CLASS_BY_ID.get(snapshot.heroClass.id);
+  const mood = companionMood(snapshot.lastSessionAt, now);
   return {
     kind: 'hero',
     deepLink: WIDGET_DEEP_LINK,
@@ -118,6 +162,9 @@ export function widgetView(snapshot: WidgetSnapshot | undefined, now: number): W
     level: snapshot.level,
     rank: snapshot.rank,
     topAttributes: snapshot.topAttributes,
+    ...(snapshot.companion
+      ? { companion: { ...snapshot.companion, mood, moodTitle: MOOD_TITLES[mood] } }
+      : {}),
     ...(heroClass && snapshot.heroClass
       ? {
           heroClass: {
@@ -163,6 +210,7 @@ export function parseWidgetSnapshot(text: string | undefined): WidgetSnapshot | 
   if (lastSessionAt !== undefined && !isCount(lastSessionAt)) return undefined;
   if (!Array.isArray(top) || !top.every(isWidgetAttribute)) return undefined;
   const heroClass = readHeroClass(value.heroClass);
+  const companion = readCompanion(value.companion);
   return {
     version: WIDGET_SNAPSHOT_VERSION,
     level,
@@ -171,7 +219,29 @@ export function parseWidgetSnapshot(text: string | undefined): WidgetSnapshot | 
     ...(lastSessionAt !== undefined ? { lastSessionAt } : {}),
     topAttributes: top,
     ...(heroClass ? { heroClass } : {}),
+    ...(companion ? { companion } : {}),
   };
+}
+
+/** The snapshot's companion: known accessories in their own slots, a known weapon; else none. */
+function readCompanion(value: unknown): WidgetCompanion | undefined {
+  if (!isRecord(value) || !isRecord(value.loadout) || !isRecord(value.weapon)) return undefined;
+  const loadout: Partial<Record<CompanionSlot, string>> = {};
+  for (const slot of COMPANION_SLOTS) {
+    const id = value.loadout[slot];
+    if (typeof id === 'string' && ACCESSORY_BY_ID.get(id)?.slot === slot) loadout[slot] = id;
+  }
+  const { classId, upgraded } = value.weapon;
+  if (typeof classId !== 'string' || !CLASS_WEAPONS.some((entry) => entry.classId === classId)) {
+    return undefined;
+  }
+  const look: CompanionLookChoice = {};
+  if (isRecord(value.look)) {
+    for (const key of ['skin', 'hair', 'outfit'] as const) {
+      if (typeof value.look[key] === 'string') look[key] = value.look[key];
+    }
+  }
+  return { loadout, weapon: { classId, upgraded: upgraded === true }, look };
 }
 
 /** The snapshot's class, if it is a known class with a tier; anything else is left out. */
