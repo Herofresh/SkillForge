@@ -359,10 +359,11 @@ type HeroCompanion = NonNullable<HeroView['companion']>;
  * sprite's pixels are painted: the background stays transparent, so it stands on the widget.
  */
 export function companionSvg(companion: HeroCompanion, widthDp: number): string {
-  const rows = companionStill(companion.mood, {
-    loadout: companion.loadout,
-    weapon: companion.weapon,
-  });
+  const rows = companionStill(
+    companion.mood,
+    { loadout: companion.loadout, weapon: companion.weapon },
+    companion.look,
+  );
   const colors = companionColors(companion.look);
   return gridSvg(parsePixelGrid(rows), widthDp, (role) => colors[role]);
 }

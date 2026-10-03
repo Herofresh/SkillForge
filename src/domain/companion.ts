@@ -190,11 +190,23 @@ export function sessionAccessoryUnlocks(
 /** Layout version of the stored `hero_companion` setting. */
 export const COMPANION_SETTINGS_VERSION = 1;
 
-/** The hero's color choices (ids from `src/data/companion/looks.ts`; unset = the default). */
+/** The companion's body (PLAN 6.13): a man or a woman; unset = the man (the first body). */
+export const COMPANION_BODIES = ['man', 'woman'] as const;
+export type CompanionBody = (typeof COMPANION_BODIES)[number];
+export const DEFAULT_COMPANION_BODY: CompanionBody = 'man';
+
+/**
+ * The hero's look: colour and hair style ids (from `src/data/companion/`; unset or unknown = the
+ * default) and the body (unset = `DEFAULT_COMPANION_BODY`, so heroes from before 6.13 look the
+ * same kind of hero as before).
+ */
 export interface CompanionLookChoice {
   skin?: string;
   hair?: string;
   outfit?: string;
+  /** Hair style id (PLAN 6.13); unset = the body's default style. */
+  hairStyle?: string;
+  body?: CompanionBody;
 }
 
 /**
@@ -222,7 +234,26 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isTime = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value) && value >= 0;
 
-const LOOK_KEYS = ['skin', 'hair', 'outfit'] as const;
+const LOOK_KEYS = ['skin', 'hair', 'outfit', 'hairStyle'] as const;
+
+const isBody = (value: unknown): value is CompanionBody =>
+  COMPANION_BODIES.some((body) => body === value);
+
+/**
+ * Reads a stored look (setting or widget snapshot). Tolerant: ids are kept as text (an unknown one
+ * draws the default), a body other than the known ones is dropped (the default body), anything
+ * else is ignored.
+ */
+export function parseCompanionLook(raw: unknown): CompanionLookChoice {
+  const look: CompanionLookChoice = {};
+  if (!isRecord(raw)) return look;
+  for (const key of LOOK_KEYS) {
+    const value = raw[key];
+    if (typeof value === 'string' && value.length > 0) look[key] = value;
+  }
+  if (isBody(raw.body)) look.body = raw.body;
+  return look;
+}
 
 /**
  * Reads the stored setting. Tolerant: a missing or unreadable value is the empty state (the
@@ -254,13 +285,7 @@ export function parseCompanionSettings(
       else if (typeof value === 'string' && byId.get(value)?.slot === slot) equipped[slot] = value;
     }
   }
-  const look: CompanionLookChoice = {};
-  if (isRecord(raw.look)) {
-    for (const key of LOOK_KEYS) {
-      const value = raw.look[key];
-      if (typeof value === 'string' && value.length > 0) look[key] = value;
-    }
-  }
+  const look = parseCompanionLook(raw.look);
   const seen = Array.isArray(raw.seen)
     ? raw.seen.filter((id): id is string => typeof id === 'string' && byId.has(id))
     : [];

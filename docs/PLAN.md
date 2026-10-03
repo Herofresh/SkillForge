@@ -264,8 +264,14 @@
   was added and drew the sprite straight on the widget background. Screenshots
   `docs/screenshots/6.11-*.png`. The GitHub release is created by the coordinator after the
   merge. **Phase 6 is complete.**
+- Companion cooler look (6.13, ADR-061, [PR #60](https://github.com/Herofresh/SkillForge/pull/60)): the companion is a taller, heroic JRPG
+  field sprite (32 × 44, head ≈ ¼ of the height, determined face, more contrast, heroic poses)
+  instead of a chibi, as a man or a woman (Customize → Body) with Spiky / Long / Ponytail hair;
+  every accessory and weapon re-fitted, stored data unchanged (`look.body` / `look.hairStyle` are
+  optional). Screenshots `docs/screenshots/6.13-*.png`.
 
 ## Next up
+0. 6.13 companion cooler look + woman body: review and merge [PR #60](https://github.com/Herofresh/SkillForge/pull/60).
 1. On the user's phone: install v0.6.0 (once published) over the installed build (Update, no
    uninstall), add the new SkillForge Companion widget and report what feels off.
 2. Phase 7 (Google Play), starting with **7.1: the user creates the upload key with `keytool`**
@@ -278,6 +284,34 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Companion: cooler look (task 6.13, ADR-061, [PR #60](https://github.com/Herofresh/SkillForge/pull/60)):**
+  - Code: `src/data/companion/body.ts` (`SPRITE_SIZE` 32 × 44, the one size constant the UI,
+    widget and scripts read; `BODY_SHAPES` man / woman; `HAIR_STYLES` spiky / long / ponytail with
+    `top` (hidden under helmets: `hidesHair` in `art.ts`), `locks` and `back` parts; arm poses
+    down / up / shoulder / hip / cross / salute; legs stand / shift / wide / kneel; faces),
+    `moods.ts` (weapon poses held / lowered / planted), `index.ts` (`companionFrame(frame, outfit,
+    look)` now takes the look for the body and hair; `companionBody(look)`; cloak and long hair
+    sway), `art.ts` (every part re-fitted to the 12 × 10 head and 12 × 13 torso boxes; cloak folds;
+    `plant` / `plantMirror` on weapons), `looks.ts` (contrast palette, `iris`, no blush;
+    `CompanionLook` = the domain's `CompanionLookChoice`). Domain: `COMPANION_BODIES`,
+    `DEFAULT_COMPANION_BODY`, `parseCompanionLook` (shared by the setting and the widget snapshot).
+    UI: Body and Hair style chip rows in `CompanionSheet`. Widget: `companionSvg` passes the look
+    (one line); `companionScale` unchanged (44 rows still give 3 dp per pixel at the 250 × 180 dp
+    minimum); preview regenerated (`icon:build`).
+  - Tests: every accessory and weapon on both bodies in every animation, each frame one connected
+    piece (no loose layer; sparkles excepted), boots on the ground row, every hair style on both
+    bodies in every frame; body parsing / default / unknown values; store and backup round trip
+    with the body; widget snapshot keeps it.
+  - Sheets: `npm run companion:sheet` → `docs/screenshots/6.13-*.png` (moods per body, accessories
+    per slot on both bodies, weapons man base / woman tier III, outfits × poses per body, looks ×
+    hair styles), `6.13-before-after.png` (6.10 row cut from the old sheet above the new man and
+    woman; made by a one-off script, not committed).
+  - Verified: the five checks, the sheets at 4× and 8–12×, Maestro `character.yaml` on
+    Pixel_8_Pro_API_35 / Expo Go (`6.13-character-companion*.png`, `6.13-customize-woman.png`,
+    `6.13-summary-victory.png`). Not verified: a real phone, the large widget on a device.
+  - Weakest art / ideas: the kneel reads best without a long cloak (a cloak covers the legs); the
+    crossed arms are a simple band; small weapons (daggers, wand) are still a few pixels; a fourth
+    hair style (short crop) or tier II recolours could come later.
 - **Release v0.6.0 (task 6.11, [PR #58](https://github.com/Herofresh/SkillForge/pull/58)):** ADR-043 routine. Both APKs built with `-- --clean`
   in a short-path copy `D:\sf060` (`diff -r` against the branch: identical, excluding
   `node_modules`, `android`, `builds`, `.git`, `.expo`); signer check passed,
@@ -1290,6 +1324,21 @@ upgrade check from every earlier release). Any new table or column is additive a
   its own, no onboarding change, no data change.
 - [x] 6.11 v0.6.0 release (6.9–6.10c), same routine: upgrade check from 0.1.0, 0.2.0, 0.3.0,
   0.4.0 and 0.5.0, then both widgets on the install upgraded from 0.5.0 ([PR #58](https://github.com/Herofresh/SkillForge/pull/58); release [v0.6.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.6.0))
+- [x] 6.13 Companion: cooler look (user request 2026-10-03: "try to make the companion less cute
+  and more cool"; ADR-061, [PR #60](https://github.com/Herofresh/SkillForge/pull/60)). Same art direction family (SNES-era FF
+  field sprites, Octopath Traveler; original art), from chibi-cute to a cool, heroic hero: taller
+  and leaner (head about a quarter of the height, long legs, broad shoulders; canvas 32 × 44),
+  narrow determined eyes under a brow, a set mouth, no blush, sharper hair; more contrast, darker
+  outlines, deeper shadows, cooler metal; heroic poses (happy raises the weapon, content holds it at
+  the shoulder and shifts its weight with a swaying cloak, waiting crosses its arms with the weapon
+  planted, sad rests on one knee with the head bowed, victory a fist on the hip and the weapon
+  high, the wave a salute with a nod). Every accessory and weapon re-fitted; ids, rules and stored
+  data unchanged. **User addition (2026-10-03):** a body choice in Customize, "Man" / "Woman",
+  stored additively as `look.body` in `hero_companion` (missing = Man, the body every hero had, so
+  nobody sees a surprise change; unknown values dropped; backups carry it); a distinct, equally
+  heroic woman (narrower shoulders, softer jaw, lashes, a fitted jerkin with a split travelling
+  skirt; practical, not sexualised); hair styles Spiky / Long / Ponytail for both bodies
+  (`look.hairStyle`, unset = the body's default).
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
@@ -1312,6 +1361,10 @@ upgrade check from every earlier release). Any new table or column is additive a
 - [ ] 7.7 Production release and an update routine (versionCode +1, AAB upload, release notes).
 
 ### Later / Backlog
+- Companion headgear readability (after 6.13, ADR-061): with full helmets, hoods and cowls
+  (crested_helm, green_hood, nightblade_cowl, shadow_mask) the man and woman read almost the same,
+  and faces under helmets are very dark. Ideas: a lighter eye/face pixel under the brim, the
+  woman's side locks or long hair showing under hoods/cowls as they already do under iron_helm
 - E2E in CI: run the Maestro flows on GitHub Actions with an Android emulator (e.g.
   `reactivecircus/android-emulator-runner`). This probably needs a dev build or APK (5.3) instead of
   Expo Go. Every UI task in Phase 4 should also add or extend a flow in `.maestro/`.

@@ -1,8 +1,12 @@
 /**
- * The companion's accessories and class weapons as layered pixel parts (PLAN 6.10, ADR-059).
- * Original art in the spirit of SNES-era JRPG sprites. Each accessory is one or more of:
- * - `head`: a part placed relative to the head box (14 × 13; it may reach above or beside it),
- * - `back`: a part behind the body, relative to the torso box (10 × 8): cloaks, banners, a lute,
+ * The companion's accessories and class weapons as layered pixel parts (PLAN 6.10 / 6.13,
+ * ADR-059 / ADR-061). Original art in the spirit of SNES-era JRPG and Octopath-style field
+ * sprites, fitted to the taller hero (both bodies share the anchors). Each accessory is one or
+ * more of:
+ * - `head`: a part placed relative to the head box (12 × 10; it may reach above or beside it),
+ *   `hidesHair` for helmets, hoods and hats that cover the hair's volume,
+ * - `back`: a part behind the body, relative to the torso box (12 × 13): cloaks, banners, a lute
+ *   (its lower half sways with the idle loop),
  * - `behindHead`: a part behind the head (a lowered hood),
  * - `front`: a part over the body, relative to the torso box: collars, pendants, beads,
  * - `recolor`: regions repainted in another material (a chainmail torso, leather forearms),
@@ -67,6 +71,8 @@ export interface Recolor {
 
 export interface AccessoryArt {
   head?: PlacedPart;
+  /** The head part covers the hair's volume (helmets, hoods, hats); fringe and long hair stay. */
+  hidesHair?: boolean;
   back?: PlacedPart;
   behindHead?: PlacedPart;
   front?: PlacedPart;
@@ -80,7 +86,14 @@ export interface AccessoryArt {
 
 const part = (dx: number, dy: number, rows: readonly string[]): PlacedPart => ({ dx, dy, rows });
 
-/** A cloak behind the body: `length` rows from the shoulders, flaring, with a hem pattern. */
+/** Cloak width at the hem and how far it reaches left of the torso box. */
+const CLOAK_WIDTH = 24;
+const CLOAK_DX = -6;
+
+/**
+ * A cloak behind the body: `length` rows from the shoulders, flaring from the shoulders to the
+ * hem, a darker edge, an optional hem pattern on its last two rows.
+ */
 function cloakRows(
   fill: string,
   edge: string,
@@ -88,22 +101,27 @@ function cloakRows(
   hem?: (x: number) => string,
 ): string[] {
   const rows: string[] = [];
+  const centre = (CLOAK_WIDTH - 1) / 2;
   for (let y = 0; y < length; y += 1) {
-    const half = Math.min(9.5, 6 + Math.floor(y / 3));
+    const half = Math.min(centre, 8 + Math.floor(y / 5));
     let row = '';
-    for (let x = 0; x < 20; x += 1) {
-      const d = Math.abs(x - 9.5);
+    for (let x = 0; x < CLOAK_WIDTH; x += 1) {
+      const d = Math.abs(x - centre);
       if (d > half) row += '.';
       else if (y >= length - 2 && hem) row += hem(x);
-      else row += d > half - 1 ? edge : fill;
+      else if (d > half - 1) row += edge;
+      else row += y > 4 && Math.abs(Math.round(d)) % 5 === 3 ? edge : fill;
     }
     rows.push(row);
   }
   return rows;
 }
 
-/** A collar over both shoulders, in front of the body, at the torso's top. */
-const collar = (rows: readonly string[]): PlacedPart => part(-2, 0, rows);
+const cloak = (fill: string, edge: string, length: number, hem?: (x: number) => string) =>
+  part(CLOAK_DX, 1, cloakRows(fill, edge, length, hem));
+
+/** A collar over both shoulders, in front of the body (16 wide, from the arms' outer edge). */
+const collar = (rows: readonly string[]): PlacedPart => part(-2, 1, rows);
 
 const sparkle = (points: readonly [number, number][], fixed: string) =>
   points.map(([x, y]) => ({ x, y, fixed }));
@@ -121,192 +139,185 @@ const stars = (points: readonly [number, number][], fixed: string, core: string)
 const rings = (x: number, y: number) => (x + y) % 2 === 0;
 const scales = (x: number, y: number) => y % 2 === 1 && (x + Math.floor(y / 2)) % 2 === 0;
 
+/** A hood framing the face (`F` fill, `f` brim shadow), the face open from row 4. */
+const hoodRows = (fill: string, mask?: string): string[] => {
+  const f = fill;
+  const s = fill.toLowerCase();
+  const m = mask ?? '.';
+  return [
+    `.....${f.repeat(6)}.....`,
+    `...${f.repeat(10)}...`,
+    `..${f.repeat(12)}..`,
+    `.${f.repeat(14)}.`,
+    `.${f.repeat(14)}.`,
+    `${f.repeat(5)}${s.repeat(6)}${f.repeat(5)}`,
+    `${f.repeat(3)}${s}........${s}${f.repeat(3)}`,
+    `${f.repeat(3)}..........${f.repeat(3)}`,
+    `${f.repeat(3)}..........${f.repeat(3)}`,
+    `${f.repeat(3)}${m.repeat(10)}${f.repeat(3)}`,
+    `${f.repeat(4)}${m.repeat(8)}${f.repeat(4)}`,
+    `.${f.repeat(4)}${m.repeat(6)}${f.repeat(4)}.`,
+    `..${f.repeat(12)}..`,
+    `..${f.repeat(12)}..`,
+  ];
+};
+
 export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
   // --- Head ------------------------------------------------------------------------------------
   rope_headband: {
-    head: part(0, 4, ['LlLlLlLlLlLlLlL.', '..............lL', '...............l']),
+    head: part(0, 3, ['WwWwWwWwWwWw..', '..........wWW.', '............wW']),
   },
   iron_circlet: {
-    head: part(0, 3, ['......EE......', 'IIIIIIEEIIIIII']),
+    head: part(0, 2, ['.....EE.....', 'IIIIIEEIIIII']),
   },
   golden_crown: {
-    head: part(1, -4, [
-      'G....GG....G',
-      'GG..GGGG..GG',
-      'GGGGGRRGGGGG',
-      'GEGGGRRGGGEG',
-      'gggggggggggg',
-    ]),
+    head: part(2, -4, ['G..GG..G', 'GG.GG.GG', 'GGGRRGGG', 'GEGRRGEG', 'gggggggg']),
   },
   iron_helm: {
+    hidesHair: true,
     head: part(-1, -1, [
-      '.....IIIIII.....',
-      '...IIIIIIIIII...',
-      '..IIIIIIIIIIII..',
-      '.IIIIIIIIIIIIII.',
-      '.IIIIIIIIIIIIII.',
-      'iiiiiiiiiiiiiiii',
-      '.......ii.......',
-      '.......ii.......',
-    ]),
-  },
-  warlord_helm: {
-    head: part(-2, -5, [
-      'W................W',
-      'W................W',
-      'WW..............WW',
-      '.WW............WW.',
-      '..WW..JJJJJJ..WW..',
-      '...WJJJJJJJJJJW...',
-      '...JJJJJJJJJJJJ...',
-      '..JJJJJJJJJJJJJJ..',
-      '..JJJJJJRRJJJJJJ..',
-      '.GGGGGGGGGGGGGGGG.',
-      '........jj........',
-      '........jj........',
-    ]),
-  },
-  green_hood: {
-    head: part(-1, -1, [
-      '.....VVVVVV.....',
-      '...VVVVVVVVVV...',
-      '..VVVVVVVVVVVV..',
-      '.VVVVVVVVVVVVVV.',
-      '.VVVVVVVVVVVVVV.',
-      'VVVVVvvvvvvVVVVV',
-      'VVVv........vVVV',
-      'VVV..........VVV',
-      'VVV..........VVV',
-      'VVV..........VVV',
-      'VVVV........VVVV',
-      '.VVVV......VVVV.',
-      '..VVVV....VVVV..',
-      '..VVVVVVVVVVVV..',
-    ]),
-  },
-  bone_crown: {
-    head: part(1, -3, [
-      'W...W..W...W',
-      'W..WW..WW..W',
-      'WW.WW..WW.WW',
-      'WWWWWWWWWWWW',
-      'WMWMW**WMWMW',
-    ]),
-  },
-  shadow_mask: {
-    head: part(0, 4, [
-      'NNNNNNNNNNNNNNN.',
-      '..............NN',
-      '...............N',
-      '................',
-      '................',
-      '................',
-      '..NNNNNNNNNN....',
-      '..NNNNNNNNNN....',
-      '...NNNNNNNN.....',
-    ]),
-  },
-  nightblade_cowl: {
-    head: part(-1, -1, [
-      '.....NNNNNN.....',
-      '...NNNNNNNNNN...',
-      '..NNNNNNNNNNNN..',
-      '.NNNNNNNNNNNNNN.',
-      '.NNNNNNNNNNNNNN.',
-      'NNNNNnnnnnnNNNNN',
-      'NNNn........nNNN',
-      'NNN..........NNN',
-      'NNN..........NNN',
-      'NNN..........NNN',
-      'NNNNNNNNNNNNNNNN',
-      '.NNNNNNNNNNNNNN.',
-      '..NNNNNNNNNNNN..',
-      '..NNNNNNNNNNNN..',
-    ]),
-  },
-  antler_wreath: {
-    head: part(-1, -4, [
-      'W..W........W..W',
-      'W.W..........W.W',
-      '.WW.W......W.WW.',
-      '..WW........WW..',
-      '...W........W...',
-      '.VvVvVvVvVvVvVv.',
-    ]),
-  },
-  leaf_crown: {
-    head: part(0, -3, ['...V..OV..V...', '.V.VV.VV.VV.V.', 'VVvVVvVVvVVvVV', '.OVvVVVVVVvVO.']),
-  },
-  hachimaki: {
-    head: part(-3, 4, ['...WWWWWWWRRWWWWW', '.Ww..............', 'Ww...............']),
-  },
-  kabuto: {
-    head: part(-2, -5, [
-      '..G............G..',
-      '...G..........G...',
-      '....GG......GG....',
-      '.....GGGGGGGG.....',
-      '....RRRRRRRRRR....',
-      '...RRRRRRRRRRRR...',
-      '..RRRRRRRRRRRRRR..',
-      '..GGGGGGGGGGGGGG..',
-      '.RRR..........RRR.',
-      'RRR............RRR',
-    ]),
-  },
-  feathered_cap: {
-    head: part(-1, -2, [
-      '..............G..',
-      '....XXXXXXX..GW..',
-      '..XXXXXXXXXXXGW..',
-      '.XXXXXXXXXXXXW...',
-      'XXXXXXXXXXXXXXX..',
-      '.xxxxxxxxxxxxxxx.',
-    ]),
-  },
-  mitre: {
-    head: part(2, -6, [
-      '...W..W...',
-      '..WW..WW..',
-      '.WWW..WWW.',
-      '.WWWGGWWW.',
-      'WWWWGGWWWW',
-      'WWGGGGGGWW',
-      'WWWWGGWWWW',
-      'WWWWGGWWWW',
-      'GGGGGGGGGG',
-    ]),
-  },
-  crested_helm: {
-    head: part(0, -4, [
-      '.....XXXX.....',
-      '....XXXXXX....',
-      '.....XxxX.....',
       '....IIIIII....',
       '..IIIIIIIIII..',
       '.IIIIIIIIIIII.',
       '.IIIIIIIIIIII.',
       'IIIIIIIIIIIIII',
-      'IIIIIIIIIIIIII',
-      'II**********II',
-      'IIIIII**IIIIII',
-      'IIIIII**IIIIII',
-      'IIIIIIIIIIIIII',
-      '.IIIIIIIIIIII.',
-      '..IIIIIIIIII..',
-      '...iiiiiiii...',
+      'iiiiiiiiiiiiii',
+      'II....ii....II',
+      'II....ii....II',
+      '.I....ii....I.',
+    ]),
+  },
+  warlord_helm: {
+    hidesHair: true,
+    head: part(-3, -4, [
+      'W................W',
+      'WW..............WW',
+      '.WW....JJJJ....WW.',
+      '..WWJJJJJJJJJJWW..',
+      '....JJJJJJJJJJ....',
+      '...JJJJJJRRJJJJJ..',
+      '...JJJJJJJJJJJJJ..',
+      '..GGGGGGGGGGGGGGG.',
+      '..JJ....jj....JJ..',
+      '..JJ....jj....JJ..',
+      '...J....jj....J...',
+    ]),
+  },
+  green_hood: {
+    hidesHair: true,
+    head: part(-2, -2, hoodRows('V')),
+  },
+  bone_crown: {
+    hidesHair: false,
+    head: part(1, -4, [
+      'W...WW...W',
+      'W..WWWW..W',
+      'WW.WWWW.WW',
+      'WWWW**WWWW',
+      'WWWWWWWWWW',
+      'WMWMWMWMWM',
+    ]),
+  },
+  shadow_mask: {
+    head: part(1, 3, [
+      'NNNNNNNNNNNNN',
+      '...........NN',
+      '............N',
+      '.............',
+      '.NNNNNNNNNN..',
+      '.NNNNNNNNNN..',
+      '..NNNNNNNN...',
+    ]),
+  },
+  nightblade_cowl: {
+    hidesHair: true,
+    head: part(-2, -2, hoodRows('N', 'N')),
+  },
+  antler_wreath: {
+    head: part(-3, -4, [
+      'W..W..........W..W',
+      '.W.W..........W.W.',
+      '..WW.W......W.WW..',
+      '...WW........WW...',
+      '....W........W....',
+      '....VvVvVvVvVvVv..',
+    ]),
+  },
+  leaf_crown: {
+    head: part(0, -3, ['..V..OV..V..', '.VV.VVVV.VV.', 'VVvVVvVVvVVv', '.OVvVVVVvVO.']),
+  },
+  hachimaki: {
+    head: part(-4, 3, ['....WWWWWRRWWWWW', '.Ww.............', 'Ww..............']),
+  },
+  kabuto: {
+    hidesHair: true,
+    head: part(-3, -4, [
+      '..G............G..',
+      '...GG........GG...',
+      '.....GGGGGGGG.....',
+      '....RRRRRRRRRR....',
+      '...RRRRRRRRRRRR...',
+      '..RRRRRRRRRRRRRR..',
+      '..RRRRRRRRRRRRRR..',
+      '..GGGGGGGGGGGGGG..',
+      '.RRRR........RRRR.',
+      'RRRR..........RRRR',
+      'RRR............RRR',
+    ]),
+  },
+  feathered_cap: {
+    hidesHair: true,
+    head: part(-1, -3, [
+      '.............G.',
+      '....XXXXXX..GW.',
+      '..XXXXXXXXXXGW.',
+      '.XXXXXXXXXXXW..',
+      'XXXXXXXXXXXXXX.',
+      'XXXXXXXXXXXXXXX',
+      '.xxxxxxxxxxxxx.',
+    ]),
+  },
+  mitre: {
+    hidesHair: true,
+    head: part(2, -4, [
+      '.WW..WW.',
+      '.WWGGWW.',
+      'WWWGGWWW',
+      'WGGGGGGW',
+      'WWWGGWWW',
+      'WWWGGWWW',
+      'WWWGGWWW',
+      'GGGGGGGG',
+    ]),
+  },
+  crested_helm: {
+    hidesHair: true,
+    head: part(0, -4, [
+      '....XXXX....',
+      '...XXXXXX...',
+      '....XxxX....',
+      '...IIIIII...',
+      '.IIIIIIIIII.',
+      'IIIIIIIIIIII',
+      'IIIIIIIIIIII',
+      'IIIIIIIIIIII',
+      'IIIIIIIIIIII',
+      'IIIIIIIIIIII',
+      'I**********I',
+      'IIIII**IIIII',
+      'IIIII**IIIII',
+      '.IIIIIIIIII.',
+      '..iiiiiiii..',
     ]),
   },
   pointed_hat: {
-    head: part(-2, -8, [
-      '............AA....',
-      '...........AAA....',
+    hidesHair: true,
+    head: part(-3, -4, [
       '..........AAA.....',
-      '.........AAAA.....',
-      '........AA!AA.....',
+      '.........AAA......',
+      '........AA!A......',
       '.......AAAAAA.....',
       '......AAAAAAAA....',
-      '.....AAAAAAAAAA...',
       '.....GGGGGGGGGG...',
       '....AAAAAAAAAAAA..',
       'AAAAAAAAAAAAAAAAAA',
@@ -316,112 +327,102 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
 
   // --- Cloak and back ----------------------------------------------------------------------------
   hooded_cloak: {
-    back: part(-5, 1, cloakRows('X', 'x', 12)),
-    behindHead: part(-2, 6, [
-      '..xxxxxxxxxxxxxx..',
-      '.xxxxxxxxxxxxxxxx.',
-      'xxxxxxxxxxxxxxxxxx',
-      'xxxxxxxxxxxxxxxxxx',
+    back: cloak('X', 'x', 24),
+    behindHead: part(-2, 8, [
+      '..xxxxxxxxxxxx..',
+      '.xxxxxxxxxxxxxx.',
+      'xxxxxxxxxxxxxxxx',
+      'xxxxxxxxxxxxxxxx',
     ]),
-    front: collar(['XX..........XX', 'XXX...GG...XXX']),
+    front: collar(['XXX..........XXX', 'XXXX...GG...XXXX']),
   },
   fur_pelt: {
     back: part(
-      -5,
+      CLOAK_DX,
       1,
-      cloakRows('M', 'm', 6, (x) => (x % 2 === 0 ? 'm' : '.')),
+      cloakRows('M', 'm', 9, (x) => (x % 2 === 0 ? 'm' : '.')),
     ),
-    front: collar(['MMMMM....MMMMM', 'MmMmMm..mMmMmM', '.m.m.m..m.m.m.']),
+    front: collar(['MMMMMM....MMMMMM', 'MmMmMmM..MmMmMmM', '.m.m.m....m.m.m.']),
   },
   veterans_scarf: {
-    back: part(-7, 0, ['xX.......', 'XXx......', '.XXx.....', '..xXX....']),
-    front: part(-1, 0, [
-      'XXXXXXXXXXXX',
-      '.xxxxxxxxxx.',
-      '.......XX...',
-      '.......Xx...',
-      '.......xX...',
+    back: part(-8, 0, ['xX........', 'XXx.......', '.XXx......', '..xXX.....', '....xX....']),
+    front: part(1, 0, [
+      'XXXXXXXXXX',
+      '.xxxxxxxx.',
+      '......XX..',
+      '......Xx..',
+      '......xX..',
+      '......X...',
     ]),
   },
   knights_mantle: {
-    back: part(
-      -5,
-      1,
-      cloakRows('X', 'x', 12, () => 'G'),
-    ),
-    front: collar(['GGG........GGG', 'GXGG..GG..GGXG', '.GG........GG.']),
+    back: cloak('X', 'x', 25, () => 'G'),
+    front: collar(['GGG..........GGG', 'GXGG...GG...GGXG', '.GG..........GG.']),
   },
   warden_cloak: {
-    back: part(
-      -5,
-      1,
-      cloakRows('V', 'v', 12, (x) => (x % 2 === 0 ? 'V' : 'v')),
-    ),
-    front: collar(['VvV........VvV', 'vVvV..OO..VvVv']),
+    back: cloak('V', 'v', 25, (x) => (x % 2 === 0 ? 'V' : 'v')),
+    front: collar(['VvV..........VvV', 'vVvV...OO...VvVv']),
   },
   templar_cape: {
-    back: part(
-      -5,
-      1,
-      cloakRows('W', 'w', 13, () => 'R'),
-    ),
-    front: collar(['RRR........RRR', 'RWRR..RR..RRWR']),
+    back: cloak('W', 'w', 26, () => 'R'),
+    front: collar(['RRR..........RRR', 'RWRR...RR...RRWR']),
   },
   high_lord_cape: {
-    back: part(
-      -5,
-      1,
-      cloakRows('X', 'x', 14, (x) => (x % 3 === 0 ? '*' : 'W')),
-    ),
-    front: collar(['WWWW......WWWW', 'W*WWW.GG.WW*WW', '.WW*W....W*WW.']),
+    back: cloak('X', 'x', 27, (x) => (x % 3 === 0 ? '*' : 'W')),
+    front: collar(['WWWW........WWWW', 'W*WWW..GG..WW*WW', '.WW*W......W*WW.']),
   },
   phoenix_cloak: {
-    back: part(
-      -5,
-      1,
-      cloakRows('R', 'r', 13, (x) => (x % 2 === 0 ? 'F' : 'f')),
-    ),
-    front: collar(['FFF........FFF', 'FRFF..FF..FFRF']),
+    back: cloak('R', 'r', 26, (x) => (x % 2 === 0 ? 'F' : 'f')),
+    front: collar(['FFF..........FFF', 'FRFF...FF...FFRF']),
   },
 
   // --- Body ------------------------------------------------------------------------------------
   travelers_tunic: {
     recolor: { regions: { torso: 'leather' } },
-    front: part(0, 0, [
-      '....SS....',
-      '...XSSX...',
-      '....XX....',
-      '..........',
-      '..........',
-      '..........',
-      '....GG....',
+    front: part(3, 0, [
+      '.SSSS.',
+      '.XSSX.',
+      '..XX..',
+      '......',
+      '......',
+      '......',
+      '......',
+      '......',
+      '......',
+      '..GG..',
     ]),
   },
   prayer_beads: {
     front: part(0, 1, [
-      '.W......W.',
-      '..D....D..',
-      '...W..W...',
-      '....DD....',
-      '....RR....',
-      '....rr....',
+      '.W........W.',
+      '..D......D..',
+      '...W....W...',
+      '....D..D....',
+      '.....WW.....',
+      '.....RR.....',
+      '.....rr.....',
     ]),
   },
   holy_symbol: {
-    front: part(0, 1, ['..G....G..', '...G..G...', '....GG....', '...G!!G...', '...GGGG...']),
+    front: part(2, 1, ['G......G', '.G....G.', '..G..G..', '..GGGG..', '..G!!G..', '...GG...']),
   },
   templar_tabard: {
     recolor: { regions: { torso: 'bone' } },
-    front: part(1, 1, [
+    front: part(2, 1, [
       '...RR...',
       '...RR...',
       '.RRRRRR.',
       '...RR...',
       '...RR...',
+      '...RR...',
+      '........',
+      '........',
       '........',
       'WWWWWWWW',
-      'WWWWWWWW',
-      'wWWWWWWw',
+      'WWWRRWWW',
+      'WWWRRWWW',
+      'wWWRRWWw',
+      '.WWWWWW.',
     ]),
   },
   chainmail_vest: {
@@ -429,11 +430,20 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
   },
   grandmaster_robe: {
     recolor: { regions: { torso: 'robe', sleeve: 'robe', belt: 'leather', legs: 'robe' } },
-    front: part(0, 1, ['.L........', '..L.......', '...L......', '....L.....', '.....L....']),
+    front: part(1, 1, [
+      'L.........',
+      '.L........',
+      '..L.......',
+      '...L......',
+      '....L.....',
+      '.....L....',
+      '......L...',
+      '.......L..',
+    ]),
   },
   dragonscale_armour: {
     recolor: { regions: { torso: 'leaf', sleeve: 'leaf', belt: 'gold' }, pattern: scales },
-    shoulders: part(-1, -1, ['GVV', 'VVv']),
+    shoulders: part(-1, -1, ['.GVV', 'GVVV', 'VVVv']),
   },
 
   // --- Hands and arms ----------------------------------------------------------------------------
@@ -444,74 +454,80 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
     recolor: { regions: { forearm: 'iron', hand: 'iron' } },
   },
   shield_emblem: {
-    leftHand: part(-3, -4, [
+    leftHand: part(-4, -6, [
       'GGGGGGG',
       'GWWWWWG',
       'GWW!WWG',
       'GW!G!WG',
       'GWW!WWG',
+      'GWWWWWG',
       '.GWWWG.',
       '..GWG..',
       '...G...',
     ]),
   },
   skull_pauldrons: {
-    shoulders: part(-1, -2, ['WWWW', 'W**W', 'WWWW', '.ww.']),
+    shoulders: part(-1, -2, ['.WWW.', 'WW*WW', 'W*W*W', 'WWWWW', '.w.w.']),
   },
 
   // --- Aura and emblem ---------------------------------------------------------------------------
   trial_medallion: {
-    front: part(2, 1, ['X....X', '.X..X.', '..GG..', '.GRRG.', '.GRRG.', '..GG..']),
+    front: part(3, 1, ['X....X', '.X..X.', '..GG..', '.GRRG.', '.GRRG.', '..GG..']),
   },
   war_paint: {
-    head: part(2, 9, ['RR......RR', '..........', 'RR......RR']),
+    head: part(2, 7, ['R......R', '.R....R.']),
   },
   ember_aura: {
     glow: 'glowFire',
     sparkles: sparkle(
       [
-        [-3, -2],
-        [16, 0],
-        [-4, 9],
-        [17, 12],
-        [15, -4],
-        [-2, 18],
+        [-5, -1],
+        [17, 1],
+        [-6, 12],
+        [18, 15],
+        [15, -3],
+        [-5, 26],
+        [17, 30],
       ],
       'sparkFire',
     ),
   },
   lute_emblem: {
-    back: part(-6, 1, [
+    back: part(-6, -3, [
       '..............DG',
       '.............D..',
       '............D...',
       '...........D....',
       '..........D.....',
       '.........D......',
-      '..LLL...D.......',
-      '.LLLLLLD........',
+      '........D.......',
+      '.......D........',
+      '..LLL.D.........',
+      '.LLLLLD.........',
       'LLLlLLLL........',
+      'LLLLLLLL........',
       'LLLLLLLL........',
       '.LLLLLL.........',
       '..LLLL..........',
     ]),
   },
   war_banner: {
-    back: part(-9, -16, [
-      'G.........',
-      'D.........',
-      'DXXXXXXX..',
-      'DXXXXXXXX.',
-      'DXXGGXXXX.',
-      'DXXGGXXXX.',
-      'DXXXXXXXX.',
-      'DXXXXXXXX.',
-      'DX.XX.XX..',
-      ...Array.from({ length: 20 }, () => 'D.........'),
+    back: part(-9, -14, [
+      'G..........',
+      'D..........',
+      'DXXXXXXXX..',
+      'DXXXXXXXXX.',
+      'DXXXGGXXXX.',
+      'DXXGGGGXXX.',
+      'DXXXGGXXXX.',
+      'DXXXXXXXXX.',
+      'DXXXXXXXXX.',
+      'DX.XXX.XX..',
+      ...Array.from({ length: 22 }, () => 'D..........'),
     ]),
   },
   lightbringer_halo: {
-    head: part(2, -5, ['..!!!!!!..', '!!......!!', '..!!!!!!..']),
+    head: part(1, -4, ['..!!!!!!..', '!!......!!', '..!!!!!!..']),
     glow: 'glowLight',
   },
   arcane_aura: {
@@ -519,18 +535,18 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
     sparkles: [
       ...stars(
         [
-          [-4, 2],
-          [17, 6],
+          [-5, 3],
+          [17, 8],
         ],
         'sparkArcane',
         'sparkWhite',
       ),
       ...sparkle(
         [
-          [0, -5],
-          [14, -4],
-          [-5, 17],
-          [18, 19],
+          [0, -4],
+          [14, -3],
+          [-6, 20],
+          [18, 24],
         ],
         'sparkArcane',
       ),
@@ -540,29 +556,29 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
     glow: 'glowFlame',
     sparkles: sparkle(
       [
-        [-3, -1],
-        [-3, -2],
-        [-4, 0],
+        [-4, -1],
+        [-4, -2],
+        [-5, 0],
+        [16, -2],
         [16, -3],
-        [16, -4],
-        [17, -2],
-        [6, -6],
-        [7, -7],
-        [-5, 12],
-        [-5, 11],
-        [18, 14],
-        [18, 13],
+        [17, -1],
+        [-6, 16],
+        [-6, 15],
+        [18, 20],
+        [18, 19],
+        [-5, 28],
+        [17, 31],
       ],
       'sparkFire',
     ),
   },
   starforged_halo: {
-    head: part(2, -5, ['..EEEEEE..', 'EE......EE', '..EEEEEE..']),
+    head: part(1, -4, ['..EEEEEE..', 'EE......EE', '..EEEEEE..']),
     sparkles: stars(
       [
-        [-4, 4],
+        [-5, 4],
         [17, 1],
-        [-5, 20],
+        [-6, 22],
       ],
       'sparkRune',
       'sparkWhite',
@@ -573,18 +589,18 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
     sparkles: [
       ...stars(
         [
-          [-4, 0],
-          [17, -2],
-          [18, 16],
+          [-5, 1],
+          [17, -1],
+          [18, 20],
         ],
         'sparkGold',
         'sparkWhite',
       ),
       ...sparkle(
         [
-          [-5, 14],
-          [12, -6],
-          [0, -4],
+          [-6, 16],
+          [12, -4],
+          [-1, -3],
         ],
         'sparkGold',
       ),
@@ -595,12 +611,19 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
 // --- Class weapons -------------------------------------------------------------------------------
 
 export interface WeaponArt {
-  /** Drawn upright, as held at the side. */
+  /** Drawn upright, as held at the shoulder or brandished. */
   part: SpritePart;
   /** The cell the hand holds (the fist is drawn over it). */
   grip: { x: number; y: number };
   /** Both hands carry one (the left one mirrored). */
   twin?: boolean;
+  /**
+   * How it is lowered or planted on the ground: `flip` point down (blades, axes, hammers rest on
+   * their heads), `upright` as drawn (staffs, the bow, the lute, the wand). Default `flip`.
+   */
+  plant?: 'flip' | 'upright';
+  /** Planted mirrored, so a curved blade leans towards the hero. */
+  plantMirror?: boolean;
   /** Material swaps for the tier III version (e.g. iron → rune: a glowing blade). */
   upgrade: Readonly<Record<string, string>>;
   /** Extra cells of the upgraded version (gems, glints), in part coordinates. */
@@ -609,52 +632,60 @@ export interface WeaponArt {
   offHand?: PlacedPart;
 }
 
+/** A straight two-pixel blade of `length` rows over a hilt (4 wide). */
 const blade = (length: number, hilt: readonly string[]) => [
-  ...Array.from({ length }, () => '.I.'),
+  '.I..',
+  ...Array.from({ length }, () => '.II.'),
   ...hilt,
 ];
 
 export const WEAPON_ART: Readonly<Record<string, WeaponArt>> = {
   recruit: {
-    part: { rows: ['.D.', '.D.', '.D.', '.D.', '.D.', '.D.', 'DDD', '.L.', '.L.', '.D.'] },
-    grip: { x: 1, y: 7 },
+    part: {
+      rows: ['.D..', ...Array.from({ length: 7 }, () => '.DD.'), 'DDDD', '.L..', '.L..', '.D..'],
+    },
+    grip: { x: 1, y: 9 },
     upgrade: {},
   },
   warrior: {
-    part: { rows: blade(8, ['GGG', '.L.', '.L.', '.G.']) },
-    grip: { x: 1, y: 9 },
+    part: { rows: blade(8, ['GGGG', '.L..', '.L..', '.G..']) },
+    grip: { x: 1, y: 10 },
     upgrade: { iron: 'rune' },
-    upgradeMarks: [{ x: 1, y: 11, fixed: 'sparkRed' }],
+    upgradeMarks: [{ x: 1, y: 12, fixed: 'sparkRed' }],
   },
   ranger: {
+    plant: 'upright',
     part: {
       rows: [
-        'WD..',
-        'W.D.',
-        'W..D',
-        'W..D',
-        'W..D',
-        'W..D',
-        'W.LD',
-        'W.LD',
-        'W..D',
-        'W..D',
-        'W..D',
-        'W..D',
-        'W.D.',
-        'WD..',
+        'WD...',
+        'W.D..',
+        'W..D.',
+        'W...D',
+        'W...D',
+        'W...D',
+        'W...D',
+        'W..LD',
+        'W..LD',
+        'W...D',
+        'W...D',
+        'W...D',
+        'W...D',
+        'W..D.',
+        'W.D..',
+        'WD...',
       ],
     },
-    grip: { x: 2, y: 7 },
+    grip: { x: 3, y: 8 },
     upgrade: { wood: 'leaf' },
     upgradeMarks: [
       { x: 2, y: 0, fixed: 'sparkGold' },
-      { x: 2, y: 13, fixed: 'sparkGold' },
+      { x: 2, y: 15, fixed: 'sparkGold' },
     ],
   },
   monk: {
-    part: { rows: ['I', ...Array.from({ length: 17 }, () => 'D'), 'I'] },
-    grip: { x: 0, y: 12 },
+    plant: 'upright',
+    part: { rows: ['I', 'I', ...Array.from({ length: 19 }, () => 'D'), 'I'] },
+    grip: { x: 0, y: 10 },
     upgrade: { iron: 'fire' },
     upgradeMarks: [{ x: 0, y: -1, fixed: 'sparkFire' }],
   },
@@ -665,8 +696,8 @@ export const WEAPON_ART: Readonly<Record<string, WeaponArt>> = {
         'II.D.II',
         'IIIDIII',
         'IIIDIII',
+        'IIIDIII',
         'II.D.II',
-        '...D...',
         '...D...',
         '...D...',
         '...D...',
@@ -678,15 +709,16 @@ export const WEAPON_ART: Readonly<Record<string, WeaponArt>> = {
     },
     grip: { x: 3, y: 10 },
     upgrade: { iron: 'bone', wood: 'darkIron' },
-    upgradeMarks: [{ x: 3, y: 2, fixed: 'sparkRed' }],
+    upgradeMarks: [{ x: 3, y: 3, fixed: 'sparkRed' }],
   },
   rogue: {
-    part: { rows: ['.I.', '.I.', '.I.', 'GGG', '.L.', '.L.'] },
-    grip: { x: 1, y: 4 },
+    part: { rows: ['.I.', '.I.', '.I.', '.I.', 'GGG', '.L.', '.L.'] },
+    grip: { x: 1, y: 5 },
     twin: true,
     upgrade: { iron: 'arcane' },
   },
   druid: {
+    plant: 'upright',
     part: {
       rows: [
         '.DD.',
@@ -707,9 +739,11 @@ export const WEAPON_ART: Readonly<Record<string, WeaponArt>> = {
         '..D.',
         '..D.',
         '..D.',
+        '..D.',
+        '..D.',
       ],
     },
-    grip: { x: 2, y: 12 },
+    grip: { x: 2, y: 10 },
     upgrade: { orchid: 'rune', wood: 'leaf' },
     upgradeMarks: [
       { x: 0, y: 0, fixed: 'sparkGold' },
@@ -719,42 +753,45 @@ export const WEAPON_ART: Readonly<Record<string, WeaponArt>> = {
   paladin: {
     part: {
       rows: [
-        'IIIII',
-        'IIIII',
-        'IIIII',
-        '..D..',
-        '..D..',
-        '..D..',
-        '..D..',
-        '..D..',
-        '..L..',
-        '..L..',
-        '..G..',
+        'IIIIII',
+        'IIIIII',
+        'IIIIII',
+        'IIIIII',
+        '..DD..',
+        '..DD..',
+        '..DD..',
+        '..DD..',
+        '..DD..',
+        '..LL..',
+        '..LL..',
+        '..GG..',
       ],
     },
-    grip: { x: 2, y: 8 },
+    grip: { x: 2, y: 9 },
     upgrade: { iron: 'gold' },
     upgradeMarks: [{ x: 2, y: 1, fixed: 'sparkWhite' }],
   },
   samurai: {
     part: {
       rows: [
-        '..I',
-        '.II',
-        '.I.',
-        '.I.',
-        '.I.',
-        'I..',
-        'I..',
-        'I..',
-        'I..',
-        'G..',
-        'R..',
-        'R..',
-        'R..',
+        '...I',
+        '..II',
+        '..I.',
+        '.II.',
+        '.I..',
+        '.I..',
+        'II..',
+        'I...',
+        'I...',
+        'I...',
+        'GG..',
+        'R...',
+        'R...',
+        'R...',
       ],
     },
     grip: { x: 0, y: 11 },
+    plantMirror: true,
     upgrade: { iron: 'rune' },
   },
   templar: {
@@ -768,17 +805,21 @@ export const WEAPON_ART: Readonly<Record<string, WeaponArt>> = {
         '..D..',
         '..D..',
         '..D..',
+        '..D..',
         '..L..',
         '..L..',
+        '..G..',
       ],
     },
-    grip: { x: 2, y: 8 },
+    grip: { x: 2, y: 9 },
     upgrade: { iron: 'gold' },
   },
   bard: {
+    plant: 'upright',
     part: {
       rows: [
         '..DD.',
+        '..D..',
         '..D..',
         '..D..',
         '..D..',
@@ -787,16 +828,19 @@ export const WEAPON_ART: Readonly<Record<string, WeaponArt>> = {
         'LLLLL',
         'LLlLL',
         'LLLLL',
+        'LLLLL',
         '.LLL.',
       ],
     },
-    grip: { x: 2, y: 4 },
+    grip: { x: 2, y: 5 },
     upgrade: { wood: 'gold' },
     upgradeMarks: [{ x: 0, y: 0, fixed: 'sparkGold' }],
   },
   cleric: {
-    part: { rows: ['.G.', 'GGG', 'G!G', 'GGG', '.G.', '.L.', '.L.', '.L.', '.L.', '.G.'] },
-    grip: { x: 1, y: 7 },
+    part: {
+      rows: ['.G.', 'GGG', 'G!G', 'GGG', '.G.', '.L.', '.L.', '.L.', '.L.', '.L.', '.G.'],
+    },
+    grip: { x: 1, y: 8 },
     upgrade: { leather: 'gold' },
     upgradeMarks: [
       { x: -1, y: 0, fixed: 'sparkGold' },
@@ -804,28 +848,33 @@ export const WEAPON_ART: Readonly<Record<string, WeaponArt>> = {
     ],
   },
   knight: {
-    part: { rows: blade(8, ['GGG', '.L.', '.L.', '.G.']) },
-    grip: { x: 1, y: 9 },
+    part: { rows: blade(8, ['GGGG', '.L..', '.L..', '.G..']) },
+    grip: { x: 1, y: 10 },
     upgrade: { iron: 'gold' },
-    offHand: part(-3, -4, [
-      '.IIIII.',
+    offHand: part(-4, -6, [
+      'IIIIIII',
       'IXXXXXI',
       'IXXGXXI',
       'IXGGGXI',
       'IXXGXXI',
-      'IXXXXXI',
-      '.IIIII.',
+      'IXXGXXI',
+      '.IXXXI.',
+      '..IXI..',
+      '...I...',
     ]),
   },
   berserker: {
-    part: { rows: ['II.', 'IID', 'IID', '..D', '..D', '..L', '..L'] },
-    grip: { x: 2, y: 5 },
+    part: {
+      rows: ['.II..', 'IIIID', 'IIIID', 'IIIID', '.II.D', '....D', '....D', '....L', '....L'],
+    },
+    grip: { x: 4, y: 7 },
     twin: true,
     upgrade: { iron: 'red' },
   },
   sorcerer: {
-    part: { rows: ['.A.', 'AAA', '.A.', '.D.', '.D.', '.D.', '.D.'] },
-    grip: { x: 1, y: 5 },
+    plant: 'upright',
+    part: { rows: ['.A.', 'AAA', 'AAA', '.A.', 'G.G', '.G.', '.D.', '.D.', '.D.', '.D.', '.D.'] },
+    grip: { x: 1, y: 8 },
     upgrade: { wood: 'night', arcane: 'rune' },
     upgradeMarks: [
       { x: 1, y: -2, fixed: 'sparkWhite' },

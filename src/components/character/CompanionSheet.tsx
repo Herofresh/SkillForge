@@ -3,14 +3,17 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   ACCESSORY_BY_ID,
+  BODY_SHAPES,
   COMPANION_DYES,
   COMPANION_HAIRS,
   COMPANION_TINTS,
   DEFAULT_DYE_ID,
   DEFAULT_HAIR_ID,
   DEFAULT_TINT_ID,
+  HAIR_STYLES,
+  companionBody,
 } from '@/data/companion';
-import type { CompanionLookChoice, SlotRow } from '@/domain/companion';
+import { COMPANION_BODIES, type CompanionLookChoice, type SlotRow } from '@/domain/companion';
 import type { CompanionSlot } from '@/domain/types';
 
 import { Colors, PIXEL, Spacing } from '../theme';
@@ -127,8 +130,8 @@ function SlotSection({
 }
 
 /**
- * The companion's customize sheet (PLAN 6.10, ADR-059): a live preview, skin, hair and outfit
- * colors, then every slot with its earned accessories to wear (or None) and the locked ones with
+ * The companion's customize sheet (PLAN 6.10 / 6.13, ADR-059 / ADR-061): a live preview, the body
+ * (man or woman), hair style, skin, hair and outfit colors, then every slot with its earned accessories to wear (or None) and the locked ones with
  * what earns them, like the class sheet. The weapon comes from the worn class and is shown, not
  * chosen. NEW tags mark accessories earned since the sheet was last opened (kept while it is
  * open; the screen marks them seen on close). Mount it to open it.
@@ -170,6 +173,23 @@ export function CompanionSheet({
         <PixelText variant="small" tone="textMuted">
           Training earns gear for your companion. What you earn stays yours.
         </PixelText>
+        <ColorRow
+          label="Body"
+          options={COMPANION_BODIES.map((id) => BODY_SHAPES[id])}
+          selected={companionBody(view.look).shape.id}
+          onSelect={(id) => {
+            const body = COMPANION_BODIES.find((entry) => entry === id);
+            if (body) onLook({ body });
+          }}
+          testID={`${testID}-body`}
+        />
+        <ColorRow
+          label="Hair style"
+          options={HAIR_STYLES}
+          selected={companionBody(view.look).hair.id}
+          onSelect={(hairStyle) => onLook({ hairStyle })}
+          testID={`${testID}-hairstyle`}
+        />
         <ColorRow
           label="Skin"
           options={COMPANION_TINTS}

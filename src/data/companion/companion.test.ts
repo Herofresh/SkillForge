@@ -1,18 +1,25 @@
 import { HERO_CLASS_BY_ID, HERO_CLASSES } from '@/data/classes';
-import { COMPANION_MOODS } from '@/domain/companion';
+import { COMPANION_BODIES, COMPANION_MOODS, type CompanionLookChoice } from '@/domain/companion';
 import { COMPANION_SLOTS } from '@/domain/types';
 import { parsePixelGrid } from '@/lib/pixelGrid';
+
+import { GROUND_Y } from './body';
 
 import {
   ACCESSORIES,
   ACCESSORY_ART,
+  BODY_SHAPES,
+  companionBody,
   CLASS_WEAPONS,
   COMPANION_ANIMATIONS,
+  HAIR_STYLES,
+  SPRITE_SIZE,
   COMPANION_DYES,
   COMPANION_HAIRS,
   COMPANION_ROLE_CHARS,
   COMPANION_TINTS,
   companionColors,
+  companionFrame,
   companionFrames,
   companionRole,
   companionStill,
@@ -99,6 +106,52 @@ function expectGrid(rows: readonly string[]) {
   expect(() => parsePixelGrid(rows, allowed)).not.toThrow();
 }
 
+const LOOKS: readonly CompanionLookChoice[] = COMPANION_BODIES.map((body) => ({ body }));
+
+/** Sparkle roles: the only cells allowed to float apart from the hero. */
+const SPARKLES = new Set(
+  ['sparkGold', 'sparkWhite', 'sparkRune', 'sparkArcane', 'sparkFire', 'sparkRed'].map((fixed) =>
+    companionRole({ fixed }),
+  ),
+);
+
+/**
+ * No layer gaps: every painted cell except sparkles touches the rest (one 4-connected shape:
+ * the hero, its gear, its outline and the ground shadow), so no part floats loose from the body.
+ */
+function expectOnePiece(rows: readonly string[], what: string) {
+  const painted = (x: number, y: number) => rows[y]?.[x] !== undefined && rows[y][x] !== '.';
+  const cells: [number, number][] = [];
+  rows.forEach((row, y) =>
+    [...row].forEach((cell, x) => cell !== '.' && !SPARKLES.has(cell) && cells.push([x, y])),
+  );
+  const seen = new Set<string>();
+  const stack = [cells[0]];
+  while (stack.length > 0) {
+    const [x, y] = stack.pop() as [number, number];
+    const key = `${x},${y}`;
+    if (seen.has(key) || !painted(x, y)) continue;
+    seen.add(key);
+    stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+  }
+  const loose = cells.filter(([x, y]) => !seen.has(`${x},${y}`));
+  if (loose.length > 0) throw new Error(`${what}: loose cells at ${JSON.stringify(loose)}`);
+}
+
+/** The boots stand on the ground row and the face is on the canvas (pixel bounds). */
+function expectStanding(rows: readonly string[]) {
+  const boots = new Set(
+    (['shadow', 'base', 'light'] as const).map((tone) =>
+      companionRole({ material: 'boots', tone }),
+    ),
+  );
+  expect([...rows[GROUND_Y]].some((cell) => boots.has(cell))).toBe(true);
+  const skin = new Set(
+    (['shadow', 'base', 'light'] as const).map((tone) => companionRole({ material: 'skin', tone })),
+  );
+  expect(rows.slice(0, GROUND_Y).some((row) => [...row].some((cell) => skin.has(cell)))).toBe(true);
+}
+
 describe('companion accessories (PLAN 6.10)', () => {
   it('is exactly the list shown to the user, with its unlock rules', () => {
     expect(Object.fromEntries(ACCESSORIES.map((item) => [item.id, ruleKey(item.rule)]))).toEqual(
@@ -127,13 +180,16 @@ describe('companion accessories (PLAN 6.10)', () => {
     }
   });
 
-  it('draws every accessory in every pose with known roles, and it changes the picture', () => {
-    for (const item of ACCESSORIES) {
-      for (const animation of ANIMATIONS) {
-        const outfit: CompanionOutfit = { loadout: { [item.slot]: item.id } };
-        const rows = companionStill(animation, outfit);
-        expectGrid(rows);
-        expect(rows).not.toEqual(companionStill(animation, { loadout: {} }));
+  it('draws every accessory on both bodies in every pose, in one piece, and it changes the picture', () => {
+    for (const look of LOOKS) {
+      for (const item of ACCESSORIES) {
+        for (const animation of ANIMATIONS) {
+          const outfit: CompanionOutfit = { loadout: { [item.slot]: item.id } };
+          const rows = companionStill(animation, outfit, look);
+          expectGrid(rows);
+          expectOnePiece(rows, `${look.body} ${item.id} ${animation}`);
+          expect(rows).not.toEqual(companionStill(animation, { loadout: {} }, look));
+        }
       }
     }
   });
@@ -168,15 +224,77 @@ describe('class weapons', () => {
         loadout: {},
         weapon: { classId: weapon.classId, upgraded: true },
       };
-      for (const mood of COMPANION_MOODS) {
-        const rows = companionStill(mood, base);
-        expectGrid(rows);
-        expect(rows).not.toEqual(companionStill(mood, { loadout: {} }));
-      }
-      if (weapon.classId !== 'recruit') {
-        expect(companionStill('content', upgraded)).not.toEqual(companionStill('content', base));
+      for (const look of LOOKS) {
+        for (const animation of ANIMATIONS) {
+          for (const outfit of [base, upgraded]) {
+            const rows = companionStill(animation, outfit, look);
+            expectGrid(rows);
+            expectOnePiece(rows, `${look.body} ${weapon.classId} ${animation}`);
+            expect(rows).not.toEqual(companionStill(animation, { loadout: {} }, look));
+          }
+        }
+        if (weapon.classId !== 'recruit') {
+          expect(companionStill('content', upgraded, look)).not.toEqual(
+            companionStill('content', base, look),
+          );
+        }
       }
     }
+  });
+});
+
+describe('companion bodies and hair styles (PLAN 6.13)', () => {
+  it('exports its size from one constant', () => {
+    expect(SPRITE_SIZE).toEqual({ width: SPRITE_WIDTH, height: SPRITE_HEIGHT });
+  });
+
+  it('draws a distinct man and woman, the man by default (stored looks from before 6.13)', () => {
+    expect(Object.keys(BODY_SHAPES).sort()).toEqual([...COMPANION_BODIES].sort());
+    const outfit: CompanionOutfit = {
+      loadout: {},
+      weapon: { classId: 'warrior', upgraded: false },
+    };
+    expect(companionStill('content', outfit)).toEqual(
+      companionStill('content', outfit, { body: 'man' }),
+    );
+    // Same hair style, so the body itself differs, not just the hair.
+    expect(companionStill('content', outfit, { body: 'woman', hairStyle: 'spiky' })).not.toEqual(
+      companionStill('content', outfit, { body: 'man', hairStyle: 'spiky' }),
+    );
+    expect(companionBody({ body: 'woman' }).hair.id).toBe(BODY_SHAPES.woman.defaultHair);
+    expect(companionBody({ hairStyle: 'mohawk' }).hair.id).toBe(BODY_SHAPES.man.defaultHair);
+  });
+
+  it('draws every hair style on both bodies in every frame of every animation, standing on the ground', () => {
+    const outfit: CompanionOutfit = { loadout: {}, weapon: { classId: 'knight', upgraded: true } };
+    for (const body of COMPANION_BODIES) {
+      for (const style of HAIR_STYLES) {
+        const look = { body, hairStyle: style.id };
+        for (const animation of ANIMATIONS) {
+          for (const frame of COMPANION_ANIMATIONS[animation]) {
+            const rows = companionFrame(frame, outfit, look);
+            expectGrid(rows);
+            expectOnePiece(rows, `${body} ${style.id} ${animation}`);
+            expectStanding(rows);
+          }
+        }
+      }
+    }
+    const styles = HAIR_STYLES.map((style) =>
+      companionStill('content', { loadout: {} }, { hairStyle: style.id }).join('\n'),
+    );
+    expect(new Set(styles).size).toBe(HAIR_STYLES.length);
+  });
+
+  it('keeps the long hair and fringe under a helmet but hides the hair volume', () => {
+    const helm: CompanionOutfit = { loadout: { head: 'iron_helm' } };
+    const hair = companionRole({ material: 'hair', tone: 'base' });
+    const count = (rows: string[]) => rows.join('').split(hair).length - 1;
+    expect(
+      count(companionStill('content', helm, { body: 'woman', hairStyle: 'long' })),
+    ).toBeGreaterThan(
+      count(companionStill('content', helm, { body: 'woman', hairStyle: 'spiky' })),
+    );
   });
 });
 

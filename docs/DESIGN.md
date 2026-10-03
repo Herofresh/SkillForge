@@ -296,30 +296,40 @@ XP"), the goal, the bar, "1 / 2 sessions" and "+1 this session" / "Complete! +50
 complete this week"; the XP line adds "· +50 challenge". The class sheet shows each class's
 "Weekly challenge: …" in rune under its flavor line. Screenshots: `docs/screenshots/6.9b-*.png`.
 
-**Companion (PLAN 6.10, ADR-059)** in `src/components/character/`. **Two styles on purpose: the
-companion is a JRPG-style chibi sprite; the exercise animations stay stick figures** (they show a
-human body's movement more clearly). The companion is original pixel art inspired by SNES-era
-Final Fantasy field sprites and Octopath Traveler (nothing copied): a 32 × 40 front-facing chibi
-with a big head (about half its height), two eyes with a white glint, mouth and blush, a hair shape,
-a tunic with belt and hem, hands and boots, a soft dark ground shadow. Every material is shaded in
+**Companion (PLAN 6.10 / 6.13, ADR-059 / ADR-061)** in `src/components/character/`. **Two styles on
+purpose: the companion is a JRPG field sprite; the exercise animations stay stick figures** (they
+show a human body's movement more clearly). The companion is original pixel art inspired by
+SNES-era Final Fantasy field sprites and Octopath Traveler's taller sprites (nothing copied).
+Since 6.13 it is **cool and heroic, not cute**: a 32 × 44 front-facing hero (`SPRITE_SIZE`), the
+head about a quarter of its height, broad shoulders tapering to the waist, a leather baldric, long
+legs in boots; narrow determined eyes (dark with a steel-blue iris pixel) under a low brow, a short
+set mouth, no blush, sharp hair; a man or a woman (narrower shoulders, softer jaw, lashes, a fitted
+jerkin with a split travelling skirt; practical, never sexualised); hair styles Spiky / Long /
+Ponytail for either; a soft dark ground shadow. Every material is shaded in
 code from a 4–5 step ramp of its own (`src/data/companion/looks.ts`; outline, shadow, base, light,
 specular on metal, gold and gems), light from the top left, warm highlights, slightly muted
 mid-tones, and outlined selectively in the darkest step of the colour it borders, never pure black.
-Skin (6), hair (6) and outfit dye (6) are the hero's choices. Animations are stepped loops of
-`FRAME_MS` frames with holds: happy (fists up, a hop, weapon raised, smile), content (a 1 px breath),
-waiting (eyes left and right, a foot tap), sad (sitting, head down, eyes down, weapon on the
-ground; slower), victory (weapon raised; Train summary), wave (on a tap). `CompanionCard` is its own
+6.13 raised the contrast: darker outlines and shadows, less pastel, cooler metal, folds in cloaks.
+Body (2), hair style (3), skin (6), hair (6) and outfit dye (6) are the hero's choices. Animations
+are stepped loops of `FRAME_MS` frames with holds, heroic rather than bouncy: happy (the weapon
+brandished up and out, a smirk), content (the weapon upright at the shoulder, a weight shift, the
+cloak and long hair sway), waiting (arms crossed, the weapon planted beside it, glances left and
+right), sad (on one knee, head bowed, eyes closed, a hand on the planted weapon; slower; resting,
+never hurt), victory (fist on the hip, weapon high, wide stance; Train summary), wave (a salute with
+a nod, on a tap). `CompanionCard` is its own
 stone panel under the hero panel (rune caps "Companion"): the sprite at 4 dp per pixel on a raised
 stage with a 1 dp `border` line, the mood title in gold ("Fired up", "Rested", "Restless", "Missing
 you"), one kind `small` line ("Misses training with you. One session cheers it up."), the weapon's
 name as a muted caps label, and a secondary "Customize" button with the helmet plus an "n NEW" tag.
 Moods are poses, never penalties. `CompanionSheet` (`PixelModal` "Customize"): a 3 dp-per-pixel
-preview, the weapon ("Comes with the class you wear"), chips for Skin, Hair and Outfit, then one
+preview, the weapon ("Comes with the class you wear"), chips for Body (Man / Woman), Hair style, Skin,
+Hair and Outfit, then one
 section per slot (bronze rule, heading, the worn item's flavour, chips "None" + the earned items,
 "· NEW" on unseen ones) and the locked items as muted name + gold "Character level 10 · Level 4 /
 10" lines with a gold-dark left rule. The Train summary adds a gold panel with a NEW TRINKET! burst
 and one line per accessory ("Iron helm" / "Head · Warrior class, tier I"), and the companion in its
-victory pose ("Victory!"). Contact sheets: `npm run companion:sheet` → `docs/screenshots/6.10-*.png`.
+victory pose ("Victory!"). Contact sheets: `npm run companion:sheet` → `docs/screenshots/6.13-*.png` (both bodies; before / after:
+`6.13-before-after.png`).
 
 **Node editor and shared progressions (PLAN 4.7–4.8, ADR-036)** in `src/components/editor/`: the
 editor is a stack of `DetailSection` panels (an arcane "Exercise" panel for a custom node: name,

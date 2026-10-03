@@ -22,6 +22,7 @@ import {
   EMPTY_COMPANION_SETTINGS,
   MOOD_TITLES,
   type CompanionLoadout,
+  parseCompanionLook,
   type CompanionLookChoice,
   type CompanionMood,
   type CompanionSettings,
@@ -235,13 +236,11 @@ function readCompanion(value: unknown): WidgetCompanion | undefined {
   if (typeof classId !== 'string' || !CLASS_WEAPONS.some((entry) => entry.classId === classId)) {
     return undefined;
   }
-  const look: CompanionLookChoice = {};
-  if (isRecord(value.look)) {
-    for (const key of ['skin', 'hair', 'outfit'] as const) {
-      if (typeof value.look[key] === 'string') look[key] = value.look[key];
-    }
-  }
-  return { loadout, weapon: { classId, upgraded: upgraded === true }, look };
+  return {
+    loadout,
+    weapon: { classId, upgraded: upgraded === true },
+    look: parseCompanionLook(value.look),
+  };
 }
 
 /** The snapshot's class, if it is a known class with a tier; anything else is left out. */

@@ -7,6 +7,7 @@
 # The companion (PLAN 6.10) waits for the first quest, its Customize sheet opens and closes; after
 # the session it is fired up and a tap makes it wave (6.10 screenshots). Its "i" opens the guide's
 # summary and page (PLAN 6.10c, 6.10c screenshots).
+# The Customize sheet switches the body to Woman with a ponytail and back (PLAN 6.13).
 # Prerequisites and run: see smoke.yaml / docs/CONTEXT.md.
 appId: host.exp.exponent
 name: Character - level and XP after a logged session, history opens the session
@@ -60,7 +61,14 @@ name: Character - level and XP after a logged session, history opens the session
     text: 'Wooden training sword'
 - tapOn:
     id: 'companion-sheet-skin-tan'
-- takeScreenshot: 6.10-customize
+- takeScreenshot: 6.13-customize
+- tapOn:
+    id: 'companion-sheet-body-woman'
+- tapOn:
+    id: 'companion-sheet-hairstyle-ponytail'
+- takeScreenshot: 6.13-customize-woman
+- tapOn:
+    id: 'companion-sheet-body-man'
 - scrollUntilVisible:
     element:
       id: 'companion-sheet-head-golden_crown-locked'
