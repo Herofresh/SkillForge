@@ -215,13 +215,21 @@
   layout scales with the widget's size (the 4 × 2 widget draws at 1.5) and the widget picker
   shows a pixel preview (`assets/images/widget-preview.png`).
 
+- Release v0.5.0 (6.8, [PR #52](https://github.com/Herofresh/SkillForge/pull/52)): version 0.5.0 / versionCode 5 with the home-screen
+  widget (6.6, 6.6b). Upgrade check passed on the emulator from **v0.1.0-preview1, v0.2.0,
+  v0.3.0 and v0.4.0** (hero, goal, session, 40 XP and the custom exercise "Lever hold" kept, no
+  onboarding); on the upgraded install the widget was added and showed the seeded data, and a
+  tap opened Train. Screenshots `docs/screenshots/6.8-*.png`. The GitHub release is created by
+  the coordinator after the merge.
+
 ## Next up
-1. Coordinator: after this PR is merged, publish the GitHub pre-release `v0.4.0` with both APKs
-   and their SHA-256 (see the 6.5 handoff note). Then, on the user's phone: install v0.4.0 over
-   the installed build (Update, no uninstall) and look at the new font, descriptions,
-   animations, the mobility tab and the rank ladder; report what feels off.
-2. Phase 6 in order, next 6.8 (v0.5.0 release: 6.6 widget is done). Phase 7 (Google Play)
-   comes after all of Phase 6; the user creates the upload key then (7.1).
+1. Coordinator: after this PR is merged, publish the GitHub pre-release `v0.5.0` with both APKs
+   and their SHA-256 (see the PR body). Then, on the user's phone: install v0.5.0 over the
+   installed build (Update, no uninstall), add the SkillForge widget to the home screen and
+   report what feels off.
+2. 6.9 Classes and 6.10 Companion: waiting for the user's decision on the design proposals.
+   Then 6.11 (v0.6.0 release) and Phase 7 (Google Play); the user creates the upload key then
+   (7.1).
 3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
@@ -229,6 +237,19 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Release v0.5.0 (task 6.8, [PR #52](https://github.com/Herofresh/SkillForge/pull/52)):** ADR-043 routine. Both APKs built with `-- --clean` (new native
+  dependency) in a short-path copy `D:\sf050` (checked identical to the branch with `diff -r`);
+  signer check passed, `RELEASE_SIGNER_SHA256` unchanged. APKs and SHA-256: see the PR body; the
+  coordinator publishes them. Upgrade check from all four earlier releases on the final build.
+  - Flow fix: `upgrade-seed.yaml` failed on v0.4.0 itself ("1 problem to fix before saving":
+    6.2 made the description required). The flow now fills `editor-description-input` inside a
+    `runFlow: when: visible`, so it still runs on v0.1.0–v0.3.0 (no field there); if a release
+    needs the field and it isn't found, the `editor-status` assert fails. All four seeds were run
+    with the final flow.
+  - Widget on the upgraded install (from v0.4.0): added via the picker, showed Trained today,
+    streak 1, level 1, Novice, Pull 8 (the seeded data); a tap opened Train. CONTEXT.md "Release
+    upgrade check" step 8. Not verified: a real phone, the midnight flip on an upgraded install,
+    importing an old backup into 0.5.0 (Jest only).
 - **Widget polish (task 6.6b, ADR-056, [PR #51](https://github.com/Herofresh/SkillForge/pull/51)):**
   - Code: `widgetSizes` in `src/widget/nativeWidget.tsx` (one scale for type, icons, gaps from
     the reported width and height; tests in `nativeWidget.test.tsx`), `scripts/widgetPreview.ts`
@@ -1040,7 +1061,9 @@ upgrade check from every earlier release). Any new table or column is additive a
 - [x] 6.7 Rank ladder: tapping the rank crest on the Character tab opens all ranks, the reached
   ones and the still locked ones with what each needs (from `character.ts`, no copied
   thresholds) (ADR-054, [PR #47](https://github.com/Herofresh/SkillForge/pull/47))
-- [ ] 6.8 v0.5.0 release (6.6; 6.7 already shipped in v0.4.0), same routine.
+- [x] 6.8 v0.5.0 release (6.6; 6.7 already shipped in v0.4.0), same routine: upgrade check from
+  0.1.0, 0.2.0, 0.3.0 and 0.4.0, then the widget on the upgraded install
+  ([PR #52](https://github.com/Herofresh/SkillForge/pull/52))
 - [ ] 6.9 Classes (user idea): classes the hero unlocks at certain levels, ranks or attribute
   profiles (e.g. a pull-strong hero unlocks a "Climber" class) and can pick one to display.
   **Starts with a short design proposal for the user** (class list, unlock rules, what a class

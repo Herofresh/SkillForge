@@ -749,7 +749,8 @@ Before publishing a release, check that it installs over the previous one with t
    `adb install <previous>.apk`.
 4. `npm run e2e -- .maestro/release/upgrade-seed.yaml`: fresh onboarding with a Pull-up test-out,
    then a custom exercise "Lever hold" saved right after Tuck front lever (the user overlay; on
-   v0.3.0 and earlier its order clashes with a later built-in node, ADR-052). Works on every
+   v0.3.0 and earlier its order clashes with a later built-in node, ADR-052). Since v0.4.0 the
+   editor requires a description; the flow fills it only when the field is there. Works on every
    release since v0.1.0-preview1.
 5. `adb install -r builds/<new>.apk` (an update: no uninstall, no clearState). It must print
    `Success`; `INSTALL_FAILED_UPDATE_INCOMPATIBLE` means the signer changed,
@@ -761,6 +762,9 @@ Before publishing a release, check that it installs over the previous one with t
    `docs/screenshots/`).
 7. Repeat 3–6 for **every** earlier release a user may still have (`gh release list`), not only
    the last one.
+8. Since v0.5.0 (widget, ADR-055): on one upgraded install, add the SkillForge widget (long-press
+   the home screen → Widgets → search "SkillForge" → tap the preview → Add). It must show the
+   seeded data (Trained today, streak 1, level 1, Novice, Pull 8) and a tap must open Train.
 
 **Building in an agent worktree:** under `.claude/worktrees/<agent-…>/` the native CMake object
 paths get too long for Windows and Gradle fails with "ninja: error: manifest 'build.ninja' still

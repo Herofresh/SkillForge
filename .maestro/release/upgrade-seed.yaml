@@ -84,7 +84,8 @@ name: Upgrade check 1 - seed data on the previous release
     id: 'character-total-xp'
     text: '0 XP earned in total'
 - takeScreenshot: 5.7-upgrade-before
-# The user overlay: a custom exercise right after Tuck front lever. The ids exist since v0.1.0.
+# The user overlay: a custom exercise right after Tuck front lever. The ids exist since v0.1.0
+# (the description field since v0.4.0, filled only when it is there).
 - tapOn: 'Tree'
 - extendedWaitUntil:
     visible:
@@ -129,6 +130,17 @@ name: Upgrade check 1 - seed data on the previous release
 - assertVisible:
     id: 'editor-position'
     text: 'Tuck front lever'
+# Since v0.4.0 (6.2) a custom exercise needs a description; older releases have no such field.
+# If the field is missing on a release that needs it, the editor-status check below fails.
+- runFlow:
+    when:
+      visible:
+        id: 'editor-description-input'
+    commands:
+      - tapOn:
+          id: 'editor-description-input'
+      - inputText: 'A front lever hold with the knees tucked to the chest.'
+      - hideKeyboard
 - scrollUntilVisible:
     element:
       id: 'editor-add-prerequisite'
