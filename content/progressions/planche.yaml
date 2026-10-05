@@ -36,7 +36,7 @@ nodes:
       - Lean forward until the shoulders are past the hands; lean further to progress.
     sources:
       - https://themovementathlete.com/planche-requirements/
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://antranik.org/connective-tissue-basics/
     verify: OG2 gives no level for the lean; 2 is inferred (below the level-3 frog stand).
     review:
@@ -68,7 +68,7 @@ nodes:
       - Lean forward until the feet lift; arms stay locked.
       - Push the floor away, back rounded.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://redditbwf.github.io/wiki/recommended_routine.html
       - https://antranik.org/connective-tissue-basics/
     review:
@@ -107,7 +107,7 @@ nodes:
       - Round the back and push the floor away.
       - Hips at shoulder height; lean the shoulders past the hands.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://themovementathlete.com/planche-requirements/
       - https://redditbwf.github.io/wiki/recommended_routine.html
     review:
@@ -137,7 +137,7 @@ nodes:
       - Knees stay bent but move away from the chest.
       - Arms locked, shoulders protracted.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://redditbwf.github.io/wiki/recommended_routine.html
       - https://antranik.org/connective-tissue-basics/
     review:
@@ -172,8 +172,8 @@ nodes:
       - Lower with the elbows close to the body; keep the hips at shoulder height.
       - Press back to straight arms and push the floor away.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: OG2 level 6 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
     review:
       status: draft
@@ -203,7 +203,7 @@ nodes:
       - Arms locked, shoulders protracted and leaning past the hands.
       - Squeeze the glutes; no sag in the hips.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://antranik.org/ssc/
       - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
     review:
@@ -235,8 +235,8 @@ nodes:
       - Lower until the chest is near hand height without dropping the hips.
       - Press back up with the shoulders leaning past the hands.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: >-
       OG2 prints it at 8, above the straddle planche (8 on the chart, 7 in the dataset); the
       3 x 5 rep standard is a placeholder (Steven Low's strength rule).
@@ -267,8 +267,8 @@ nodes:
       - Arms locked, shoulders protracted and well past the hands.
       - Squeeze the glutes; no sag or pike at the hips.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
       - https://antranik.org/ssc/
     verify: >-
       OG2 prints the half-lay / one-leg planche at 9 (straddle 8, full 11 on the chart; 7 and 10
@@ -301,7 +301,7 @@ nodes:
       - Arms locked, shoulders well past the hands.
       - Keep a slight hollow; no arch in the lower back.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://antranik.org/ssc/
       - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
     verify: OG2 level ~10 is inferred from the chart layout.
@@ -334,8 +334,8 @@ nodes:
       - Lower with the body staying level; the feet never touch the floor.
       - Press back to straight arms and protract the shoulders.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: OG2 level 10 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
     review:
       status: draft

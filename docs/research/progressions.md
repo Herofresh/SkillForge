@@ -341,7 +341,7 @@ without migrations.
 ## Sources
 - [Overcoming Gravity charts page](https://stevenlow.org/overcoming-gravity/)
 - [OG2 charts Google Sheet](https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/)
-- [OG2 charts PDF](https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf)
+- [OG2 charts print PDF (official, from the charts page)](https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf)
 - [Steven Low: Prilepin tables for isometrics](https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/)
 - [Steven Low: Fundamentals of bodyweight strength training](https://stevenlow.org/the-fundamentals-of-bodyweight-strength-training/)
 - [Steven Low: Beginner's guide to OG](https://stevenlow.org/a-beginners-guide-to-overcoming-gravity/)
@@ -350,7 +350,7 @@ without migrations.
 - [Steven Low: Overcoming tendonitis](https://stevenlow.org/overcoming-tendonitis/)
 - [Reddit BWF Recommended Routine (mirror)](https://redditbwf.github.io/wiki/recommended_routine.html)
 - [RR progressions (gist)](https://gist.github.com/sgup/f10f1d57e54b7876495f4bafb6d697eb)
-- [Bodyweight Fitness Progressions chart v5.4](https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf)
+- [r/bodyweightfitness wiki: Exercise progressions](https://www.reddit.com/r/bodyweightfitness/wiki/exercises) (where the community's Bodyweight Fitness Progressions chart v5.4 came from)
 - [GMB handstand](https://gmb.io/handstand/)
 - [GMB freestanding handstand](https://gmb.io/freestanding-handstand/)
 - [Antranik: Steady State Cycle](https://antranik.org/ssc/)
@@ -405,6 +405,12 @@ without migrations.
 - [12 Minute Athlete: 5 exercises for a stronger handstand](https://www.12minuteathlete.com/stronger-handstand/)
 - [r/bodyweightfitness wiki: Squat progression](https://www.reddit.com/r/bodyweightfitness/wiki/exercises/squat)
 - [r/bodyweightfitness wiki: Hinge progression](https://www.reddit.com/r/bodyweightfitness/wiki/exercises/hinge)
+
+**Source links (PLAN 7.0b, ADR-064):** node `sources` used to point at copies of the OG2 chart
+PDF and the BWF Progressions chart v5.4 re-hosted on a third-party site (calisthenics-101.co.uk).
+They now point at the official places: Steven Low's own OG2 print PDF (linked from his charts
+page) and the r/bodyweightfitness wiki's exercise progressions. A mechanical replace; no id, level,
+gate or threshold changed. The levels were read from the same chart.
 
 **Caveats:**
 - The `~` levels and the tier band boundaries are inferred.

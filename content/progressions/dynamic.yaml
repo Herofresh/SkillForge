@@ -136,8 +136,8 @@ nodes:
       - Pull the rings to the lower chest, then lean forward over them.
       - Turn through to a deep dip and press out to straight arms.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     review:
       status: draft
       notes: ""
@@ -169,7 +169,7 @@ nodes:
       - Squeeze the glutes and keep the elbows from sliding apart.
     sources:
       - https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
     verify: The 3 x 30 s trial follows the RR hold rule, not an elbow-lever-specific standard.
     review:
       status: draft
@@ -233,8 +233,8 @@ nodes:
       - Top hand pulls, bottom hand pushes; both arms stay straight.
       - Keep the body level with the floor.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: >-
       OG2 prints tuck 5, advanced tuck 6, straddle 7, full 8; the dataset has straddle and full at 6
       (PLAN 1.6), so 6 keeps the order. The 5-15 s range and 3 x 15 s trial follow the other flags.

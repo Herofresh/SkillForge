@@ -28,7 +28,7 @@ nodes:
       - Walk the feet up the wall until the body forms an L (hips over the shoulders).
       - Push tall through the shoulders; arms straight, head between the arms.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
       - https://gmb.io/handstand/
     review:
       status: draft
@@ -59,8 +59,8 @@ nodes:
       - Arms locked, push tall through the shoulders.
       - Ribs in, glutes squeezed; try to touch the wall only with the heels.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
       - https://gmb.io/handstand/
     verify: OG2 gives level 1-2; 1 is used.
     review:
@@ -90,7 +90,7 @@ nodes:
     sources:
       - https://gmb.io/freestanding-handstand/
       - https://gmb.io/handstand/
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: Not levelled in OG2 (2 inferred between wall HS and freestanding HS).
     review:
       status: draft
@@ -148,8 +148,8 @@ nodes:
       - Lean forward slowly until the feet lift.
       - Look slightly ahead, not straight down.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
       - https://redditbwf.github.io/wiki/recommended_routine.html
     review:
       status: draft
@@ -180,7 +180,7 @@ nodes:
     sources:
       - https://gmb.io/freestanding-handstand/
       - https://gmb.io/handstand/
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
     verify: >-
       OG2 gives level 4-5; 4 is used. GMB's common gate is about 60 s; the 3 x 30 s trial
       follows the RR hold rule.
@@ -212,8 +212,8 @@ nodes:
       - Keep the rings pressed against the body and the shoulders close to them.
       - Extend the legs straight up and come down the way you went up.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: OG2 level 5 is printed; the 3 x 30 s hold standard is the RR hold rule.
     review:
       status: draft
@@ -245,7 +245,7 @@ nodes:
       - Lower the legs slowly to the floor, shoulders leaning forward over the hands.
       - Arms stay straight; count the seconds of the lowering.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
     review:
       status: draft
@@ -277,7 +277,7 @@ nodes:
       - Shift the shoulders forward over the hands until the feet float.
       - Lift the hips over the shoulders, then bring the legs together.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://stevenlow.org/the-fundamentals-of-bodyweight-strength-training/
     verify: >-
       No rep standard in the sources; 3 x 5 follows Steven Low's strength rule (advance past
@@ -310,7 +310,7 @@ nodes:
       - Lean the shoulders over the hands until the feet float off.
       - Lift the hips over the shoulders, then bring the legs together.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://stevenlow.org/the-fundamentals-of-bodyweight-strength-training/
     verify: OG2 level 6 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
     review:
@@ -342,7 +342,7 @@ nodes:
       - Balance through the fingers and the shoulder of the support arm.
     sources:
       - https://gmb.io/handstand/
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
     verify: >-
       The 3 x 15 s trial is a placeholder (advanced-hold rule); no source gives a one-arm HS
       standard.

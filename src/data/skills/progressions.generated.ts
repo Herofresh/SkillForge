@@ -39,7 +39,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -97,7 +97,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -146,7 +146,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -198,7 +198,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -247,7 +247,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -295,8 +295,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Press up to straight arms and push the rings away at the top."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -350,8 +350,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower the chest to the hand under control, elbow close to the body."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -403,7 +403,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -451,8 +451,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower until the chest is near the hand, then press back up."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -510,7 +510,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://themovementathlete.com/planche-requirements/"
     ],
     "verify": "OG2 level inferred: OG2 lists the rings-turned-out 40 degree PPPU at about level 6; the floor version is placed at 6 too. Check with a coach.",
@@ -560,8 +560,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower until the chest is near the hand, then press back up."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -609,7 +609,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "verify": "OG2 puts ring support at level 1; the easier bar/parallettes support is set to 0. The RR may use a 60 s gate instead of 3 x 30 s.",
     "review": {
@@ -662,7 +662,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -714,10 +714,11 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "cues": [
       "Start at the top of a support hold, arms straight.",
       "Lower slowly and evenly until the shoulders are just below the elbows.",
-      "Step or jump back to the top; do not press up."
+      "Step or jump back to the top; do not press up.",
+      "On a straight bar it is harder on the shoulders; only go as deep as stays pain-free."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
     "verify": "OG2 levels the negative on dip bars/rings; the straight-bar option (Home profile) is our addition and is somewhat harder on the shoulders.",
@@ -774,7 +775,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -825,7 +826,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -934,8 +935,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Squeeze the glutes and abs so the back does not arch; press to straight arms."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -995,8 +996,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Press back up to straight arms and turn the rings slightly out at the top."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -1045,8 +1046,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Press all the way up and push the shoulders to the ears at the top."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -1104,7 +1105,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Keep the body tight and press straight up to lockout."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://gmb.io/freestanding-handstand/"
     ],
     "verify": "OG2 level: the chart puts freestanding HSPU at about 6-7; set to 7 here. The 3 x 8 trial is the RR rep standard and may be high for this skill. Check with a coach.",
@@ -1151,7 +1152,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "Not levelled in the OG2 chart (0 assumed); the 3 x 30 s gate follows the RR hold rule.",
     "review": {
@@ -1416,8 +1417,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower to straight arms with the L still held."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -1713,7 +1714,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -1765,7 +1766,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -1816,8 +1817,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower all the way to straight arms."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -1869,7 +1870,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -1927,7 +1928,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower back to straight arms without dropping the hips."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -1984,8 +1985,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower back to straight arms without dropping the hips."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -2036,7 +2037,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Pull the chest to the hand, then lower to a straight arm under control."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -2087,8 +2088,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Pull the chest to the hand, then lower to a straight arm under control."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -2145,8 +2146,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower back to straight arms without dropping the hips."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -2210,7 +2211,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "sourceUrls": [
       "https://www.calisthenics-corner.com/skills/front-lever/",
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -2315,7 +2316,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Keep the hips level with the shoulders, arms locked."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html",
       "https://www.calisthenics-corner.com/skills/front-lever/"
     ],
@@ -2375,7 +2376,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Pull back up to the top along the same path, then lower to a hang."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://calisthenics-parks.com/skills/206-en-ice-cream-makers"
     ],
     "verify": "Not on the OG2 chart; the BWF chart puts the tuck ice cream maker in its intermediate band next to the tuck front lever row (OG2 5). Level 5 and the 3 x 5 standard (Steven Low's strength rule) are inferred.",
@@ -2428,7 +2429,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Switch the extended leg between sets."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html",
       "https://www.calisthenics-corner.com/skills/front-lever/"
     ],
@@ -2482,7 +2483,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms locked, shoulders pulled down."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://antranik.org/ssc/",
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
@@ -2535,7 +2536,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms locked, shoulders pulled down."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://en.wikipedia.org/wiki/Front_lever",
       "https://antranik.org/ssc/"
     ],
@@ -2589,7 +2590,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms locked; pull the bar towards the hips."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://antranik.org/ssc/",
       "https://en.wikipedia.org/wiki/Front_lever"
     ],
@@ -2642,8 +2643,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower back to the lever under control and hold it briefly."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "OG2 level 9 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
@@ -2695,8 +2696,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower slowly the same way."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "OG2 level 10 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
@@ -2748,8 +2749,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Keep the arms straight and leave the same way you came in."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://antranik.org/connective-tissue-basics/"
     ],
     "review": {
@@ -2803,8 +2804,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms stay straight the whole time."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://redditbwf.github.io/wiki/recommended_routine.html"
     ],
     "verify": "No source gives a rep standard; 3 x 8 is the RR default and may be high for this move.",
@@ -2857,7 +2858,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms locked; keep the shoulders pressed down."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html",
       "https://antranik.org/connective-tissue-basics/"
     ],
@@ -2911,7 +2912,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms locked; ease in, the biceps tendon takes the load."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html",
       "https://antranik.org/connective-tissue-basics/"
     ],
@@ -2964,7 +2965,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms locked, shoulders pressed down."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://antranik.org/ssc/",
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
@@ -3017,8 +3018,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Switch the straight leg between sets."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://antranik.org/ssc/"
     ],
     "verify": "OG2 prints the half-lay / one-leg back lever at 6. The BWF chart lists it before the straddle and notes that the straddle is easier for some people; here it follows the OG2 level.",
@@ -3071,7 +3072,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms locked; keep the chest from dropping below the hips."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://antranik.org/ssc/",
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
@@ -3125,8 +3126,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Move slowly; stop at any pain in the biceps or elbows."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "OG2 level 8 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
@@ -3183,8 +3184,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Finish in an inverted hang and come out slowly."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "OG2 level 9 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
@@ -3247,7 +3248,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://stevenlow.org/ironcross/",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://en.wikipedia.org/wiki/Iron_cross_(gymnastics)"
     ],
     "verify": "The 3 x 15 s trial is a placeholder (advanced-hold rule); no source gives a cross standard.",
@@ -3312,7 +3313,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://themovementathlete.com/planche-requirements/",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://antranik.org/connective-tissue-basics/"
     ],
     "verify": "OG2 gives no level for the lean; 2 is inferred (below the level-3 frog stand).",
@@ -3371,7 +3372,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Push the floor away, back rounded."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html",
       "https://antranik.org/connective-tissue-basics/"
     ],
@@ -3436,7 +3437,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Hips at shoulder height; lean the shoulders past the hands."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://themovementathlete.com/planche-requirements/",
       "https://redditbwf.github.io/wiki/recommended_routine.html"
     ],
@@ -3489,7 +3490,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms locked, shoulders protracted."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html",
       "https://antranik.org/connective-tissue-basics/"
     ],
@@ -3549,8 +3550,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Press back to straight arms and push the floor away."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "OG2 level 6 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
@@ -3602,7 +3603,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Squeeze the glutes; no sag in the hips."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://antranik.org/ssc/",
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
@@ -3661,8 +3662,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Press back up with the shoulders leaning past the hands."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "OG2 prints it at 8, above the straddle planche (8 on the chart, 7 in the dataset); the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
@@ -3714,8 +3715,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Squeeze the glutes; no sag or pike at the hips."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://antranik.org/ssc/"
     ],
     "verify": "OG2 prints the half-lay / one-leg planche at 9 (straddle 8, full 11 on the chart; 7 and 10 in the dataset, PLAN 1.6).",
@@ -3769,7 +3770,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Keep a slight hollow; no arch in the lower back."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://antranik.org/ssc/",
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
@@ -3829,8 +3830,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Press back to straight arms and protract the shoulders."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "OG2 level 10 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
     "review": {
@@ -3879,7 +3880,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Push tall through the shoulders; arms straight, head between the arms."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://gmb.io/handstand/"
     ],
     "review": {
@@ -3935,8 +3936,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Ribs in, glutes squeezed; try to touch the wall only with the heels."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://gmb.io/handstand/"
     ],
     "verify": "OG2 gives level 1-2; 1 is used.",
@@ -3989,7 +3990,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "sourceUrls": [
       "https://gmb.io/freestanding-handstand/",
       "https://gmb.io/handstand/",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "Not levelled in OG2 (2 inferred between wall HS and freestanding HS).",
     "review": {
@@ -4091,8 +4092,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Look slightly ahead, not straight down."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://redditbwf.github.io/wiki/recommended_routine.html"
     ],
     "review": {
@@ -4145,7 +4146,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "sourceUrls": [
       "https://gmb.io/freestanding-handstand/",
       "https://gmb.io/handstand/",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "verify": "OG2 gives level 4-5; 4 is used. GMB's common gate is about 60 s; the 3 x 30 s trial follows the RR hold rule.",
     "review": {
@@ -4201,8 +4202,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Extend the legs straight up and come down the way you went up."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "OG2 level 5 is printed; the 3 x 30 s hold standard is the RR hold rule.",
     "review": {
@@ -4260,7 +4261,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms stay straight; count the seconds of the lowering."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/"
     ],
     "review": {
@@ -4319,7 +4320,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lift the hips over the shoulders, then bring the legs together."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://stevenlow.org/the-fundamentals-of-bodyweight-strength-training/"
     ],
     "verify": "OG2 level 6 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).",
@@ -4384,7 +4385,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lift the hips over the shoulders, then bring the legs together."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://stevenlow.org/the-fundamentals-of-bodyweight-strength-training/"
     ],
     "verify": "No rep standard in the sources; 3 x 5 follows Steven Low's strength rule (advance past 5-6 reps) and is a placeholder.",
@@ -4438,7 +4439,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://gmb.io/handstand/",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "verify": "The 3 x 15 s trial is a placeholder (advanced-hold rule); no source gives a one-arm HS standard.",
     "review": {
@@ -4585,7 +4586,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "Not levelled in the OG2 chart; 0 is assumed.",
     "review": {
@@ -4644,7 +4645,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Keep the hips level with or slightly in front of the hands."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html"
     ],
     "review": {
@@ -4694,7 +4695,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "Not levelled in the OG2 chart; level 1 is inferred. Uses the RR core range 3 x 8-12.",
     "review": {
@@ -4753,7 +4754,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Arms locked, shoulders pushed down, chest up."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html"
     ],
     "verify": "OG2 places the L-sit at about level 2 (approximate anchor).",
@@ -4810,7 +4811,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "Not levelled in the OG2 chart; level 3 is inferred. Uses the RR core range 3 x 8-12.",
     "review": {
@@ -4866,7 +4867,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Squeeze the legs up; the heels must not touch the floor."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html"
     ],
     "verify": "The 3 x 30 s trial follows the general RR hold rule; there is no straddle-specific standard.",
@@ -4923,7 +4924,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Keep the knees locked; drop back to a straddle L-sit if the legs sink."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://antranik.org/ssc/"
     ],
     "verify": "This is the OG2 45 degree V-sit [6]. The 3 x 15 s trial uses Antranik's ~15 s gate for advanced holds; there is no V-sit-specific standard.",
@@ -4993,7 +4994,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Legs straight and folded up towards the face."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://antranik.org/ssc/"
     ],
     "verify": "OG2 gates the manna behind the 170 degree V-sit [8]. The V-sit stages between 45 and 170 degrees are not modelled yet, so the jump from v_sit [6] is large. The trial is a placeholder (~15 s advanced hold, Antranik).",
@@ -5037,7 +5038,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://redditbwf.github.io/wiki/recommended_routine.html",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "review": {
       "status": "draft"
@@ -5078,7 +5079,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Stand up by squeezing the glute of the standing leg."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://www.reddit.com/r/bodyweightfitness/wiki/exercises/hinge"
     ],
     "verify": "Not on the OG2 chart; the BWF chart and the BWF wiki put the one-leg deadlift at the start of the hinge path. Level 1 and the RR rep standard 3 x 8 are inferred.",
@@ -5128,7 +5129,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Knees track over the toes, heels stay down, chest up."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html"
     ],
     "review": {
@@ -5177,7 +5178,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Keep the back neutral at the bottom; stand up without bouncing."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html"
     ],
     "review": {
@@ -5329,7 +5330,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Stand up through the front heel; knee in line with the toes."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://www.reddit.com/r/bodyweightfitness/wiki/exercises/squat"
     ],
     "verify": "Not on the OG2 chart; level 3 (next to the Bulgarian split squat) is inferred.",
@@ -5434,7 +5435,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Stand up without the back foot pushing off."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://www.reddit.com/r/bodyweightfitness/wiki/exercises/squat"
     ],
     "verify": "Not on the OG2 chart; level 4 (next to the pistol squat) is inferred.",
@@ -5484,7 +5485,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Stand up without bouncing or letting the knee cave in."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
       "https://redditbwf.github.io/wiki/recommended_routine.html"
     ],
     "review": {
@@ -5583,7 +5584,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Pull back up with the hamstrings; catch yourself with the hands only if needed."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://www.reddit.com/r/bodyweightfitness/wiki/exercises/hinge"
     ],
     "verify": "Not on the OG2 chart; level 5 (above the negative at 4) and the 3 x 5 standard are inferred.",
@@ -5821,8 +5822,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Turn through to a deep dip and press out to straight arms."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "review": {
       "status": "draft"
@@ -5880,7 +5881,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     ],
     "sourceUrls": [
       "https://docs.google.com/spreadsheets/d/19l4tVfdTJLheLMwZBYqcw1oeEBPRh8mxngqrCz2YnVg/",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf"
     ],
     "verify": "The 3 x 30 s trial follows the RR hold rule, not an elbow-lever-specific standard.",
     "review": {
@@ -5995,8 +5996,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Keep the body level with the floor."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf",
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "OG2 prints tuck 5, advanced tuck 6, straddle 7, full 8; the dataset has straddle and full at 6 (PLAN 1.6), so 6 keeps the order. The 5-15 s range and 3 x 15 s trial follow the other flags.",
     "review": {
@@ -6327,7 +6328,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Relax into it and breathe; reach for the toes or past them."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://antranik.org/progressions/"
     ],
     "verify": "Our synthesis (compression prep for the L-sit and manna); no sourced hold or range standard. A range standard (e.g. chest to knees) may suit better than a time.",
@@ -6463,7 +6464,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Knees over the ankles, shoulders over the wrists, head in line."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "Our synthesis; 0 is assumed and the 3 x 30 s trial follows the general RR hold rule.",
     "review": {
@@ -6674,7 +6675,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Push the shoulders over the hands; don't just bend the lower back."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf"
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises"
     ],
     "verify": "Our synthesis; the OG2 level 2 is inferred and the 3 x 30 s trial follows the general RR hold rule. The BWF chart has angled and head bridge steps in between that are not modelled.",
     "review": {
@@ -6831,7 +6832,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "cues": [
       "Set the first foot in half lotus, then rotate the second thigh out from the hip.",
       "Lift the second foot over with the hands; never lever it in with the knee.",
-      "Switch which leg goes on top between sets."
+      "Switch which leg goes on top between sets.",
+      "Stop at any pinch inside the knee; forcing the lotus can injure the knee."
     ],
     "sourceUrls": [
       "https://en.wikipedia.org/wiki/Lotus_position"
@@ -6883,7 +6885,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Lower the leg slowly; switch legs between sets."
     ],
     "sourceUrls": [
-      "https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf",
+      "https://www.reddit.com/r/bodyweightfitness/wiki/exercises",
       "https://en.wikipedia.org/wiki/Chakrasana"
     ],
     "verify": "The BWF chart lists the one-leg bridge after the full and decline bridge without a standard; OG level 3 and the 3 x 15 s trial are inferred.",
@@ -7090,7 +7092,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Chin to the chest, eyes on your belt; the head never touches the floor.",
       "Sit the hips down close to the heels and roll back on a rounded back.",
       "Slap the floor with both whole arms at about 45 degrees from the body, palms down.",
-      "Build up from lying, to sitting, to squatting, to standing; stay low until it is easy."
+      "Build up from lying, to sitting, to squatting, to standing; stay low until it is easy.",
+      "Practise on a soft surface (grass, a mat or a carpet), not on a hard floor."
     ],
     "sourceUrls": [
       "https://judocanada.org/wp-content/uploads/2023/07/Guide-Chutes_2023_EN.pdf",
@@ -7141,7 +7144,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "cues": [
       "Squat, hands shoulder-width on the floor, hips high.",
       "Tuck the chin to the chest and roll onto the back of the head and shoulders, never the top of the head.",
-      "Stay in a tight ball and reach forward to stand up without pushing off the floor behind you."
+      "Stay in a tight ball and reach forward to stand up without pushing off the floor behind you.",
+      "Practise on a soft surface (grass, a mat or a carpet), not on a hard floor."
     ],
     "sourceUrls": [
       "https://www.nrgq.co.uk/wp-content/uploads/2018/12/Foundation_Teaching-Progressions-FORWARD-ROLL-_-VARIATIONS.pdf"
@@ -7192,7 +7196,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Alternate sides; count every fall as one rep.",
       "Swing one leg across the body and sit down close to the heel of the standing leg.",
       "Land on the side, not the back; slap with the whole arm on the falling side at about 45 degrees.",
-      "Chin tucked, head up off the floor; legs apart, never crossed."
+      "Chin tucked, head up off the floor; legs apart, never crossed.",
+      "Practise on a soft surface (grass, a mat or a carpet), not on a hard floor."
     ],
     "sourceUrls": [
       "https://judocanada.org/wp-content/uploads/2023/07/Guide-Chutes_2023_EN.pdf",
@@ -7250,7 +7255,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Alternate sides; count every roll as one rep.",
       "Roll diagonally along the arm and the back of the shoulder to the opposite hip; the head stays off the floor.",
       "Chin in, look towards the far shoulder; keep the leading arm round like a wheel.",
-      "Start from kneeling, then from standing, then walking; slap the floor with the free arm as you finish."
+      "Start from kneeling, then from standing, then walking; slap the floor with the free arm as you finish.",
+      "Practise on a soft surface (grass, a mat or a carpet), not on a hard floor."
     ],
     "sourceUrls": [
       "https://judocanada.org/wp-content/uploads/2023/07/Guide-Chutes_2023_EN.pdf",
@@ -7307,7 +7313,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "cues": [
       "Alternate sides; count every roll as one rep.",
       "Sit back, turn the head away and roll over the back of one shoulder, not the neck.",
-      "Tuck the head under the other arm; walk the knees or feet around to finish."
+      "Tuck the head under the other arm; walk the knees or feet around to finish.",
+      "Practise on a soft surface (grass, a mat or a carpet), not on a hard floor."
     ],
     "sourceUrls": [
       "https://gmb.io/tumbling/"
@@ -7420,7 +7427,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
       "Hands by the ears, palms up, like holding a pizza tray; chin tucked in.",
       "Rock back; the hands and the back of the head touch the floor together.",
       "Push hard through the hands so the neck carries no weight, and land on the feet, not the knees.",
-      "Learn it down a slope first; stop if you feel pressure in the neck."
+      "Learn it down a slope first; stop if you feel pressure in the neck.",
+      "Practise on a soft surface (grass, a mat or a carpet), not on a hard floor."
     ],
     "sourceUrls": [
       "https://www.pinngym.com/favorite-backward-roll-progressions",
@@ -7702,7 +7710,7 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "regressionId": "one_handed_cartwheel",
     "legendary": true,
     "cues": [
-      "Learn it with a coach and on a soft mat first, ideally off a raised surface.",
+      "Learn it with a coach or a spotter and on a soft mat first, ideally off a raised surface.",
       "Drill needle kicks and fast, close cartwheels before taking the hands away.",
       "Drive hard with the back leg and lift the chest; the legs do the work, not the arms."
     ],
@@ -8018,7 +8026,8 @@ export const GENERATED_NODES: readonly ExerciseNode[] = [
     "cues": [
       "Sit tall; lean back on the hands at first, then take them away.",
       "Lift the knees and rotate from the hips, keeping the feet roughly in place.",
-      "Pause in each 90/90 position with the chest over the front shin."
+      "Pause in each 90/90 position with the chest over the front shin.",
+      "Skip it or ask a physio first if you have hip impingement or knee problems."
     ],
     "sourceUrls": [
       "https://health.clevelandclinic.org/90-90-stretch/",
