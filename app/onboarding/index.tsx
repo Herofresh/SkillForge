@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 
+import { HealthNotice } from '@/components/HealthNotice';
 import { OnboardingScaffold } from '@/components/onboarding/OnboardingScaffold';
 import { Spacing } from '@/components/theme';
 import { PixelFrame, PixelText, PixelTextInput } from '@/components/ui';
@@ -39,6 +40,7 @@ export default function HeroStep() {
           unlock harder skills, and let the forge suggest each workout. You decide what to follow.
         </PixelText>
       </PixelFrame>
+      <HealthNotice />
       <PixelTextInput
         label="Name your hero"
         value={name}

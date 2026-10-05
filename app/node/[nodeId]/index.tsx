@@ -27,9 +27,16 @@ import type { ReviewStatus } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
 
 const REVIEW_TEXT: Readonly<Record<ReviewStatus, string>> = {
-  draft: 'Draft: not reviewed by a coach yet.',
+  draft: 'Community-sourced progression; not yet reviewed by a coach.',
   coach_reviewed: 'Reviewed by a coach.',
 };
+
+/**
+ * The YAML `verify:` notes are research notes for us (open questions, placeholders), not for
+ * users: only development builds show them (ADR-064). Safety advice that was in a note lives in
+ * the node's cues.
+ */
+const SHOW_RESEARCH_NOTES = __DEV__;
 
 /**
  * The node detail (PLAN 4.3): everything about one skill (what it is first, PLAN 6.2), from the user's tree with the overlay
@@ -206,7 +213,7 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
           {node.review.notes !== undefined && (
             <PixelText variant="small">{`Coach notes: ${node.review.notes}`}</PixelText>
           )}
-          {node.verify !== undefined && (
+          {SHOW_RESEARCH_NOTES && node.verify !== undefined && (
             <PixelText variant="small" tone="textMuted">
               {`Still being checked: ${node.verify}`}
             </PixelText>

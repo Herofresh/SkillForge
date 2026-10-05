@@ -33,6 +33,10 @@ export const CONTENT_SOURCES: readonly Credit[] = [
   },
 ];
 
+/** Shown under the content sources (ADR-064). */
+export const NOT_AFFILIATED_NOTE =
+  'SkillForge is an independent project, not affiliated with or endorsed by the sources listed.';
+
 /** The SIL Open Font License 1.1 that all bundled fonts use. */
 export const OFL_CREDIT: Credit = {
   name: 'SIL Open Font License 1.1',

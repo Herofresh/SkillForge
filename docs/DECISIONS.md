@@ -2225,3 +2225,64 @@ Template:
     already noted in ADR-014). Revisit only if expo-router drops them.
 - Consequences: a data problem shows as a note instead of a dead end, the manifest asks for less,
   and nothing about the stored data changed, so every earlier release upgrades as before.
+
+## ADR-065: Play texts and data: health disclaimer, "difficulty", Auto Backup kept on, delete all data, release-only research notes, official sources (PLAN 7.0b)
+- Date: 2026-10-05 · Status: Accepted (user decisions 2026-10-05 after the pre-Google-Play review;
+  extends ADR-028's backups, ADR-016's `verify:` notes and ADR-055's widget snapshot)
+- Context: before the Play listing, a review found texts that a store reviewer or a user could
+  read as wrong or risky: no health disclaimer; the Overcoming Gravity level shown as a unit ("OG
+  6") that only readers of the book understand; no statement that the app is independent of its
+  sources; 121 node sources pointing at copies of the OG2 and BWF chart PDFs re-hosted on another
+  site; the research `verify:` notes ("placeholder", names of other sites) shown to every user as
+  "Still being checked"; texts saying the data lives "only on this phone" although Android Auto
+  Backup (on by default) may copy it to the user's Google account; and no way to erase all data in
+  the app (Play's data-deletion expectations).
+- Decision:
+  - **Health disclaimer** (`HEALTH_DISCLAIMER` in `src/data/notices.ts`, one place): "SkillForge
+    gives general training suggestions, not medical advice. Check with a doctor before you start a
+    new exercise programme, especially with an injury or a health condition. Stop if you feel pain.
+    You train at your own risk." Shown without an extra tap as a framed notice (`HealthNotice`) on
+    the first onboarding step (under "The quest") and in Settings → About, and as the last point of
+    the guide's safeguards page. No acknowledge step: it informs, it doesn't gate (ADR-023).
+  - **"Difficulty" in the UI**: `formatOgLevel` → "Difficulty 6" (level 0 stays "Foundation"),
+    `spokenOgLevel` → "difficulty 6"; every label that used them follows (tiles, node header, rows,
+    rank crest and ladder, balance note, class challenge text, editor). The guide says "difficulty"
+    ("1 + 0.25 × its difficulty", "difficulty levels apart", "ranks by branch median difficulty:
+    Novice 0, …"). Internal names (`ogLevel`, YAML `og_level`, docs/research) stay: no data change.
+  - **Not affiliated**: `NOT_AFFILIATED_NOTE` under the sources in About.
+  - **Official source links**: the re-hosted OG2 chart PDF → Steven Low's own print PDF
+    (`stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf`, linked from his charts page);
+    the re-hosted BWF Progressions chart → the r/bodyweightfitness wiki's exercise progressions
+    (`reddit.com/r/bodyweightfitness/wiki/exercises`). A mechanical replace in the YAML; no id,
+    level, gate or threshold changed.
+  - **Research notes only in development builds**: the node detail shows `verify:` only when
+    `__DEV__`. Before hiding them, the safety points they (or the acrobatics header) held went into
+    cues: soft surface for the rolls and breakfalls, a coach or spotter for the aerial, no forcing
+    for the lotus, hip impingement / knee problems for the 90/90 switch, the straight-bar dip
+    negative's shoulder load. The review line reads "Community-sourced progression; not yet
+    reviewed by a coach." (calm, not "Draft").
+  - **Auto Backup stays on** (`android.allowBackup: true` made explicit in app.json): a restore
+    after a reinstall or on a new phone is worth more than the purity of "only on this phone". The
+    texts say so (`DATA_STORAGE_NOTE`: "Your data is stored on this phone. SkillForge has no
+    account and sends nothing anywhere; Android's own device backup may include it."), in the
+    Backup panel and the guide; the guide no longer promises that uninstalling deletes everything.
+  - **Delete all my data** (Settings → Delete data): a sheet lists exactly what goes, offers
+    "Export backup first", and enables "Delete everything" only after "I understand". The store's
+    `deleteAllData` deletes the app's files first (`BackupFiles.deleteAppFiles`: the safety copies
+    in `documents/backups/`, the exports `share` left in the cache (`skillforge-*`), the document
+    picker's cache copies and the widget snapshot; failures are reported, not thrown), then
+    `deleteAllUserData` wipes every user table (sessions + sets, user actions, goals, equipment
+    profiles, overlay, all settings, the profile, the Train draft, the progress cache) and writes
+    the first-run defaults again (hero profile, Home and Park, a new `defaults_seeded_at`) in ONE
+    transaction. `meta.schema_version` and the migrations table are untouched. Then `loadAll`; the
+    in-memory plan, summary and last import go too. With `onboarding_completed_at` gone the tabs
+    open onboarding. `dataResets` counts the wipes so the widget sync rewrites the snapshot and
+    redraws even when the fresh data looks like the old (the widget shows a fresh hero, as after a
+    new install's first start).
+- Consequences: no schema or backup-format change; existing data loads unchanged. The Play data
+  safety form can say: no data collected or shared, data deletable in the app, device backup by
+  Android. Dev builds still show the `verify:` notes for content work. Not verified on a device:
+  the file deletion (expo-file-system) and the widget redraw after a wipe; the r/bodyweightfitness
+  wiki URL could not be fetched from here (reddit blocks it). The `redditbwf.github.io` mirror of
+  the Recommended Routine (50 sources, also the About credit) is a mirror, not a re-hosted PDF, and
+  was left as it is.

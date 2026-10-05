@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
 
+import { DATA_STORAGE_NOTE } from '@/data/notices';
 import { backupIssueLines } from '@/domain/backup';
 import type { ValidationIssue } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
@@ -80,7 +81,7 @@ export function BackupPanel() {
   return (
     <DetailSection title="Backup" icon="scroll" testID="settings-backup">
       <PixelText variant="small" tone="textMuted">
-        Your data lives only on this phone. Export a backup now and then, e.g. to your Drive.
+        {`${DATA_STORAGE_NOTE} Export a backup now and then, e.g. to your Drive.`}
       </PixelText>
       <PixelButton
         label="Export backup"

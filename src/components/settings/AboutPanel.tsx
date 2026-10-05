@@ -1,8 +1,15 @@
 import Constants from 'expo-constants';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
-import { CONTENT_SOURCES, FONT_CREDITS, OFL_CREDIT, type Credit } from '@/data/credits';
+import {
+  CONTENT_SOURCES,
+  FONT_CREDITS,
+  NOT_AFFILIATED_NOTE,
+  OFL_CREDIT,
+  type Credit,
+} from '@/data/credits';
 
+import { HealthNotice } from '../HealthNotice';
 import { DetailSection } from '../node/DetailSection';
 import { Spacing, TOUCH_TARGET } from '../theme';
 import { PixelText } from '../ui';
@@ -31,9 +38,10 @@ export function AboutPanel() {
       <PixelText>
         {`SkillForge ${version}. A calisthenics skill tree: the app suggests, you decide.`}
       </PixelText>
+      <HealthNotice testID="about-health-notice" />
       <PixelText variant="small" tone="textMuted">
-        Exercise content is a draft built from the sources below and not yet reviewed by a coach.
-        Train within your limits.
+        The progressions are community-sourced from the sources below and not yet reviewed by a
+        coach.
       </PixelText>
       <PixelText variant="label" tone="gold" accessibilityRole="header">
         Sources
@@ -43,6 +51,9 @@ export function AboutPanel() {
           <CreditLink key={credit.name} credit={credit} />
         ))}
       </View>
+      <PixelText variant="small" tone="textMuted" testID="about-not-affiliated">
+        {NOT_AFFILIATED_NOTE}
+      </PixelText>
       <PixelText variant="label" tone="gold" accessibilityRole="header">
         Fonts
       </PixelText>
