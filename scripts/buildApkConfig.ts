@@ -31,6 +31,11 @@ export const PREBUILD_PROTECTED_FILES = ['package.json'];
 
 export interface BuildOptions {
   abis: Abi[];
+  /**
+   * An Android App Bundle for Google Play (PLAN 7.2, ADR-066): every ABI, a clean prebuild, signed
+   * with the upload key and checked against `UPLOAD_SIGNER_SHA256`.
+   */
+  aab: boolean;
   /** Recreate android/ from scratch (slow, cold Gradle build) instead of applying changes to it. */
   clean: boolean;
   /** Reuse android/ as it is and only run Gradle. */
@@ -40,8 +45,10 @@ export interface BuildOptions {
 
 export const BUILD_USAGE = `Usage: npm run build:apk [-- options]      (arm64-v8a, for phones)
        npm run build:apk:universal          (arm64-v8a + x86_64, also runs on the emulator)
+       npm run build:aab                    (App Bundle for Google Play, upload key, every ABI)
 
 Options:
+  --aab                App Bundle for Play (always a clean prebuild; no ABI options)
   --universal          arm64-v8a + x86_64
   --abis=<a,b>         explicit ABIs (${KNOWN_ABIS.join(', ')})
   --clean              recreate android/ (after changing app.json plugins or native dependencies)
@@ -67,8 +74,11 @@ export function parseBuildArgs(argv: readonly string[]): BuildOptions {
   let clean = false;
   let skipPrebuild = false;
   let help = false;
+  let aab = false;
   for (const arg of argv) {
-    if (arg === '--universal') {
+    if (arg === '--aab') {
+      aab = true;
+    } else if (arg === '--universal') {
       if (abis) throw new Error('Use either --universal or --abis, not both');
       abis = [...UNIVERSAL_ABIS];
     } else if (arg.startsWith('--abis=')) {
@@ -85,7 +95,13 @@ export function parseBuildArgs(argv: readonly string[]): BuildOptions {
     }
   }
   if (clean && skipPrebuild) throw new Error('Use either --clean or --skip-prebuild, not both');
-  return { abis: abis ?? [...PHONE_ABIS], clean, skipPrebuild, help };
+  if (aab) {
+    // A stale android/ would ship an old versionCode; Play splits the bundle per device ABI.
+    if (abis) throw new Error('--aab always includes every ABI; drop --universal / --abis');
+    if (skipPrebuild) throw new Error('--aab always runs a clean prebuild; drop --skip-prebuild');
+    return { abis: [...KNOWN_ABIS], clean: true, skipPrebuild: false, help, aab };
+  }
+  return { abis: abis ?? [...PHONE_ABIS], clean, skipPrebuild, help, aab };
 }
 
 /** Short label for the file name: "arm64", "universal", or the ABIs joined with "+". */
@@ -147,15 +163,127 @@ export function prebuildArgs(clean: boolean): string[] {
   ];
 }
 
-/** The Gradle wrapper (file name in android/) and its arguments for a release APK with these ABIs. */
+/**
+ * Gradle project property that switches the release build to the upload key
+ * (`UPLOAD_SIGNING_FLAG` in plugins/withUploadSigning.js; a test keeps them equal).
+ */
+export const UPLOAD_SIGNING_FLAG = 'skillforgeUploadSigning';
+
+/**
+ * The Gradle wrapper (file name in android/) and its arguments: a release APK with these ABIs, or
+ * (`aab`) a release App Bundle signed with the upload key.
+ */
 export function gradleCommand(
   platform: NodeJS.Platform,
   abis: readonly Abi[],
+  aab = false,
 ): { command: string; args: string[] } {
   return {
     command: platform === 'win32' ? 'gradlew.bat' : 'gradlew',
-    args: ['assembleRelease', '--no-daemon', `-PreactNativeArchitectures=${abis.join(',')}`],
+    args: [
+      aab ? 'bundleRelease' : 'assembleRelease',
+      '--no-daemon',
+      `-PreactNativeArchitectures=${abis.join(',')}`,
+      ...(aab ? [`-P${UPLOAD_SIGNING_FLAG}=true`] : []),
+    ],
   };
+}
+
+/** Where Gradle writes the release App Bundle, relative to the repo root. */
+export const GRADLE_AAB_PATH = [
+  'android',
+  'app',
+  'build',
+  'outputs',
+  'bundle',
+  'release',
+  'app-release.aab',
+];
+
+/** `SkillForge-0.8.0-vc8-d18a142.aab`; the commit is left out when unknown. */
+export function aabFileName(parts: {
+  version: string;
+  versionCode: number;
+  commit?: string;
+}): string {
+  const commit = parts.commit ? `-${parts.commit}` : '';
+  return `SkillForge-${parts.version}-vc${parts.versionCode}${commit}.aab`;
+}
+
+// --- Upload key (PLAN 7.1–7.2, ADR-047, ADR-066) ----------------------------------------------
+
+/**
+ * SHA-256 of the upload key's certificate (created by the user in PLAN 7.1, kept outside the
+ * repo). Play only accepts bundles signed with it; Play App Signing re-signs them for devices.
+ * A lost key is reset through Play Console support, after which this digest changes.
+ */
+export const UPLOAD_SIGNER_SHA256 =
+  '027d806ef6ca05e3453c700c1bd9f4349f6b58f8a4ffe7658ec9e275f585725d';
+
+/** The Gradle properties the upload signing config reads (plugins/withUploadSigning.js). */
+export const UPLOAD_PROPERTIES = [
+  'SKILLFORGE_UPLOAD_STORE_FILE',
+  'SKILLFORGE_UPLOAD_STORE_PASSWORD',
+  'SKILLFORGE_UPLOAD_KEY_ALIAS',
+  'SKILLFORGE_UPLOAD_KEY_PASSWORD',
+] as const;
+
+/**
+ * The upload properties neither `~/.gradle/gradle.properties` (`gradleProperties`, its text) nor
+ * an `ORG_GRADLE_PROJECT_<name>` environment variable sets. Only names are read, never values.
+ */
+export function missingUploadProperties(
+  gradleProperties: string,
+  env: Readonly<Record<string, string | undefined>>,
+): string[] {
+  const keys = new Set(
+    gradleProperties
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith('#') && !line.startsWith('!'))
+      .map((line) => line.split(/[=:]/, 1)[0]?.trim() ?? ''),
+  );
+  return UPLOAD_PROPERTIES.filter((name) => !keys.has(name) && !env[`ORG_GRADLE_PROJECT_${name}`]);
+}
+
+/** The SHA-256 digests in `keytool -printcert` output (lower case hex, no colons, in order). */
+export function parseKeytoolDigests(output: string): string[] {
+  return [...output.matchAll(/SHA256:\s*((?:[0-9A-Fa-f]{2}:){31}[0-9A-Fa-f]{2})/g)].map((match) =>
+    (match[1] ?? '').replace(/:/g, '').toLowerCase(),
+  );
+}
+
+/** `undefined` when the bundle is signed with the upload key only, else what is wrong. */
+export function uploadSignerProblem(digests: readonly string[]): string | undefined {
+  if (digests.length === 0) return 'keytool printed no signer certificate';
+  const others = digests.filter((digest) => digest !== UPLOAD_SIGNER_SHA256);
+  if (others.length === 0) return undefined;
+  return (
+    `the bundle is signed with ${others.join(', ')}, not the upload key ` +
+    `${UPLOAD_SIGNER_SHA256}. Play Console rejects it.`
+  );
+}
+
+/**
+ * Where to look for `keytool`, in order: JAVA_HOME, Android Studio's bundled JDK (its default
+ * install location), then plain `keytool` on PATH.
+ */
+export function keytoolCandidates(
+  env: Readonly<Record<string, string | undefined>>,
+  platform: NodeJS.Platform,
+): string[] {
+  const exe = platform === 'win32' ? 'keytool.exe' : 'keytool';
+  const path = platform === 'win32' ? win32 : posix;
+  const candidates: string[] = [];
+  if (env.JAVA_HOME) candidates.push(path.join(env.JAVA_HOME, 'bin', exe));
+  if (platform === 'win32') {
+    const programFiles = env.ProgramFiles || 'C:\\Program Files';
+    candidates.push(win32.join(programFiles, 'Android', 'Android Studio', 'jbr', 'bin', exe));
+  } else if (platform === 'darwin') {
+    candidates.push('/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/keytool');
+  }
+  candidates.push(exe);
+  return candidates;
 }
 
 /** The app's version from app.json (`expo.version`, `expo.android.versionCode`). */

@@ -12,6 +12,12 @@
  *    before anything is copied (ADR-043).
  * 5. Copies the APK to builds/ with a versioned name and prints its path and SHA-256.
  *
+ * `npm run build:aab` (`--aab`, PLAN 7.2, ADR-066) makes the Google Play App Bundle instead: it
+ * checks that the upload key's Gradle properties exist (names only), always runs a clean prebuild,
+ * runs `gradlew bundleRelease` for every ABI with `-PskillforgeUploadSigning=true` (the release
+ * signing switch of plugins/withUploadSigning.js), checks the bundle's signer with `keytool` against
+ * `UPLOAD_SIGNER_SHA256` and copies it to builds/.
+ *
  * Run through tsx (it imports the tested pure module `buildApkConfig.ts`).
  */
 import { spawnSync, type SpawnSyncOptions } from 'node:child_process';
@@ -30,18 +36,24 @@ import { join } from 'node:path';
 import {
   APK_OUTPUT_DIR,
   BUILD_USAGE,
+  GRADLE_AAB_PATH,
   GRADLE_APK_PATH,
   PREBUILD_PROTECTED_FILES,
+  aabFileName,
   apkFileName,
   apksignerPath,
   appVersion,
   gradleCommand,
+  keytoolCandidates,
   localPropertiesContent,
+  missingUploadProperties,
   parseBuildArgs,
+  parseKeytoolDigests,
   parseSignerDigests,
   prebuildArgs,
   resolveSdkDir,
   signerProblem,
+  uploadSignerProblem,
 } from './buildApkConfig';
 
 // npm run always starts scripts in the package root.
@@ -129,6 +141,40 @@ function checkSigner(sdkDir: string, apk: string): void {
   console.log('Signer:  the release key (updates over earlier installs keep their data)');
 }
 
+/** Fails early, before the slow prebuild, when the upload key's Gradle properties are missing. */
+function checkUploadProperties(): void {
+  const file = join(homedir(), '.gradle', 'gradle.properties');
+  const text = existsSync(file) ? readFileSync(file, 'utf8') : '';
+  const missing = missingUploadProperties(text, process.env);
+  if (missing.length > 0) {
+    throw new Error(
+      `the upload key isn't configured: ${missing.join(', ')} missing in ${file} ` +
+        '(see docs/CONTEXT.md "Play build", PLAN 7.1)',
+    );
+  }
+}
+
+/** Fails the build when the App Bundle isn't signed with the upload key (ADR-066). */
+function checkUploadSigner(aab: string): void {
+  // A bare name is looked up on PATH by the shell; a full path must exist.
+  const onPath = (candidate: string) => !candidate.includes('/') && !candidate.includes('\\');
+  const keytool = keytoolCandidates(process.env, process.platform).find(
+    (candidate) => onPath(candidate) || existsSync(candidate),
+  );
+  if (!keytool) throw new Error('keytool not found; set JAVA_HOME to a JDK');
+  // One quoted command string with a shell (Windows); both are our paths.
+  const result = spawnSync(`"${keytool}" -printcert -jarfile "${aab}"`, {
+    encoding: 'utf8',
+    shell: true,
+  });
+  if (result.status !== 0) {
+    throw new Error(`keytool -printcert failed:\n${result.stderr || result.stdout}`);
+  }
+  const problem = uploadSignerProblem(parseKeytoolDigests(result.stdout));
+  if (problem) throw new Error(`Signer check: ${problem}`);
+  console.log('Signer:  the upload key (Play App Signing re-signs it for devices)');
+}
+
 function sha256(path: string): string {
   return createHash('sha256').update(readFileSync(path)).digest('hex');
 }
@@ -144,8 +190,10 @@ function main(): void {
   );
   const commit = capture('git', ['rev-parse', '--short', 'HEAD']);
   console.log(
-    `SkillForge ${version} (versionCode ${versionCode}), ABIs ${options.abis.join(', ')}`,
+    `SkillForge ${version} (versionCode ${versionCode}), ABIs ${options.abis.join(', ')}` +
+      (options.aab ? ', App Bundle for Google Play' : ''),
   );
+  if (options.aab) checkUploadProperties();
 
   if (options.skipPrebuild) {
     if (!existsSync(ANDROID_DIR))
@@ -155,12 +203,28 @@ function main(): void {
   }
   const sdkDir = writeLocalProperties();
 
-  const gradle = gradleCommand(process.platform, options.abis);
+  const gradle = gradleCommand(process.platform, options.abis, options.aab);
   // A full path: cmd.exe doesn't reliably find a .bat in the spawn cwd.
   const wrapper = join(ANDROID_DIR, gradle.command);
   run(isWindows && wrapper.includes(' ') ? `"${wrapper}"` : wrapper, gradle.args, {
     cwd: ANDROID_DIR,
   });
+
+  if (options.aab) {
+    const bundle = join(ROOT, ...GRADLE_AAB_PATH);
+    if (!existsSync(bundle)) throw new Error(`Gradle finished but ${bundle} is missing`);
+    // Checked before the copy, so a wrongly signed bundle never lands in builds/.
+    checkUploadSigner(bundle);
+    const outDir = join(ROOT, APK_OUTPUT_DIR);
+    mkdirSync(outDir, { recursive: true });
+    const target = join(outDir, aabFileName({ version, versionCode, commit }));
+    copyFileSync(bundle, target);
+    const sizeMb = (statSync(target).size / (1024 * 1024)).toFixed(1);
+    console.log(`\nAAB:     ${target} (${sizeMb} MB)`);
+    console.log(`SHA-256: ${sha256(target)}`);
+    console.log('Upload it in Play Console; it carries its native debug symbols.');
+    return;
+  }
 
   const built = join(ROOT, ...GRADLE_APK_PATH);
   if (!existsSync(built)) throw new Error(`Gradle finished but ${built} is missing`);
@@ -174,7 +238,9 @@ function main(): void {
   const sizeMb = (statSync(target).size / (1024 * 1024)).toFixed(1);
   console.log(`\nAPK:     ${target} (${sizeMb} MB)`);
   console.log(`SHA-256: ${sha256(target)}`);
-  console.log('Signed with the debug keystore: fine for sideloading, not for Play (PLAN 5.3b).');
+  console.log(
+    'Signed with the debug keystore: fine for sideloading; for Play use npm run build:aab.',
+  );
 }
 
 try {

@@ -44,6 +44,7 @@
       ],
       "expo-sqlite",
       "expo-sharing",
+      "./plugins/withUploadSigning.js",
       [
         "react-native-android-widget",
         {
