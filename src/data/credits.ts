@@ -37,6 +37,16 @@ export const CONTENT_SOURCES: readonly Credit[] = [
 export const NOT_AFFILIATED_NOTE =
   'SkillForge is an independent project, not affiliated with or endorsed by the sources listed.';
 
+/**
+ * The privacy policy (PLAN 7.4, ADR-067): site/privacy/ published to GitHub Pages. Play Console's
+ * store listing links the same URL.
+ */
+export const PRIVACY_POLICY: Credit = {
+  name: 'Privacy policy',
+  note: 'What SkillForge stores (everything on this phone) and what it never sends.',
+  url: 'https://herofresh.github.io/SkillForge/privacy/',
+};
+
 /** The SIL Open Font License 1.1 that all bundled fonts use. */
 export const OFL_CREDIT: Credit = {
   name: 'SIL Open Font License 1.1',

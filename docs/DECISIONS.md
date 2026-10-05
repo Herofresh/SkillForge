@@ -2334,3 +2334,28 @@ Template:
   foreground-service declaration is expected). Kept; if Play Console asks anyway, add
   FOREGROUND_SERVICE to `blockedPermissions` (WorkManager only needs it for `setForeground`,
   which the widget library doesn't use).
+
+## ADR-067: Privacy policy as a static page on GitHub Pages, deployed from site/ (PLAN 7.4)
+- Date: 2026-10-05 · Status: Accepted
+- Context: Play requires a privacy policy URL (store listing, Data safety, Health apps declaration)
+  and the app should link it. ADR-047 keeps the project free of paid services. The repo is public.
+- Options: Pages from the `docs/` folder (would also publish PLAN/DECISIONS as a site and needs
+  Jekyll care); a third-party policy generator (not free of tracking, generic text); **a small
+  static `site/` folder deployed by a GitHub Actions workflow**.
+- Decision:
+  - `site/` holds `index.html` (landing: what the app is, links), `privacy/index.html` and
+    `style.css` (the app's palette), plus the app icon. No build step, no JavaScript, no analytics.
+    `.github/workflows/pages.yml` deploys it on pushes to `main` that touch `site/**` (Pages source:
+    GitHub Actions). URL: https://herofresh.github.io/SkillForge/privacy/.
+  - The policy names the developer as **Andre Rivera Arboleda** (the same name as the Play
+    developer name, user decision) and the contact **skillforge.application@gmail.com** (an
+    address the user created for the app). It states what the app stores on the device, that
+    nothing is sent to the developer, the two ways data can leave the phone (the user's own
+    exports via the share sheet, Android's device backup, ADR-065), the permissions incl.
+    WorkManager's (ADR-066), deletion (Settings → Delete all my data, uninstall, Clear storage),
+    GDPR contact and the Austrian supervisory authority, children (not directed at under 13).
+  - Settings → About links it (`PRIVACY_POLICY` in `src/data/credits.ts`, right under the health
+    notice).
+- Consequences: every feature that changes what the app stores or shares must update
+  `site/privacy/index.html` and its effective date in the same PR (AGENT.md §4, documentation duty). GitHub (Pages host) may log page visitors' IPs
+  under its own policy; the app itself never loads the page.
