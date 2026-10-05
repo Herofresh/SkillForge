@@ -12,6 +12,11 @@
     },
     "android": {
       "permissions": ["android.permission.VIBRATE"],
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#0D0B14",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

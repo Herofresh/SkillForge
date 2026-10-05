@@ -48,6 +48,7 @@ export function NodeOptionSheet({
         />
       )}
       <ScrollView
+        nestedScrollEnabled
         style={styles.scroll}
         contentContainerStyle={styles.list}
         keyboardShouldPersistTaps="handled">

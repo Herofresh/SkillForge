@@ -5,16 +5,17 @@ SkillForge is a gamified calisthenics progression tracker, built as an RPG-style
 Pick the skills you want to learn. The app generates workouts that train their prerequisites, you earn
 XP for every session, your exercises level up, and harder progressions unlock as you go.
 
-> Status: early development (Phase 5, first preview APK). See [docs/PLAN.md](docs/PLAN.md).
+> Status: preview releases (currently v0.7.0) as APKs on GitHub; a Google Play release is being
+> prepared (Phase 7). See [docs/PLAN.md](docs/PLAN.md).
 
 ## Install on your phone
 
-SkillForge is Android only for now, and it isn't on the Play Store.
+SkillForge is Android only for now, and it isn't on the Play Store yet.
 
 **Download a preview APK.**
 
 1. Open the [Releases](https://github.com/Herofresh/SkillForge/releases) page on your phone and pick
-   the newest pre-release (e.g. `v0.2.0`).
+   the newest release (e.g. `v0.7.0`).
 2. Download the **arm64** APK. The **universal** APK also runs on the x86_64 Android emulator; it
    is bigger but works on phones too.
 3. Open the file and allow "Install unknown apps" for your browser or file manager when Android asks.
@@ -29,8 +30,8 @@ Preview builds are signed with a development key. A later build signed with the 
 can't update them in place: you'll have to uninstall first, which deletes the app's data. Export a
 backup first (Settings → Export backup) and import it again afterwards.
 
-**Build it yourself.** You need Node.js 22+, JDK 17 and the Android SDK (Android Studio installs it;
-set `ANDROID_HOME` if it isn't in the default location). No Expo account is needed.
+**Build it yourself.** You need Node.js 24 (≥ 22.18), JDK 17 and the Android SDK (Android Studio
+installs it; set `ANDROID_HOME` if it isn't in the default location). No Expo account is needed.
 
 ```bash
 npm install
@@ -43,7 +44,7 @@ it to the phone.
 
 ## Getting started
 
-You need Node.js 22 LTS or newer, npm, and the **Expo Go** app on an Android phone.
+You need Node.js 24 (≥ 22.18), npm, and the **Expo Go** app on an Android phone.
 
 ```bash
 npm install
@@ -70,6 +71,7 @@ npm run format         # Prettier: rewrite files (npm run format:check only chec
 | [docs/PLAN.md](docs/PLAN.md) | Living roadmap, current progress and handoff notes |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Architecture and product decision log (ADRs) |
 | [docs/CONTEXT.md](docs/CONTEXT.md) | Architecture map, glossary, formulas, commands |
+| [docs/DESIGN.md](docs/DESIGN.md) | Visual language and UI kit (pixel art × dark fantasy) |
 | [docs/research/progressions.md](docs/research/progressions.md) | Calisthenics progression research and sources |
 
 ## Stack

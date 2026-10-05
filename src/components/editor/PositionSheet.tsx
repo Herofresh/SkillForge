@@ -28,7 +28,7 @@ export function PositionSheet({ chain, afterId, onPick, onClose }: Props) {
       <PixelText variant="small" tone="textMuted">
         Pick the exercise it follows in the column. Its difficulty is kept between its neighbours.
       </PixelText>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.list}>
+      <ScrollView nestedScrollEnabled style={styles.scroll} contentContainerStyle={styles.list}>
         <PixelButton
           label="At the top of the branch"
           variant={afterId === undefined ? 'primary' : 'secondary'}

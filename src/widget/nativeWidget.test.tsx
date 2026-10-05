@@ -10,8 +10,11 @@ import {
   SkillForgeWidget,
 } from './nativeWidget';
 import { companionLayout, widgetLayout } from './widgetLayout';
+import { readWidgetSnapshot } from './widgetStorage';
 
-jest.mock('./widgetStorage', () => ({ readWidgetSnapshot: () => Promise.resolve(undefined) }));
+jest.mock('./widgetStorage', () => ({
+  readWidgetSnapshot: jest.fn(() => Promise.resolve(undefined)),
+}));
 
 interface Primitive {
   type: string;
@@ -118,6 +121,22 @@ describe('the widget task', () => {
       renderWidget,
     } as unknown as Parameters<typeof handler>[0]);
     expect(texts(renderWidget.mock.calls[0][0])).toContain('SkillForge');
+  });
+
+  it('draws a plain fallback instead of failing when the widget cannot be built (PLAN 7.0a)', async () => {
+    jest.mocked(readWidgetSnapshot).mockRejectedValueOnce(new Error('corrupt snapshot'));
+    registerWidgetTask();
+    const handler = jest.mocked(registerWidgetTaskHandler).mock.calls[0][0];
+    const renderWidget = jest.fn();
+    await handler({
+      widgetInfo: { widgetName: 'SkillForge', widgetId: 1, width: 300, height: 120 },
+      widgetAction: 'WIDGET_UPDATE',
+      renderWidget,
+    } as unknown as Parameters<typeof handler>[0]);
+    expect(renderWidget).toHaveBeenCalledTimes(1);
+    const tree = renderWidget.mock.calls[0][0] as ReactNode;
+    expect(texts(tree)).toEqual(['SkillForge']);
+    expect(primitives(tree)[0].props).toMatchObject({ clickAction: 'OPEN_APP' });
   });
 
   it('draws nothing for a click (the deep link opens natively)', async () => {

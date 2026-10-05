@@ -93,7 +93,7 @@ export function SharePanel({ hasChanges }: Props) {
           label="Open the contributor guide"
           icon="scroll"
           variant="secondary"
-          onPress={() => void Linking.openURL(PROGRESSIONS_GUIDE_URL)}
+          onPress={() => void Linking.openURL(PROGRESSIONS_GUIDE_URL).catch(() => undefined)}
           accessibilityHint="Opens content/progressions/README.md on GitHub in the browser"
           testID="open-contributor-guide"
         />

@@ -7,6 +7,7 @@ import { branchOgLevels, RANK_BRANCHES } from '@/domain/character';
 import { goalProgress, radarAxes, type SessionListItem } from '@/domain/characterView';
 import { EMPTY_OVERLAY } from '@/domain/overlay';
 import { rankLadder } from '@/domain/rankLadder';
+import { importFileSizeProblem, MAX_IMPORT_FILE_BYTES } from '@/lib/importFile';
 import { createAppStore, type AppStore, type BackupFiles } from '@/store/appStore';
 import { setAppStore } from '@/store/useAppStore';
 
@@ -263,6 +264,22 @@ describe('BackupPanel', () => {
     expect(screen.getByText(/Nothing was changed/)).toBeOnTheScreen();
     expect(store.getState().equipmentProfiles).toHaveLength(2);
     expect(screen.queryByTestId('undo-import')).toBeNull();
+  });
+
+  it('shows why a too-large file is not read and changes nothing (PLAN 7.0a)', async () => {
+    const message = importFileSizeProblem(MAX_IMPORT_FILE_BYTES + 1) as string;
+    const store = await startStore({
+      ...files(undefined),
+      pick: async () => {
+        throw new Error(message);
+      },
+    });
+    const user = userEvent.setup();
+    await render(<BackupPanel />);
+    await user.press(screen.getByTestId('import-backup'));
+    await user.press(screen.getByTestId('import-confirm'));
+    expect(await screen.findByText(message, { exact: false })).toBeOnTheScreen();
+    expect(store.getState().equipmentProfiles).toHaveLength(2);
   });
 
   it('imports, then undoes the import from the safety copy', async () => {

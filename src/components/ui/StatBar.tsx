@@ -19,6 +19,8 @@ type Props = {
 };
 
 const DEFAULT_SEGMENTS = 8;
+/** Lines the bars up under each other at the normal font scale. */
+const LABEL_MIN_WIDTH = 76;
 
 /** A labelled attribute bar: icon, name, a short segmented bar and the value. */
 export function StatBar({
@@ -60,7 +62,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   label: {
-    width: 76,
+    // A minimum, not a fixed width: at a large font scale the name grows instead of clipping.
+    minWidth: LABEL_MIN_WIDTH,
   },
   bar: {
     flex: 1,

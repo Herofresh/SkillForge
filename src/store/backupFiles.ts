@@ -9,6 +9,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
 import { BACKUP_MIME_TYPE } from '@/domain/backup';
+import { importFileSizeProblem } from '@/lib/importFile';
 
 import type { BackupFiles, ShareOptions } from './appStore';
 
@@ -40,7 +41,13 @@ async function pick(): Promise<string | undefined> {
     multiple: false,
   });
   if (result.canceled) return undefined;
-  return new File(result.assets[0].uri).text();
+  const asset = result.assets[0];
+  const file = new File(asset.uri);
+  // Checked before reading: the picker allows any file. The thrown message is shown where the
+  // import's other errors are (Settings → Backup, Import progressions).
+  const problem = importFileSizeProblem(asset.size ?? file.size);
+  if (problem !== undefined) throw new Error(problem);
+  return file.text();
 }
 
 function saveSafetyCopy(fileName: string, text: string): string {

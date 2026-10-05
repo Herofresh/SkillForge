@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ONBOARDING_STEPS, onboardingStepNumber, type OnboardingStep } from '@/domain/onboarding';
+import { useAppStore } from '@/store/useAppStore';
 
 import { Border, Colors, Spacing } from '../theme';
 import { PixelButton, PixelIcon, PixelText, Screen, SegmentedBar, type IconName } from '../ui';
@@ -26,6 +27,7 @@ type Props = {
 /**
  * The frame of every onboarding step: a "STEP n / 5" quest bar, the step's title, its scrolling
  * content and a footer with Back / Skip / Next that stays above the content (and the keyboard).
+ * During a replay of a completed onboarding (PLAN 7.0a) it also offers "Back to the app".
  */
 export function OnboardingScaffold({
   step,
@@ -39,6 +41,8 @@ export function OnboardingScaffold({
   testID,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const replaying = useAppStore((state) => state.onboardingReplay);
+  const leaveReplay = useAppStore((state) => state.leaveOnboardingReplay);
   const number = onboardingStepNumber(step);
   const total = ONBOARDING_STEPS.length;
   return (
@@ -62,6 +66,15 @@ export function OnboardingScaffold({
         </View>
       </View>
       <Screen testID={testID}>
+        {replaying && (
+          <PixelButton
+            label="Back to the app"
+            variant="secondary"
+            onPress={leaveReplay}
+            accessibilityHint="Leaves the intro. What you already saved on its steps stays."
+            testID="onboarding-leave"
+          />
+        )}
         <View style={styles.header}>
           <PixelIcon name={icon} size={48} />
           <View style={styles.headerText}>

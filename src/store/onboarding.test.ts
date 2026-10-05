@@ -164,6 +164,32 @@ describe('replayOnboarding (PLAN 5.10)', () => {
     first.close();
   });
 
+  it('"Back to the app" leaves a replay without writing anything (PLAN 7.0a)', async () => {
+    const test = await openTestDatabase();
+    const store = storeFor(test);
+    store.getState().setHeroName('Aria');
+    store.getState().completeOnboarding();
+    expect(store.getState().onboardingReplay).toBe(false);
+
+    store.getState().replayOnboarding();
+    expect(store.getState().onboardingReplay).toBe(true);
+    store.getState().leaveOnboardingReplay();
+    expect(store.getState().onboardingCompletedAt).toBe(NOW);
+    expect(store.getState().onboardingReplay).toBe(false);
+    expect(getSetting(test.db, ONBOARDING_COMPLETED_SETTING)).toBe(NOW);
+    expect(store.getState().profile?.heroName).toBe('Aria');
+    test.close();
+  });
+
+  it('offers no way out of a first onboarding', async () => {
+    const test = await openTestDatabase();
+    const store = storeFor(test);
+    expect(store.getState().onboardingReplay).toBe(false);
+    store.getState().leaveOnboardingReplay();
+    expect(store.getState().onboardingCompletedAt).toBeUndefined();
+    test.close();
+  });
+
   it('ends with a restart: the stored completion opens the tabs again', async () => {
     const path = join(tempDir, 'replay-restart.db');
     const first = await openTestDatabase(path);

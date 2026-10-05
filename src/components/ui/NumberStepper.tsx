@@ -5,6 +5,9 @@ import { Spacing, TOUCH_TARGET } from '../theme';
 import { PixelButton } from './PixelButton';
 import { PixelText } from './PixelText';
 
+/** Lines the steppers up under each other at the normal font scale. */
+const LABEL_MIN_WIDTH = 56;
+
 type Props = {
   /** What the value is, e.g. "Set 1". Also used in the button labels for screen readers. */
   label: string;
@@ -68,7 +71,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   label: {
-    width: 56,
+    // A minimum, not a fixed width: at a large font scale the label grows instead of clipping.
+    minWidth: LABEL_MIN_WIDTH,
   },
   button: {
     minWidth: TOUCH_TARGET + Spacing.md,

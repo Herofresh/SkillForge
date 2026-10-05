@@ -255,13 +255,41 @@ async function handleWidgetTask({
 }: WidgetTaskHandlerProps) {
   // A click opens the deep link natively (OPEN_URI); a removed widget needs nothing drawn.
   if (widgetAction === 'WIDGET_CLICK' || widgetAction === 'WIDGET_DELETED') return;
-  renderWidget(
-    <WidgetFor
-      name={widgetInfo.widgetName}
-      view={await currentView()}
-      widthDp={widgetInfo.width}
-      heightDp={widgetInfo.height}
-    />,
+  try {
+    renderWidget(
+      <WidgetFor
+        name={widgetInfo.widgetName}
+        view={await currentView()}
+        widthDp={widgetInfo.width}
+        heightDp={widgetInfo.height}
+      />,
+    );
+  } catch {
+    // A bad snapshot or layout must not leave the widget blank or crash the task (PLAN 7.0a).
+    renderWidget(<FallbackWidget />);
+  }
+}
+
+/** Text size (sp) of the fallback panel's name. */
+const FALLBACK_TEXT_SIZE = 16;
+
+/** A plain "SkillForge" panel that opens the app, drawn when the real widget can't be. */
+function FallbackWidget() {
+  return (
+    <FlexWidget
+      clickAction="OPEN_APP"
+      style={{
+        height: 'match_parent',
+        width: 'match_parent',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: color(Colors.surface),
+      }}>
+      <TextWidget
+        text="SkillForge"
+        style={{ fontSize: FALLBACK_TEXT_SIZE, color: color(Colors.text) }}
+      />
+    </FlexWidget>
   );
 }
 
