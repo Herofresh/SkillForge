@@ -52,16 +52,17 @@ export const METRIC_LABELS: Readonly<Record<Metric, string>> = {
 export const FOUNDATION_OG_LEVEL = 0;
 
 /**
- * The OG level as a short tag: "Foundation" for level 0, else "Difficulty 5". The UI calls the
- * Overcoming Gravity level "difficulty" (ADR-065); `ogLevel` stays the internal name.
+ * The OG level as a short tag: "Foundation" for level 0, else "Tier 5". The UI calls the
+ * Overcoming Gravity level "tier" (ADR-065); `ogLevel` stays the internal name. Not to be confused
+ * with the Beginner–Elite band of `tierForOgLevel` or the hero class tiers I–III.
  */
 export function formatOgLevel(ogLevel: number): string {
-  return ogLevel === FOUNDATION_OG_LEVEL ? 'Foundation' : `Difficulty ${ogLevel}`;
+  return ogLevel === FOUNDATION_OG_LEVEL ? 'Foundation' : `Tier ${ogLevel}`;
 }
 
-/** The OG level for screen readers: "foundation" for level 0, else "difficulty 5". */
+/** The OG level for screen readers: "foundation" for level 0, else "tier 5". */
 export function spokenOgLevel(ogLevel: number): string {
-  return ogLevel === FOUNDATION_OG_LEVEL ? 'foundation' : `difficulty ${ogLevel}`;
+  return ogLevel === FOUNDATION_OG_LEVEL ? 'foundation' : `tier ${ogLevel}`;
 }
 
 /**

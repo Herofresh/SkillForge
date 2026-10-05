@@ -145,7 +145,7 @@ export function RankLadderSheet({ ladder, onClose, testID = 'rank-ladder' }: Pro
   return (
     <PixelModal visible title="Rank ladder" onClose={onClose} testID={testID}>
       <PixelText variant="small" tone="textMuted" testID={`${testID}-intro`}>
-        {`Your rank is the median of your best Trial's difficulty in each of the ` +
+        {`Your rank is the median of your best Trial's tier in each of the ` +
           `${ladder.rankBranchCount} main branches (now ${formatOgLevel(ladder.medianOgLevel)}). ` +
           `${NON_RANK_NAMES} don't count. Reaching a rank's level in ` +
           `${ladder.branchesForRank} branches always earns it.`}

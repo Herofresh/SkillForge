@@ -284,7 +284,7 @@ src/
                         baseNodes, nodeDraft, newNodeDraft, nodeDraftIssues, saveNodeDraft,
                         resetNode, setNodeHidden, exportOverlay, shareOverlay, previewOverlayImport,
                         importOverlay (merge), pickOverlayFile; deleteAllData (PLAN 7.0b, ADR-065:
-                        files.deleteAppFiles, deleteAllUserData, loadAll, dataResets + 1)
+                        deleteAllUserData, files.deleteAppFiles, loadAll, dataResets + 1)
     backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker);
                         a picked file over MAX_IMPORT_FILE_BYTES is refused before it is read (7.0a);
                         deleteAppFiles: safety copies, skillforge-* cache exports, picker copies,
@@ -531,7 +531,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | Term | Meaning |
 |---|---|
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
-| **Difficulty** | What the UI calls a node's Overcoming Gravity 2 level (`ogLevel`, YAML `og_level`, 0–17; 0 = "Foundation"): "Difficulty 6" (`formatOgLevel`, ADR-065). The code and the docs keep the OG name. |
+| **Tier (UI)** | What the UI calls a node's Overcoming Gravity 2 level (`ogLevel`, YAML `og_level`, 0–17; 0 = "Foundation"): "Tier 6" (`formatOgLevel`, ADR-065). The code and the docs keep the OG name. Distinct from the hero class tiers I–III and from the code's `Tier` bands below (shown only as Beginner … Elite). |
 | **Research note** | A node's `verify:` note: what is inferred or a placeholder. Shown on the node detail only in development builds (`__DEV__`); safety advice belongs in the cues (ADR-065). |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
 | **User-placed node** | A user node, or a built-in node whose edit sets branch, order or og_level. Its order clashes are resolved in the merged tree and an og_level drop next to it is a warning, so a content update can't invalidate a saved overlay (ADR-052). |
@@ -560,7 +560,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Flexibility vs. mobility** | Two branches (ADR-050). `flexibility` is passive range: stretches and yoga poses held for time (splits, pancake, pigeon, lotus, bridge) plus the warm-up staples wrist prep and band dislocates. `mobility` is active range: moving a joint through its range under your own control (CARs, ankle rocks, open book, wall angel, deep squat hold, overhead squat). Flexibility counts towards the rank median, mobility does not. |
 | **Prerequisite** | An edge from another node that must reach `minLevel`. `hard` edges lock the node; `recommended` edges only show a warning. |
 | **ogLevel** | Cross-branch difficulty from 0 to 17, taken from the Overcoming Gravity 2 charts (ADR-007). 0 = foundation exercise below OG2 level 1 (ADR-016). |
-| **Tier** | Beginner 0–5 · Intermediate 6–8 · Advanced 9–12 · Elite 13+ (derived by `tierForOgLevel`). |
+| **Tier** (band, code `Tier`) | Beginner 0–5 · Intermediate 6–8 · Advanced 9–12 · Elite 13+ (derived by `tierForOgLevel`). |
 | **Metric** | What a node measures: `reps`, `hold_s`, `eccentric_s`, or `load_xbw` (load as a multiple of bodyweight). |
 | **Unit** | Normalized volume: 1 rep = 2 s hold = 3 s eccentric = 1 unit. |
 | **Working range** | The prescribed training range for a node, e.g. 5–8 reps or 10–30 s. |

@@ -150,7 +150,7 @@ export function NodeEditorForm({
             testID="editor-change-position"
           />
           <NumberStepper
-            label="Difficulty"
+            label="Tier"
             valueText={formatOgLevel(draft.ogLevel)}
             onDecrement={() => onChange(stepOgLevel(draft, -1))}
             onIncrement={() => onChange(stepOgLevel(draft, 1))}
@@ -161,8 +161,8 @@ export function NodeEditorForm({
             variant="small"
             tone="textMuted"
             accessibilityLabel={spokenOgLevel(draft.ogLevel)}>
-            Difficulty on the Overcoming Gravity scale; it sets the tier and the XP. It shouldn’t be
-            below the exercise above it.
+            Tier on the Overcoming Gravity scale; it sets the band (Beginner to Elite) and the XP.
+            It shouldn’t be below the exercise above it.
           </PixelText>
           {!STRAIGHT_ARM_BRANCHES.includes(draft.branch) && (
             <PixelChip

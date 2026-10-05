@@ -240,7 +240,7 @@ export function guideFacts(): GuideFacts {
 export function buildGuide(facts: GuideFacts): GuideEntry[] {
   const n = guideNumber;
   const attributeNames = list(ATTRIBUTES.map(capitalize));
-  const difficulty = `${n(facts.difficultyBase)} + ${n(facts.difficultyPerOgLevel)} × its difficulty`;
+  const difficulty = `${n(facts.difficultyBase)} + ${n(facts.difficultyPerOgLevel)} × its tier`;
   const example = facts.classExample;
   const entries: Record<GuideTopic, Omit<GuideEntry, 'id'>> = {
     xp: {
@@ -252,7 +252,7 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
       more: [
         `One unit of work is one rep, ${n(facts.holdSecondsPerUnit)} s of hold or ` +
           `${n(facts.eccentricSecondsPerUnit)} s of slow lowering. Each unit pays XP by the ` +
-          `skill’s difficulty: ${difficulty}.`,
+          `skill’s tier: ${difficulty}.`,
         `An exercise where every set met its target pays in full. Reaching at least ` +
           `${percent(facts.partialMinRatio)} % of the target pays ${percent(facts.partialMult)} %, ` +
           `less than that still pays ${percent(facts.failedMult)} %. A hard day is never wasted.`,
@@ -314,7 +314,7 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         'The radar is scaled to your strongest attribute, so it shows the shape of your ' +
           'training rather than the size.',
         'A note appears when your best push and pull skills are more than ' +
-          `${n(facts.pushPullMaxGap)} difficulty levels apart. It is a hint for balance, nothing more.`,
+          `${n(facts.pushPullMaxGap)} tiers apart. It is a hint for balance, nothing more.`,
       ],
     },
     ranks: {
@@ -324,7 +324,7 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         `proficient skill in each of the ${n(facts.rankBranchCount)} rank branches. ` +
         `${list(facts.nonRankBranches)} don’t count towards it.`,
       more: [
-        `The ranks by branch median difficulty: ${facts.ranks
+        `The ranks by branch median tier: ${facts.ranks
           .map(({ rank, min }) => `${rank} ${n(min)}`)
           .join(', ')}.`,
         `A rank is certain once ${n(branchesForMedian(facts.rankBranchCount))} of the ` +

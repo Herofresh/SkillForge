@@ -2226,7 +2226,7 @@ Template:
 - Consequences: a data problem shows as a note instead of a dead end, the manifest asks for less,
   and nothing about the stored data changed, so every earlier release upgrades as before.
 
-## ADR-065: Play texts and data: health disclaimer, "difficulty", Auto Backup kept on, delete all data, release-only research notes, official sources (PLAN 7.0b)
+## ADR-065: Play texts and data: health disclaimer, "tier", Auto Backup kept on, delete all data, release-only research notes, official sources (PLAN 7.0b)
 - Date: 2026-10-05 · Status: Accepted (user decisions 2026-10-05 after the pre-Google-Play review;
   extends ADR-028's backups, ADR-016's `verify:` notes and ADR-055's widget snapshot)
 - Context: before the Play listing, a review found texts that a store reviewer or a user could
@@ -2244,11 +2244,16 @@ Template:
     You train at your own risk." Shown without an extra tap as a framed notice (`HealthNotice`) on
     the first onboarding step (under "The quest") and in Settings → About, and as the last point of
     the guide's safeguards page. No acknowledge step: it informs, it doesn't gate (ADR-023).
-  - **"Difficulty" in the UI**: `formatOgLevel` → "Difficulty 6" (level 0 stays "Foundation"),
-    `spokenOgLevel` → "difficulty 6"; every label that used them follows (tiles, node header, rows,
-    rank crest and ladder, balance note, class challenge text, editor). The guide says "difficulty"
-    ("1 + 0.25 × its difficulty", "difficulty levels apart", "ranks by branch median difficulty:
-    Novice 0, …"). Internal names (`ogLevel`, YAML `og_level`, docs/research) stay: no data change.
+  - **"Tier" in the UI** (user decision 2026-10-05 in review; first drafted as "Difficulty",
+    which is too long for the tree tiles): `formatOgLevel` → "Tier 6" (level 0 stays
+    "Foundation"), `spokenOgLevel` → "tier 6"; every label that used them follows (tiles, node
+    header, rows, rank crest and ladder, balance note, class challenge text, editor stepper and
+    hint, the import preview's field name). The guide says "tier" ("1 + 0.25 × its tier", "tiers
+    apart", "ranks by branch median tier: Novice 0, …"). Internal names (`ogLevel`, YAML
+    `og_level`, `Tier` / `tierForOgLevel` for the Beginner–Elite bands, docs/research) stay: no
+    data change. On screen the bands show only as their names (Beginner … Elite; a screen reader
+    hears "Intermediate tier" from `TierChip`) and the hero class tiers as I–III, so "Tier 6"
+    stays distinguishable.
   - **Not affiliated**: `NOT_AFFILIATED_NOTE` under the sources in About.
   - **Official source links**: the re-hosted OG2 chart PDF → Steven Low's own print PDF
     (`stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf`, linked from his charts page);
@@ -2268,9 +2273,10 @@ Template:
     Backup panel and the guide; the guide no longer promises that uninstalling deletes everything.
   - **Delete all my data** (Settings → Delete data): a sheet lists exactly what goes, offers
     "Export backup first", and enables "Delete everything" only after "I understand". The store's
-    `deleteAllData` deletes the app's files first (`BackupFiles.deleteAppFiles`: the safety copies
-    in `documents/backups/`, the exports `share` left in the cache (`skillforge-*`), the document
-    picker's cache copies and the widget snapshot; failures are reported, not thrown), then
+    `deleteAllData` first runs `deleteAllUserData`, then deletes the app's files
+    (`BackupFiles.deleteAppFiles`: the safety copies in `documents/backups/`, the exports `share`
+    left in the cache (`skillforge-*`), the document picker's cache copies and the widget snapshot;
+    failures are reported, not thrown), so a failed wipe leaves the files too.
     `deleteAllUserData` wipes every user table (sessions + sets, user actions, goals, equipment
     profiles, overlay, all settings, the profile, the Train draft, the progress cache) and writes
     the first-run defaults again (hero profile, Home and Park, a new `defaults_seeded_at`) in ONE

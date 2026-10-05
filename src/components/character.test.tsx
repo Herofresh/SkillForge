@@ -62,9 +62,9 @@ describe('AttributeRadar', () => {
 
 describe('RankCrest', () => {
   it('names the rank and the hint', async () => {
-    await render(<RankCrest rank="Adept" hint="Branch median Difficulty 6" />);
+    await render(<RankCrest rank="Adept" hint="Branch median Tier 6" />);
     expect(screen.getByText('Adept')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Rank: Adept. Branch median Difficulty 6')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Rank: Adept. Branch median Tier 6')).toBeOnTheScreen();
     expect(screen.queryByRole('button')).toBeNull();
   });
 
@@ -94,7 +94,7 @@ describe('RankLadderSheet', () => {
     expect(screen.getByTestId('rank-ladder-apprentice-status')).toHaveTextContent('Next rank');
     expect(screen.getByTestId('rank-ladder-legend-status')).toHaveTextContent('Locked');
     expect(screen.getByTestId('rank-ladder-apprentice-progress')).toHaveTextContent(
-      `0 of ${ladder.branchesForRank} branches at Difficulty 2 or higher · ${ladder.branchesForRank} to go`,
+      `0 of ${ladder.branchesForRank} branches at Tier 2 or higher · ${ladder.branchesForRank} to go`,
     );
     expect(screen.getByTestId('rank-ladder-legend-progress')).toBeOnTheScreen();
     expect(screen.queryByTestId('rank-ladder-novice-progress')).toBeNull();
@@ -105,7 +105,7 @@ describe('RankLadderSheet', () => {
     expect(screen.queryByText('Acrobatics')).toBeNull();
     expect(
       screen.getByLabelText(
-        /^Legend\. Locked\. Branch median Difficulty 13\. 0 of 7 branches at Difficulty 13 or higher/,
+        /^Legend\. Locked\. Branch median Tier 13\. 0 of 7 branches at Tier 13 or higher/,
       ),
     ).toBeOnTheScreen();
     expect(screen.getByLabelText(/^Apprentice\. Next rank\. .*Still below: /)).toBeOnTheScreen();
@@ -122,7 +122,7 @@ describe('RankLadderSheet', () => {
     expect(screen.getByTestId('rank-ladder-apprentice-status')).toHaveTextContent('Reached');
     expect(screen.getByTestId('rank-ladder-adept-status')).toHaveTextContent('Your rank');
     expect(screen.getByTestId('rank-ladder-master-progress')).toHaveTextContent(
-      '1 of 7 branches at Difficulty 9 or higher · 6 to go',
+      '1 of 7 branches at Tier 9 or higher · 6 to go',
     );
   });
 });

@@ -552,9 +552,9 @@ export interface AppState {
   /** Let the user pick a file, then `importBackup` it. */
   importBackupFromFile(): Promise<ImportBackupFileResult>;
   /**
-   * "Delete all my data" (PLAN 7.0b, ADR-065): deletes the app's files (`files.deleteAppFiles`),
-   * then every user table in one transaction with the first-run defaults written again, and
-   * reloads: the app is as after a fresh install and opens onboarding. The in-memory drafts (plan,
+   * "Delete all my data" (PLAN 7.0b, ADR-065): deletes every user table in one transaction with
+   * the first-run defaults written again, then the app's files (`files.deleteAppFiles`; not when
+   * the wipe threw), and reloads: the app is as after a fresh install and opens onboarding. The in-memory drafts (plan,
    * summary, last import) go too. The UI asks for a confirmation first.
    */
   deleteAllData(): DeleteAllDataResult;
@@ -1294,9 +1294,11 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       },
 
       deleteAllData() {
-        // Files first: the widget sync writes a fresh snapshot as soon as the reload lands.
-        const filesLeft = deps.files?.deleteAppFiles() ?? [];
+        // The database first: if its transaction throws, nothing (files included) is deleted, as
+        // the UI then says. The files go before the reload, so the widget sync's fresh snapshot
+        // (written when the reload lands) is not deleted with them.
         deleteAllUserData(db, now());
+        const filesLeft = deps.files?.deleteAppFiles() ?? [];
         set({
           trainPlan: undefined,
           trainSummary: undefined,

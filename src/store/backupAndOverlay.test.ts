@@ -2,6 +2,8 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { sql } from 'drizzle-orm';
+
 import { makeNode, makeSession } from '@/data/testFixtures';
 import { ALL_NODES } from '@/data/skills';
 import { formatIssue } from '@/data/validate';
@@ -427,6 +429,18 @@ describe('delete all my data (PLAN 7.0b)', () => {
     leaveFiles(['widget-snapshot.json']);
     expect(store.getState().deleteAllData()).toEqual({ filesLeft: ['widget-snapshot.json'] });
     expect(store.getState().sessions).toEqual([]);
+    test.close();
+  });
+
+  it('deletes no file when the database wipe fails', async () => {
+    const test = await openTestDatabase();
+    const { files, deletions } = fakeFiles();
+    const store = storeFor(test, files);
+    fillWithData(test, store);
+    test.db.run(sql`DROP TABLE goals`);
+    expect(() => store.getState().deleteAllData()).toThrow();
+    expect(deletions).toEqual([]);
+    expect(store.getState().dataResets).toBe(0);
     test.close();
   });
 

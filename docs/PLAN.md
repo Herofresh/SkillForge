@@ -300,7 +300,7 @@
   scroll at large text; the widget task draws a fallback on errors; `eas.json` is gone; README
   refreshed. No data change.
 - Play texts and data (7.0b, ADR-065, [PR #67](https://github.com/Herofresh/SkillForge/pull/67)): a health disclaimer (`HEALTH_DISCLAIMER`)
-  on onboarding step 1, in About and in the guide; the UI says **"Difficulty 6"** instead of "OG 6"
+  on onboarding step 1, in About and in the guide; the UI says **"Tier 6"** instead of "OG 6"
   (internal names unchanged); "not affiliated" under the sources; node sources point at Steven
   Low's own OG2 PDF and the r/bodyweightfitness wiki instead of re-hosted copies; `verify:` research
   notes only in dev builds (their safety points moved into cues); Auto Backup stays on
@@ -344,8 +344,11 @@
   - Texts in one place: `src/data/notices.ts` (`HEALTH_DISCLAIMER`, `DATA_STORAGE_NOTE`) and
     `NOT_AFFILIATED_NOTE` in `src/data/credits.ts`; `src/components/HealthNotice.tsx` frames the
     disclaimer (onboarding step 1, About); the guide's safeguards page ends with it.
-  - "Difficulty": only `formatOgLevel` / `spokenOgLevel` (`src/domain/format.ts`), the guide, the
-    rank ladder intro and the editor hint changed; everything else formats through them.
+  - "Tier" (user's wording, chosen in review over the first draft's "Difficulty", which is too
+    long for the tree tiles): only `formatOgLevel` / `spokenOgLevel` (`src/domain/format.ts`), the
+    guide, the rank ladder intro, the editor stepper / hint / position sheet and the import
+    preview's field name changed; everything else formats through them. Not seen on a device yet:
+    the "Tier N" fit on the tiles.
   - Sources: mechanical replace in the YAML (calisthenics-101 OG2 PDF → stevenlow.org print PDF,
     BWF v5.4 PDF → reddit.com/r/bodyweightfitness/wiki/exercises), noted in
     docs/research/progressions.md. The reddit URL could not be fetched from the agent's
@@ -1519,7 +1522,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   app" exit on a replayed onboarding, scrolling sheets at large text, widget task fallback,
   `eas.json` removed, README refresh (ADR-064, [PR #66](https://github.com/Herofresh/SkillForge/pull/66))
 - [x] 7.0b Play texts and data (ADR-065, [PR #67](https://github.com/Herofresh/SkillForge/pull/67); user decisions 2026-10-05 after the pre-Play
-  review): health disclaimer in onboarding/About/guide, "OG" → "Difficulty" in the UI, "not
+  review): health disclaimer in onboarding/About/guide, "OG" → "Tier" in the UI, "not
   affiliated" credit, official source links, research `verify:` notes only in dev builds (safety
   points moved into cues), Auto Backup kept on with honest texts, Settings → Delete all my data
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is

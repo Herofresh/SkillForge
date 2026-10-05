@@ -121,7 +121,7 @@ describe('the guide', () => {
     expect(text('generator')).toContain('your last 5 sessions');
     expect(text('generator')).toContain('up to 5 per exercise');
     expect(text('generator')).toContain('balance and mobility work');
-    expect(text('xp')).toContain('1 + 0.25 × its difficulty');
+    expect(text('xp')).toContain('1 + 0.25 × its tier');
   });
 
   it('formats numbers with at most two decimals', () => {

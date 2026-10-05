@@ -50,7 +50,7 @@ export const NODE_FIELD_LABELS: Readonly<Record<EditableNodeField, string>> = {
   description: 'description',
   branch: 'branch',
   chainOrder: 'position',
-  ogLevel: 'difficulty',
+  ogLevel: 'tier',
   metric: 'metric',
   workingRange: 'working range',
   trial: 'Trial',
