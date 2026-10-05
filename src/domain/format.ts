@@ -51,14 +51,17 @@ export const METRIC_LABELS: Readonly<Record<Metric, string>> = {
 /** OG level 0 marks a foundation node below the OG2 chart (see the progressions overview). */
 export const FOUNDATION_OG_LEVEL = 0;
 
-/** The OG level as a short tag: "Foundation" for level 0, else "OG 5". */
+/**
+ * The OG level as a short tag: "Foundation" for level 0, else "Difficulty 5". The UI calls the
+ * Overcoming Gravity level "difficulty" (ADR-064); `ogLevel` stays the internal name.
+ */
 export function formatOgLevel(ogLevel: number): string {
-  return ogLevel === FOUNDATION_OG_LEVEL ? 'Foundation' : `OG ${ogLevel}`;
+  return ogLevel === FOUNDATION_OG_LEVEL ? 'Foundation' : `Difficulty ${ogLevel}`;
 }
 
-/** The OG level for screen readers: "foundation" for level 0, else "OG level 5". */
+/** The OG level for screen readers: "foundation" for level 0, else "difficulty 5". */
 export function spokenOgLevel(ogLevel: number): string {
-  return ogLevel === FOUNDATION_OG_LEVEL ? 'foundation' : `OG level ${ogLevel}`;
+  return ogLevel === FOUNDATION_OG_LEVEL ? 'foundation' : `difficulty ${ogLevel}`;
 }
 
 /**

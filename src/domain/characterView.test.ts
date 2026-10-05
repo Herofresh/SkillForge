@@ -57,8 +57,10 @@ describe('nextRank', () => {
 
 describe('rankHint', () => {
   it('shows the median and the next threshold', () => {
-    expect(rankHint(0, nextRank('Novice'))).toBe('Branch median Foundation · Apprentice at OG 2');
-    expect(rankHint(14, undefined)).toBe('Branch median OG 14 · the highest rank');
+    expect(rankHint(0, nextRank('Novice'))).toBe(
+      'Branch median Foundation · Apprentice at Difficulty 2',
+    );
+    expect(rankHint(14, undefined)).toBe('Branch median Difficulty 14 · the highest rank');
   });
 });
 
@@ -89,7 +91,7 @@ describe('balanceNote', () => {
   it('names the weaker side', () => {
     const note = balanceNote({ push: 8, pull: 2, core: 0, legs: 0, balance: 0, mobility: 0 });
     expect(note.weaker).toBe('pull');
-    expect(note.message).toContain('OG 8');
+    expect(note.message).toContain('Difficulty 8');
     expect(note.message).toContain('pull work');
   });
 });

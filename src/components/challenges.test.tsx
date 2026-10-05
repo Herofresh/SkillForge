@@ -52,7 +52,9 @@ describe('challenge words', () => {
       medianOgLevel: 0,
     };
     const [part] = ruleParts({ kind: 'rank', rank: 'Adept' }, facts);
-    expect(partText(part)).toBe('You are Novice · branch median Foundation · Adept at OG 6');
+    expect(partText(part)).toBe(
+      'You are Novice · branch median Foundation · Adept at Difficulty 6',
+    );
   });
 });
 

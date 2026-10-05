@@ -161,8 +161,8 @@ export function NodeEditorForm({
             variant="small"
             tone="textMuted"
             accessibilityLabel={spokenOgLevel(draft.ogLevel)}>
-            Overcoming Gravity level; it sets the tier and the XP. It shouldn’t be below the
-            exercise above it.
+            Difficulty on the Overcoming Gravity scale; it sets the tier and the XP. It shouldn’t be
+            below the exercise above it.
           </PixelText>
           {!STRAIGHT_ARM_BRANCHES.includes(draft.branch) && (
             <PixelChip

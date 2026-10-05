@@ -33,14 +33,14 @@ describe('formatTrial', () => {
 });
 
 describe('OG level labels', () => {
-  it('calls level 0 a foundation node instead of "OG 0"', () => {
+  it('calls level 0 a foundation node instead of "Difficulty 0"', () => {
     expect(formatOgLevel(0)).toBe('Foundation');
     expect(spokenOgLevel(0)).toBe('foundation');
   });
 
   it('shows other levels as OG n', () => {
-    expect(formatOgLevel(5)).toBe('OG 5');
-    expect(spokenOgLevel(5)).toBe('OG level 5');
+    expect(formatOgLevel(5)).toBe('Difficulty 5');
+    expect(spokenOgLevel(5)).toBe('difficulty 5');
   });
 });
 
