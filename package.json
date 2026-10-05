@@ -73,6 +73,7 @@
     "lockfile:fix": "node scripts/lockfile.ts fix",
     "build:apk": "tsx scripts/buildApk.ts",
     "build:apk:universal": "tsx scripts/buildApk.ts --universal",
+    "build:aab": "tsx scripts/buildApk.ts --aab",
     "icon:build": "tsx scripts/iconBuild.ts",
     "animations:sheet": "tsx scripts/animationSheetBuild.ts",
     "companion:sheet": "tsx scripts/companionSheetBuild.ts"

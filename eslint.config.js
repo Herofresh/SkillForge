@@ -7,6 +7,15 @@ module.exports = defineConfig([
   expoConfig,
   prettierConfig,
   {
-    ignores: ['dist/*', '.expo/*', 'node_modules/*', 'coverage/*', 'expo-env.d.ts'],
+    // .claude/: agent worktrees inside the checkout (each lints itself); android/: generated.
+    ignores: [
+      'dist/*',
+      '.expo/*',
+      'node_modules/*',
+      'coverage/*',
+      'expo-env.d.ts',
+      '.claude/**',
+      'android/**',
+    ],
   },
 ]);

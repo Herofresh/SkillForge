@@ -1,18 +1,32 @@
 import {
+  UPLOAD_PROPERTIES as PLUGIN_UPLOAD_PROPERTIES,
+  UPLOAD_SIGNING_FLAG as PLUGIN_FLAG,
+} from '../plugins/withUploadSigning';
+
+import {
+  KNOWN_ABIS,
   PHONE_ABIS,
   RELEASE_SIGNER_SHA256,
+  UPLOAD_PROPERTIES,
+  UPLOAD_SIGNER_SHA256,
+  UPLOAD_SIGNING_FLAG,
+  aabFileName,
   UNIVERSAL_ABIS,
   abiLabel,
   apksignerPath,
   apkFileName,
   appVersion,
   gradleCommand,
+  keytoolCandidates,
   localPropertiesContent,
+  missingUploadProperties,
   parseBuildArgs,
+  parseKeytoolDigests,
   parseSignerDigests,
   prebuildArgs,
   resolveSdkDir,
   signerProblem,
+  uploadSignerProblem,
 } from './buildApkConfig';
 
 describe('parseBuildArgs', () => {
@@ -22,7 +36,21 @@ describe('parseBuildArgs', () => {
       clean: false,
       skipPrebuild: false,
       help: false,
+      aab: false,
     });
+  });
+
+  it('builds an App Bundle with every ABI and a clean prebuild (PLAN 7.2)', () => {
+    expect(parseBuildArgs(['--aab'])).toEqual({
+      abis: [...KNOWN_ABIS],
+      clean: true,
+      skipPrebuild: false,
+      help: false,
+      aab: true,
+    });
+    expect(() => parseBuildArgs(['--aab', '--universal'])).toThrow('every ABI');
+    expect(() => parseBuildArgs(['--aab', '--abis=x86_64'])).toThrow('every ABI');
+    expect(() => parseBuildArgs(['--aab', '--skip-prebuild'])).toThrow('clean prebuild');
   });
 
   it('builds arm64 + x86_64 with --universal', () => {
@@ -171,5 +199,78 @@ describe('release signer check (ADR-043)', () => {
       '/sdk/build-tools/10.0.0/apksigner',
     );
     expect(apksignerPath('/sdk', ['.DS_Store'], 'darwin')).toBeUndefined();
+  });
+});
+
+describe('App Bundle for Google Play (PLAN 7.2, ADR-066)', () => {
+  const keytoolOutput = (digest: string) =>
+    `Signer #1:\n\nCertificate #1:\nOwner: CN=SkillForge\nCertificate fingerprints:\n\t SHA1: 12:34\n\t SHA256: ${digest}\nSignature algorithm name: SHA384withRSA\n`;
+  const colons = (hex: string) => hex.toUpperCase().match(/../g)?.join(':') ?? '';
+
+  it('runs bundleRelease with the upload signing switch the plugin reads', () => {
+    expect(gradleCommand('win32', KNOWN_ABIS, true)).toEqual({
+      command: 'gradlew.bat',
+      args: [
+        'bundleRelease',
+        '--no-daemon',
+        '-PreactNativeArchitectures=arm64-v8a,armeabi-v7a,x86,x86_64',
+        '-PskillforgeUploadSigning=true',
+      ],
+    });
+    expect(gradleCommand('linux', PHONE_ABIS).args).not.toContain('-PskillforgeUploadSigning=true');
+    expect(UPLOAD_SIGNING_FLAG).toBe(PLUGIN_FLAG);
+    expect([...UPLOAD_PROPERTIES]).toEqual([...PLUGIN_UPLOAD_PROPERTIES]);
+  });
+
+  it('names the bundle by version, versionCode and commit', () => {
+    expect(aabFileName({ version: '0.8.0', versionCode: 8, commit: 'abc1234' })).toBe(
+      'SkillForge-0.8.0-vc8-abc1234.aab',
+    );
+    expect(aabFileName({ version: '0.8.0', versionCode: 8 })).toBe('SkillForge-0.8.0-vc8.aab');
+  });
+
+  it('lists the upload properties neither gradle.properties nor the environment sets', () => {
+    const file = [
+      '# comment',
+      'SKILLFORGE_UPLOAD_STORE_FILE=C:/keys/upload.jks',
+      'SKILLFORGE_UPLOAD_KEY_ALIAS : upload',
+      'org.gradle.jvmargs=-Xmx4g',
+    ].join('\r\n');
+    expect(missingUploadProperties(file, {})).toEqual([
+      'SKILLFORGE_UPLOAD_STORE_PASSWORD',
+      'SKILLFORGE_UPLOAD_KEY_PASSWORD',
+    ]);
+    expect(
+      missingUploadProperties(file, {
+        ORG_GRADLE_PROJECT_SKILLFORGE_UPLOAD_STORE_PASSWORD: 'x',
+        ORG_GRADLE_PROJECT_SKILLFORGE_UPLOAD_KEY_PASSWORD: 'x',
+      }),
+    ).toEqual([]);
+    expect(missingUploadProperties('', {})).toEqual([...UPLOAD_PROPERTIES]);
+  });
+
+  it('reads keytool digests and accepts only the upload key', () => {
+    expect(parseKeytoolDigests(keytoolOutput(colons(UPLOAD_SIGNER_SHA256)))).toEqual([
+      UPLOAD_SIGNER_SHA256,
+    ]);
+    expect(uploadSignerProblem([UPLOAD_SIGNER_SHA256])).toBeUndefined();
+    expect(uploadSignerProblem([])).toMatch('no signer');
+    // The debug key that signs the sideloaded APKs is not the upload key.
+    expect(uploadSignerProblem([RELEASE_SIGNER_SHA256])).toMatch(RELEASE_SIGNER_SHA256);
+  });
+
+  it('pins the fingerprint of the key created in PLAN 7.1', () => {
+    expect(colons(UPLOAD_SIGNER_SHA256)).toBe(
+      '02:7D:80:6E:F6:CA:05:E3:45:3C:70:0C:1B:D9:F4:34:9F:6B:58:F8:A4:FF:E7:65:8E:C9:E2:75:F5:85:72:5D',
+    );
+  });
+
+  it('looks for keytool in JAVA_HOME, then Android Studio, then PATH', () => {
+    expect(keytoolCandidates({ JAVA_HOME: 'C:\\jdk' }, 'win32')).toEqual([
+      'C:\\jdk\\bin\\keytool.exe',
+      'C:\\Program Files\\Android\\Android Studio\\jbr\\bin\\keytool.exe',
+      'keytool.exe',
+    ]);
+    expect(keytoolCandidates({}, 'linux')).toEqual(['keytool']);
   });
 });

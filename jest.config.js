@@ -15,6 +15,9 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  // Agent worktrees live under .claude/worktrees/ inside the checkout; each runs its own tests.
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/.claude/'],
+  modulePathIgnorePatterns: ['<rootDir>/.claude/'],
   // Per-checkout transform cache: the default %TEMP%\jest is shared by every worktree, and two
   // runs writing it at once fail with EPERM on rename (Windows).
   cacheDirectory: '<rootDir>/node_modules/.cache/jest',

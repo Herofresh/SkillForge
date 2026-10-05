@@ -307,13 +307,15 @@
   (`allowBackup: true` explicit) and the texts say Android's device backup may include the data;
   **Settings → Delete data** wipes everything (files, all user tables, the draft, the widget
   snapshot) in one transaction, re-seeds Home and Park and opens onboarding.
+- Play App Bundle (7.1 + 7.2, ADR-066, [PR #68](https://github.com/Herofresh/SkillForge/pull/68)): the user's upload key lives outside the repo;
+  `npm run build:aab` makes a bundle signed with it (clean prebuild, all four ABIs, native debug
+  symbols, signer checked against `UPLOAD_SIGNER_SHA256`). `build:apk` keeps the debug key, so
+  GitHub APKs still update over earlier ones. targetSdk 36 (React Native's default).
 
 ## Next up
 1. The combined emulator check of 7.0a + 7.0b (Delete all my data → onboarding and the widget
    redraw, the manifest, the error fallbacks).
-2. **7.1: the user creates the upload key with `keytool`** (the exact command and the backup
-   advice have already been given to the user; the key never enters the repo), then 7.2
-   `npm run build:aab` signed with it.
+2. 7.3 move-to-Play guide, 7.4 privacy policy (GitHub Pages), then 7.5 Play Console with the user.
 3. Then a release (v0.8.0: 6.15 session length + 7.0a/b) with the usual upgrade check, so it
    reaches the phone.
 4. On the user's phone: install [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0)
@@ -326,6 +328,20 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Play App Bundle (task 7.2, ADR-066, [PR #68](https://github.com/Herofresh/SkillForge/pull/68)):**
+  - Code: `plugins/withUploadSigning.js` (+ `.d.ts`, `.test.ts`; registered in app.json),
+    `scripts/buildApk.ts --aab` (`checkUploadProperties`, `checkUploadSigner`),
+    `scripts/buildApkConfig.ts` (`UPLOAD_SIGNER_SHA256`, `UPLOAD_PROPERTIES`, `UPLOAD_SIGNING_FLAG`,
+    `GRADLE_AAB_PATH`, `aabFileName`, `missingUploadProperties`, `parseKeytoolDigests`,
+    `uploadSignerProblem`, `keytoolCandidates`), `npm run build:aab`. CONTEXT.md → "Play build".
+  - Verified: `npm run build:aab` on this machine → `builds/SkillForge-0.7.0-vc7-6af4fcc.aab`
+    (72.9 MB, SHA-256 e810be9a…9345), BUILD SUCCESSFUL in 47 min (cold, four ABIs); keytool:
+    owner CN=Andre Rivera Arboleda, SHA-256 = the pinned upload key; 52 debug-symbol files in
+    BUNDLE-METADATA; merged manifest permissions as in ADR-066.
+  - Not verified: `npm run build:apk` after the change (the plugin keeps the debug key unless the
+    flag is set; covered by the plugin test, not by a real APK build); uploading to Play (7.5).
+  - Jest and ESLint now ignore `.claude/` (agent worktrees inside the checkout were tested and
+    linted from the main checkout, with false failures).
 - **Play hardening (task 7.0a, ADR-064, [PR #66](https://github.com/Herofresh/SkillForge/pull/66)):**
   - Overlay: `getOverlay` selects `body` as raw text (`sql\`${progressionOverlay.body}\``) and
     parses it itself, so broken JSON is a reported issue, not a throw in Drizzle's JSON decoder.
@@ -1525,12 +1541,15 @@ upgrade check from every earlier release). Any new table or column is additive a
   review): health disclaimer in onboarding/About/guide, "OG" → "Tier" in the UI, "not
   affiliated" credit, official source links, research `verify:` notes only in dev builds (safety
   points moved into cues), Auto Backup kept on with honest texts, Settings → Delete all my data
-- [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
-  done) and keeps it outside the repo with two backups. Gradle reads the path and passwords
-  from `~/.gradle/gradle.properties` or environment variables, never from the repo.
-- [ ] 7.2 `npm run build:aab` (Gradle `bundleRelease`) signed with the upload key; the pinned signer
+- [x] 7.1 Upload key: **the user** created it with `keytool` on 2026-10-05 (`%USERPROFILE%\keys\`,
+  alias `upload`, PKCS12) and keeps two backups outside the repo. Gradle reads the path and
+  passwords from `~/.gradle/gradle.properties`, never from the repo (checked: the properties open
+  the key; SHA-256 02:7D:80:…:72:5D, pinned in 7.2). CONTEXT.md → "Play build".
+- [x] 7.2 `npm run build:aab` (Gradle `bundleRelease`) signed with the upload key; the pinned signer
   check learns the upload key; `build:apk` keeps working for sideloading. `targetSdkVersion`
-  meets Play's current requirement (check it). (`eas.json` is already gone: 7.0a, ADR-064.)
+  meets Play's current requirement (checked in review: 36, from React Native's
+  `libs.versions.toml`). (`eas.json` is already gone: 7.0a, ADR-064.) (ADR-066,
+  [PR #68](https://github.com/Herofresh/SkillForge/pull/68))
 - [ ] 7.3 Move existing installs: the Play build has a different signer, so an install of a GitHub
   APK can't update to it. In-app/README guide: export backup → uninstall → install from Play →
   import. Check that a backup from every earlier release imports.

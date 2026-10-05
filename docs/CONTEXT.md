@@ -100,9 +100,15 @@ scripts/
                         MAESTRO_CLI_NO_ANALYTICS, runs .maestro/ or the flows passed after `--`
   buildApk.ts           npm run build:apk[:universal] (tsx, ADR-039): prebuild, restore package.json,
                         local.properties, gradlew assembleRelease, signer check, then copy to
-                        builds/ + SHA-256
-  buildApkConfig.ts     its pure parts (args, ABIs, SDK path, APK name, commands, the pinned
-                        release signer RELEASE_SIGNER_SHA256 and its apksigner check), Jest-tested
+                        builds/ + SHA-256; npm run build:aab (--aab, ADR-066): upload-key check,
+                        clean prebuild, bundleRelease for every ABI, keytool signer check
+  buildApkConfig.ts     its pure parts (args, ABIs, SDK path, APK/AAB names, commands, the pinned
+                        signers RELEASE_SIGNER_SHA256 (debug key, sideload APKs) and
+                        UPLOAD_SIGNER_SHA256 (Play upload key) with their checks), Jest-tested
+plugins/
+  withUploadSigning.js  config plugin (ADR-066): `upload` signing config from the SKILLFORGE_UPLOAD_*
+                        Gradle properties, used by release only with -PskillforgeUploadSigning;
+                        ndk debugSymbolLevel SYMBOL_TABLE (tested in withUploadSigning.test.ts)
   appIcon.ts            the app icon as a 32×32 pixel grid (roles → Palette keys), the asset list
                         (paths, sizes, cell size per layer) and the preview sheet (PLAN 5.6, ADR-042)
   iconBuild.ts          npm run icon:build: renders appIcon.ts to assets/images/*.png + the preview,
@@ -797,6 +803,7 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 | `npm run e2e` | Maestro E2E flows in `.maestro/` against Expo Go on a running emulator (see "E2E tests"); `npm run e2e -- .maestro/tree.yaml` runs one flow |
 | `npm run build:apk` | Local release APK for phones (arm64-v8a) in `builds/`, no Expo account (ADR-039). `-- --clean` recreates android/, `-- --skip-prebuild` only runs Gradle, `-- --abis=a,b` picks ABIs. ~14 min cold, a few minutes incremental. |
 | `npm run build:apk:universal` | The same with arm64-v8a + x86_64, so it also runs on the x86_64 emulator |
+| `npm run build:aab` | Google Play App Bundle in `builds/` (every ABI, always a clean prebuild), signed with the upload key; fails unless the signer is `UPLOAD_SIGNER_SHA256` (see "Play build") |
 | `npm run animations:sheet` | Render the exercise animations as contact sheets to `docs/screenshots/6.4a-*.png` (v_pull, iconic, patterns). While tuning: `-- --only pull_up,pattern:core --cell 8 --out <png>`. Look at them after every pose change; commit the PNGs. |
 | `npm run companion:sheet` | Render the companion sprite's contact sheets to `docs/screenshots/6.10-*.png` (animations, accessories per slot, weapons, outfits, looks). While tuning: `-- --only iron_helm,warrior,legend --cell 8 --out <png>` (accessory ids, class ids for weapons, outfit labels). Look at them after every art change; commit the PNGs. |
 | `npm run icon:build` | Render the pixel-art app icon (`scripts/appIcon.ts`) to every PNG app.json points at (`assets/images/`) and `docs/screenshots/5.6-app-icon.png`, plus the widget picker previews (`scripts/widgetPreview.ts` → `assets/images/widget-preview.png`, `widget-companion-preview.png`). Run after editing the grid; commit the PNGs. |
@@ -880,6 +887,21 @@ build is needed.
   nodes by `testID` while the map is zoomed (`map-node-<id>`; `map-node-.*` for "any visible node").
 - `hideKeyboard` presses back when no keyboard is open, which leaves a tab (4.6). Tabs keep their
   scroll position between flows; scroll up to a known element first.
+
+## Play build (PLAN 7.1–7.2, ADR-047, ADR-066)
+- **Upload key:** `%USERPROFILE%\keys\skillforge-upload.jks` (alias `upload`, PKCS12, RSA 2048,
+  valid ~27 years), created by the user with `keytool` and backed up twice outside the repo. Never
+  commit it (`*.jks` / `*.keystore` are gitignored). SHA-256 `02:7D:80:…:72:5D` =
+  `UPLOAD_SIGNER_SHA256`.
+- **Gradle properties** in `~/.gradle/gradle.properties` (or `ORG_GRADLE_PROJECT_<name>`):
+  `SKILLFORGE_UPLOAD_STORE_FILE` (forward slashes), `SKILLFORGE_UPLOAD_KEY_ALIAS`,
+  `SKILLFORGE_UPLOAD_STORE_PASSWORD`, `SKILLFORGE_UPLOAD_KEY_PASSWORD` (the same password for a
+  PKCS12 key). `build:aab` reads only their names before the build.
+- **Two signers on purpose:** `build:apk` keeps the debug key so GitHub APKs still update over
+  earlier ones (ADR-043); Play installs carry Google's app signing key (Play App Signing), so a
+  GitHub install can't update to Play; moving needs export → uninstall → install → import (7.3).
+- **Lost upload key:** Play Console → App integrity → request an upload key reset (days); then put
+  the new digest into `UPLOAD_SIGNER_SHA256`.
 
 ## Release upgrade check (PLAN 5.7, ADR-043)
 Before publishing a release, check that it installs over the previous one with the data intact.
