@@ -274,6 +274,7 @@ describe('shared progressions (PLAN 4.8)', () => {
       },
       pick: async () => undefined,
       saveSafetyCopy: () => 'unused',
+      deleteAppFiles: () => [],
     };
     const store = storeFor(test, files);
     addTowelHang(store);

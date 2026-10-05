@@ -37,7 +37,7 @@ nodes:
     sources:
       - https://www.calisthenics-corner.com/skills/front-lever/
       - https://redditbwf.github.io/wiki/recommended_routine.html
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
     review:
       status: draft
       notes: ""
@@ -98,7 +98,7 @@ nodes:
       - Flatten the back; no rounding like in the tuck.
       - Keep the hips level with the shoulders, arms locked.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://redditbwf.github.io/wiki/recommended_routine.html
       - https://www.calisthenics-corner.com/skills/front-lever/
     verify: OG2 level ~4 is inferred from the chart layout.
@@ -131,7 +131,7 @@ nodes:
       - Push the bar away and lean back until the arms are straight and the body is level.
       - Pull back up to the top along the same path, then lower to a hang.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
       - https://calisthenics-parks.com/skills/206-en-ice-cream-makers
     verify: >-
       Not on the OG2 chart; the BWF chart puts the tuck ice cream maker in its intermediate band
@@ -165,7 +165,7 @@ nodes:
       - Squeeze the glutes; do not let the hips pike or sag.
       - Switch the extended leg between sets.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://redditbwf.github.io/wiki/recommended_routine.html
       - https://www.calisthenics-corner.com/skills/front-lever/
     verify: >-
@@ -199,7 +199,7 @@ nodes:
       - Body in one line from shoulders to hips, parallel to the floor.
       - Arms locked, shoulders pulled down.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://antranik.org/ssc/
       - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
     review:
@@ -229,7 +229,7 @@ nodes:
       - Body level with the floor; squeeze the glutes so the hips do not pike.
       - Arms locked, shoulders pulled down.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://en.wikipedia.org/wiki/Front_lever
       - https://antranik.org/ssc/
     verify: >-
@@ -262,7 +262,7 @@ nodes:
       - Whole body horizontal and rigid, a slight hollow.
       - Arms locked; pull the bar towards the hips.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://antranik.org/ssc/
       - https://en.wikipedia.org/wiki/Front_lever
     review:
@@ -293,8 +293,8 @@ nodes:
       - Press the bar towards the hips to rotate the body up to an inverted hang.
       - Lower back to the lever under control and hold it briefly.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: OG2 level 9 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
     review:
       status: draft
@@ -323,8 +323,8 @@ nodes:
       - Keep the arms locked and the body rigid as it passes the front lever.
       - Lower slowly the same way.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: OG2 level 10 is printed; the 3 x 5 rep standard is a placeholder (Steven Low's strength rule).
     review:
       status: draft

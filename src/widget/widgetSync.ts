@@ -1,7 +1,8 @@
 /**
  * Keeps the home-screen widget current (PLAN 6.6, ADR-055). After `loadAll`, the app writes a fresh
  * `WidgetSnapshot` and redraws the widget; then again whenever the parts the widget shows change
- * (a finished session or Trial, a test-out, an import, an edited tree) and whenever the app comes to
+ * (a finished session or Trial, a test-out, an import, an edited tree, "Delete all my data") and
+ * whenever the app comes to
  * the foreground (the day may have changed). One store subscription covers every action that
  * changes the data, so no store action needs to know about the widget.
  */
@@ -54,7 +55,11 @@ export function syncWidget(store: AppStore, deps: WidgetSyncDeps): () => void {
 
   push(true);
   const unsubscribeStore = store.subscribe((state, previous) => {
-    if (
+    if (state.dataResets !== previous.dataResets) {
+      // "Delete all my data" also deleted the snapshot file: write it again and redraw.
+      written = undefined;
+      push(true);
+    } else if (
       state.loaded !== previous.loaded ||
       state.engine !== previous.engine ||
       state.nodes !== previous.nodes ||

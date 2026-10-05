@@ -2,6 +2,8 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { sql } from 'drizzle-orm';
+
 import { makeNode, makeSession } from '@/data/testFixtures';
 import { ALL_NODES } from '@/data/skills';
 import { formatIssue } from '@/data/validate';
@@ -47,6 +49,8 @@ const holdSession = (id: string, day: number, nodeId: string): LoggedSession =>
 function fakeFiles(picked?: string) {
   const saved: { fileName: string; text: string }[] = [];
   const shared: { fileName: string; text: string }[] = [];
+  const deletions: number[] = [];
+  const filesLeft: string[] = [];
   let failSave = false;
   const files: BackupFiles = {
     share: async (fileName, text) => {
@@ -58,8 +62,20 @@ function fakeFiles(picked?: string) {
       saved.push({ fileName, text });
       return `file:///backups/${fileName}`;
     },
+    deleteAppFiles: () => {
+      deletions.push(saved.length);
+      saved.length = 0;
+      return filesLeft;
+    },
   };
-  return { files, saved, shared, failSaves: () => (failSave = true) };
+  return {
+    files,
+    saved,
+    shared,
+    deletions,
+    failSaves: () => (failSave = true),
+    leaveFiles: (names: string[]) => filesLeft.push(...names),
+  };
 }
 
 let ids = 0;
@@ -354,5 +370,86 @@ describe('backup export/import (PLAN 3.3)', () => {
     await expect(storeFor(other).getState().shareBackup()).rejects.toThrow(/no file access/);
     test.close();
     other.close();
+  });
+});
+
+describe('delete all my data (PLAN 7.0b)', () => {
+  it('wipes everything, keeps the defaults and goes back to onboarding', async () => {
+    const test = await openTestDatabase();
+    const { files, saved, deletions } = fakeFiles();
+    const store = storeFor(test, files);
+    fillWithData(test, store);
+    store.getState().completeOnboarding();
+    expect(store.getState().importBackup(store.getState().exportBackup().text).status).toBe(
+      'imported',
+    );
+    store.getState().planTraining('home', 30);
+    store.getState().startTraining();
+    expect(store.getState().activeSession).toBeDefined();
+    expect(saved).toHaveLength(1);
+
+    expect(store.getState().deleteAllData()).toEqual({ filesLeft: [] });
+
+    const state = store.getState();
+    expect(deletions).toEqual([1]);
+    expect(state.sessions).toEqual([]);
+    expect(state.userActions).toEqual([]);
+    expect(state.goals).toEqual([]);
+    expect(state.overlay).toEqual(EMPTY_OVERLAY);
+    expect(state.nodes).toEqual(ALL_NODES);
+    expect(state.engine.totalXp).toBe(0);
+    expect(state.equipmentProfiles.map((profile) => profile.name)).toEqual(['Home', 'Park']);
+    expect(state.profile).toEqual({ createdAt: NOW });
+    expect(state.onboardingCompletedAt).toBeUndefined();
+    expect(state.activeSession).toBeUndefined();
+    expect(state.trainPlan).toBeUndefined();
+    expect(state.lastImport).toBeUndefined();
+    expect(state.dataResets).toBe(1);
+    expect(readNodeProgress(test.db)).toEqual({});
+    // The settings are the ones a fresh install's first load writes (e.g. the starting gear).
+    const fresh = await openTestDatabase(undefined, NOW);
+    storeFor(fresh);
+    expect(readUserData(test.db).settings).toEqual(readUserData(fresh.db).settings);
+    expect(readUserData(test.db).settings).not.toHaveProperty('onboarding_completed_at');
+    fresh.close();
+
+    // A restart finds the same fresh state.
+    const restarted = storeFor(test).getState();
+    expect(restarted.onboardingCompletedAt).toBeUndefined();
+    expect(restarted.activeSession).toBeUndefined();
+    expect(restarted.sessions).toEqual([]);
+    test.close();
+  });
+
+  it('reports the files it could not delete and still wipes the data', async () => {
+    const test = await openTestDatabase();
+    const { files, leaveFiles } = fakeFiles();
+    const store = storeFor(test, files);
+    fillWithData(test, store);
+    leaveFiles(['widget-snapshot.json']);
+    expect(store.getState().deleteAllData()).toEqual({ filesLeft: ['widget-snapshot.json'] });
+    expect(store.getState().sessions).toEqual([]);
+    test.close();
+  });
+
+  it('deletes no file when the database wipe fails', async () => {
+    const test = await openTestDatabase();
+    const { files, deletions } = fakeFiles();
+    const store = storeFor(test, files);
+    fillWithData(test, store);
+    test.db.run(sql`DROP TABLE goals`);
+    expect(() => store.getState().deleteAllData()).toThrow();
+    expect(deletions).toEqual([]);
+    expect(store.getState().dataResets).toBe(0);
+    test.close();
+  });
+
+  it('works without file access (the database part alone)', async () => {
+    const test = await openTestDatabase();
+    const store = storeFor(test);
+    fillWithData(test, store);
+    expect(store.getState().deleteAllData()).toEqual({ filesLeft: [] });
+    expect(readUserData(test.db).sessions).toEqual([]);
+    test.close();
   });
 });

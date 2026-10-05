@@ -26,7 +26,7 @@ nodes:
       - Squeeze the glutes and point the toes; slight hollow body.
     sources:
       - https://redditbwf.github.io/wiki/recommended_routine.html
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
     verify: >-
       OG2 puts ring support at level 1; the easier bar/parallettes support is set to 0.
       The RR may use a 60 s gate instead of 3 x 30 s.
@@ -58,7 +58,7 @@ nodes:
       - Elbows point back, not out; press until the arms are straight.
     sources:
       - https://redditbwf.github.io/wiki/recommended_routine.html
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
     review:
       status: draft
       notes: ""
@@ -84,8 +84,9 @@ nodes:
       - Start at the top of a support hold, arms straight.
       - Lower slowly and evenly until the shoulders are just below the elbows.
       - Step or jump back to the top; do not press up.
+      - On a straight bar it is harder on the shoulders; only go as deep as stays pain-free.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://stevenlow.org/prilepin-tables-for-bodyweight-strength-isometric-and-eccentric-exercises/
     verify: >-
       OG2 levels the negative on dip bars/rings; the straight-bar option (Home profile) is our
@@ -117,7 +118,7 @@ nodes:
       - The higher the feet, the harder it gets; press to straight arms.
     sources:
       - https://redditbwf.github.io/wiki/recommended_routine.html
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
     review:
       status: draft
       notes: ""
@@ -144,7 +145,7 @@ nodes:
       - Press back to straight arms without shrugging.
     sources:
       - https://redditbwf.github.io/wiki/recommended_routine.html
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
     review:
       status: draft
       notes: ""
@@ -207,8 +208,8 @@ nodes:
       - Lower until the head touches the floor, with head and hands forming a triangle.
       - Squeeze the glutes and abs so the back does not arch; press to straight arms.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     review:
       status: draft
       notes: ""
@@ -240,8 +241,8 @@ nodes:
       - Lower until the shoulders are just below the elbows; keep the rings from drifting out.
       - Press back up to straight arms and turn the rings slightly out at the top.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     review:
       status: draft
       notes: ""
@@ -266,8 +267,8 @@ nodes:
       - Lower until the shoulders are near the hands, elbows pointing forward.
       - Press all the way up and push the shoulders to the ears at the top.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     review:
       status: draft
       notes: ""
@@ -298,7 +299,7 @@ nodes:
       - Lower slowly with the fingers gripping the floor to keep balance.
       - Keep the body tight and press straight up to lockout.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://gmb.io/freestanding-handstand/
     verify: >-
       OG2 level: the chart puts freestanding HSPU at about 6-7; set to 7 here.

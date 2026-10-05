@@ -94,7 +94,7 @@ describe('rankLadder', () => {
   });
 
   it('marks the ranks below the current one reached and counts what the next one needs', () => {
-    // 7 branches at OG 6 → median 6 → Adept; Master needs OG 9.
+    // 7 branches at Tier 6 → median 6 → Adept; Master needs Tier 9.
     const branchLevels = firstAt(branchesForMedian(RANK_BRANCHES.length), minOf('Adept'));
     branchLevels.handstand = minOf('Master');
     branchLevels.core = 3;
@@ -111,7 +111,7 @@ describe('rankLadder', () => {
     const atMaster = RANK_BRANCHES.filter((branch) => branchLevels[branch] >= minOf('Master'));
     expect(master.branchesAtLevel).toBe(atMaster.length);
     expect(master.branchesToGo).toBe(ladder.branchesForRank - atMaster.length);
-    // Closest first: the branches at OG 6, then core at 3, then the zeros.
+    // Closest first: the branches at Tier 6, then core at 3, then the zeros.
     const below = master.branchesBelow.map((peak) => peak.ogLevel);
     expect(below).toEqual([...below].sort((a, b) => b - a));
     expect(master.branchesBelow).toHaveLength(RANK_BRANCHES.length - atMaster.length);
@@ -176,14 +176,14 @@ describe('rankLadder', () => {
 describe('ladder texts', () => {
   it('names what a rank needs', () => {
     expect(rankRequirement({ minMedianOgLevel: 0 })).toBe('Where every hero starts');
-    expect(rankRequirement({ minMedianOgLevel: 6 })).toBe('Branch median OG 6');
+    expect(rankRequirement({ minMedianOgLevel: 6 })).toBe('Branch median Tier 6');
   });
 
   it('says how far a rank above is, and nothing for a reached one', () => {
     const ladder = rankLadder(firstAt(3, 6));
     const adept = stepOf(ladder.steps, 'Adept');
     expect(rankProgressText(adept, ladder.branchesForRank)).toBe(
-      `3 of ${ladder.branchesForRank} branches at OG 6 or higher · ${ladder.branchesForRank - 3} to go`,
+      `3 of ${ladder.branchesForRank} branches at Tier 6 or higher · ${ladder.branchesForRank - 3} to go`,
     );
     expect(rankProgressText(stepOf(ladder.steps, 'Novice'), ladder.branchesForRank)).toBe('');
   });

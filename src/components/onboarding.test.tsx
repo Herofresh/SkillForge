@@ -76,16 +76,16 @@ describe('NodeRow', () => {
     await render(<NodeRow node={node('tuck_planche')} status="Goal" />);
     expect(screen.getByText('Tuck planche')).toBeOnTheScreen();
     expect(screen.getByText('Beginner')).toBeOnTheScreen();
-    expect(screen.getByText('OG 5')).toBeOnTheScreen();
+    expect(screen.getByText('Tier 5')).toBeOnTheScreen();
     expect(screen.getByText('Straight-arm')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Tuck planche, OG level 5, straight-arm, Goal')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Tuck planche, tier 5, straight-arm, Goal')).toBeOnTheScreen();
   });
 
   it('is a checkbox when it picks a node', async () => {
     const onPress = jest.fn();
     const user = userEvent.setup();
     await render(<NodeRow node={node('pull_up')} role="checkbox" selected onPress={onPress} />);
-    const row = screen.getByRole('checkbox', { name: 'Pull-up, OG level 2' });
+    const row = screen.getByRole('checkbox', { name: 'Pull-up, tier 2' });
     expect(row).toBeChecked();
     await user.press(row);
     expect(onPress).toHaveBeenCalled();

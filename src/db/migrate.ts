@@ -5,13 +5,10 @@
  */
 import { migrate } from 'drizzle-orm/expo-sqlite/migrator';
 
-import { DEFAULT_EQUIPMENT_PROFILES } from '@/domain/equipment';
-
 import type { AppDb } from './database';
-import { insertEquipmentProfile } from './equipmentProfileRepository';
+import { writeDefaults } from './defaults';
 import { META_KEYS, getMeta, setMeta } from './metaRepository';
 import migrations from './migrations/migrations';
-import { createProfile } from './profileRepository';
 import { meta } from './schema';
 
 /** The schema version this build knows: the number of bundled migrations. */
@@ -30,13 +27,7 @@ function hasMetaTable(db: AppDb): boolean {
 /** Seeds the hero profile and the Home and Park equipment profiles once, on the first run. */
 export function seedDefaults(db: AppDb, now: number): void {
   if (getMeta(db, META_KEYS.defaultsSeededAt) !== undefined) return;
-  db.transaction((tx) => {
-    createProfile(tx, now);
-    DEFAULT_EQUIPMENT_PROFILES.forEach((profile, position) =>
-      insertEquipmentProfile(tx, profile, position),
-    );
-    setMeta(tx, META_KEYS.defaultsSeededAt, String(now));
-  });
+  db.transaction((tx) => writeDefaults(tx, now));
 }
 
 /**

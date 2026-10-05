@@ -227,7 +227,10 @@ src/
                         companionRole, companionColors(look)
       index.ts          companionFrame / companionFrames / companionStill (grids for app, widget,
                         sheets)
-    credits.ts          About screen content: CONTENT_SOURCES, FONT_CREDITS, OFL_CREDIT
+    credits.ts          About screen content: CONTENT_SOURCES, NOT_AFFILIATED_NOTE, FONT_CREDITS,
+                        OFL_CREDIT
+    notices.ts          texts shown in several places (ADR-065): HEALTH_DISCLAIMER (+ title),
+                        DATA_STORAGE_NOTE (on this phone; Android's device backup may include it)
     testFixtures.ts     synthetic nodes for unit tests
     skills/
       index.ts          ALL_NODES, NODE_BY_ID (what the app imports)
@@ -252,10 +255,12 @@ src/
     database.ts         AppDb type, createDatabase(client) (foreign keys on)
     openAppDatabase.ts  opens skillforge.db with expo-sqlite (app only)
     migrate.ts          migrateDatabase: version guard, migrations, schema_version, first-run seed
+    defaults.ts         writeDefaults: hero profile, Home and Park, defaults_seeded_at (seed + wipe)
     activeSessionRepository.ts  the Train draft row (get/save/clear, ADR-034)
     *Repository.ts      session, userAction, goal, equipmentProfile, nodeProgress (cache), profile,
                         settings, meta, overlay: small sync functions taking AppDb (or a transaction)
-    userDataRepository.ts  readUserData / replaceUserData (all user tables, one transaction)
+    userDataRepository.ts  readUserData / replaceUserData (all user tables, one transaction);
+                        deleteAllUserData (wipe + writeDefaults, one transaction, meta schema kept)
     rowGuards.ts        oneOf/optional checks for values read back
     testing/            TEST-ONLY: nodeSqliteClient (expo-sqlite API on node:sqlite), testDatabase (ADR-027)
   store/                Zustand store: UI actions -> domain -> repositories
@@ -278,9 +283,12 @@ src/
                         setting, passed to every recompute / applySession); lastImport + undoLastImport (PLAN 4.6); editor (ADR-036):
                         baseNodes, nodeDraft, newNodeDraft, nodeDraftIssues, saveNodeDraft,
                         resetNode, setNodeHidden, exportOverlay, shareOverlay, previewOverlayImport,
-                        importOverlay (merge), pickOverlayFile
+                        importOverlay (merge), pickOverlayFile; deleteAllData (PLAN 7.0b, ADR-065:
+                        deleteAllUserData, files.deleteAppFiles, loadAll, dataResets + 1)
     backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker);
-                        a picked file over MAX_IMPORT_FILE_BYTES is refused before it is read (7.0a)
+                        a picked file over MAX_IMPORT_FILE_BYTES is refused before it is read (7.0a);
+                        deleteAppFiles: safety copies, skillforge-* cache exports, picker copies,
+                        widget snapshot
     bootstrap.ts        startApp(): open, migrate, create store, loadAll (once)
     useAppStore.ts      useAppStore(selector) hook for components below DataGate
   components/           reusable UI components (visual language: docs/DESIGN.md, ADR-030)
@@ -342,8 +350,10 @@ src/
                         confirmation (onboarding, Settings)
     settings/           BackupPanel (export, import confirm, rejection issues, undo), AboutPanel,
                         ProgressionsPanel (count of tree changes → My progressions),
-                        ReplayOnboardingPanel (confirm → replayOnboarding), GuidePanel ("How
-                        SkillForge works": open the guide, the widgets' "i"; 6.10c)
+                        ReplayOnboardingPanel (confirm → replayOnboarding), DeleteDataPanel
+                        (what goes, export first, acknowledge → deleteAllData; 7.0b), GuidePanel
+                        ("How SkillForge works": open the guide, the widgets' "i"; 6.10c)
+    HealthNotice.tsx    the framed health disclaimer (onboarding step 1, About; ADR-065)
     editor/             node editor (PLAN 4.7–4.8, ADR-036): NodeEditorBody (screen body: live
                         issues, Save/Cancel), NodeEditorForm (sections with inline IssueNotes),
                         PositionSheet, IssueNotes, CustomBadge, OverlayEntryRow, SharePanel;
@@ -408,8 +418,10 @@ src/
                         that opens the app if drawing fails, 7.0a), redrawWidgets (both);
                         the only file that imports the library ('use no memo': no React Compiler)
     widgetStorage.ts    the snapshot file `widget-snapshot.json` in the document directory
+                        (write / read / deleteWidgetSnapshot)
     widgetSync.ts       startWidgetSync(store) from bootstrap: write + redraw after loadAll, on
-                        engine/nodes changes and on foreground (syncWidget, tested with fakes)
+                        engine/nodes changes, after a wipe (dataResets) and on foreground
+                        (syncWidget, tested with fakes)
 index.ts                app entry (package.json main): expo-router/entry + the widget task registration
 assets/images/          app icon, adaptive icon layers, splash, favicon, widget-preview.png,
                         widget-companion-preview.png: GENERATED by
@@ -519,6 +531,8 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | Term | Meaning |
 |---|---|
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
+| **Tier (UI)** | What the UI calls a node's Overcoming Gravity 2 level (`ogLevel`, YAML `og_level`, 0–17; 0 = "Foundation"): "Tier 6" (`formatOgLevel`, ADR-065). The code and the docs keep the OG name. Distinct from the hero class tiers I–III and from the code's `Tier` bands below (shown only as Beginner … Elite). |
+| **Research note** | A node's `verify:` note: what is inferred or a placeholder. Shown on the node detail only in development builds (`__DEV__`); safety advice belongs in the cues (ADR-065). |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
 | **User-placed node** | A user node, or a built-in node whose edit sets branch, order or og_level. Its order clashes are resolved in the merged tree and an og_level drop next to it is a warning, so a content update can't invalidate a saved overlay (ADR-052). |
 | **Hero class** | A cosmetic title the hero earns (PLAN 6.9, ADR-057): `HERO_CLASSES` in `src/data/classes.ts`. Every class but the starting Recruit has three **tiers** (e.g. Warrior → Veteran → Warlord) of flat thresholds (attribute points, sessions or rank) that only grow with training. Reached tiers are derived on every engine change and kept forever in the `hero_classes` setting; the hero wears one class. No effect on XP, the generator or the safeguards. |
@@ -546,7 +560,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Flexibility vs. mobility** | Two branches (ADR-050). `flexibility` is passive range: stretches and yoga poses held for time (splits, pancake, pigeon, lotus, bridge) plus the warm-up staples wrist prep and band dislocates. `mobility` is active range: moving a joint through its range under your own control (CARs, ankle rocks, open book, wall angel, deep squat hold, overhead squat). Flexibility counts towards the rank median, mobility does not. |
 | **Prerequisite** | An edge from another node that must reach `minLevel`. `hard` edges lock the node; `recommended` edges only show a warning. |
 | **ogLevel** | Cross-branch difficulty from 0 to 17, taken from the Overcoming Gravity 2 charts (ADR-007). 0 = foundation exercise below OG2 level 1 (ADR-016). |
-| **Tier** | Beginner 0–5 · Intermediate 6–8 · Advanced 9–12 · Elite 13+ (derived by `tierForOgLevel`). |
+| **Tier** (band, code `Tier`) | Beginner 0–5 · Intermediate 6–8 · Advanced 9–12 · Elite 13+ (derived by `tierForOgLevel`). |
 | **Metric** | What a node measures: `reps`, `hold_s`, `eccentric_s`, or `load_xbw` (load as a multiple of bodyweight). |
 | **Unit** | Normalized volume: 1 rep = 2 s hold = 3 s eccentric = 1 unit. |
 | **Working range** | The prescribed training range for a node, e.g. 5–8 reps or 10–30 s. |

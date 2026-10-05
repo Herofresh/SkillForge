@@ -26,7 +26,7 @@ export function PositionSheet({ chain, afterId, onPick, onClose }: Props) {
       closeLabel="Cancel"
       testID="position-sheet">
       <PixelText variant="small" tone="textMuted">
-        Pick the exercise it follows in the column. Its difficulty is kept between its neighbours.
+        Pick the exercise it follows in the column. Its tier is kept between its neighbours.
       </PixelText>
       <ScrollView nestedScrollEnabled style={styles.scroll} contentContainerStyle={styles.list}>
         <PixelButton

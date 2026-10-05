@@ -11,6 +11,7 @@
       "icon": "./assets/images/icon.png"
     },
     "android": {
+      "allowBackup": true,
       "permissions": ["android.permission.VIBRATE"],
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",

@@ -76,6 +76,16 @@ describe('syncWidget', () => {
     expect(deps.redraw).toHaveBeenCalledTimes(2);
   });
 
+  it('rewrites and redraws after "Delete all my data", even when the data looks the same', () => {
+    const { deps, written } = fakeDeps();
+    const store = fakeStore();
+    syncWidget(store, deps);
+    store.setState({ dataResets: 1 });
+    expect(written).toHaveLength(2);
+    expect(written[1]).toEqual(written[0]);
+    expect(deps.redraw).toHaveBeenCalledTimes(2);
+  });
+
   it('reports a failed write instead of throwing', () => {
     const { deps } = fakeDeps();
     const error = new Error('disk full');

@@ -81,7 +81,7 @@ nodes:
       - Lift the hips off the floor and keep the chest up.
     sources:
       - https://redditbwf.github.io/wiki/recommended_routine.html
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: Not levelled in the OG2 chart; 0 is assumed.
     review:
       status: draft
@@ -110,7 +110,7 @@ nodes:
       - Knees pulled up to the chest, feet off the floor.
       - Keep the hips level with or slightly in front of the hands.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://redditbwf.github.io/wiki/recommended_routine.html
     review:
       status: draft
@@ -138,7 +138,7 @@ nodes:
       - Lower slowly under control.
     sources:
       - https://redditbwf.github.io/wiki/recommended_routine.html
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: Not levelled in the OG2 chart; level 1 is inferred. Uses the RR core range 3 x 8-12.
     review:
       status: draft
@@ -168,7 +168,7 @@ nodes:
       - Lock the knees and point the toes.
       - Arms locked, shoulders pushed down, chest up.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://redditbwf.github.io/wiki/recommended_routine.html
     verify: OG2 places the L-sit at about level 2 (approximate anchor).
     review:
@@ -201,7 +201,7 @@ nodes:
       - Lower slowly; don't swing into the next rep.
     sources:
       - https://redditbwf.github.io/wiki/recommended_routine.html
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: Not levelled in the OG2 chart; level 3 is inferred. Uses the RR core range 3 x 8-12.
     review:
       status: draft
@@ -230,7 +230,7 @@ nodes:
       - Lean the shoulders forward over the hands to lift the hips.
       - Squeeze the legs up; the heels must not touch the floor.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://redditbwf.github.io/wiki/recommended_routine.html
     verify: The 3 x 30 s trial follows the general RR hold rule; there is no straddle-specific standard.
     review:
@@ -260,7 +260,7 @@ nodes:
       - Push the floor away and let the shoulders move back behind the hands.
       - Keep the knees locked; drop back to a straddle L-sit if the legs sink.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://antranik.org/ssc/
     verify: >-
       This is the OG2 45 degree V-sit [6]. The 3 x 15 s trial uses Antranik's ~15 s gate for
@@ -303,7 +303,7 @@ nodes:
       - Push the shoulders back into extension and lift the hips high.
       - Legs straight and folded up towards the face.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
       - https://antranik.org/ssc/
     verify: >-
       OG2 gates the manna behind the 170 degree V-sit [8]. The V-sit stages between 45 and 170 degrees

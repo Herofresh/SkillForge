@@ -1,12 +1,14 @@
 /**
  * All user data at once (PLAN 3.3, ADR-028): read for a backup, replaced by an import. The
  * `node_progress` cache is cleared on replace (the store recomputes it) and `meta` (schema version,
- * seed marker) is never touched.
+ * seed marker) is never touched by an import. `deleteAllUserData` wipes the same tables and
+ * re-seeds the first-run defaults (it rewrites the seed marker, never the schema version).
  */
 import { EMPTY_OVERLAY, isEmptyOverlay } from '@/domain/overlay';
 import type { UserData } from '@/domain/types';
 
 import type { AppDb } from './database';
+import { writeDefaults } from './defaults';
 import { insertEquipmentProfile, listEquipmentProfiles } from './equipmentProfileRepository';
 import { listGoals, replaceGoals } from './goalRepository';
 import { clearOverlay, getOverlay, saveOverlay } from './overlayRepository';
@@ -55,6 +57,19 @@ export function readUserData(db: AppDb): UserData {
     overlay: getOverlay(db)?.overlay ?? EMPTY_OVERLAY,
     settings: listSettings(db),
   };
+}
+
+/**
+ * "Delete all my data" (PLAN 7.0b, ADR-065): deletes every user table (the same ones an import
+ * replaces, the Train draft and the progress cache included) and writes the first-run defaults
+ * again (hero profile, Home and Park, a new seed marker), in ONE transaction: if anything fails,
+ * nothing changes. The schema version in `meta` and the migrations table are never touched.
+ */
+export function deleteAllUserData(db: AppDb, now: number): void {
+  db.transaction((tx) => {
+    for (const table of USER_TABLES) tx.delete(table).run();
+    writeDefaults(tx, now);
+  });
 }
 
 /**

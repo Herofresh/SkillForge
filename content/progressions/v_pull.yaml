@@ -25,7 +25,7 @@ nodes:
       - Ribs down, legs together, no swinging.
     sources:
       - https://redditbwf.github.io/wiki/recommended_routine.html
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: Not levelled in the OG2 chart (0 assumed); the 3 x 30 s gate follows the RR hold rule.
     review:
       status: draft
@@ -165,8 +165,8 @@ nodes:
       - Pull until the chin is over the bar without letting the legs drop.
       - Lower to straight arms with the L still held.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Overcoming-Gravity-2nd-Edition-Exercise-Charts.pdf
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://stevenlow.org/wp-content/uploads/2017/02/OG2ChartsPrint.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     review:
       status: draft
       notes: ""

@@ -107,7 +107,7 @@ describe('the guide', () => {
     expect(text('ranks')).toContain(`${RANK_BRANCHES.length} rank branches`);
     expect(text('ranks')).toContain('7 of the 12 branches');
     expect(text('ranks')).toContain('Acrobatics and Mobility');
-    expect(text('ranks')).toContain('Novice OG 0, Apprentice OG 2, Adept OG 6');
+    expect(text('ranks')).toContain('Novice 0, Apprentice 2, Adept 6');
     expect(text('streak')).toContain(`+${STREAK_BONUS_MAX * 100} %`);
     expect(text('streak')).toContain('72 h');
     expect(text('challenge')).toContain(`+${CLASS_CHALLENGE_BONUS_XP} XP`);
@@ -121,7 +121,7 @@ describe('the guide', () => {
     expect(text('generator')).toContain('your last 5 sessions');
     expect(text('generator')).toContain('up to 5 per exercise');
     expect(text('generator')).toContain('balance and mobility work');
-    expect(text('xp')).toContain('1 + 0.25 × its OG level');
+    expect(text('xp')).toContain('1 + 0.25 × its tier');
   });
 
   it('formats numbers with at most two decimals', () => {

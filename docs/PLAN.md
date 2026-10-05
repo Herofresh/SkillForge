@@ -299,9 +299,18 @@
   over 5 MB are refused before reading; a replayed onboarding has "Back to the app"; sheets
   scroll at large text; the widget task draws a fallback on errors; `eas.json` is gone; README
   refreshed. No data change.
+- Play texts and data (7.0b, ADR-065, [PR #67](https://github.com/Herofresh/SkillForge/pull/67)): a health disclaimer (`HEALTH_DISCLAIMER`)
+  on onboarding step 1, in About and in the guide; the UI says **"Tier 6"** instead of "OG 6"
+  (internal names unchanged); "not affiliated" under the sources; node sources point at Steven
+  Low's own OG2 PDF and the r/bodyweightfitness wiki instead of re-hosted copies; `verify:` research
+  notes only in dev builds (their safety points moved into cues); Auto Backup stays on
+  (`allowBackup: true` explicit) and the texts say Android's device backup may include the data;
+  **Settings → Delete data** wipes everything (files, all user tables, the draft, the widget
+  snapshot) in one transaction, re-seeds Home and Park and opens onboarding.
 
 ## Next up
-1. Review and merge 7.0a (Play hardening) and 7.0b (texts, disclaimer, delete all data).
+1. The combined emulator check of 7.0a + 7.0b (Delete all my data → onboarding and the widget
+   redraw, the manifest, the error fallbacks).
 2. **7.1: the user creates the upload key with `keytool`** (the exact command and the backup
    advice have already been given to the user; the key never enters the repo), then 7.2
    `npm run build:aab` signed with it.
@@ -331,6 +340,33 @@
     `AndroidManifest.xml` has the three permissions with `tools:node="remove"`, VIBRATE and
     INTERNET kept. Not verified: the merged manifest of a Gradle build, sheets at a real large
     font scale on a device, the widget fallback on a device.
+- **Play texts and data (task 7.0b, ADR-065, [PR #67](https://github.com/Herofresh/SkillForge/pull/67)):**
+  - Texts in one place: `src/data/notices.ts` (`HEALTH_DISCLAIMER`, `DATA_STORAGE_NOTE`) and
+    `NOT_AFFILIATED_NOTE` in `src/data/credits.ts`; `src/components/HealthNotice.tsx` frames the
+    disclaimer (onboarding step 1, About); the guide's safeguards page ends with it.
+  - "Tier" (user's wording, chosen in review over the first draft's "Difficulty", which is too
+    long for the tree tiles): only `formatOgLevel` / `spokenOgLevel` (`src/domain/format.ts`), the
+    guide, the rank ladder intro, the editor stepper / hint / position sheet and the import
+    preview's field name changed; everything else formats through them. Not seen on a device yet:
+    the "Tier N" fit on the tiles.
+  - Sources: mechanical replace in the YAML (calisthenics-101 OG2 PDF → stevenlow.org print PDF,
+    BWF v5.4 PDF → reddit.com/r/bodyweightfitness/wiki/exercises), noted in
+    docs/research/progressions.md. The reddit URL could not be fetched from the agent's
+    environment; check it opens. The `redditbwf.github.io` Recommended Routine mirror (50
+    sources and the About credit) was left; swapping it for the reddit wiki is a separate call.
+  - Verify notes: `SHOW_RESEARCH_NOTES = __DEV__` in `app/node/[nodeId]/index.tsx`. New safety
+    cues: soft surface (back / side breakfall, forward / backward roll, both shoulder rolls),
+    "coach or a spotter" (aerial), lotus knee, 90/90 switch (hip impingement / knee problems),
+    dip negative on a straight bar (shoulders).
+  - Delete all: `src/db/defaults.ts` (`writeDefaults`, shared with the first-run seed),
+    `deleteAllUserData` in `userDataRepository.ts`, the store's `deleteAllData` + `dataResets`,
+    `BackupFiles.deleteAppFiles` (device version in `backupFiles.ts`, deletes `documents/backups/`,
+    `cache/skillforge-*`, `cache/DocumentPicker/`, the widget snapshot), widgetSync redraws on
+    `dataResets`, UI `src/components/settings/DeleteDataPanel.tsx`. Not run on a device yet: the
+    file deletion and the widget redraw after a wipe belong in the combined emulator check
+    (expected: widget shows a fresh level-1 hero, "Not yet today"; the app opens onboarding).
+  - `app.json` `android.allowBackup: true` is this task's only app.json line (7.0a adds
+    `blockedPermissions`).
 - **Session length (task 6.15, ADR-063, [PR #65](https://github.com/Herofresh/SkillForge/pull/65)):**
   - Cause found by running the generator: the estimate was ~80 % rest (90 / 180 s after every set)
     and the live session lets the user skip rest, so a "30 min" plan of ~13 sets could be done in
@@ -1485,6 +1521,10 @@ upgrade check from every earlier release). Any new table or column is additive a
   checked (kept: expo-router depends on them), `.gitignore` for keys/builds, unknown-route redirect, link-open catches, a "Back to the
   app" exit on a replayed onboarding, scrolling sheets at large text, widget task fallback,
   `eas.json` removed, README refresh (ADR-064, [PR #66](https://github.com/Herofresh/SkillForge/pull/66))
+- [x] 7.0b Play texts and data (ADR-065, [PR #67](https://github.com/Herofresh/SkillForge/pull/67); user decisions 2026-10-05 after the pre-Play
+  review): health disclaimer in onboarding/About/guide, "OG" → "Tier" in the UI, "not
+  affiliated" credit, official source links, research `verify:` notes only in dev builds (safety
+  points moved into cues), Auto Backup kept on with honest texts, Settings → Delete all my data
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
   done) and keeps it outside the repo with two backups. Gradle reads the path and passwords
   from `~/.gradle/gradle.properties` or environment variables, never from the repo.

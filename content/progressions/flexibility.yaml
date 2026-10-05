@@ -109,7 +109,7 @@ nodes:
       - Fold forward from the hips, not by rounding the upper back.
       - Relax into it and breathe; reach for the toes or past them.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
       - https://antranik.org/progressions/
     verify: >-
       Our synthesis (compression prep for the L-sit and manna); no sourced hold or range standard.
@@ -191,7 +191,7 @@ nodes:
       - Push the hips up until the body is flat like a table top.
       - Knees over the ankles, shoulders over the wrists, head in line.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: Our synthesis; 0 is assumed and the 3 x 30 s trial follows the general RR hold rule.
     review:
       status: draft
@@ -314,7 +314,7 @@ nodes:
       - Push up until the arms and legs are straight.
       - Push the shoulders over the hands; don't just bend the lower back.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
     verify: >-
       Our synthesis; the OG2 level 2 is inferred and the 3 x 30 s trial follows the general RR hold rule.
       The BWF chart has angled and head bridge steps in between that are not modelled.
@@ -406,6 +406,7 @@ nodes:
       - Set the first foot in half lotus, then rotate the second thigh out from the hip.
       - Lift the second foot over with the hands; never lever it in with the knee.
       - Switch which leg goes on top between sets.
+      - Stop at any pinch inside the knee; forcing the lotus can injure the knee.
     sources:
       - https://en.wikipedia.org/wiki/Lotus_position
     verify: >-
@@ -435,7 +436,7 @@ nodes:
       - Keep the shoulders pushed over the hands while the leg rises.
       - Lower the leg slowly; switch legs between sets.
     sources:
-      - https://www.calisthenics-101.co.uk/wp-content/uploads/2020/05/Bodyweight-Fitness-Progressions-Version-5.4.pdf
+      - https://www.reddit.com/r/bodyweightfitness/wiki/exercises
       - https://en.wikipedia.org/wiki/Chakrasana
     verify: >-
       The BWF chart lists the one-leg bridge after the full and decline bridge without a standard;

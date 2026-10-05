@@ -13,6 +13,7 @@
 import { HERO_CLASSES, STARTING_CLASS_ID } from '@/data/classes';
 import { ACCESSORIES } from '@/data/companion/accessories';
 import { CLASS_WEAPONS, UPGRADED_WEAPON_TIER } from '@/data/companion/weapons';
+import { DATA_STORAGE_NOTE, HEALTH_DISCLAIMER } from '@/data/notices';
 import { BRANCH_NAMES } from '@/data/skills/branches';
 import { MS_PER_HOUR } from '@/lib/time';
 
@@ -239,7 +240,7 @@ export function guideFacts(): GuideFacts {
 export function buildGuide(facts: GuideFacts): GuideEntry[] {
   const n = guideNumber;
   const attributeNames = list(ATTRIBUTES.map(capitalize));
-  const difficulty = `${n(facts.difficultyBase)} + ${n(facts.difficultyPerOgLevel)} × its OG level`;
+  const difficulty = `${n(facts.difficultyBase)} + ${n(facts.difficultyPerOgLevel)} × its tier`;
   const example = facts.classExample;
   const entries: Record<GuideTopic, Omit<GuideEntry, 'id'>> = {
     xp: {
@@ -250,8 +251,8 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         `level ${n(facts.characterMaxLevel)}).`,
       more: [
         `One unit of work is one rep, ${n(facts.holdSecondsPerUnit)} s of hold or ` +
-          `${n(facts.eccentricSecondsPerUnit)} s of slow lowering. Each unit pays the skill’s ` +
-          `difficulty in XP: ${difficulty}.`,
+          `${n(facts.eccentricSecondsPerUnit)} s of slow lowering. Each unit pays XP by the ` +
+          `skill’s tier: ${difficulty}.`,
         `An exercise where every set met its target pays in full. Reaching at least ` +
           `${percent(facts.partialMinRatio)} % of the target pays ${percent(facts.partialMult)} %, ` +
           `less than that still pays ${percent(facts.failedMult)} %. A hard day is never wasted.`,
@@ -296,6 +297,7 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         `Straight-arm sessions are at least ${n(facts.straightArmRestHours)} h apart.`,
         'A warning asks you to acknowledge it. That only confirms you read it; the decision ' +
           'stays with you. The workouts the app suggests always keep to these limits.',
+        HEALTH_DISCLAIMER,
       ],
     },
     attributes: {
@@ -305,14 +307,14 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         'builds. Every skill you train adds to the attributes it works, more for harder skills ' +
         'and higher levels. The radar shows their balance.',
       more: [
-        `A skill adds its difficulty (${difficulty}) times its level. Until its Trial is ` +
+        `A skill adds (${difficulty}) times its level. Until its Trial is ` +
           `passed, its level counts at most ${n(facts.proficientLevel)}.`,
         'Straight-arm skills also train the core: planche counts as push and core, front ' +
           'lever as pull and core.',
         'The radar is scaled to your strongest attribute, so it shows the shape of your ' +
           'training rather than the size.',
         'A note appears when your best push and pull skills are more than ' +
-          `${n(facts.pushPullMaxGap)} OG levels apart. It is a hint for balance, nothing more.`,
+          `${n(facts.pushPullMaxGap)} tiers apart. It is a hint for balance, nothing more.`,
       ],
     },
     ranks: {
@@ -322,8 +324,8 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         `proficient skill in each of the ${n(facts.rankBranchCount)} rank branches. ` +
         `${list(facts.nonRankBranches)} don’t count towards it.`,
       more: [
-        `The ranks by branch median: ${facts.ranks
-          .map(({ rank, min }) => `${rank} OG ${n(min)}`)
+        `The ranks by branch median tier: ${facts.ranks
+          .map(({ rank, min }) => `${rank} ${n(min)}`)
           .join(', ')}.`,
         `A rank is certain once ${n(branchesForMedian(facts.rankBranchCount))} of the ` +
           `${n(facts.rankBranchCount)} branches reach its level (more than half). A high middle ` +
@@ -436,14 +438,18 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
     data: {
       title: 'Backups and your data',
       summary:
-        'Everything stays on this phone: no account, no ads, no analytics. Export a backup in ' +
-        'Settings and keep it somewhere safe; importing one replaces all your data.',
+        `${DATA_STORAGE_NOTE} Export a backup in Settings and keep it somewhere safe; ` +
+        'importing one replaces all your data.',
       more: [
+        'No ads and no analytics.',
         'Before an import replaces anything, the app checks the whole file and keeps a copy of ' +
           'your current data, so you can undo the last import.',
         'Levels, ranks, classes and accessories are worked out again from your logged sessions, ' +
           'so a backup restores all of them.',
-        'Uninstalling the app deletes its data. Export a backup first.',
+        'Uninstalling the app removes its data from the phone. Android may bring it back from ' +
+          'its device backup when you reinstall, but don’t count on it: export a backup first.',
+        'Settings → Delete all my data erases everything SkillForge stored on this phone and ' +
+          'starts the app fresh.',
       ],
     },
   };

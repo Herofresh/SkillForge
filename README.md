@@ -27,8 +27,8 @@ and progress stay. Every preview so far uses the same key, and `npm run build:ap
 build with another one (ADR-043).
 
 Preview builds are signed with a development key. A later build signed with the real release key
-can't update them in place: you'll have to uninstall first, which deletes the app's data. Export a
-backup first (Settings → Export backup) and import it again afterwards.
+can't update them in place: you'll have to uninstall first, which removes the app's data from the
+phone. Export a backup first (Settings → Export backup) and import it again afterwards.
 
 **Build it yourself.** You need Node.js 24 (≥ 22.18), JDK 17 and the Android SDK (Android Studio
 installs it; set `ANDROID_HOME` if it isn't in the default location). No Expo account is needed.
