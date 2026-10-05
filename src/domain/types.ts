@@ -460,7 +460,7 @@ export interface WorkoutRequest {
   progress: Readonly<Record<string, NodeProgress>>;
   /** Tags of the equipment profile chosen for this session (ADR-005). */
   equipment: readonly EquipmentTag[];
-  /** Time for the session in minutes, typically 30, 45 or 60. */
+  /** Time for the session in minutes (`SESSION_MINUTES`: 15 to 90). */
   availableMinutes: number;
   /**
    * Recent logged sessions (at least the last two weeks): pattern recency, the 48 h rules and the
@@ -502,6 +502,11 @@ export interface WorkoutPlan {
   blocks: WorkoutBlock[];
   /** Estimated duration in whole minutes (never above the request's `availableMinutes`). */
   estimatedMinutes: number;
+  /**
+   * The user's rest pace the estimate uses (`restPace` in `sessionTime.ts`, ADR-063): each set's
+   * rest counts as `restSec × restPace`; 1 = the prescribed rest.
+   */
+  restPace: number;
   /** Advisory warnings that apply to the plan (ADR-023), e.g. a self-unlocked node's prerequisites. */
   warnings: SafeguardWarning[];
   /** Plain-language explanations: substitutions, skipped patterns, deferred Trials, balance. */

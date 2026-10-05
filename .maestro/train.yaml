@@ -1,4 +1,4 @@
-# Train flow (PLAN 4.4, 5.4, 5.8, 5.9, 6.2): from a fresh install, plan a 30-min Home session, look
+# Train flow (PLAN 4.4, 5.4, 5.8, 5.9, 6.2, 6.15): from a fresh install, plan a 30-min Home session, look
 # at the plan preview, a swap sheet and an exercise info sheet (also in the session), start it, time and log the first exercise's set, start and pause
 # the next set's timer, then kill the app and check that the session resumes with its sets and the
 # paused timer, which resumes (the draft is saved after every change), edit the logged set, move an
@@ -38,6 +38,11 @@ name: Train - plan, live session, resume after a restart, summary
     id: 'profile-home'
 - tapOn:
     id: 'minutes-30'
+# Lengths from 15 to 90 min (PLAN 6.15)
+- assertVisible:
+    id: 'minutes-15'
+- assertVisible:
+    id: 'minutes-90'
 - takeScreenshot: 4.4-train
 - tapOn:
     id: 'train-now'

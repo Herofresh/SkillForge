@@ -2135,3 +2135,60 @@ Template:
   The default sizes apply to newly added widgets only; a widget placed at 4 × 2 or 4 × 3 keeps
   its size (now filled). On launchers whose one-row height is below 110 dp the companion widget
   needs two rows.
+
+## ADR-063: Session length 15–90 min, planned at the user's rest pace and filled (PLAN 6.15)
+- Date: 2026-10-05 · Status: Accepted (extends ADR-024's slots and time estimate and ADR-034's
+  session lengths; the prescription, scoring, safeguards and rests of ADR-024/025 stay)
+- Context: the user (2026-10-05): a planned session "never really is 30, 45 or 60 min … currently
+  30 often are no longer than 5 minutes"; they asked for options from 15 to 90 min and a better
+  algorithm. Running the generator showed two causes:
+  - The estimate is mostly rest: every set counts its full 90 s (pair) or 180 s (single) rest, so a
+    30-min plan was about 13 sets (wall plank 3 × 10 s = 30 s of work and 9 min of rest). The live
+    session lets the user skip each rest (and starting the set timer skips it), so a user who
+    doesn't wait trains that plan in ~5 min.
+  - Volume didn't scale: always `WORKING_SETS` (3) and a fixed set of slots, so 60 and 90 min gave
+    the same 58-min plan, and longer sessions had nothing to add.
+- Options:
+  - Shorter prescribed rests: the rests come from the research (RR 90 s in a pair, Low 3–7 min for
+    strength); weakening them to make the estimate fit would trade training quality for a number.
+  - Store the prescribed rest with every logged set (a column, a migration, a backup version), then
+    measure it: exact, but old history couldn't be read and the user would wait sessions for it.
+  - **Read the rest the user takes from the history they already have, and make more time buy
+    more work.**
+- Decision:
+  - **Lengths** `SESSION_MINUTES` = 15, 20, 30, 45, 60, 75, 90 (chips on the Train tab, wrapping),
+    default `DEFAULT_SESSION_MINUTES` 30.
+  - **Time model** moves to `src/domain/sessionTime.ts` (the generator re-exports its constants):
+    an exercise is `TRANSITION_SEC` + sets × (work + `restSec` × pace). The plan still shows and the
+    rest timer still counts the prescribed `restSec`: the pace only changes the estimate.
+  - **Rest pace** (`restPace`): from the logged sets' timestamps, the rest before a set is the gap to
+    the set before minus its work (its `durationSec` when timed). The prescribed rest is read from
+    the set order: the same node again = a single exercise (`SINGLE_REST_SEC`), alternating with a
+    partner = a pair (`PAIR_REST_SEC`); a change of exercise isn't measured, nor are Trial sets
+    (test-outs and the onboarding assessment log them at once) or mobility work (its rest changed,
+    below). Pace = the median ratio over the latest `PACE_SESSIONS` (5) sessions with measured
+    rests, clamped to [`PACE_MIN` 0.2, `PACE_MAX` 1.5]; fewer than `PACE_MIN_RESTS` (4) rests = 1.
+    The median ignores a phone call; the clamp keeps "logged everything at the end" from planning
+    an endless session. Works on existing history at once, no data change.
+  - **Filling the time** (`fillTime`, after the slots and the warm-up ramp): (1) a cool-down when
+    the session has none (any mobility node, not only goal ones); (2) `growSets`: one more set per
+    round for every skill / strength / core block (both exercises of a pair), up to
+    `MAX_WORKING_SETS` (5; research: Low's 25–50 reps per pattern, 4–6 × holds), never for a Trial;
+    (3) up to `MAX_EXTRA_EXERCISES` (4) extra exercises, the best unused candidates (training work
+    before more stretching), each with at least `MIN_WORKING_SETS`, in the block that matches what
+    it trains; then (2) again. Every step checks the time and the straight-arm budget, and the 48 h
+    rules and Trial day already shaped the candidates, so more time never means more straight-arm
+    work.
+  - **Cool-down rest** `COOL_DOWN_REST_SEC` 30 s instead of the single rest (180 s): 3 × 3 hip CARs
+    counted as 10 min.
+  - **Notes:** "Planned at your pace: … about N% of the suggested rest …" when the pace is at least
+    `PACE_NOTE_DEVIATION` (0.2) from 1; "This plan fills about N of your M min: …" below
+    `FILL_NOTE_SHARE` (80 %) of the chosen time (e.g. most patterns rested after yesterday).
+  - `WorkoutPlan.restPace` (required) and `SessionPlan.restPace` (optional: drafts from before have
+    none = 1, `parseActiveSession` accepts both); `planMinutes(exercises, restPace)` in the preview.
+    The guide's generator page says "15 to 90 min", the pace and the set cap from these constants.
+- Consequences: a user who skips rests gets a plan with much more work in it (30 min: ~40 sets
+  instead of 12, at pace 0.2), and one who rests fully gets the old plan, now filling 75 / 90 min.
+  The pace adapts as the user's habit changes (5 sessions). Not covered: a user who rests longer
+  on skills than on pairs is read as one pace; an edited or added exercise keeps its own rest but
+  is measured like the rest. Tuning knobs: the constants above.

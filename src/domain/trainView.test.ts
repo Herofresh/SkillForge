@@ -39,6 +39,7 @@ const WORKOUT: WorkoutPlan = {
     },
   ],
   estimatedMinutes: 20,
+  restPace: 1,
   warnings: [],
   notes: [],
 };

@@ -12,7 +12,7 @@
 import { MS_PER_SECOND } from '@/lib/time';
 
 import { searchNodes } from './assessment';
-import { exerciseSeconds, isDoableWith, plannedSets, PROGRESSION_STEP } from './generator';
+import { isDoableWith, plannedSets, PROGRESSION_STEP } from './generator';
 import { resolveTree, type ProgressMap } from './progression';
 import {
   measuredSeconds,
@@ -22,6 +22,7 @@ import {
   timerModeFor,
   type SetTimer,
 } from './setTimer';
+import { DEFAULT_REST_PACE, estimateMinutes } from './sessionTime';
 import {
   WORKOUT_BLOCK_KINDS,
   type EquipmentTag,
@@ -42,8 +43,10 @@ import { classifyOutcome, meetsTarget } from './xp';
 export const SESSION_BLOCK_KINDS = [...WORKOUT_BLOCK_KINDS, 'added'] as const;
 export type SessionBlockKind = WorkoutBlockKind | 'added';
 
-/** The session lengths offered by "Train now", in minutes. */
-export const SESSION_MINUTES = [30, 45, 60] as const;
+/** The session lengths offered by "Train now", in minutes (ADR-063). */
+export const SESSION_MINUTES = [15, 20, 30, 45, 60, 75, 90] as const;
+/** The length chosen when the Train tab opens. */
+export const DEFAULT_SESSION_MINUTES = 30;
 
 /** How many swap or add options a list shows at most. */
 export const MAX_SWAP_OPTIONS = 8;
@@ -65,8 +68,13 @@ export interface SessionExercise extends PlannedExercise {
 /** The plan preview: the generated session, edited by the user before starting it. */
 export interface SessionPlan {
   equipmentProfileId: string;
-  /** The time the user chose (30/45/60). */
+  /** The time the user chose (`SESSION_MINUTES`). */
   minutes: number;
+  /**
+   * The rest pace the generator planned with (`WorkoutPlan.restPace`, ADR-063). Plans and drafts
+   * from before 6.15 don't have it: the prescribed rest (`DEFAULT_REST_PACE`).
+   */
+  restPace?: number;
   exercises: SessionExercise[];
   /** The generator's notes (substitutions, Trial day, rest). */
   notes: string[];
@@ -132,6 +140,7 @@ export function sessionPlan(
   return {
     equipmentProfileId,
     minutes,
+    restPace: plan.restPace,
     exercises,
     notes: [...plan.notes],
     acknowledged: [],
@@ -139,12 +148,18 @@ export function sessionPlan(
   };
 }
 
-/** Estimated whole minutes of the exercises not skipped (same estimate as the generator's). */
-export function planMinutes(exercises: readonly SessionExercise[]): number {
-  const seconds = exercises
-    .filter((exercise) => !exercise.skipped)
-    .reduce((sum, exercise) => sum + exerciseSeconds(exercise), 0);
-  return Math.ceil(seconds / 60);
+/**
+ * Estimated whole minutes of the exercises not skipped, at the plan's rest pace (the generator's
+ * estimate).
+ */
+export function planMinutes(
+  exercises: readonly SessionExercise[],
+  restPace: number = DEFAULT_REST_PACE,
+): number {
+  return estimateMinutes(
+    exercises.filter((exercise) => !exercise.skipped),
+    restPace,
+  );
 }
 
 /** Removes an exercise; its pair partner becomes a single exercise. */
@@ -692,6 +707,7 @@ export function parseActiveSession(raw: unknown): ActiveSession | undefined {
     !isNumber(raw.startedAt) ||
     !isString(raw.equipmentProfileId) ||
     !isNumber(raw.minutes) ||
+    (raw.restPace !== undefined && !isNumber(raw.restPace)) ||
     !isNumber(raw.nextKey) ||
     !Array.isArray(raw.exercises) ||
     !raw.exercises.every(isExercise) ||

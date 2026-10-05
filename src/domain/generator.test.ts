@@ -1,10 +1,13 @@
 import { ALL_NODES, NODE_BY_ID } from '@/data/skills';
 import { makeNode, makeSession, makeSet } from '@/data/testFixtures';
 import {
+  COOL_DOWN_REST_SEC,
   exerciseSeconds,
+  FILL_NOTE_SHARE,
   generateWorkout,
   goalFrontier,
   isDoableWith,
+  MAX_WORKING_SETS,
   MIN_WORKING_SETS,
   PAIR_REST_SEC,
   planExercises,
@@ -20,6 +23,8 @@ import {
 import { resolveTree } from '@/domain/progression';
 import { recompute } from '@/domain/recompute';
 import { STRAIGHT_ARM_SESSION_BUDGET_S, straightArmSecondsUsed } from '@/domain/safeguards';
+import { DEFAULT_REST_PACE, SECONDS_PER_REP } from '@/domain/sessionTime';
+import { SESSION_MINUTES } from '@/domain/train';
 import type {
   EquipmentTag,
   ExerciseNode,
@@ -29,7 +34,7 @@ import type {
   WorkoutPlan,
   WorkoutRequest,
 } from '@/domain/types';
-import { MS_PER_DAY, MS_PER_HOUR } from '@/lib/time';
+import { MS_PER_DAY, MS_PER_HOUR, MS_PER_SECOND } from '@/lib/time';
 
 const NOW = Date.UTC(2026, 8, 27, 9);
 const daysAgo = (days: number) => NOW - days * MS_PER_DAY;
@@ -313,19 +318,23 @@ describe('generateWorkout', () => {
         workSession('fl2', daysAgo(10), 'tuck_front_lever', 20),
         workSession('pl2', daysAgo(8), 'tuck_planche', 20),
       ];
-      const plan = generateWorkout(
-        request({
-          goals: ['tuck_front_lever', 'tuck_planche'],
-          recentSessions: building,
-          actions: unlocks,
-        }),
-      );
-      const straight = straightArmOf(plan);
-      expect(straight.length).toBeGreaterThan(0);
-      expect(straight.some((exercise) => exercise.isTrial)).toBe(false);
-      expect(straightArmSeconds(plan)).toBeGreaterThan(0);
-      expect(straightArmSeconds(plan)).toBeLessThanOrEqual(STRAIGHT_ARM_SESSION_BUDGET_S);
-      expect(plan.warnings.filter((warning) => warning.severity === 'warning')).toEqual([]);
+      // Also the longest session: more time never buys more straight-arm work (ADR-063).
+      for (const availableMinutes of SESSION_MINUTES) {
+        const plan = generateWorkout(
+          request({
+            goals: ['tuck_front_lever', 'tuck_planche'],
+            recentSessions: building,
+            actions: unlocks,
+            availableMinutes,
+          }),
+        );
+        const straight = straightArmOf(plan);
+        expect(straight.length).toBeGreaterThan(0);
+        expect(straight.some((exercise) => exercise.isTrial)).toBe(false);
+        expect(straightArmSeconds(plan)).toBeGreaterThan(0);
+        expect(straightArmSeconds(plan)).toBeLessThanOrEqual(STRAIGHT_ARM_SESSION_BUDGET_S);
+        expect(plan.warnings.filter((warning) => warning.severity === 'warning')).toEqual([]);
+      }
     });
 
     it('suggests a due 3 × 30 s tuck planche Trial as the only straight-arm work (Trial day)', () => {
@@ -458,8 +467,8 @@ describe('generateWorkout', () => {
     expect(mainExercises(later).map((exercise) => exercise.nodeId)).toContain('dead_hang');
   });
 
-  it('respects the time budget and fits more work into more time', () => {
-    const counts = [30, 45, 60].map((availableMinutes) => {
+  it('respects the time budget, fills it and fits more work into more time (ADR-063)', () => {
+    const sets = SESSION_MINUTES.map((availableMinutes) => {
       const plan = generateWorkout(
         request({
           goals: ['pull_up', 'pistol_squat'],
@@ -467,25 +476,105 @@ describe('generateWorkout', () => {
           availableMinutes,
         }),
       );
+      expect(plan.restPace).toBe(DEFAULT_REST_PACE);
       const seconds = planExercises(plan).reduce((sum, e) => sum + exerciseSeconds(e), 0);
       expect(plan.estimatedMinutes).toBe(Math.ceil(seconds / 60));
       expect(plan.estimatedMinutes).toBeLessThanOrEqual(availableMinutes);
-      return planExercises(plan).length;
+      expect(plan.estimatedMinutes).toBeGreaterThanOrEqual(FILL_NOTE_SHARE * availableMinutes);
+      expect(plan.notes.some((note) => note.startsWith('This plan fills'))).toBe(false);
+      for (const exercise of planExercises(plan)) {
+        expect(exercise.sets).toBeLessThanOrEqual(MAX_WORKING_SETS);
+      }
+      return planExercises(plan).reduce((sum, e) => sum + e.sets, 0);
     });
-    expect(counts[0]).toBeLessThanOrEqual(counts[1]);
-    expect(counts[1]).toBeLessThanOrEqual(counts[2]);
-    expect(counts[2]).toBeGreaterThan(counts[0]);
+    for (let index = 1; index < sets.length; index++) {
+      expect(sets[index]).toBeGreaterThanOrEqual(sets[index - 1]);
+    }
+    expect(sets[sets.length - 1]).toBeGreaterThan(2 * sets[0]);
   });
 
-  it('pairs strength work with 90 s rest and rests ~3 min otherwise', () => {
-    const plan = generateWorkout(request({ goals: ['pull_up'], recentSessions: INTERMEDIATE }));
+  it('says so when the tree has too little for the chosen time', () => {
+    // A new user with every pattern but balance and mobility trained yesterday.
+    const yesterday = workSession('y', daysAgo(1), 'pike_push_up', 5);
+    const plan = generateWorkout(
+      request({
+        recentSessions: [
+          yesterday,
+          ...[
+            'dead_hang',
+            'squat',
+            'incline_row',
+            'side_plank',
+            'single_leg_deadlift',
+            'support_hold',
+          ].map((id, index) => workSession(`r${index}`, daysAgo(1), id, node(id).workingRange.min)),
+        ],
+        availableMinutes: 90,
+      }),
+    );
+    expect(plan.estimatedMinutes).toBeLessThan(FILL_NOTE_SHARE * 90);
+    expect(plan.notes).toContain(
+      `This plan fills about ${plan.estimatedMinutes} of your 90 min: that is all your tree, ` +
+        'equipment and rest days suggest today. Add exercises if you want more.',
+    );
+  });
+
+  it('plans at the user’s rest pace: less rest taken, more work in the same time', () => {
+    /** Five sets of pike push-ups, each logged 
+estSec after the one before (plus its work). */
+    const paced = (id: string, days: number, restSec: number): LoggedSession => {
+      const base = workSession(id, daysAgo(days), 'squat', 5, 5);
+      const work = 5 * SECONDS_PER_REP;
+      const sets = base.sets.map((set, index) => ({
+        ...set,
+        timestamp: base.startedAt + index * (restSec + work) * MS_PER_SECOND,
+      }));
+      return { ...base, sets };
+    };
+    const quick = [paced('a', 3, SINGLE_REST_SEC / 4), paced('b', 5, SINGLE_REST_SEC / 4)];
+    const patient = [paced('a', 3, SINGLE_REST_SEC), paced('b', 5, SINGLE_REST_SEC)];
+    const plan = (sessions: LoggedSession[]) =>
+      generateWorkout(request({ recentSessions: sessions, availableMinutes: 30 }));
+    const fast = plan(quick);
+    const slow = plan(patient);
+    expect(fast.restPace).toBeCloseTo(0.25);
+    expect(slow.restPace).toBeCloseTo(1);
+    const setCount = (p: WorkoutPlan) => planExercises(p).reduce((sum, e) => sum + e.sets, 0);
+    expect(setCount(fast)).toBeGreaterThan(setCount(slow));
+    const seconds = planExercises(fast).reduce(
+      (sum, e) => sum + exerciseSeconds(e, fast.restPace),
+      0,
+    );
+    expect(fast.estimatedMinutes).toBe(Math.ceil(seconds / 60));
+    expect(fast.estimatedMinutes).toBeLessThanOrEqual(30);
+    // The rest the user is asked to take stays the prescribed one.
+    for (const exercise of planExercises(fast)) {
+      expect([WARM_UP_REST_SEC, PAIR_REST_SEC, SINGLE_REST_SEC, COOL_DOWN_REST_SEC]).toContain(
+        exercise.restSec,
+      );
+    }
+    expect(fast.notes).toContain(
+      'Planned at your pace: in your last sessions you rested about 25% of the suggested rest, ' +
+        'so the time estimate counts that.',
+    );
+    expect(slow.notes.some((note) => note.startsWith('Planned at your pace'))).toBe(false);
+  });
+
+  it('pairs strength work with 90 s rest, rests ~3 min otherwise and 30 s in the cool-down', () => {
+    // 90 min: time left after the slots buys a cool-down (ADR-063).
+    const plan = generateWorkout(
+      request({ goals: ['pull_up'], recentSessions: INTERMEDIATE, availableMinutes: 90 }),
+    );
+    expect(plan.blocks.some((b) => b.kind === 'cool_down')).toBe(true);
     for (const block of plan.blocks) {
       const expected =
         block.kind === 'warm_up'
           ? WARM_UP_REST_SEC
-          : block.kind === 'strength' && block.exercises.length === 2
-            ? PAIR_REST_SEC
-            : SINGLE_REST_SEC;
+          : block.kind === 'cool_down'
+            ? COOL_DOWN_REST_SEC
+            : block.kind === 'strength' && block.exercises.length === 2
+              ? PAIR_REST_SEC
+              : SINGLE_REST_SEC;
       for (const exercise of block.exercises) expect(exercise.restSec).toBe(expected);
     }
     expect(plan.blocks.some((b) => b.kind === 'strength' && b.exercises.length === 2)).toBe(true);

@@ -78,7 +78,7 @@ export default function PlanPreviewScreen() {
             <GuideButton topic="generator" />
           </View>
           <PixelText variant="small" tone="textMuted" testID="plan-estimate">
-            {`${plan.exercises.length} exercises · about ${planMinutes(plan.exercises)} min`}
+            {`${plan.exercises.length} exercises · about ${planMinutes(plan.exercises, plan.restPace)} min`}
           </PixelText>
         </PixelFrame>
 
