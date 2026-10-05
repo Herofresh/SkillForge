@@ -292,7 +292,7 @@
   work**: a cool-down, more sets (up to 5), then up to 4 extra exercises, within the straight-arm
   budget and the 48 h rules. The cool-down rests 30 s. Notes say when the plan uses the pace and
   when the tree can't fill the chosen time. Time model in `src/domain/sessionTime.ts`.
-- Play hardening (7.0a, ADR-064, PR_LINK): the manifest no longer asks for
+- Play hardening (7.0a, ADR-064, [PR #66](https://github.com/Herofresh/SkillForge/pull/66)): the manifest no longer asks for
   `SYSTEM_ALERT_WINDOW` / external storage; an unreadable stored overlay starts the app on the
   built-in tree with a note on My progressions instead of the "Could not open your data" dead
   end; a root error boundary ("Try again") and an unknown-route redirect; picked import files
@@ -317,7 +317,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Play hardening (task 7.0a, ADR-064, PR_LINK):**
+- **Play hardening (task 7.0a, ADR-064, [PR #66](https://github.com/Herofresh/SkillForge/pull/66)):**
   - Overlay: `getOverlay` selects `body` as raw text (`sql\`${progressionOverlay.body}\``) and
     parses it itself, so broken JSON is a reported issue, not a throw in Drizzle's JSON decoder.
     `StoredOverlay.unreadable` → store `overlayUnreadable` → My progressions note
@@ -1480,11 +1480,11 @@ upgrade check from every earlier release). Any new table or column is additive a
   ([PR #65](https://github.com/Herofresh/SkillForge/pull/65))
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
-- [~] 7.0a Play hardening (in-progress, agent): blocked unused permissions, root error boundary,
+- [x] 7.0a Play hardening: blocked unused permissions, root error boundary,
   unreadable stored overlay no longer blocks startup, picked-file size cap, unused native deps
   removed, `.gitignore` for keys/builds, unknown-route redirect, link-open catches, a "Back to the
   app" exit on a replayed onboarding, scrolling sheets at large text, widget task fallback,
-  `eas.json` removed, README refresh
+  `eas.json` removed, README refresh (ADR-064, [PR #66](https://github.com/Herofresh/SkillForge/pull/66))
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
   done) and keeps it outside the repo with two backups. Gradle reads the path and passwords
   from `~/.gradle/gradle.properties` or environment variables, never from the repo.
