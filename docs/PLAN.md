@@ -292,7 +292,6 @@
   work**: a cool-down, more sets (up to 5), then up to 4 extra exercises, within the straight-arm
   budget and the 48 h rules. The cool-down rests 30 s. Notes say when the plan uses the pace and
   when the tree can't fill the chosen time. Time model in `src/domain/sessionTime.ts`.
-<<<<<<< HEAD
 - Play hardening (7.0a, ADR-064, [PR #66](https://github.com/Herofresh/SkillForge/pull/66)): the manifest no longer asks for
   `SYSTEM_ALERT_WINDOW` / external storage; an unreadable stored overlay starts the app on the
   built-in tree with a note on My progressions instead of the "Could not open your data" dead
@@ -300,7 +299,7 @@
   over 5 MB are refused before reading; a replayed onboarding has "Back to the app"; sheets
   scroll at large text; the widget task draws a fallback on errors; `eas.json` is gone; README
   refreshed. No data change.
-- Play texts and data (7.0b, ADR-064, PR_LINK): a health disclaimer (`HEALTH_DISCLAIMER`)
+- Play texts and data (7.0b, ADR-065, [PR #67](https://github.com/Herofresh/SkillForge/pull/67)): a health disclaimer (`HEALTH_DISCLAIMER`)
   on onboarding step 1, in About and in the guide; the UI says **"Difficulty 6"** instead of "OG 6"
   (internal names unchanged); "not affiliated" under the sources; node sources point at Steven
   Low's own OG2 PDF and the r/bodyweightfitness wiki instead of re-hosted copies; `verify:` research
@@ -341,7 +340,7 @@
     `AndroidManifest.xml` has the three permissions with `tools:node="remove"`, VIBRATE and
     INTERNET kept. Not verified: the merged manifest of a Gradle build, sheets at a real large
     font scale on a device, the widget fallback on a device.
-- **Play texts and data (task 7.0b, ADR-064, PR_LINK):**
+- **Play texts and data (task 7.0b, ADR-065, [PR #67](https://github.com/Herofresh/SkillForge/pull/67)):**
   - Texts in one place: `src/data/notices.ts` (`HEALTH_DISCLAIMER`, `DATA_STORAGE_NOTE`) and
     `NOT_AFFILIATED_NOTE` in `src/data/credits.ts`; `src/components/HealthNotice.tsx` frames the
     disclaimer (onboarding step 1, About); the guide's safeguards page ends with it.
@@ -1519,7 +1518,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   checked (kept: expo-router depends on them), `.gitignore` for keys/builds, unknown-route redirect, link-open catches, a "Back to the
   app" exit on a replayed onboarding, scrolling sheets at large text, widget task fallback,
   `eas.json` removed, README refresh (ADR-064, [PR #66](https://github.com/Herofresh/SkillForge/pull/66))
-- [~] 7.0b Play texts and data (in-progress, agent; user decisions 2026-10-05 after the pre-Play
+- [x] 7.0b Play texts and data (ADR-065, [PR #67](https://github.com/Herofresh/SkillForge/pull/67); user decisions 2026-10-05 after the pre-Play
   review): health disclaimer in onboarding/About/guide, "OG" → "Difficulty" in the UI, "not
   affiliated" credit, official source links, research `verify:` notes only in dev builds (safety
   points moved into cues), Auto Backup kept on with honest texts, Settings → Delete all my data
