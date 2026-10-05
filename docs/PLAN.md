@@ -285,7 +285,7 @@
   the new defaults (4 × 1, 4 × 2) drew correctly; Woman + ponytail updated the Character tab and
   both companion widgets. Screenshots `docs/screenshots/6.14-*.png`. The GitHub release is
   created by the coordinator after the merge.
-- Session length (6.15, ADR-063): Train offers **15, 20, 30, 45, 60, 75 and 90 min**. The generator
+- Session length (6.15, ADR-063, [PR #65](https://github.com/Herofresh/SkillForge/pull/65)): Train offers **15, 20, 30, 45, 60, 75 and 90 min**. The generator
   plans at the user's **rest pace** (the median "rest taken ÷ rest prescribed" from the logged sets'
   timestamps over the last 5 sessions, 0.2–1.5; Trials and mobility not measured; no data change),
   so a user who skips rests gets a plan with that much more work in it, and **more time buys more
@@ -309,7 +309,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Session length (task 6.15, ADR-063):**
+- **Session length (task 6.15, ADR-063, [PR #65](https://github.com/Herofresh/SkillForge/pull/65)):**
   - Cause found by running the generator: the estimate was ~80 % rest (90 / 180 s after every set)
     and the live session lets the user skip rest, so a "30 min" plan of ~13 sets could be done in
     ~5 min; and volume never grew (3 sets, fixed slots), so 60 and 90 min gave the same 58-min plan.
