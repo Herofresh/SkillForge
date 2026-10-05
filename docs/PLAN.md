@@ -1455,7 +1455,7 @@ upgrade check from every earlier release). Any new table or column is additive a
   from 0.6.0 ([PR #63](https://github.com/Herofresh/SkillForge/pull/63); release [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0))
 - [~] 6.15 Session length 15–90 min (user request 2026-10-05: "30 often are no longer than 5
   minutes"): more length options, plan at the user's rest pace and fill longer sessions (ADR-063)
-  (PR pending)
+  ([PR #65](https://github.com/Herofresh/SkillForge/pull/65))
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
