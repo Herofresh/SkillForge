@@ -307,6 +307,10 @@
   (`allowBackup: true` explicit) and the texts say Android's device backup may include the data;
   **Settings → Delete data** wipes everything (files, all user tables, the draft, the widget
   snapshot) in one transaction, re-seeds Home and Park and opens onboarding.
+- Play App Bundle (7.1 + 7.2, ADR-066, [PR #68](https://github.com/Herofresh/SkillForge/pull/68)): the user's upload key lives outside the repo;
+  `npm run build:aab` makes a bundle signed with it (clean prebuild, all four ABIs, native debug
+  symbols, signer checked against `UPLOAD_SIGNER_SHA256`). `build:apk` keeps the debug key, so
+  GitHub APKs still update over earlier ones. targetSdk 36 (React Native's default).
 
 ## Next up
 1. The combined emulator check of 7.0a + 7.0b (Delete all my data → onboarding and the widget
@@ -324,7 +328,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Play App Bundle (task 7.2, ADR-066):**
+- **Play App Bundle (task 7.2, ADR-066, [PR #68](https://github.com/Herofresh/SkillForge/pull/68)):**
   - Code: `plugins/withUploadSigning.js` (+ `.d.ts`, `.test.ts`; registered in app.json),
     `scripts/buildApk.ts --aab` (`checkUploadProperties`, `checkUploadSigner`),
     `scripts/buildApkConfig.ts` (`UPLOAD_SIGNER_SHA256`, `UPLOAD_PROPERTIES`, `UPLOAD_SIGNING_FLAG`,
@@ -1541,9 +1545,11 @@ upgrade check from every earlier release). Any new table or column is additive a
   alias `upload`, PKCS12) and keeps two backups outside the repo. Gradle reads the path and
   passwords from `~/.gradle/gradle.properties`, never from the repo (checked: the properties open
   the key; SHA-256 02:7D:80:…:72:5D, pinned in 7.2). CONTEXT.md → "Play build".
-- [~] 7.2 `npm run build:aab` (Gradle `bundleRelease`) signed with the upload key; the pinned signer
+- [x] 7.2 `npm run build:aab` (Gradle `bundleRelease`) signed with the upload key; the pinned signer
   check learns the upload key; `build:apk` keeps working for sideloading. `targetSdkVersion`
-  meets Play's current requirement (check it). (`eas.json` is already gone: 7.0a, ADR-064.)
+  meets Play's current requirement (checked in review: 36, from React Native's
+  `libs.versions.toml`). (`eas.json` is already gone: 7.0a, ADR-064.) (ADR-066,
+  [PR #68](https://github.com/Herofresh/SkillForge/pull/68))
 - [ ] 7.3 Move existing installs: the Play build has a different signer, so an install of a GitHub
   APK can't update to it. In-app/README guide: export backup → uninstall → install from Play →
   import. Check that a backup from every earlier release imports.
