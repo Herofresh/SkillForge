@@ -6,6 +6,7 @@ import {
   FONT_CREDITS,
   NOT_AFFILIATED_NOTE,
   OFL_CREDIT,
+  PRIVACY_POLICY,
   type Credit,
 } from '@/data/credits';
 
@@ -14,14 +15,15 @@ import { DetailSection } from '../node/DetailSection';
 import { Spacing, TOUCH_TARGET } from '../theme';
 import { PixelText } from '../ui';
 
-function CreditLink({ credit }: { credit: Credit }) {
+function CreditLink({ credit, testID }: { credit: Credit; testID?: string }) {
   return (
     <Pressable
       onPress={() => void Linking.openURL(credit.url).catch(() => undefined)}
       accessibilityRole="link"
       accessibilityLabel={`${credit.name}: ${credit.note}`}
       accessibilityHint="Opens the website"
-      style={styles.link}>
+      style={styles.link}
+      testID={testID}>
       <PixelText tone="rune">{credit.name}</PixelText>
       <PixelText variant="small" tone="textMuted">
         {credit.note}
@@ -30,7 +32,7 @@ function CreditLink({ credit }: { credit: Credit }) {
   );
 }
 
-/** About and credits (PLAN 4.6): version, content sources and the fonts' licences. */
+/** About and credits (PLAN 4.6): version, privacy policy, content sources and the fonts' licences. */
 export function AboutPanel() {
   const version = Constants.expoConfig?.version ?? 'dev';
   return (
@@ -39,6 +41,7 @@ export function AboutPanel() {
         {`SkillForge ${version}. A calisthenics skill tree: the app suggests, you decide.`}
       </PixelText>
       <HealthNotice testID="about-health-notice" />
+      <CreditLink credit={PRIVACY_POLICY} testID="about-privacy-policy" />
       <PixelText variant="small" tone="textMuted">
         The progressions are community-sourced from the sources below and not yet reviewed by a
         coach.

@@ -336,7 +336,7 @@
     `uploadSignerProblem`, `keytoolCandidates`), `npm run build:aab`. CONTEXT.md → "Play build".
   - Verified: `npm run build:aab` on this machine → `builds/SkillForge-0.7.0-vc7-6af4fcc.aab`
     (72.9 MB, SHA-256 e810be9a…9345), BUILD SUCCESSFUL in 47 min (cold, four ABIs); keytool:
-    owner CN=Andre Rivera Arboleda, SHA-256 = the pinned upload key; 52 debug-symbol files in
+    SHA-256 = the pinned upload key; 52 debug-symbol files in
     BUNDLE-METADATA; merged manifest permissions as in ADR-066.
   - Not verified: `npm run build:apk` after the change (the plugin keeps the debug key unless the
     flag is set; covered by the plugin test, not by a real APK build); uploading to Play (7.5).
@@ -1553,9 +1553,11 @@ upgrade check from every earlier release). Any new table or column is additive a
 - [ ] 7.3 Move existing installs: the Play build has a different signer, so an install of a GitHub
   APK can't update to it. In-app/README guide: export backup → uninstall → install from Play →
   import. Check that a backup from every earlier release imports.
-- [ ] 7.4 Privacy policy page on GitHub Pages (free): what the app stores (everything on the
-  device), what leaves the device (only backups/progressions the user shares), no analytics,
-  no ads, no account; contact address. Update it whenever a feature changes what is collected.
+- [~] 7.4 Privacy policy page on GitHub Pages (free): what the app stores (everything on the
+  device), what leaves the device (the user's own exports, Android device backup), no analytics,
+  no ads, no account; contact skillforge.application@gmail.com, developer Anriar (the Play developer name).
+  https://herofresh.github.io/SkillForge/privacy/ from `site/` (ADR-067), linked in Settings →
+  About. Update it whenever a feature changes what is stored or shared (AGENT.md §4).
 - [ ] 7.5 Play Console (user, with the agent's help): developer account ($25 once), store listing
   (texts, screenshots, feature graphic from the pixel assets), content rating, data safety form,
   app access, target audience.

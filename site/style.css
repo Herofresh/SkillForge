@@ -1,0 +1,78 @@
+/* SkillForge public pages (PLAN 7.4): colours from the app's palette (src/components/palette.ts). */
+:root {
+  color-scheme: dark;
+  --bg: #0d0b14;
+  --surface: #262036;
+  --text: #f3ead3;
+  --muted: #b4a9c8;
+  --gold: #e9b949;
+  --rune: #62e3f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    17px/1.6 system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 4rem;
+}
+
+h1 {
+  color: var(--gold);
+  font-size: 2rem;
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+}
+
+h2 {
+  color: var(--rune);
+  font-size: 1.15rem;
+  margin: 2rem 0 0.5rem;
+}
+
+a {
+  color: var(--rune);
+}
+
+ul {
+  padding-left: 1.25rem;
+}
+
+li + li {
+  margin-top: 0.4rem;
+}
+
+section {
+  border-top: 1px solid var(--surface);
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.meta {
+  color: var(--muted);
+  margin-top: 0;
+}
+
+.icon {
+  image-rendering: pixelated;
+  border-radius: 20%;
+}

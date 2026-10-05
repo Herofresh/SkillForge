@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 
-import { NOT_AFFILIATED_NOTE } from '@/data/credits';
+import { Linking } from 'react-native';
+
+import { NOT_AFFILIATED_NOTE, PRIVACY_POLICY } from '@/data/credits';
 import { HEALTH_DISCLAIMER } from '@/data/notices';
 import { ALL_NODES } from '@/data/skills';
 import { openTestDatabase } from '@/db/testing/testDatabase';
@@ -373,5 +375,14 @@ describe('AboutPanel (PLAN 7.0b)', () => {
     await render(<AboutPanel />);
     expect(screen.getByText(HEALTH_DISCLAIMER)).toBeOnTheScreen();
     expect(screen.getByText(NOT_AFFILIATED_NOTE)).toBeOnTheScreen();
+  });
+
+  it('links the privacy policy (PLAN 7.4)', async () => {
+    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    await render(<AboutPanel />);
+    await fireEvent.press(screen.getByTestId('about-privacy-policy'));
+    expect(openURL).toHaveBeenCalledWith(PRIVACY_POLICY.url);
+    expect(PRIVACY_POLICY.url).toBe('https://herofresh.github.io/SkillForge/privacy/');
+    openURL.mockRestore();
   });
 });

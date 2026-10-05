@@ -105,6 +105,11 @@ scripts/
   buildApkConfig.ts     its pure parts (args, ABIs, SDK path, APK/AAB names, commands, the pinned
                         signers RELEASE_SIGNER_SHA256 (debug key, sideload APKs) and
                         UPLOAD_SIGNER_SHA256 (Play upload key) with their checks), Jest-tested
+site/                   public GitHub Pages site (ADR-067), deployed by .github/workflows/pages.yml:
+  index.html            landing page (what the app is, links, contact)
+  privacy/index.html    the privacy policy (https://herofresh.github.io/SkillForge/privacy/); update it
+                        and its date whenever stored data, permissions or sharing change (AGENT.md §4)
+  style.css, icon.png   the app's palette and icon
 plugins/
   withUploadSigning.js  config plugin (ADR-066): `upload` signing config from the SKILLFORGE_UPLOAD_*
                         Gradle properties, used by release only with -PskillforgeUploadSigning;

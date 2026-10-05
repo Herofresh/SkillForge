@@ -89,6 +89,9 @@ At the end of every task:
   - Never rewrite old ADRs. To reverse one, add a new ADR and mark the old one `Superseded by ADR-NNN`.
 - **`docs/CONTEXT.md`:** update it whenever you add or move folders, change formulas, add commands, or
   introduce a new concept that belongs in the glossary.
+- **`site/privacy/index.html`** (the published privacy policy, ADR-067): update it and its effective
+  date whenever a change alters what the app stores, which permissions it has, or what can leave
+  the phone. Play's Data safety answers must then be checked too.
 
 ## 4a. PR review and merge (agent-reviewed, not user-reviewed)
 
