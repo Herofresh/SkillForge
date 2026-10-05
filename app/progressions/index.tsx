@@ -22,6 +22,7 @@ export default function ProgressionsScreen() {
   const overlay = useAppStore((state) => state.overlay);
   const baseNodes = useAppStore((state) => state.baseNodes);
   const overlayIssues = useAppStore((state) => state.overlayIssues);
+  const overlayUnreadable = useAppStore((state) => state.overlayUnreadable);
   const resetNode = useAppStore((state) => state.resetNode);
   const setNodeHidden = useAppStore((state) => state.setNodeHidden);
   const entries = useMemo(() => overlayEntries(overlay, baseNodes), [overlay, baseNodes]);
@@ -39,6 +40,16 @@ export default function ProgressionsScreen() {
     <>
       <Stack.Screen options={stackHeaderOptions('My progressions')} />
       <Screen testID="progressions-screen">
+        {overlayUnreadable.length > 0 && (
+          <IssueNotes
+            title="Your saved changes couldn't be read"
+            messages={[
+              'The built-in tree is used. The saved changes stay on this device, but your next change to the tree or an import replaces them.',
+              ...overlayUnreadable.map(formatIssue),
+            ]}
+            testID="overlay-unreadable"
+          />
+        )}
         {overlayIssues.length > 0 && (
           <IssueNotes
             title="Your changes don't fit this version"

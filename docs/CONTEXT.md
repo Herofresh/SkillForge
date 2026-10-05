@@ -36,7 +36,9 @@ exercise timer (`src/domain/setTimer.ts`, `src/components/timer/`, ADR-040). Fil
 
 ```
 app/                    expo-router screens (UI only, no game logic)
-  _layout.tsx           root Stack + dark navigation theme, loads the fonts, wrapped in DataGate
+  _layout.tsx           root Stack + dark navigation theme, loads the fonts, wrapped in DataGate;
+                        exports ErrorBoundary (RootErrorScreen, "Try again" = retry, PLAN 7.0a)
+  +not-found.tsx        unknown route (e.g. a mistyped skillforge:// link) → Redirect to "/" (7.0a)
   styleguide.tsx        DEV ONLY: catalogue of tokens, components and icons (Settings → Style Guide)
   index.tsx             redirects "/" to /tree (/train while a session is in progress), or to
                         /onboarding until onboarding is completed
@@ -53,7 +55,8 @@ app/                    expo-router screens (UI only, no game logic)
     trial.tsx           Trial attempt: warnings to acknowledge, steppers, logTrial, outcome + burst
     edit.tsx            "Edit progression" (PLAN 4.7, ADR-036): NodeEditorBody on nodeDraft(nodeId)
   progressions/         the user's tree changes (PLAN 4.7–4.8, ADR-036), stack screens
-    index.tsx           "My progressions": every change (open / reset / show / delete), SharePanel
+    index.tsx           "My progressions": every change (open / reset / show / delete), the notes
+                        for `overlayIssues` and `overlayUnreadable` (7.0a), SharePanel
                         (share YAML, import, suggest to project + contributor guide link)
     new.tsx             "Add custom exercise" (?branch=&after=): NodeEditorBody on newNodeDraft
     import.tsx          paste or pick shared YAML → preview (changes, "replaces yours", issues) → merge
@@ -260,7 +263,9 @@ src/
                         profile CRUD, generateWorkout(profileId, minutes, seed?), saveOverlay,
                         exportBackup, importBackup, shareBackup, importBackupFromFile; onboarding:
                         onboardingCompletedAt, setHeroName, toggleGoal, logTrial, testOutWarnings,
-                        completeOnboarding, replayOnboarding (in memory only, ADR-046); node detail: selfUnlockWarnings; Train (ADR-034):
+                        completeOnboarding, replayOnboarding (in memory only, ADR-046),
+                        onboardingReplay + leaveOnboardingReplay ("Back to the app", 7.0a);
+                        overlayUnreadable (a stored overlay row that doesn't read, 7.0a); node detail: selfUnlockWarnings; Train (ADR-034):
                         trainPlan / activeSession / trainSummary, planTraining, swap/remove/add,
                         trainWarnings, acknowledgeTrainWarning, startTraining, logTrainingSet,
                         editTrainingSet / deleteTrainingSet / moveTrainingExercise (5.9),
@@ -274,7 +279,8 @@ src/
                         baseNodes, nodeDraft, newNodeDraft, nodeDraftIssues, saveNodeDraft,
                         resetNode, setNodeHidden, exportOverlay, shareOverlay, previewOverlayImport,
                         importOverlay (merge), pickOverlayFile
-    backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker)
+    backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker);
+                        a picked file over MAX_IMPORT_FILE_BYTES is refused before it is read (7.0a)
     bootstrap.ts        startApp(): open, migrate, create store, loadAll (once)
     useAppStore.ts      useAppStore(selector) hook for components below DataGate
   components/           reusable UI components (visual language: docs/DESIGN.md, ADR-030)
@@ -287,7 +293,9 @@ src/
     theme.test.ts       contrast of every text/fill pair (>= 4.5:1, bars >= 3:1)
     fonts.ts            FONT_ASSETS for useFonts (keys = FontFamily names)
     NodeRow.tsx         a node as a list row: icon, name, tier chip, OG level, straight-arm tag, status
-    onboarding/OnboardingScaffold.tsx  step bar "STEP n / 5", title, scrolling body, Back/Skip/Next footer
+    onboarding/OnboardingScaffold.tsx  step bar "STEP n / 5", title, scrolling body, Back/Skip/Next footer;
+                        "Back to the app" while `onboardingReplay` (PLAN 7.0a)
+    RootErrorScreen.tsx what the root ErrorBoundary shows: EmptyState + "Try again" (no store, 7.0a)
     BranchTabs.tsx      the 14 branches as horizontal pixel tabs (goal picker, Tree tab)
     SafeguardWarningList.tsx  WarningBanner per SafeguardWarning + useAcknowledgements (ADR-023)
     stackHeader.ts      stackHeaderOptions(title) for pushed stack screens
@@ -357,6 +365,8 @@ src/
       *.tsx             Screen, PixelFrame, PixelText, PixelButton, PixelIcon, SegmentedBar, XPBar,
                         StatBar, LevelBadge, TierChip, WarningBanner, PixelModal, EmptyState,
                         LevelUpBurst (+ BURST_TITLES), PixelTextInput, PixelChip, NumberStepper,
+                        (PixelModal's content scrolls past SHEET_MAX_HEIGHT_SHARE of the window, 7.0a;
+                        a list inside a sheet that scrolls by itself sets nestedScrollEnabled),
                         PixelAnimation (looping exercise figure, 6.4), PixelSprite (stepped frames
                         of any pixel grids on the UI thread; PixelAnimation and the companion use it)
       figurePalette.ts  FIGURE_COLORS: animation roles → Palette keys (also used by the sheet script)
@@ -367,7 +377,8 @@ src/
                         as an SVG string for the home-screen widget, 6.6)
       frameGeometry.ts  notched-corner rects for PixelFrame
       ui.test.tsx       component render tests (RNTL); icons.test.ts, frameGeometry.test.ts
-  lib/                  generic helpers: clamp.ts, deepEqual.ts, curve.ts (geometric level curves), median.ts,
+  lib/                  generic helpers: importFile.ts (MAX_IMPORT_FILE_BYTES 5 MB,
+                        importFileSizeProblem: the "too large" message, 7.0a), clamp.ts, deepEqual.ts, curve.ts (geometric level curves), median.ts,
                         time.ts (MS_PER_HOUR/DAY/WEEK, currentTime for UI handlers, isSameLocalDay), hash.ts (FNV-1a, seeded tie-breaks),
                         id.ts (createId for local records), compare.ts (compareCodeUnits: id tie-breaks,
                         same order on Hermes as in Node), contrast.ts (WCAG ratio),
@@ -393,7 +404,8 @@ src/
     nativeWidget.tsx    turns the layout tree into the library's primitives: the small
                         SkillForgeWidget (WIDGET_NAME) and the large SkillForgeCompanionWidget
                         (COMPANION_WIDGET_NAME, the companion sprite as an SVG, PLAN 6.10),
-                        registerWidgetTask (draws by widgetName), redrawWidgets (both);
+                        registerWidgetTask (draws by widgetName; a plain "SkillForge" fallback
+                        that opens the app if drawing fails, 7.0a), redrawWidgets (both);
                         the only file that imports the library ('use no memo': no React Compiler)
     widgetStorage.ts    the snapshot file `widget-snapshot.json` in the document directory
     widgetSync.ts       startWidgetSync(store) from bootstrap: write + redraw after loadAll, on
@@ -410,9 +422,8 @@ docs/                   PLAN, DECISIONS, CONTEXT, DESIGN (visual language), rese
 app.json                Expo config: version + android.versionCode (the one version source,
                         ADR-039), package at.skillforge.app, adaptive icon, plugins (incl. the
                         widgets: default / min / max size, 30-min update, fonts copied into the
-                        APK, ADR-055, ADR-062)
-eas.json                EAS profiles development / preview (APK) / production (AAB), version
-                        source local; unused (no EAS, ADR-047)
+                        APK, ADR-055, ADR-062); android.blockedPermissions strips the template's
+                        SYSTEM_ALERT_WINDOW and READ/WRITE_EXTERNAL_STORAGE (7.0a). No eas.json (ADR-064)
 android/, builds/       GENERATED, gitignored: prebuild's native project and the copied APKs
 drizzle.config.ts       drizzle-kit config (sqlite, expo driver, schema -> src/db/migrations)
 babel.config.js         babel-preset-expo + inline-import for .sql (also used by Jest)
@@ -520,7 +531,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Timer cue** | A moment the phone buzzes (PLAN 5.8, ADR-044): `go` (a hold's get-ready ends: one short buzz), `target` (the hold reaches its target: two long buzzes), `rest_end` (the rest countdown reaches zero: three short buzzes). Only while the screen sees the moment pass; no sound, no background notification. |
 | **Custom node / custom tag** | A node the user added (`user_` id) or edited through the node editor; shown with a "Custom" tag. "Reset to default" removes the edit; a custom node is deleted instead. Overlays can't clear `straightArm` on, or move, a built-in straight-arm node (ADR-036). |
 | **Shared progressions** | The overlay as YAML (`exportOverlay`), shared from My progressions. Importing one merges it into the user's overlay after a preview (`mergeOverlays`, ADR-036). |
-| **Stored overlay** | The one current overlay in `progression_overlay`; the store's tree is `applyOverlay(ALL_NODES, overlay).nodes`. An overlay with issues is never saved; a stored one that stops applying is kept and reported as `overlayIssues` (ADR-028). |
+| **Stored overlay** | The one current overlay in `progression_overlay`; the store's tree is `applyOverlay(ALL_NODES, overlay).nodes`. An overlay with issues is never saved; a stored one that stops applying is kept and reported as `overlayIssues` (ADR-028); a stored row that doesn't read at all is kept, the app starts on the built-in tree and reports it as `overlayUnreadable` (ADR-064). |
 | **Backup** | A JSON file of all user data (`skillforge-backup`, `schemaVersion`). Import validates the whole file first and then replaces all data in one transaction; never a merge or a partial import (ADR-028). |
 | **Safety copy** | The backup of the current data that `importBackup` writes to `documents/backups/skillforge-before-import-<UTC>.json` before it replaces anything; importing it undoes the import. |
 | **Description** | A node's 1–3 plain sentences on what the exercise is and what it looks like (not the cues; PLAN 6.2, ADR-049). Required on built-in nodes (`validateNodes`), at most `MAX_DESCRIPTION_LENGTH` (300) characters; a user node saved before 6.2 may have `''` (shown as "No description yet…") and the editor asks for one on its next save. |

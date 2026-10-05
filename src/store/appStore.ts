@@ -305,6 +305,12 @@ export interface AppState {
    * removed a node it edits). Non-empty means the built-in tree is used; the overlay is kept.
    */
   overlayIssues: ValidationIssue[];
+  /**
+   * Why the stored overlay row couldn't be read at all (PLAN 7.0a, e.g. written by a newer app
+   * version). Non-empty means the built-in tree is used and `overlay` is empty; the row is kept
+   * until the user's next change to the tree or an import replaces it.
+   */
+  overlayUnreadable: ValidationIssue[];
   engine: EngineState;
   /**
    * What each logged session earned (`SessionResult` by session id), from the last recompute plus
@@ -320,6 +326,11 @@ export interface AppState {
   profile?: HeroProfile;
   /** When onboarding was finished; unset = show the first-run flow (PLAN 4.1). */
   onboardingCompletedAt?: number;
+  /**
+   * True while a replay of a completed onboarding runs (PLAN 7.0a): the steps then offer "Back to
+   * the app" (`leaveOnboardingReplay`).
+   */
+  onboardingReplay: boolean;
   /** The Tree tab's mode (PLAN 5.1): the branch columns or the whole-tree map. */
   treeMode: TreeMode;
   /**
@@ -388,6 +399,11 @@ export interface AppState {
    * stored hero name, equipment and goals, and a test-out logs an ordinary Trial session.
    */
   replayOnboarding(): void;
+  /**
+   * "Back to the app" during a replay (PLAN 7.0a): leaves the flow without writing anything, by
+   * restoring the stored completion time. A no-op when onboarding was never completed.
+   */
+  leaveOnboardingReplay(): void;
   /** Switches the Tree tab between Columns and Map and remembers it (setting `tree_view_mode`). */
   setTreeMode(mode: TreeMode): void;
   /** Wears a reached class (PLAN 6.9). Throws for an unknown or not yet reached class. */
@@ -712,6 +728,8 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       nodes: baseNodes,
       overlay: EMPTY_OVERLAY,
       overlayIssues: [],
+      overlayUnreadable: [],
+      onboardingReplay: false,
       engine: INITIAL_ENGINE_STATE,
       sessionResults: {},
       sessions: [],
@@ -724,7 +742,8 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       companion: EMPTY_COMPANION_SETTINGS,
 
       loadAll() {
-        const overlay = getOverlay(db)?.overlay ?? EMPTY_OVERLAY;
+        const stored = getOverlay(db);
+        const overlay = stored?.overlay ?? EMPTY_OVERLAY;
         const { nodes, issues: overlayIssues } = applyOverlay(baseNodes, overlay);
         const sessions = listStoredSessions(db);
         const userActions = listUserActions(db);
@@ -739,6 +758,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           onboardingCompletedAt: parseOnboardingCompletedAt(
             getSetting(db, ONBOARDING_COMPLETED_SETTING),
           ),
+          onboardingReplay: false,
           treeMode: parseTreeMode(getSetting(db, TREE_MODE_SETTING)),
           classes: parseClassSettings(getSetting(db, CLASS_SETTING), classDefinitions),
           challengePins,
@@ -750,6 +770,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           nodes,
           overlay,
           overlayIssues,
+          overlayUnreadable: stored?.unreadable ?? [],
           sessions,
           sessionResults: resultsById(results),
           userActions,
@@ -837,12 +858,21 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       completeOnboarding() {
         const at = onboardingCompletionAt(getSetting(db, ONBOARDING_COMPLETED_SETTING), now());
         setSetting(db, ONBOARDING_COMPLETED_SETTING, at);
-        set({ onboardingCompletedAt: at });
+        set({ onboardingCompletedAt: at, onboardingReplay: false });
       },
 
       replayOnboarding() {
         // In memory only: the stored completion stays, so a restart mid-replay opens the tabs.
-        set({ onboardingCompletedAt: undefined });
+        const completed = getSetting(db, ONBOARDING_COMPLETED_SETTING);
+        set({
+          onboardingCompletedAt: undefined,
+          onboardingReplay: parseOnboardingCompletedAt(completed) !== undefined,
+        });
+      },
+
+      leaveOnboardingReplay() {
+        const stored = parseOnboardingCompletedAt(getSetting(db, ONBOARDING_COMPLETED_SETTING));
+        if (stored !== undefined) set({ onboardingCompletedAt: stored, onboardingReplay: false });
       },
 
       setTreeMode(mode) {

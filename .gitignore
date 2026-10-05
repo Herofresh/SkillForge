@@ -17,6 +17,9 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+# signing keys and their passwords (Play upload key, PLAN 7.1): never in the repo
+*.keystore
+keystore.properties
 
 # Metro
 .metro-health-check*
@@ -31,6 +34,8 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.*
 .env*.local
 
 # typescript
@@ -44,3 +49,5 @@ example
 
 # local APK builds (npm run build:apk)
 /builds
+*.aab
+*.apk

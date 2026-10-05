@@ -292,23 +292,45 @@
   work**: a cool-down, more sets (up to 5), then up to 4 extra exercises, within the straight-arm
   budget and the 48 h rules. The cool-down rests 30 s. Notes say when the plan uses the pace and
   when the tree can't fill the chosen time. Time model in `src/domain/sessionTime.ts`.
+- Play hardening (7.0a, ADR-064, PR_LINK): the manifest no longer asks for
+  `SYSTEM_ALERT_WINDOW` / external storage; an unreadable stored overlay starts the app on the
+  built-in tree with a note on My progressions instead of the "Could not open your data" dead
+  end; a root error boundary ("Try again") and an unknown-route redirect; picked import files
+  over 5 MB are refused before reading; a replayed onboarding has "Back to the app"; sheets
+  scroll at large text; the widget task draws a fallback on errors; `eas.json` is gone; README
+  refreshed. No data change.
 
 ## Next up
-1. Review and merge 6.15 (session length), then a v0.8.0 release with the usual upgrade check
-   so it reaches the phone.
-2. Phase 7 (Google Play), starting with **7.1: the user creates the upload key with `keytool`**
-   (the exact command and the backup advice have already been given to the user; the key never
-   enters the repo), then 7.2 `npm run build:aab` signed with it.
-3. On the user's phone: install [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0)
+1. Review and merge 7.0a (Play hardening) and 7.0b (texts, disclaimer, delete all data).
+2. **7.1: the user creates the upload key with `keytool`** (the exact command and the backup
+   advice have already been given to the user; the key never enters the repo), then 7.2
+   `npm run build:aab` signed with it.
+3. Then a release (v0.8.0: 6.15 session length + 7.0a/b) with the usual upgrade check, so it
+   reaches the phone.
+4. On the user's phone: install [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0)
    over the installed build (Update, no uninstall), check both widgets and the Man / Woman choice
    and report what feels off.
-4. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+5. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
 ## Blockers
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Play hardening (task 7.0a, ADR-064, PR_LINK):**
+  - Overlay: `getOverlay` selects `body` as raw text (`sql\`${progressionOverlay.body}\``) and
+    parses it itself, so broken JSON is a reported issue, not a throw in Drizzle's JSON decoder.
+    `StoredOverlay.unreadable` → store `overlayUnreadable` → My progressions note
+    (`overlay-unreadable`). The row is not touched on load; the next `saveOverlay` overwrites it.
+  - Replay exit: `onboardingReplay` (true only when `onboarding_completed_at` is stored) and
+    `leaveOnboardingReplay`; the button lives in `OnboardingScaffold`, which now reads the store
+    (its tests start a real store).
+  - Not done on purpose: removing `@expo/ui`, `expo-glass-effect`, `expo-symbols` (expo-router
+    depends on them, ADR-064). `allowBackup` unchanged (user decision; 7.0b does the texts).
+  - Verified: `npx expo prebuild --platform android --clean --no-install` → the generated
+    `AndroidManifest.xml` has the three permissions with `tools:node="remove"`, VIBRATE and
+    INTERNET kept. Not verified: the merged manifest of a Gradle build, sheets at a real large
+    font scale on a device, the widget fallback on a device.
 - **Session length (task 6.15, ADR-063, [PR #65](https://github.com/Herofresh/SkillForge/pull/65)):**
   - Cause found by running the generator: the estimate was ~80 % rest (90 / 180 s after every set)
     and the live session lets the user skip rest, so a "30 min" plan of ~13 sets could be done in
@@ -1453,17 +1475,22 @@ upgrade check from every earlier release). Any new table or column is additive a
 - [x] 6.14 v0.7.0 release (6.12 widgets, 6.13 cooler companion + Man/Woman), same routine: upgrade
   check from 0.1.0, 0.2.0, 0.3.0, 0.4.0, 0.5.0 and 0.6.0, then both widgets on the install upgraded
   from 0.6.0 ([PR #63](https://github.com/Herofresh/SkillForge/pull/63); release [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0))
-- [~] 6.15 Session length 15–90 min (user request 2026-10-05: "30 often are no longer than 5
+- [x] 6.15 Session length 15–90 min (user request 2026-10-05: "30 often are no longer than 5
   minutes"): more length options, plan at the user's rest pace and fill longer sessions (ADR-063)
   ([PR #65](https://github.com/Herofresh/SkillForge/pull/65))
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
+- [~] 7.0a Play hardening (in-progress, agent): blocked unused permissions, root error boundary,
+  unreadable stored overlay no longer blocks startup, picked-file size cap, unused native deps
+  removed, `.gitignore` for keys/builds, unknown-route redirect, link-open catches, a "Back to the
+  app" exit on a replayed onboarding, scrolling sheets at large text, widget task fallback,
+  `eas.json` removed, README refresh
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
   done) and keeps it outside the repo with two backups. Gradle reads the path and passwords
   from `~/.gradle/gradle.properties` or environment variables, never from the repo.
 - [ ] 7.2 `npm run build:aab` (Gradle `bundleRelease`) signed with the upload key; the pinned signer
   check learns the upload key; `build:apk` keeps working for sideloading. `targetSdkVersion`
-  meets Play's current requirement (check it). Decide whether `eas.json` goes.
+  meets Play's current requirement (check it). (`eas.json` is already gone: 7.0a, ADR-064.)
 - [ ] 7.3 Move existing installs: the Play build has a different signer, so an install of a GitHub
   APK can't update to it. In-app/README guide: export backup → uninstall → install from Play →
   import. Check that a backup from every earlier release imports.
@@ -1495,8 +1522,6 @@ upgrade check from every earlier release). Any new table or column is additive a
   release does that today. Options: drop the user's closing prerequisite in the merged tree, or a
   dataset check against `RELEASED_POSITIONS`-style snapshots of user edits
 - Settings extras: units/preferences once there are any
-- Replay onboarding extras (5.10, ADR-046): a "Back to the app" exit on the hero step during a
-  replay (today: finish it, or restart the app)
 - Timer extras (after 5.8, ADR-040 / ADR-044): sound, a notification when a hold's target or the
   rest's end passes while the app is in the background, timers for rep Trials, pausing the rest
   countdown

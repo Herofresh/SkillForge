@@ -153,7 +153,7 @@ export function CompanionSheet({
   );
   return (
     <PixelModal visible title="Customize" onClose={onClose} testID={testID}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.list}>
+      <ScrollView nestedScrollEnabled style={styles.scroll} contentContainerStyle={styles.list}>
         <View style={styles.preview}>
           <View style={styles.stage}>
             <CompanionSprite animation="content" outfit={view.outfit} look={view.look} scale={3} />

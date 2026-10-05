@@ -166,6 +166,24 @@ describe('stored overlay (PLAN 3.4)', () => {
     expect(getOverlay(test.db)).toBeDefined();
     test.close();
   });
+
+  it('starts on the built-in tree when the stored overlay row cannot be read (regression: boot dead end)', async () => {
+    const test = await openTestDatabase();
+    saveOverlay(test.db, withUserNode, 1);
+    // As if a newer app version had written an overlay format this version doesn't know.
+    test.sqlite.raw.exec(`UPDATE progression_overlay SET body = '{"format":"nope"}'`);
+    const state = storeFor(test).getState();
+    expect(state.loaded).toBe(true);
+    expect(state.nodes).toEqual(ALL_NODES);
+    expect(state.overlay).toEqual(EMPTY_OVERLAY);
+    expect(state.overlayIssues).toEqual([]);
+    expect(state.overlayUnreadable.length).toBeGreaterThan(0);
+    const row = test.sqlite.raw.prepare('SELECT body FROM progression_overlay').get() as {
+      body: string;
+    };
+    expect(row.body).toBe('{"format":"nope"}'); // kept, never deleted on load
+    test.close();
+  });
 });
 
 describe('backup export/import (PLAN 3.3)', () => {

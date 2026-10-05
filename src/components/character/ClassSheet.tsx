@@ -182,7 +182,7 @@ export function ClassSheet({ rows, onWear, onClose, testID = 'class-sheet' }: Pr
         class you have earned stays yours. Pick one to wear: it also offers an optional weekly
         challenge.
       </PixelText>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.list}>
+      <ScrollView nestedScrollEnabled style={styles.scroll} contentContainerStyle={styles.list}>
         {rows.map((row) => (
           <ClassRowView
             key={row.classId}

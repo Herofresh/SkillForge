@@ -31,7 +31,7 @@ export function ExerciseInfoSheet({
   const animation = useMemo(() => animationFor(node), [node]);
   return (
     <PixelModal visible title={node.name} onClose={onClose} testID={testID}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.body}>
+      <ScrollView nestedScrollEnabled style={styles.scroll} contentContainerStyle={styles.body}>
         <View style={styles.animation}>
           <PixelAnimation
             animation={animation}

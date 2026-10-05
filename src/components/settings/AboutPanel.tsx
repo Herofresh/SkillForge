@@ -10,7 +10,7 @@ import { PixelText } from '../ui';
 function CreditLink({ credit }: { credit: Credit }) {
   return (
     <Pressable
-      onPress={() => void Linking.openURL(credit.url)}
+      onPress={() => void Linking.openURL(credit.url).catch(() => undefined)}
       accessibilityRole="link"
       accessibilityLabel={`${credit.name}: ${credit.note}`}
       accessibilityHint="Opens the website"

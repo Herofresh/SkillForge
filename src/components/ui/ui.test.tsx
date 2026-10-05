@@ -1,5 +1,7 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 
+import { Dimensions } from 'react-native';
+
 import { animationFor } from '@/data/animations';
 
 import { Colors, TierColors } from '../theme';
@@ -11,7 +13,7 @@ import { PixelAnimation } from './PixelAnimation';
 import { PixelButton } from './PixelButton';
 import { PixelFrame } from './PixelFrame';
 import { PixelIcon } from './PixelIcon';
-import { PixelModal } from './PixelModal';
+import { PixelModal, SHEET_MAX_HEIGHT_SHARE } from './PixelModal';
 import { PixelText } from './PixelText';
 import { StatBar } from './StatBar';
 import { TierChip } from './TierChip';
@@ -88,6 +90,12 @@ describe('StatBar', () => {
     expect(screen.getByText('push')).toBeOnTheScreen();
     expect(screen.getByText('21')).toBeOnTheScreen();
     expect(screen.getAllByTestId('segment-lit')).toHaveLength(4);
+  });
+
+  it('lets the label grow at a large font scale instead of clipping it (PLAN 7.0a)', async () => {
+    await render(<StatBar label="mobility" value={3} max={9} color={Colors.ember} />);
+    expect(screen.getByText('mobility')).not.toHaveStyle({ width: 76 });
+    expect(screen.getByText('mobility')).toHaveStyle({ minWidth: 76 });
   });
 
   it('is empty when max is 0', async () => {
@@ -184,6 +192,20 @@ describe('PixelModal', () => {
     expect(screen.getByText('body')).toBeOnTheScreen();
     await user.press(screen.getAllByRole('button', { name: 'Close' })[1]);
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('scrolls its content beyond a share of the window height, so large text stays reachable (PLAN 7.0a)', async () => {
+    await render(
+      <PixelModal visible title="Choose" onClose={jest.fn()} testID="sheet">
+        <PixelText>body</PixelText>
+      </PixelModal>,
+    );
+    const scroll = screen.getByTestId('sheet-scroll');
+    expect(scroll).toHaveStyle({
+      maxHeight: Dimensions.get('window').height * SHEET_MAX_HEIGHT_SHARE,
+    });
+    expect(screen.getByRole('header', { name: 'Choose' })).toBeOnTheScreen();
+    expect(screen.getByTestId('sheet-close')).toBeOnTheScreen();
   });
 
   it('renders nothing when hidden', async () => {

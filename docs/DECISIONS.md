@@ -2192,3 +2192,36 @@ Template:
   The pace adapts as the user's habit changes (5 sessions). Not covered: a user who rests longer
   on skills than on pairs is read as one pace; an edited or added exercise keeps its own rest but
   is measured like the rest. Tuning knobs: the constants above.
+
+## ADR-064: Play hardening: fail soft, ship less (PLAN 7.0a)
+- Date: 2026-10-05 · Status: Accepted (extends ADR-028's stored overlay, ADR-046's replay and
+  ADR-047's build plan; no schema or backup change)
+- Context: a review before the Google Play release found startup dead ends, unused permissions and
+  rough edges a store reviewer or a user with large text would hit.
+- Decision:
+  - **Permissions:** `android.blockedPermissions` strips `SYSTEM_ALERT_WINDOW` and
+    `READ/WRITE_EXTERNAL_STORAGE` (Expo's template adds them; import uses the document picker, export
+    the share sheet). `VIBRATE` and `INTERNET` stay. `allowBackup` is unchanged (user decision).
+  - **An unreadable stored overlay no longer blocks the start.** `getOverlay` reads the row's body
+    as text and returns an empty overlay plus `unreadable` issues instead of throwing (also for
+    broken JSON); the store exposes them as `overlayUnreadable` and My progressions explains it. The
+    row itself is never deleted on load; the user's next tree change or an import replaces it (the
+    note says so), and a backup taken meanwhile carries no overlay.
+  - **Root `ErrorBoundary`** (`RootErrorScreen`, "Try again" = expo-router's `retry`) and
+    `app/+not-found.tsx` (redirect to `/`), so neither a render error nor a bad deep link shows a
+    developer screen.
+  - **Picked files** over `MAX_IMPORT_FILE_BYTES` (5 MB) are refused before they are read.
+  - **Replay exit:** `onboardingReplay` (set only when a completion is stored) shows "Back to the
+    app"; `leaveOnboardingReplay` restores the stored completion time without writing.
+  - **Large text:** `PixelModal`'s content scrolls past `SHEET_MAX_HEIGHT_SHARE` (0.8) of the window;
+    sheets with their own inner list set `nestedScrollEnabled` (Android). StatBar / NumberStepper
+    labels have a minimum instead of a fixed width.
+  - **Widget task:** drawing errors render a plain "SkillForge" panel that opens the app.
+  - **`eas.json` is removed:** ADR-047 builds locally without an Expo account, so the EAS profiles
+    were never used; 7.2's `build:aab` runs Gradle directly.
+  - **`@expo/ui`, `expo-glass-effect`, `expo-symbols` stay** in package.json although the app
+    imports none of them: `expo-router` lists all three as its own dependencies, so removing them
+    from package.json would neither drop them from `node_modules` nor from the native build (as
+    already noted in ADR-014). Revisit only if expo-router drops them.
+- Consequences: a data problem shows as a note instead of a dead end, the manifest asks for less,
+  and nothing about the stored data changed, so every earlier release upgrades as before.

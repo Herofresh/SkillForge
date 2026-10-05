@@ -150,7 +150,7 @@ export function RankLadderSheet({ ladder, onClose, testID = 'rank-ladder' }: Pro
           `${NON_RANK_NAMES} don't count. Reaching a rank's level in ` +
           `${ladder.branchesForRank} branches always earns it.`}
       </PixelText>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.list}>
+      <ScrollView nestedScrollEnabled style={styles.scroll} contentContainerStyle={styles.list}>
         {ladder.steps.map((step) => (
           <RankStep
             key={step.rank}

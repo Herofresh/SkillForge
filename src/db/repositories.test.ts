@@ -222,10 +222,24 @@ describe('overlay repository', () => {
     expect(getOverlay(test.db)).toBeUndefined();
   });
 
-  it('refuses to read a corrupt row instead of guessing', () => {
+  it('reports a row that no longer reads as empty and unreadable, without guessing or throwing', () => {
     saveOverlay(test.db, overlay, 100);
     test.sqlite.raw.exec(`UPDATE progression_overlay SET body = '{"format":"nope"}'`);
-    expect(() => getOverlay(test.db)).toThrow(/stored overlay cannot be read/);
+    const stored = getOverlay(test.db);
+    expect(stored).toMatchObject({ overlay: EMPTY_OVERLAY, revision: 1, savedAt: 100 });
+    expect(stored?.unreadable?.length).toBeGreaterThan(0);
+    // The row itself is left as it was.
+    const row = test.sqlite.raw.prepare('SELECT body FROM progression_overlay').get() as {
+      body: string;
+    };
+    expect(row.body).toBe('{"format":"nope"}');
+  });
+
+  it('reports a row that is not JSON at all as unreadable (regression: it blocked the start)', () => {
+    saveOverlay(test.db, overlay, 100);
+    test.sqlite.raw.exec(`UPDATE progression_overlay SET body = 'not json {'`);
+    expect(getOverlay(test.db)?.unreadable?.length).toBeGreaterThan(0);
+    expect(getOverlay(test.db)?.overlay).toEqual(EMPTY_OVERLAY);
   });
 });
 
