@@ -10,6 +10,7 @@ import {
   type WorkoutContext,
 } from './generator';
 import { recompute } from './recompute';
+import { estimateMinutes } from './sessionTime';
 import {
   acknowledgeWarning,
   addExercise,
@@ -70,6 +71,7 @@ const WORKOUT: WorkoutPlan = {
     { kind: 'core', exercises: [exercise('hollow_hold', { sets: 2, metric: 'hold_s' })] },
   ],
   estimatedMinutes: 20,
+  restPace: 1,
   warnings: [],
   notes: ['a note'],
 };
@@ -91,8 +93,12 @@ describe('session plan', () => {
     expect(result.acknowledged).toEqual([]);
   });
 
-  it('estimates the minutes like the generator', () => {
-    expect(planMinutes(plan().exercises)).toBeGreaterThan(0);
+  it('estimates the minutes like the generator, at the plan’s rest pace (ADR-063)', () => {
+    const { exercises } = plan();
+    expect(plan().restPace).toBe(WORKOUT.restPace);
+    expect(planMinutes(exercises)).toBe(estimateMinutes(exercises));
+    expect(planMinutes(exercises, 0.5)).toBe(estimateMinutes(exercises, 0.5));
+    expect(planMinutes(exercises, 0.5)).toBeLessThan(planMinutes(exercises));
     expect(planMinutes([])).toBe(0);
   });
 
@@ -524,6 +530,7 @@ describe('stored draft', () => {
     ).toBeUndefined();
     expect(parseActiveSession({ ...started(), sets: [{ nodeId: 'a' }] })).toBeUndefined();
     expect(parseActiveSession({ ...started(), restEndsAt: 'soon' })).toBeUndefined();
+    expect(parseActiveSession({ ...started(), restPace: 'fast' })).toBeUndefined();
     expect(parseActiveSession({ ...started(), timer: { exerciseKey: 'e0' } })).toBeUndefined();
     expect(
       parseActiveSession({
@@ -555,6 +562,14 @@ describe('stored draft', () => {
     expect(old.timer).toEqual({ exerciseKey: 'e0', startedAt: NOW });
     expect(parseActiveSession(old)).toEqual(old);
     expect(pauseSetTimer(old, NOW + MS_PER_SECOND).timer?.pausedAt).toBe(NOW + MS_PER_SECOND);
+  });
+
+  it('reads a draft from before the rest pace (6.15): estimated at the prescribed rest', () => {
+    const { restPace: _added, ...old } = JSON.parse(JSON.stringify(started()));
+    const parsed = parseActiveSession(old);
+    expect(parsed).toEqual(old);
+    expect(parsed?.restPace).toBeUndefined();
+    expect(planMinutes(old.exercises, parsed?.restPace)).toBe(estimateMinutes(old.exercises));
   });
 });
 

@@ -117,7 +117,9 @@ describe('the guide', () => {
     expect(text('companion')).toContain('tier III');
     expect(text('classes')).toContain(`${HERO_CLASSES.length} of them`);
     expect(text('classes')).toContain('Warrior: Push 30 / 120 / 300');
-    expect(text('generator')).toContain('30 / 45 / 60 min');
+    expect(text('generator')).toContain('15 to 90 min');
+    expect(text('generator')).toContain('your last 5 sessions');
+    expect(text('generator')).toContain('up to 5 per exercise');
     expect(text('generator')).toContain('balance and mobility work');
     expect(text('xp')).toContain('1 + 0.25 × its OG level');
   });

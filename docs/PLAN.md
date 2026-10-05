@@ -285,21 +285,63 @@
   the new defaults (4 × 1, 4 × 2) drew correctly; Woman + ponytail updated the Character tab and
   both companion widgets. Screenshots `docs/screenshots/6.14-*.png`. The GitHub release is
   created by the coordinator after the merge.
+- Session length (6.15, ADR-063): Train offers **15, 20, 30, 45, 60, 75 and 90 min**. The generator
+  plans at the user's **rest pace** (the median "rest taken ÷ rest prescribed" from the logged sets'
+  timestamps over the last 5 sessions, 0.2–1.5; Trials and mobility not measured; no data change),
+  so a user who skips rests gets a plan with that much more work in it, and **more time buys more
+  work**: a cool-down, more sets (up to 5), then up to 4 extra exercises, within the straight-arm
+  budget and the 48 h rules. The cool-down rests 30 s. Notes say when the plan uses the pace and
+  when the tree can't fill the chosen time. Time model in `src/domain/sessionTime.ts`.
 
 ## Next up
-1. Phase 7 (Google Play), starting with **7.1: the user creates the upload key with `keytool`**
+1. Review and merge 6.15 (session length), then a v0.8.0 release with the usual upgrade check
+   so it reaches the phone.
+2. Phase 7 (Google Play), starting with **7.1: the user creates the upload key with `keytool`**
    (the exact command and the backup advice have already been given to the user; the key never
    enters the repo), then 7.2 `npm run build:aab` signed with it.
-2. On the user's phone: install [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0)
+3. On the user's phone: install [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0)
    over the installed build (Update, no uninstall), check both widgets and the Man / Woman choice
    and report what feels off.
-3. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+4. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
 ## Blockers
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Session length (task 6.15, ADR-063):**
+  - Cause found by running the generator: the estimate was ~80 % rest (90 / 180 s after every set)
+    and the live session lets the user skip rest, so a "30 min" plan of ~13 sets could be done in
+    ~5 min; and volume never grew (3 sets, fixed slots), so 60 and 90 min gave the same 58-min plan.
+  - Code: `src/domain/sessionTime.ts` (rests, `workSeconds`, `setSeconds`, `exerciseSeconds(e,
+    pace)`, `estimateMinutes`, `restPace(sessions, lookup)`); the generator re-exports the rest
+    constants and `exerciseSeconds`, so old imports still work. Generator: `Builder.pace`,
+    `fillTime` → extra cool-down (`EXTRA_COOL_DOWN`), `growSets`, `addExtraExercises`
+    (`extraBlockKind`), the pace and fill notes, `WorkoutPlan.restPace`. `SlotDef.restSec` (the
+    cool-down slot rests `COOL_DOWN_REST_SEC`). `train.ts`: `SESSION_MINUTES`,
+    `DEFAULT_SESSION_MINUTES`, `SessionPlan.restPace?`, `planMinutes(exercises, restPace)`. Guide
+    generator page: "15 to 90 min", the pace and the 5-set cap from the constants.
+  - Measured with the real tree: a new user at pace 1 now gets 15 / 30 / 60 / 90 min plans of
+    15 / 30 / 60 / 90 estimated minutes (before: 15 / 25 / 58 / 58); at pace 0.2 a 30-min plan is
+    ~40 sets (before: 12). A new user can't fill 60–90 min at pace 0.2 (few unlocked nodes): the
+    note says so.
+  - Gotchas: test-outs / the onboarding assessment log all sets at once, so Trial sets are not
+    measured (they read as zero rest). Mobility isn't measured either, because its rest changed
+    from 180 to 30 s and the set order can't tell which one applied. If the pace feels off, the
+    knobs are `PACE_*` in `sessionTime.ts` and `MAX_WORKING_SETS` / `MAX_EXTRA_EXERCISES` /
+    `FILL_NOTE_SHARE` in `generator.ts`.
+  - Emulator gotchas this session: (1) the installed release APK `at.skillforge.app` (from the 6.14
+    upgrade check) took the `exp://` link, so Maestro opened it instead of Expo Go; it is disabled
+    on the AVD (`adb shell pm enable at.skillforge.app` brings it back). (2) `hideKeyboard` in
+    `finish-onboarding.yaml` pressed Back and left the app (no soft keyboard shown), also after
+    an emulator restart; the E2E run used a scratch copy that taps the step title instead.
+    (3) After an emulator restart, run `adb reverse tcp:8081 tcp:8081` again.
+  - Verified: typecheck, lint, Jest (1752 tests). Maestro `train.yaml` on Pixel_8_Pro_API_35 /
+    Expo Go (with the scratch onboarding subflow above) passed every step up to and including the
+    summary with XP > 0; the last step (Done → Train tab) didn't run because the emulator's
+    background task hit its time limit. Screenshots `6.15-train-lengths.png` (the seven chips) and
+    `6.15-plan-preview-30.png` (fresh user, 30 min: 7 exercises, about 30 min). Not verified: a
+    real phone, the pace note on a device (needs real history), a 90-min session trained end to end.
 - **Release v0.7.0 (task 6.14, [PR #63](https://github.com/Herofresh/SkillForge/pull/63)):** ADR-043 routine. Both APKs built with `-- --clean`
   in a short-path copy `D:\sf070` (`diff -r` against the branch: identical, excluding
   `node_modules`, `android`, `builds`, `.git`, `.expo`); signer check passed,
@@ -1411,6 +1453,9 @@ upgrade check from every earlier release). Any new table or column is additive a
 - [x] 6.14 v0.7.0 release (6.12 widgets, 6.13 cooler companion + Man/Woman), same routine: upgrade
   check from 0.1.0, 0.2.0, 0.3.0, 0.4.0, 0.5.0 and 0.6.0, then both widgets on the install upgraded
   from 0.6.0 ([PR #63](https://github.com/Herofresh/SkillForge/pull/63); release [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0))
+- [~] 6.15 Session length 15–90 min (user request 2026-10-05: "30 often are no longer than 5
+  minutes"): more length options, plan at the user's rest pace and fill longer sessions (ADR-063)
+  (PR pending)
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is

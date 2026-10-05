@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Spacing } from '@/components/theme';
 import { PixelButton, PixelChip, PixelFrame, PixelIcon, PixelText, Screen } from '@/components/ui';
-import { SESSION_MINUTES, sessionCounts } from '@/domain/train';
+import { DEFAULT_SESSION_MINUTES, SESSION_MINUTES, sessionCounts } from '@/domain/train';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -61,7 +61,7 @@ function SetupPanel() {
   const profiles = useAppStore((state) => state.equipmentProfiles);
   const planTraining = useAppStore((state) => state.planTraining);
   const [profileId, setProfileId] = useState<string | undefined>(profiles[0]?.id);
-  const [minutes, setMinutes] = useState<number>(SESSION_MINUTES[0]);
+  const [minutes, setMinutes] = useState<number>(DEFAULT_SESSION_MINUTES);
   const chosen = profiles.find((profile) => profile.id === profileId) ?? profiles[0];
 
   const trainNow = () => {

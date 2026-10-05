@@ -21,6 +21,9 @@
  * 6. **Prescription** (`prescribe`): double progression inside the working range from the last
  *    performance; the Trial once the top of the range is reached (for straight-arm nodes only
  *    after `MIN_WEEKS_AT_LEVEL` weeks).
+ * 7. **Filling the time** (ADR-063): time is estimated at the user's rest pace (`restPace` in
+ *    `sessionTime.ts`); time left after the slots buys a cool-down, more sets (up to
+ *    `MAX_WORKING_SETS`) and then extra exercises, within the same safeguards.
  *
  * The generator's suggestions always respect the advisory safeguards (AGENT.md §5); the warnings
  * that still apply (e.g. a self-unlocked node's prerequisites) are attached to the plan.
@@ -52,6 +55,16 @@ import {
   trialOpensAt,
   trialWarnings,
 } from './safeguards';
+import {
+  COOL_DOWN_REST_SEC,
+  DEFAULT_REST_PACE,
+  exerciseSeconds,
+  PAIR_REST_SEC,
+  restPace,
+  setSeconds,
+  SINGLE_REST_SEC,
+  WARM_UP_REST_SEC,
+} from './sessionTime';
 import type {
   EquipmentTag,
   ExerciseNode,
@@ -122,6 +135,20 @@ export const STRENGTH_PAIRS: readonly (readonly [readonly Pattern[], readonly Pa
   [['horizontal_pull'], ['horizontal_push', 'vertical_push']],
 ];
 
+// --- Filling the time (ADR-063) ---------------------------------------------------------------
+
+/**
+ * Once the slots are filled and time is left, sets of the main exercises grow one round at a time
+ * up to this many (docs/research/progressions.md: Low's 25–50 reps per pattern, 4–6 × holds).
+ */
+export const MAX_WORKING_SETS = 5;
+/** After that, at most this many extra exercises (any trainable, unused candidate) fill the rest. */
+export const MAX_EXTRA_EXERCISES = 4;
+/** A plan estimated below this share of the chosen time gets a note explaining why. */
+export const FILL_NOTE_SHARE = 0.8;
+/** The rest pace is mentioned in the notes once it is this far from the prescribed rest. */
+export const PACE_NOTE_DEVIATION = 0.2;
+
 // --- Prescription and time --------------------------------------------------------------------
 
 export const WORKING_SETS = 3;
@@ -132,13 +159,16 @@ export const PROGRESSION_STEP: Readonly<Record<Metric, number>> = {
   eccentric_s: 1,
   load_xbw: 0.05,
 };
-/** Rest after each set: inside a pair (alternate the two exercises), otherwise, and warm-up. */
-export const PAIR_REST_SEC = 90;
-export const SINGLE_REST_SEC = 180;
-export const WARM_UP_REST_SEC = 30;
-/** Time estimate: seconds per rep and per exercise for setting up. */
-export const SECONDS_PER_REP = 3;
-export const TRANSITION_SEC = 30;
+// The rests and the time estimate live in `sessionTime.ts` (shared with the plan preview).
+export {
+  COOL_DOWN_REST_SEC,
+  exerciseSeconds,
+  PAIR_REST_SEC,
+  SECONDS_PER_REP,
+  SINGLE_REST_SEC,
+  TRANSITION_SEC,
+  WARM_UP_REST_SEC,
+} from './sessionTime';
 
 const TRAINABLE_FILL_STATES: readonly NodeState[] = ['available', 'training'];
 const TARGET_DECIMALS = 100;
@@ -411,29 +441,7 @@ export function prescribe(
   };
 }
 
-// --- Time and straight-arm load ---------------------------------------------------------------
-
-function workSeconds(metric: Metric, target: SetPerformance): number {
-  const reps = target.reps ?? 1;
-  switch (metric) {
-    case 'reps':
-      return target.value * SECONDS_PER_REP;
-    case 'hold_s':
-      return target.value;
-    case 'eccentric_s':
-      return reps * target.value;
-    case 'load_xbw':
-      return reps * SECONDS_PER_REP;
-  }
-}
-
-/** Estimated seconds for one exercise: setup + each set's work and the rest after it. */
-export function exerciseSeconds(exercise: PlannedExercise): number {
-  return (
-    TRANSITION_SEC +
-    exercise.sets * (workSeconds(exercise.metric, exercise.target) + exercise.restSec)
-  );
-}
+// --- Straight-arm load ------------------------------------------------------------------------
 
 /** The plan's exercises as the sets they would log, performed exactly as prescribed. */
 export function plannedSets(exercises: readonly PlannedExercise[], at: number): LoggedSet[] {
@@ -479,6 +487,8 @@ interface SlotDef {
   /** One matcher per exercise; two make a pair. */
   sides: Matcher[];
   goalOnly?: boolean;
+  /** Rest after each set of a single exercise (a pair rests `PAIR_REST_SEC`). */
+  restSec?: number;
 }
 
 const isSkillNode: Matcher = (node) => node.isSkill || node.straightArm;
@@ -499,7 +509,12 @@ const SLOT_DEFS: readonly SlotDef[] = [
   })),
   { kind: 'core', sides: [isStrengthWith(['core'])] },
   // Mobility is trained after the session, and only when a goal needs it.
-  { kind: 'cool_down', sides: [isStrengthWith(['mobility'])], goalOnly: true },
+  {
+    kind: 'cool_down',
+    sides: [isStrengthWith(['mobility'])],
+    goalOnly: true,
+    restSec: COOL_DOWN_REST_SEC,
+  },
 ];
 
 const compareCandidates = (a: Candidate, b: Candidate): number =>
@@ -512,8 +527,15 @@ interface Builder {
   blocks: Map<number, WorkoutBlock>;
   usedIds: Set<string>;
   seconds: number;
+  /** The user's rest pace (`restPace`): the estimate counts `restSec × pace` per set. */
+  pace: number;
   notes: string[];
 }
+
+const budgetSeconds = (builder: Builder): number => builder.request.availableMinutes * 60;
+
+const secondsOf = (builder: Builder, exercises: readonly PlannedExercise[]): number =>
+  exercises.reduce((sum, exercise) => sum + exerciseSeconds(exercise, builder.pace), 0);
 
 const allExercises = (builder: Builder): PlannedExercise[] =>
   [...builder.blocks.values()].flatMap((block) => block.exercises);
@@ -621,8 +643,8 @@ function tryAddBlock(
   exercises: PlannedExercise[],
   notes: string[],
 ): boolean {
-  const budget = builder.request.availableMinutes * 60;
-  const seconds = (list: PlannedExercise[]) => list.reduce((s, e) => s + exerciseSeconds(e), 0);
+  const budget = budgetSeconds(builder);
+  const seconds = (list: PlannedExercise[]) => secondsOf(builder, list);
   let chosen = exercises;
   if (builder.seconds + seconds(chosen) > budget) {
     chosen = exercises.map((exercise) => reduced(builder, exercise));
@@ -657,7 +679,7 @@ function fillSlot(
       const fitted = fitExercise(
         builder,
         candidate,
-        SINGLE_REST_SEC,
+        def.restSec ?? SINGLE_REST_SEC,
         straightArmSecondsLeft(builder),
       );
       if (!fitted) continue;
@@ -699,8 +721,8 @@ function warmUpExercise(node: ExerciseNode): PlannedExercise {
 /** Adds `node` to the warm-up block if it fits the time left. */
 function addToWarmUp(builder: Builder, node: ExerciseNode): void {
   const exercise = warmUpExercise(node);
-  const cost = exerciseSeconds(exercise);
-  if (builder.seconds + cost > builder.request.availableMinutes * 60) return;
+  const cost = exerciseSeconds(exercise, builder.pace);
+  if (builder.seconds + cost > budgetSeconds(builder)) return;
   const block = builder.blocks.get(WARM_UP_SLOT) ?? { kind: 'warm_up', exercises: [] };
   block.exercises.push(exercise);
   builder.blocks.set(WARM_UP_SLOT, block);
@@ -710,6 +732,101 @@ function addToWarmUp(builder: Builder, node: ExerciseNode): void {
 
 /** The warm-up block sits before every slot. */
 const WARM_UP_SLOT = -1;
+
+// --- Filling the time (ADR-063) ---------------------------------------------------------------
+
+/** Blocks whose sets grow: the skill, strength and core work (not the warm-up or cool-down). */
+const GROWING_BLOCK_KINDS: readonly WorkoutBlockKind[] = ['skill', 'strength', 'core'];
+
+/**
+ * Adds one set per round to every main block (to both exercises of a pair) while it fits the time
+ * and the straight-arm budget, up to `MAX_WORKING_SETS`. Trials keep their prescribed sets.
+ */
+function growSets(builder: Builder): void {
+  const blocks = [...builder.blocks.entries()]
+    .filter(([, block]) => GROWING_BLOCK_KINDS.includes(block.kind))
+    .sort(([a], [b]) => a - b)
+    .map(([, block]) => block);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const block of blocks) {
+      if (block.exercises.some((e) => e.isTrial || e.sets >= MAX_WORKING_SETS)) continue;
+      const cost = block.exercises.reduce((sum, e) => sum + setSeconds(e, builder.pace), 0);
+      if (builder.seconds + cost > budgetSeconds(builder)) continue;
+      const grown = block.exercises.map((e) => ({ ...e, sets: e.sets + 1 }));
+      const others = allExercises(builder).filter((e) => !block.exercises.includes(e));
+      if (budgetedSeconds(builder, [...others, ...grown]) > STRAIGHT_ARM_SESSION_BUDGET_S) continue;
+      block.exercises = grown;
+      builder.seconds += cost;
+      grew = true;
+    }
+  }
+}
+
+/** The block an extra exercise goes into, by what it trains. */
+function extraBlockKind(node: ExerciseNode): WorkoutBlockKind {
+  if (isSkillNode(node)) return 'skill';
+  if (node.patterns.includes('core')) return 'core';
+  if (node.patterns.includes('mobility')) return 'cool_down';
+  return 'strength';
+}
+
+/**
+ * Adds up to `MAX_EXTRA_EXERCISES` unused candidates, best score first, each as its own block from
+ * slot `firstSlot` on, while they fit. Returns the next free slot.
+ */
+function addExtraExercises(
+  builder: Builder,
+  candidates: readonly Candidate[],
+  firstSlot: number,
+): number {
+  let slot = firstSlot;
+  // Training work first; more stretching only when nothing else fits.
+  const ordered = [
+    ...candidates.filter((c) => extraBlockKind(c.node) !== 'cool_down'),
+    ...candidates.filter((c) => extraBlockKind(c.node) === 'cool_down'),
+  ];
+  for (const candidate of ordered) {
+    if (slot - firstSlot >= MAX_EXTRA_EXERCISES) break;
+    if (builder.usedIds.has(candidate.node.id)) continue;
+    const kind = extraBlockKind(candidate.node);
+    const restSec = kind === 'cool_down' ? COOL_DOWN_REST_SEC : SINGLE_REST_SEC;
+    const fitted = fitExercise(builder, candidate, restSec, straightArmSecondsLeft(builder));
+    // An extra is only worth it as working sets (a straight-arm leftover of one set is not).
+    if (!fitted || fitted.exercise.sets < MIN_WORKING_SETS) continue;
+    if (tryAddBlock(builder, slot, kind, [fitted.exercise], fitted.notes)) slot++;
+  }
+  return slot;
+}
+
+/** A cool-down for every session with time left, not only when a goal needs mobility. */
+const EXTRA_COOL_DOWN: SlotDef = {
+  kind: 'cool_down',
+  sides: [isStrengthWith(['mobility'])],
+  restSec: COOL_DOWN_REST_SEC,
+};
+
+/**
+ * Fills the time left after the slots and the warm-up ramp (ADR-063): a cool-down when there is
+ * none, then more sets of the main work, then extra exercises (and their sets).
+ */
+function fillTime(builder: Builder, candidates: readonly Candidate[]): void {
+  let slot = SLOT_DEFS.length;
+  const hasCoolDown = [...builder.blocks.values()].some((block) => block.kind === 'cool_down');
+  if (!hasCoolDown && fillSlot(builder, slot, EXTRA_COOL_DOWN, candidates)) slot++;
+  growSets(builder);
+  addExtraExercises(builder, candidates, slot);
+  growSets(builder);
+}
+
+function paceNote(pace: number): string | undefined {
+  if (Math.abs(pace - DEFAULT_REST_PACE) < PACE_NOTE_DEVIATION) return undefined;
+  return (
+    `Planned at your pace: in your last sessions you rested about ${Math.round(pace * 100)}% ` +
+    'of the suggested rest, so the time estimate counts that.'
+  );
+}
 
 // --- Entry point ------------------------------------------------------------------------------
 
@@ -814,6 +931,7 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
     blocks: new Map(),
     usedIds: new Set(),
     seconds: 0,
+    pace: restPace(request.recentSessions, lookup),
     notes,
   };
 
@@ -865,6 +983,8 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
     if (builder.seconds > before) ramps++;
   }
 
+  fillTime(builder, ranked);
+
   const blocks = [...builder.blocks.entries()]
     .sort(
       ([a, blockA], [b, blockB]) =>
@@ -906,10 +1026,20 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
     const weaker = peaks.push < peaks.pull ? 'push' : 'pull';
     notes.push(`Your push and pull levels are far apart, so ${weaker} work gets priority.`);
   }
+  const pace = paceNote(builder.pace);
+  if (pace) notes.push(pace);
+  const estimatedMinutes = Math.ceil(builder.seconds / 60);
+  if (estimatedMinutes < FILL_NOTE_SHARE * request.availableMinutes) {
+    notes.push(
+      `This plan fills about ${estimatedMinutes} of your ${request.availableMinutes} min: that is ` +
+        'all your tree, equipment and rest days suggest today. Add exercises if you want more.',
+    );
+  }
 
   return {
     blocks,
-    estimatedMinutes: Math.ceil(builder.seconds / 60),
+    estimatedMinutes,
+    restPace: builder.pace,
     warnings: workoutWarnings(exercises, plannedSets(exercises, now), request),
     notes,
   };

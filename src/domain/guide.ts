@@ -27,7 +27,7 @@ import {
 } from './character';
 import { tierNumeral } from './classes';
 import { CONTENT_MAX_DAYS, MOOD_TITLES, WAITING_MAX_DAYS } from './companion';
-import { PATTERN_REST_HOURS, RECOVERY_EXEMPT_PATTERNS } from './generator';
+import { MAX_WORKING_SETS, PATTERN_REST_HOURS, RECOVERY_EXEMPT_PATTERNS } from './generator';
 import { MAX_GOALS } from './onboarding';
 import { MAX_NODE_LEVEL, PROFICIENT_LEVEL } from './progression';
 import { branchesForMedian } from './rankLadder';
@@ -36,6 +36,7 @@ import {
   STRAIGHT_ARM_REST_HOURS,
   STRAIGHT_ARM_SESSION_BUDGET_S,
 } from './safeguards';
+import { PACE_SESSIONS } from './sessionTime';
 import { SESSION_MINUTES } from './train';
 import { ATTRIBUTES, type Attribute, type RankTitle } from './types';
 import { WIDGET_TOP_ATTRIBUTES } from './widget';
@@ -130,6 +131,9 @@ export interface GuideFacts {
   upgradedWeaponTier: number;
   startingWeapon: string;
   sessionMinutes: number[];
+  /** Sessions the rest pace is measured over, and the most sets a longer session grows to. */
+  paceSessions: number;
+  maxWorkingSets: number;
   maxGoals: number;
   patternRestHours: number;
   /** Movement patterns that need no rest day (balance, mobility). */
@@ -222,6 +226,8 @@ export function guideFacts(): GuideFacts {
     upgradedWeaponTier: UPGRADED_WEAPON_TIER,
     startingWeapon: (startingWeapon?.name ?? 'training sword').toLowerCase(),
     sessionMinutes: [...SESSION_MINUTES],
+    paceSessions: PACE_SESSIONS,
+    maxWorkingSets: MAX_WORKING_SETS,
     maxGoals: MAX_GOALS,
     patternRestHours: PATTERN_REST_HOURS,
     restExemptPatterns: [...RECOVERY_EXEMPT_PATTERNS],
@@ -391,9 +397,10 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
     },
     generator: {
       title: 'Workout generator',
-      summary: `Train builds a session for the place and time you pick (${facts.sessionMinutes
-        .map((minutes) => n(minutes))
-        .join(' / ')} min). It is a suggestion: swap, remove or add anything before you start.`,
+      summary:
+        'Train builds a session for the place and time you pick ' +
+        `(${n(Math.min(...facts.sessionMinutes))} to ${n(Math.max(...facts.sessionMinutes))} min). ` +
+        'It is a suggestion: swap, remove or add anything before you start.',
       more: [
         `It leads towards your goals first (up to ${n(facts.maxGoals)}), then favours ` +
           'movements you haven’t trained lately and the weaker side of push and pull.',
@@ -403,6 +410,10 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
           'range and it suggests the Trial.',
         'It only uses the equipment of the profile you picked; when a skill needs something ' +
           'else, a skill of the same movement stands in.',
+        `It plans at your pace: if your last ${n(facts.paceSessions)} sessions show you rest ` +
+          'less (or more) than suggested, the time estimate counts that. The suggested rest stays.',
+        `More time buys a cool-down, then more sets (up to ${n(facts.maxWorkingSets)} per ` +
+          'exercise), then extra exercises.',
         'Its suggestions always keep to the straight-arm safeguards.',
       ],
     },

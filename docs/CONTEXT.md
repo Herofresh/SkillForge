@@ -57,7 +57,7 @@ app/                    expo-router screens (UI only, no game logic)
                         (share YAML, import, suggest to project + contributor guide link)
     new.tsx             "Add custom exercise" (?branch=&after=): NodeEditorBody on newNodeDraft
     import.tsx          paste or pick shared YAML → preview (changes, "replaces yours", issues) → merge
-  (tabs)/train.tsx      Train now (profile chips, 30/45/60 min → planTraining) or "Resume session"
+  (tabs)/train.tsx      Train now (profile chips, 15–90 min chips → planTraining) or "Resume session"
   train/                Train flow stack screens (PLAN 4.4, ADR-034)
     preview.tsx         plan by block: sets × target, rest, markers, notes, warnings to acknowledge;
                         swap / remove / add → Start session
@@ -136,7 +136,9 @@ src/
                         budget, 48 h rest, and the SafeguardWarning producers
     character.ts        character level, attributes (PATTERN_ATTRIBUTES, trains), rank, balance warning
     generator.ts        on-demand workout generator: frontier, scoring, equipment substitution,
-                        slots, double progression (ADR-024)
+                        slots, double progression (ADR-024), filling the time (ADR-063)
+    sessionTime.ts      time estimate (rests, work, setup) and the user's rest pace from the logged
+                        sets' timestamps (restPace, ADR-063); shared by the generator and preview
     recompute.ts        applySession / applyUserAction (reducer steps) + recompute (fold over
                         sessions and user actions), ADR-008/021/023
     equipment.ts        HOME_EQUIPMENT, PARK_EQUIPMENT, DEFAULT_EQUIPMENT_PROFILES (seeded),
@@ -639,7 +641,7 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
   `HERO_CLASSES[].challenge.targets`. Completed when count ≥ target; the session that crosses it
   gets the bonus, at most once per week.
 
-## Generator *(Phase 2.5, ADR-024; constants in `src/domain/generator.ts` only)*
+## Generator *(Phase 2.5, ADR-024, ADR-063; constants in `src/domain/generator.ts`, rests and time in `src/domain/sessionTime.ts`)*
 
 `generateWorkout({ nodes, goals, progress, equipment, availableMinutes, recentSessions, now, seed })`
 → `WorkoutPlan`. Pure and deterministic (same request and seed → same plan, independent of the
@@ -680,10 +682,24 @@ order of `recentSessions`). Pass the merged tree and `EngineState.progress`.
    fully successful session → weakest set + `PROGRESSION_STEP` (reps 1, hold 5 s, eccentric 1 s,
    load 0.05), else the weakest set; clamped to the working range. Every set at the range top and
    Trial not passed → the Trial (`trial.sets × trial.target`, `isTrial`).
-8. **Rest and time:** `PAIR_REST_SEC` 90 inside a pair, `SINGLE_REST_SEC` 180 otherwise,
-   `WARM_UP_REST_SEC` 30 (per exercise, for the rest timer). Estimate per exercise
-   (`exerciseSeconds`) = `TRANSITION_SEC` 30 + sets × (work + rest), work = `SECONDS_PER_REP` 3 per
-   rep, hold seconds, or lowerings × seconds. `estimatedMinutes` = ceil(total / 60) ≤ available.
+8. **Rest and time** (`sessionTime.ts`): `PAIR_REST_SEC` 90 inside a pair, `SINGLE_REST_SEC` 180
+   otherwise, `WARM_UP_REST_SEC` 30, `COOL_DOWN_REST_SEC` 30 (per exercise, for the rest timer).
+   Estimate per exercise (`exerciseSeconds`) = `TRANSITION_SEC` 30 + sets × (work + rest × pace),
+   work = `SECONDS_PER_REP` 3 per rep, hold seconds, or lowerings × seconds.
+   `estimatedMinutes` = ceil(total / 60) ≤ available; `WorkoutPlan.restPace` = pace.
+9. **Rest pace** (`restPace`, ADR-063): per measured rest, (gap to the previous set − the set's
+   work or `durationSec`) ÷ the prescribed rest read from the set order (same node again =
+   180 s, alternating pair = 90 s; changes of exercise, Trial sets and mobility work not measured).
+   Median over the latest `PACE_SESSIONS` 5 sessions with measured rests, clamped to
+   [`PACE_MIN` 0.2, `PACE_MAX` 1.5]; < `PACE_MIN_RESTS` 4 rests → 1. A note when |pace − 1| ≥
+   `PACE_NOTE_DEVIATION` 0.2.
+10. **Filling the time** (`fillTime`, after the ramp, ADR-063): a cool-down if none (any mobility
+   node); `growSets`: +1 set per round for every skill / strength / core block (a pair together)
+   up to `MAX_WORKING_SETS` 5, never a Trial; up to `MAX_EXTRA_EXERCISES` 4 unused candidates
+   (training before stretching, ≥ `MIN_WORKING_SETS` sets, in the block matching what they train);
+   `growSets` again. Each step checks time and the straight-arm budget. Below `FILL_NOTE_SHARE`
+   80 % of the chosen time a note says the tree has no more for today.
+   Session lengths: `SESSION_MINUTES` 15, 20, 30, 45, 60, 75, 90 (`train.ts`), default 30.
 
 Helpers for the UI and tests: `planExercises(plan)`, `plannedSets(exercises, at)` (the plan as
 `LoggedSet`s, e.g. for `sessionSafeguardWarnings` while the user edits the plan).
