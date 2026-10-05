@@ -43,6 +43,8 @@
  *   (`mergeAccessoryUnlocks`, after the class tiers, which some rules need) and keeps newly earned
  *   accessories in the `hero_companion` setting, stamped like the class tiers; `equipAccessory`,
  *   `setCompanionLook` and `markAccessoriesSeen` store the hero's choices. Cosmetic only.
+ * - "Delete all my data" (PLAN 7.0b, ADR-064): `deleteAllData` deletes the app's files, wipes
+ *   every user table in one transaction with the first-run defaults written again, and reloads.
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
  *
  * `createAppStore` takes its dependencies (database, built-in tree, clock, id source, file access) so
@@ -69,7 +71,7 @@ import { getProfile, setHeroName } from '@/db/profileRepository';
 import { insertSession, listStoredSessions } from '@/db/sessionRepository';
 import { getSetting, setSetting } from '@/db/settingsRepository';
 import { insertUserAction, listUserActions } from '@/db/userActionRepository';
-import { readUserData, replaceUserData } from '@/db/userDataRepository';
+import { deleteAllUserData, readUserData, replaceUserData } from '@/db/userDataRepository';
 import { HERO_CLASSES } from '@/data/classes';
 import { ACCESSORIES } from '@/data/companion/accessories';
 import { testOutWarnings, trialSession } from '@/domain/assessment';
@@ -244,6 +246,17 @@ export interface BackupFiles {
   pick(): Promise<string | undefined>;
   /** Writes a copy into the app's own storage and returns its location. Throws on failure. */
   saveSafetyCopy(fileName: string, text: string): string;
+  /**
+   * Deletes every file the app wrote outside the database (PLAN 7.0b): the safety copies, the
+   * exports it left in the cache for the share sheet, picked-file copies and the widget snapshot.
+   * Never throws; returns the names it could not delete.
+   */
+  deleteAppFiles(): string[];
+}
+
+/** What `deleteAllData` did: the files it could not delete (normally none). */
+export interface DeleteAllDataResult {
+  filesLeft: string[];
 }
 
 export interface AppStoreDeps {
@@ -359,6 +372,11 @@ export interface AppState {
    * import"; in memory only. The file itself stays in `documents/backups/`.
    */
   lastImport?: SafetyCopy;
+  /**
+   * How often `deleteAllData` ran in this app run. The widget sync redraws when it changes, even
+   * when the fresh snapshot looks like the old one.
+   */
+  dataResets: number;
 
   loadAll(): void;
   logSession(session: LoggedSession, details?: SessionDetails): SessionResult;
@@ -533,6 +551,13 @@ export interface AppState {
   shareBackup(): Promise<void>;
   /** Let the user pick a file, then `importBackup` it. */
   importBackupFromFile(): Promise<ImportBackupFileResult>;
+  /**
+   * "Delete all my data" (PLAN 7.0b, ADR-064): deletes the app's files (`files.deleteAppFiles`),
+   * then every user table in one transaction with the first-run defaults written again, and
+   * reloads: the app is as after a fresh install and opens onboarding. The in-memory drafts (plan,
+   * summary, last import) go too. The UI asks for a confirmation first.
+   */
+  deleteAllData(): DeleteAllDataResult;
 }
 
 export type AppStore = StoreApi<AppState>;
@@ -740,6 +765,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       classes: EMPTY_CLASS_SETTINGS,
       challengePins: [],
       companion: EMPTY_COMPANION_SETTINGS,
+      dataResets: 0,
 
       loadAll() {
         const stored = getOverlay(db);
@@ -1265,6 +1291,20 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const text = await requireFiles().pick();
         if (text === undefined) return { status: 'canceled' };
         return get().importBackup(text);
+      },
+
+      deleteAllData() {
+        // Files first: the widget sync writes a fresh snapshot as soon as the reload lands.
+        const filesLeft = deps.files?.deleteAppFiles() ?? [];
+        deleteAllUserData(db, now());
+        set({
+          trainPlan: undefined,
+          trainSummary: undefined,
+          lastImport: undefined,
+        });
+        get().loadAll(); // empty history, the defaults, no onboarding completion, no draft
+        set({ dataResets: get().dataResets + 1 });
+        return { filesLeft };
       },
     };
   });

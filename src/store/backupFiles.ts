@@ -10,6 +10,7 @@ import * as Sharing from 'expo-sharing';
 
 import { BACKUP_MIME_TYPE } from '@/domain/backup';
 import { importFileSizeProblem } from '@/lib/importFile';
+import { WIDGET_SNAPSHOT_FILE, deleteWidgetSnapshot } from '@/widget/widgetStorage';
 
 import type { BackupFiles, ShareOptions } from './appStore';
 
@@ -58,4 +59,49 @@ function saveSafetyCopy(fileName: string, text: string): string {
   return file.uri;
 }
 
-export const deviceBackupFiles: BackupFiles = { share, pick, saveSafetyCopy };
+/** Every file name the app gives a shared export starts with this (`backupFileName`). */
+const EXPORT_FILE_PREFIX = 'skillforge-';
+
+/** Where expo-document-picker copies a picked file (`copyToCacheDirectory`). */
+const PICKER_CACHE_FOLDER = 'DocumentPicker';
+
+function deleteIfExists(entry: File | Directory): void {
+  if (entry.exists) entry.delete();
+}
+
+/** Runs `remove`; on failure adds `name` to `failed` instead of throwing. */
+function tryDelete(name: string, remove: () => void, failed: string[]): void {
+  try {
+    remove();
+  } catch {
+    failed.push(name);
+  }
+}
+
+/**
+ * "Delete all my data" (PLAN 7.0b, ADR-064): the safety copies in `documents/backups/`, the
+ * exports `share` left in the cache, the picker's copies of imported files and the widget snapshot.
+ * Other cache files (not the app's own data) are left alone.
+ */
+function deleteAppFiles(): string[] {
+  const failed: string[] = [];
+  const safetyCopies = new Directory(Paths.document, SAFETY_COPY_FOLDER);
+  tryDelete(SAFETY_COPY_FOLDER, () => deleteIfExists(safetyCopies), failed);
+  const pickerCopies = new Directory(Paths.cache, PICKER_CACHE_FOLDER);
+  tryDelete(PICKER_CACHE_FOLDER, () => deleteIfExists(pickerCopies), failed);
+  tryDelete(
+    'cache',
+    () => {
+      for (const entry of Paths.cache.list()) {
+        if (entry instanceof File && entry.name.startsWith(EXPORT_FILE_PREFIX)) {
+          tryDelete(entry.name, () => entry.delete(), failed);
+        }
+      }
+    },
+    failed,
+  );
+  tryDelete(WIDGET_SNAPSHOT_FILE, deleteWidgetSnapshot, failed);
+  return failed;
+}
+
+export const deviceBackupFiles: BackupFiles = { share, pick, saveSafetyCopy, deleteAppFiles };

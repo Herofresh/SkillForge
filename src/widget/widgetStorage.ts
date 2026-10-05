@@ -16,6 +16,12 @@ export function writeWidgetSnapshot(snapshot: WidgetSnapshot): void {
   snapshotFile().write(JSON.stringify(snapshot));
 }
 
+/** Deletes the snapshot ("Delete all my data", PLAN 7.0b); nothing happens when there is none. */
+export function deleteWidgetSnapshot(): void {
+  const file = snapshotFile();
+  if (file.exists) file.delete();
+}
+
 /** The stored snapshot, or `undefined` when there is none yet or it can't be read. */
 export async function readWidgetSnapshot(): Promise<WidgetSnapshot | undefined> {
   const file = snapshotFile();

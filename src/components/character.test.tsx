@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 
+import { NOT_AFFILIATED_NOTE } from '@/data/credits';
+import { HEALTH_DISCLAIMER } from '@/data/notices';
 import { ALL_NODES } from '@/data/skills';
 import { openTestDatabase } from '@/db/testing/testDatabase';
 import { serializeBackup } from '@/domain/backup';
@@ -17,7 +19,9 @@ import { RankCrest } from './character/RankCrest';
 import { RankLadderSheet } from './character/RankLadderSheet';
 import { SessionHistoryRow } from './character/SessionHistoryRow';
 import { EquipmentProfileEditor } from './equipment/EquipmentProfileEditor';
+import { AboutPanel } from './settings/AboutPanel';
 import { BackupPanel } from './settings/BackupPanel';
+import { DELETED_DATA_TEXT, DeleteDataPanel } from './settings/DeleteDataPanel';
 import { ReplayOnboardingPanel } from './settings/ReplayOnboardingPanel';
 
 jest.mock('react-native-safe-area-context', () => ({
@@ -58,9 +62,9 @@ describe('AttributeRadar', () => {
 
 describe('RankCrest', () => {
   it('names the rank and the hint', async () => {
-    await render(<RankCrest rank="Adept" hint="Branch median OG 6" />);
+    await render(<RankCrest rank="Adept" hint="Branch median Difficulty 6" />);
     expect(screen.getByText('Adept')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Rank: Adept. Branch median OG 6')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Rank: Adept. Branch median Difficulty 6')).toBeOnTheScreen();
     expect(screen.queryByRole('button')).toBeNull();
   });
 
@@ -90,7 +94,7 @@ describe('RankLadderSheet', () => {
     expect(screen.getByTestId('rank-ladder-apprentice-status')).toHaveTextContent('Next rank');
     expect(screen.getByTestId('rank-ladder-legend-status')).toHaveTextContent('Locked');
     expect(screen.getByTestId('rank-ladder-apprentice-progress')).toHaveTextContent(
-      `0 of ${ladder.branchesForRank} branches at OG 2 or higher · ${ladder.branchesForRank} to go`,
+      `0 of ${ladder.branchesForRank} branches at Difficulty 2 or higher · ${ladder.branchesForRank} to go`,
     );
     expect(screen.getByTestId('rank-ladder-legend-progress')).toBeOnTheScreen();
     expect(screen.queryByTestId('rank-ladder-novice-progress')).toBeNull();
@@ -101,7 +105,7 @@ describe('RankLadderSheet', () => {
     expect(screen.queryByText('Acrobatics')).toBeNull();
     expect(
       screen.getByLabelText(
-        /^Legend\. Locked\. Branch median OG 13\. 0 of 7 branches at OG 13 or higher/,
+        /^Legend\. Locked\. Branch median Difficulty 13\. 0 of 7 branches at Difficulty 13 or higher/,
       ),
     ).toBeOnTheScreen();
     expect(screen.getByLabelText(/^Apprentice\. Next rank\. .*Still below: /)).toBeOnTheScreen();
@@ -118,7 +122,7 @@ describe('RankLadderSheet', () => {
     expect(screen.getByTestId('rank-ladder-apprentice-status')).toHaveTextContent('Reached');
     expect(screen.getByTestId('rank-ladder-adept-status')).toHaveTextContent('Your rank');
     expect(screen.getByTestId('rank-ladder-master-progress')).toHaveTextContent(
-      '1 of 7 branches at OG 9 or higher · 6 to go',
+      '1 of 7 branches at Difficulty 9 or higher · 6 to go',
     );
   });
 });
@@ -231,6 +235,7 @@ describe('BackupPanel', () => {
       share: jest.fn(async () => undefined),
       pick: async () => picked,
       saveSafetyCopy: (fileName) => `file:///backups/${fileName}`,
+      deleteAppFiles: () => [],
     };
   }
 
@@ -295,5 +300,78 @@ describe('BackupPanel', () => {
     expect(await screen.findByTestId('backup-undone')).toBeOnTheScreen();
     expect(store.getState().equipmentProfiles).toHaveLength(2);
     expect(screen.queryByTestId('undo-import')).toBeNull();
+  });
+});
+
+describe('DeleteDataPanel (PLAN 7.0b)', () => {
+  function files(): BackupFiles {
+    return {
+      share: jest.fn(async () => undefined),
+      pick: async () => undefined,
+      saveSafetyCopy: (fileName) => `file:///backups/${fileName}`,
+      deleteAppFiles: jest.fn(() => []),
+    };
+  }
+
+  async function storeWithData(access: BackupFiles): Promise<AppStore> {
+    const store = await startStore(access);
+    store.getState().setHeroName('Aria');
+    store.getState().setGoals(['pull_up']);
+    store.getState().completeOnboarding();
+    return store;
+  }
+
+  it('says what is deleted and deletes nothing until the user acknowledged and confirmed', async () => {
+    const access = files();
+    const store = await storeWithData(access);
+    const user = userEvent.setup();
+    await render(<DeleteDataPanel />);
+    await user.press(screen.getByTestId('delete-data'));
+    expect(screen.getByText('Delete all your data?')).toBeOnTheScreen();
+    expect(screen.getByText(DELETED_DATA_TEXT)).toBeOnTheScreen();
+    // The destructive button waits for the acknowledgement.
+    await user.press(screen.getByTestId('delete-data-confirm'));
+    expect(store.getState().profile?.heroName).toBe('Aria');
+    // Cancel keeps everything.
+    await user.press(screen.getAllByRole('button', { name: 'Cancel' })[0]);
+    expect(store.getState().goals).toEqual(['pull_up']);
+    expect(access.deleteAppFiles).not.toHaveBeenCalled();
+  });
+
+  it('offers an export first', async () => {
+    const access = files();
+    await storeWithData(access);
+    const user = userEvent.setup();
+    await render(<DeleteDataPanel />);
+    await user.press(screen.getByTestId('delete-data'));
+    await user.press(screen.getByTestId('delete-data-export'));
+    expect(access.share).toHaveBeenCalled();
+    expect(await screen.findByText('Backup handed to the share sheet.')).toBeOnTheScreen();
+  });
+
+  it('wipes everything after the acknowledgement and sends the app back to onboarding', async () => {
+    const access = files();
+    const store = await storeWithData(access);
+    const user = userEvent.setup();
+    await render(<DeleteDataPanel />);
+    await user.press(screen.getByTestId('delete-data'));
+    await user.press(screen.getByTestId('delete-data-warning-acknowledge'));
+    await user.press(screen.getByTestId('delete-data-confirm'));
+    expect(access.deleteAppFiles).toHaveBeenCalledTimes(1);
+    expect(store.getState().profile?.heroName).toBeUndefined();
+    expect(store.getState().goals).toEqual([]);
+    expect(store.getState().onboardingCompletedAt).toBeUndefined();
+    expect(store.getState().equipmentProfiles.map((profile) => profile.name)).toEqual([
+      'Home',
+      'Park',
+    ]);
+  });
+});
+
+describe('AboutPanel (PLAN 7.0b)', () => {
+  it('shows the health disclaimer and that the app is not affiliated with its sources', async () => {
+    await render(<AboutPanel />);
+    expect(screen.getByText(HEALTH_DISCLAIMER)).toBeOnTheScreen();
+    expect(screen.getByText(NOT_AFFILIATED_NOTE)).toBeOnTheScreen();
   });
 });
