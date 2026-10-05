@@ -6,7 +6,7 @@ import { Spacing } from './theme';
 import { PixelFrame, PixelIcon, PixelText } from './ui';
 
 /**
- * The health disclaimer as a short framed notice (PLAN 7.0b, ADR-064): onboarding step 1 and
+ * The health disclaimer as a short framed notice (PLAN 7.0b, ADR-065): onboarding step 1 and
  * Settings → About. Informational only, no extra tap.
  */
 export function HealthNotice({ testID = 'health-notice' }: { testID?: string }) {

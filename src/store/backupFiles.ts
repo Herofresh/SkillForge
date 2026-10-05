@@ -79,7 +79,7 @@ function tryDelete(name: string, remove: () => void, failed: string[]): void {
 }
 
 /**
- * "Delete all my data" (PLAN 7.0b, ADR-064): the safety copies in `documents/backups/`, the
+ * "Delete all my data" (PLAN 7.0b, ADR-065): the safety copies in `documents/backups/`, the
  * exports `share` left in the cache, the picker's copies of imported files and the widget snapshot.
  * Other cache files (not the app's own data) are left alone.
  */

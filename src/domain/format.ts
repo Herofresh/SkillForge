@@ -53,7 +53,7 @@ export const FOUNDATION_OG_LEVEL = 0;
 
 /**
  * The OG level as a short tag: "Foundation" for level 0, else "Difficulty 5". The UI calls the
- * Overcoming Gravity level "difficulty" (ADR-064); `ogLevel` stays the internal name.
+ * Overcoming Gravity level "difficulty" (ADR-065); `ogLevel` stays the internal name.
  */
 export function formatOgLevel(ogLevel: number): string {
   return ogLevel === FOUNDATION_OG_LEVEL ? 'Foundation' : `Difficulty ${ogLevel}`;

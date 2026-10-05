@@ -95,7 +95,7 @@ to be a programmer to read or change them.
 | `regression` | Id of the easier exercise to fall back to. | none |
 | `legendary` | `true` for elite teaser skills shown as a locked silhouette. | `false` |
 | `cues` | Short coaching cues, one per line. | none |
-| `verify` | Anything uncertain that still needs checking, e.g. "OG2 level inferred". It shows as ⚠ on the review sheet; the app shows it only in development builds, so put any safety advice for the user in `cues` (ADR-064). | none |
+| `verify` | Anything uncertain that still needs checking, e.g. "OG2 level inferred". It shows as ⚠ on the review sheet; the app shows it only in development builds, so put any safety advice for the user in `cues` (ADR-065). | none |
 | `review` | `status: draft` or `status: coach_reviewed`, plus `notes` for reviewer comments. | `status: draft` |
 
 ## What an exercise trains (attributes)

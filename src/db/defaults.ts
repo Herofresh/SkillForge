@@ -1,7 +1,7 @@
 /**
  * The first-run defaults (ADR-026): the hero profile and the Home and Park equipment profiles,
  * plus the `defaults_seeded_at` marker. Written by the first-run seed (`seedDefaults`) and again
- * after "Delete all my data" (`deleteAllUserData`, ADR-064), so a wiped app starts like a fresh one.
+ * after "Delete all my data" (`deleteAllUserData`, ADR-065), so a wiped app starts like a fresh one.
  */
 import { DEFAULT_EQUIPMENT_PROFILES } from '@/domain/equipment';
 

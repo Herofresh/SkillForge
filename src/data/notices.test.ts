@@ -3,7 +3,7 @@ import { guideEntry } from '@/domain/guide';
 import { NOT_AFFILIATED_NOTE } from './credits';
 import { DATA_STORAGE_NOTE, HEALTH_DISCLAIMER } from './notices';
 
-describe('notices (PLAN 7.0b, ADR-064)', () => {
+describe('notices (PLAN 7.0b, ADR-065)', () => {
   it('the health disclaimer keeps its substance', () => {
     expect(HEALTH_DISCLAIMER).toMatch(/not medical advice/);
     expect(HEALTH_DISCLAIMER).toMatch(/doctor/);

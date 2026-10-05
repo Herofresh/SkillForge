@@ -229,7 +229,7 @@ src/
                         sheets)
     credits.ts          About screen content: CONTENT_SOURCES, NOT_AFFILIATED_NOTE, FONT_CREDITS,
                         OFL_CREDIT
-    notices.ts          texts shown in several places (ADR-064): HEALTH_DISCLAIMER (+ title),
+    notices.ts          texts shown in several places (ADR-065): HEALTH_DISCLAIMER (+ title),
                         DATA_STORAGE_NOTE (on this phone; Android's device backup may include it)
     testFixtures.ts     synthetic nodes for unit tests
     skills/
@@ -283,7 +283,7 @@ src/
                         setting, passed to every recompute / applySession); lastImport + undoLastImport (PLAN 4.6); editor (ADR-036):
                         baseNodes, nodeDraft, newNodeDraft, nodeDraftIssues, saveNodeDraft,
                         resetNode, setNodeHidden, exportOverlay, shareOverlay, previewOverlayImport,
-                        importOverlay (merge), pickOverlayFile; deleteAllData (PLAN 7.0b, ADR-064:
+                        importOverlay (merge), pickOverlayFile; deleteAllData (PLAN 7.0b, ADR-065:
                         files.deleteAppFiles, deleteAllUserData, loadAll, dataResets + 1)
     backupFiles.ts      device file access (expo-file-system, expo-sharing, expo-document-picker);
                         a picked file over MAX_IMPORT_FILE_BYTES is refused before it is read (7.0a);
@@ -353,7 +353,7 @@ src/
                         ReplayOnboardingPanel (confirm → replayOnboarding), DeleteDataPanel
                         (what goes, export first, acknowledge → deleteAllData; 7.0b), GuidePanel
                         ("How SkillForge works": open the guide, the widgets' "i"; 6.10c)
-    HealthNotice.tsx    the framed health disclaimer (onboarding step 1, About; ADR-064)
+    HealthNotice.tsx    the framed health disclaimer (onboarding step 1, About; ADR-065)
     editor/             node editor (PLAN 4.7–4.8, ADR-036): NodeEditorBody (screen body: live
                         issues, Save/Cancel), NodeEditorForm (sections with inline IssueNotes),
                         PositionSheet, IssueNotes, CustomBadge, OverlayEntryRow, SharePanel;
@@ -531,8 +531,8 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | Term | Meaning |
 |---|---|
 | **Node** | One exercise in the skill tree (e.g. `tuck_front_lever`). Authored in `content/progressions/<branch>.yaml`. |
-| **Difficulty** | What the UI calls a node's Overcoming Gravity 2 level (`ogLevel`, YAML `og_level`, 0–17; 0 = "Foundation"): "Difficulty 6" (`formatOgLevel`, ADR-064). The code and the docs keep the OG name. |
-| **Research note** | A node's `verify:` note: what is inferred or a placeholder. Shown on the node detail only in development builds (`__DEV__`); safety advice belongs in the cues (ADR-064). |
+| **Difficulty** | What the UI calls a node's Overcoming Gravity 2 level (`ogLevel`, YAML `og_level`, 0–17; 0 = "Foundation"): "Difficulty 6" (`formatOgLevel`, ADR-065). The code and the docs keep the OG name. |
+| **Research note** | A node's `verify:` note: what is inferred or a placeholder. Shown on the node detail only in development builds (`__DEV__`); safety advice belongs in the cues (ADR-065). |
 | **Overlay** | The user's own changes on top of the built-in matrix: `added` (`user_` nodes), `edited` (partial overrides), `hidden` ids. Merged and validated by `applyOverlay` (ADR-016). |
 | **User-placed node** | A user node, or a built-in node whose edit sets branch, order or og_level. Its order clashes are resolved in the merged tree and an og_level drop next to it is a warning, so a content update can't invalidate a saved overlay (ADR-052). |
 | **Hero class** | A cosmetic title the hero earns (PLAN 6.9, ADR-057): `HERO_CLASSES` in `src/data/classes.ts`. Every class but the starting Recruit has three **tiers** (e.g. Warrior → Veteran → Warlord) of flat thresholds (attribute points, sessions or rank) that only grow with training. Reached tiers are derived on every engine change and kept forever in the `hero_classes` setting; the hero wears one class. No effect on XP, the generator or the safeguards. |

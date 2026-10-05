@@ -406,7 +406,7 @@ without migrations.
 - [r/bodyweightfitness wiki: Squat progression](https://www.reddit.com/r/bodyweightfitness/wiki/exercises/squat)
 - [r/bodyweightfitness wiki: Hinge progression](https://www.reddit.com/r/bodyweightfitness/wiki/exercises/hinge)
 
-**Source links (PLAN 7.0b, ADR-064):** node `sources` used to point at copies of the OG2 chart
+**Source links (PLAN 7.0b, ADR-065):** node `sources` used to point at copies of the OG2 chart
 PDF and the BWF Progressions chart v5.4 re-hosted on a third-party site (calisthenics-101.co.uk).
 They now point at the official places: Steven Low's own OG2 print PDF (linked from his charts
 page) and the r/bodyweightfitness wiki's exercise progressions. A mechanical replace; no id, level,

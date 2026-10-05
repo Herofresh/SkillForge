@@ -33,7 +33,7 @@ const REVIEW_TEXT: Readonly<Record<ReviewStatus, string>> = {
 
 /**
  * The YAML `verify:` notes are research notes for us (open questions, placeholders), not for
- * users: only development builds show them (ADR-064). Safety advice that was in a note lives in
+ * users: only development builds show them (ADR-065). Safety advice that was in a note lives in
  * the node's cues.
  */
 const SHOW_RESEARCH_NOTES = __DEV__;

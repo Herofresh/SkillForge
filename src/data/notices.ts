@@ -1,5 +1,5 @@
 /**
- * Fixed notices the app shows in more than one place (PLAN 7.0b, ADR-064). Content only: each
+ * Fixed notices the app shows in more than one place (PLAN 7.0b, ADR-065). Content only: each
  * text lives here once and the screens and the guide import it.
  */
 
@@ -12,7 +12,7 @@ export const HEALTH_DISCLAIMER =
   'Stop if you feel pain. You train at your own risk.';
 
 /**
- * Where the user's data lives. Android Auto Backup stays on (ADR-064), so the device backup may
+ * Where the user's data lives. Android Auto Backup stays on (ADR-065), so the device backup may
  * hold a copy: the text must never promise the data exists only on this phone.
  */
 export const DATA_STORAGE_NOTE =

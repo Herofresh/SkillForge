@@ -6,7 +6,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { DetailSection } from '../node/DetailSection';
 import { PixelButton, PixelModal, PixelText, WarningBanner } from '../ui';
 
-/** Exactly what "Delete all my data" deletes (the store's `deleteAllData`, ADR-064). */
+/** Exactly what "Delete all my data" deletes (the store's `deleteAllData`, ADR-065). */
 export const DELETED_DATA_TEXT =
   'This deletes everything SkillForge stored on this phone: your hero and name, every logged ' +
   'session and Trial, goals, equipment profiles, your tree changes, classes, challenges, the ' +
@@ -18,7 +18,7 @@ const AFTERWARDS_TEXT =
   'intro. Android’s own device backup may keep an older copy until it next backs up the app.';
 
 /**
- * "Delete all my data" (PLAN 7.0b, ADR-064): a sheet that says exactly what goes, offers an export
+ * "Delete all my data" (PLAN 7.0b, ADR-065): a sheet that says exactly what goes, offers an export
  * first, and only enables the destructive button after the user acknowledged that it can't be
  * undone. The wipe itself is the store's `deleteAllData`; the tabs then open onboarding.
  */

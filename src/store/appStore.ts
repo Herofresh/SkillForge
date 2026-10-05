@@ -43,7 +43,7 @@
  *   (`mergeAccessoryUnlocks`, after the class tiers, which some rules need) and keeps newly earned
  *   accessories in the `hero_companion` setting, stamped like the class tiers; `equipAccessory`,
  *   `setCompanionLook` and `markAccessoriesSeen` store the hero's choices. Cosmetic only.
- * - "Delete all my data" (PLAN 7.0b, ADR-064): `deleteAllData` deletes the app's files, wipes
+ * - "Delete all my data" (PLAN 7.0b, ADR-065): `deleteAllData` deletes the app's files, wipes
  *   every user table in one transaction with the first-run defaults written again, and reloads.
  * - Nothing here blocks the user (ADR-023): warnings come back in the results for the UI.
  *
@@ -552,7 +552,7 @@ export interface AppState {
   /** Let the user pick a file, then `importBackup` it. */
   importBackupFromFile(): Promise<ImportBackupFileResult>;
   /**
-   * "Delete all my data" (PLAN 7.0b, ADR-064): deletes the app's files (`files.deleteAppFiles`),
+   * "Delete all my data" (PLAN 7.0b, ADR-065): deletes the app's files (`files.deleteAppFiles`),
    * then every user table in one transaction with the first-run defaults written again, and
    * reloads: the app is as after a fresh install and opens onboarding. The in-memory drafts (plan,
    * summary, last import) go too. The UI asks for a confirmation first.

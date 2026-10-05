@@ -60,7 +60,7 @@ export function readUserData(db: AppDb): UserData {
 }
 
 /**
- * "Delete all my data" (PLAN 7.0b, ADR-064): deletes every user table (the same ones an import
+ * "Delete all my data" (PLAN 7.0b, ADR-065): deletes every user table (the same ones an import
  * replaces, the Train draft and the progress cache included) and writes the first-run defaults
  * again (hero profile, Home and Park, a new seed marker), in ONE transaction: if anything fails,
  * nothing changes. The schema version in `meta` and the migrations table are never touched.
