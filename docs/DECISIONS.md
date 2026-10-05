@@ -2347,8 +2347,8 @@ Template:
     `style.css` (the app's palette), plus the app icon. No build step, no JavaScript, no analytics.
     `.github/workflows/pages.yml` deploys it on pushes to `main` that touch `site/**` (Pages source:
     GitHub Actions). URL: https://herofresh.github.io/SkillForge/privacy/.
-  - The policy names the developer as **Andre Rivera Arboleda** (the same name as the Play
-    developer name, user decision) and the contact **skillforge.application@gmail.com** (an
+  - The policy names the developer as **Anriar**, the Play Console developer name (user decision:
+    no legal name in the public policy; the app collects nothing about anyone), and the contact **skillforge.application@gmail.com** (an
     address the user created for the app). It states what the app stores on the device, that
     nothing is sent to the developer, the two ways data can leave the phone (the user's own
     exports via the share sheet, Android's device backup, ADR-065), the permissions incl.
