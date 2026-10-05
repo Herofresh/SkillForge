@@ -1482,7 +1482,7 @@ upgrade check from every earlier release). Any new table or column is additive a
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
 - [x] 7.0a Play hardening: blocked unused permissions, root error boundary,
   unreadable stored overlay no longer blocks startup, picked-file size cap, unused native deps
-  removed, `.gitignore` for keys/builds, unknown-route redirect, link-open catches, a "Back to the
+  checked (kept: expo-router depends on them), `.gitignore` for keys/builds, unknown-route redirect, link-open catches, a "Back to the
   app" exit on a replayed onboarding, scrolling sheets at large text, widget task fallback,
   `eas.json` removed, README refresh (ADR-064, [PR #66](https://github.com/Herofresh/SkillForge/pull/66))
 - [ ] 7.1 Upload key: **the user** creates it with `keytool` (instructions are given when Phase 6 is
