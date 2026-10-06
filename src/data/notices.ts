@@ -18,3 +18,11 @@ export const HEALTH_DISCLAIMER =
 export const DATA_STORAGE_NOTE =
   'Your data is stored on this phone. SkillForge has no account and sends nothing anywhere; ' +
   'Android’s own device backup may include it.';
+
+/**
+ * Moving between the GitHub APK and the Play Store version (PLAN 7.3, ADR-066): the two builds
+ * have different signers, so neither updates the other. Guide and Backup panel.
+ */
+export const STORE_SWITCH_NOTE =
+  'Switching between the GitHub and the Play Store version needs a reinstall: export a backup ' +
+  'first, then import it in the new install.';

@@ -9,3 +9,5 @@ docs/
 src/data/skills/progressions.generated.ts
 content/
 src/db/migrations/
+# Backup files byte for byte as each release wrote them (ADR-068)
+src/store/fixtures/

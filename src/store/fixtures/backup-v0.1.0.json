@@ -1,0 +1,192 @@
+{
+  "format": "skillforge-backup",
+  "schemaVersion": 1,
+  "exportedAt": 1780432000000,
+  "profile": {
+    "createdAt": 1780000000000,
+    "heroName": "Aria"
+  },
+  "goals": [
+    "pull_up",
+    "user_heavy_pull_up"
+  ],
+  "equipmentProfiles": [
+    {
+      "id": "home",
+      "name": "Home",
+      "tags": [
+        "floor",
+        "wall",
+        "bar",
+        "parallettes",
+        "bands"
+      ]
+    },
+    {
+      "id": "park",
+      "name": "Park",
+      "tags": [
+        "floor",
+        "wall",
+        "bar",
+        "parallettes",
+        "bands",
+        "dip_bars"
+      ]
+    }
+  ],
+  "sessions": [
+    {
+      "id": "s1",
+      "startedAt": 1780086400000,
+      "endedAt": 1780088200000,
+      "equipmentProfileId": "home",
+      "sets": [
+        {
+          "setIndex": 0,
+          "nodeId": "dead_hang",
+          "metric": "hold_s",
+          "prescribed": {
+            "value": 30
+          },
+          "actual": {
+            "value": 30
+          },
+          "isTrial": false,
+          "timestamp": 1780086460000
+        },
+        {
+          "setIndex": 1,
+          "nodeId": "dead_hang",
+          "metric": "hold_s",
+          "prescribed": {
+            "value": 30
+          },
+          "actual": {
+            "value": 30
+          },
+          "isTrial": false,
+          "timestamp": 1780086580000
+        },
+        {
+          "setIndex": 2,
+          "nodeId": "push_up",
+          "metric": "reps",
+          "prescribed": {
+            "value": 8
+          },
+          "actual": {
+            "value": 8
+          },
+          "isTrial": false,
+          "timestamp": 1780086700000
+        },
+        {
+          "setIndex": 3,
+          "nodeId": "push_up",
+          "metric": "reps",
+          "prescribed": {
+            "value": 8
+          },
+          "actual": {
+            "value": 8
+          },
+          "isTrial": false,
+          "timestamp": 1780086820000
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "startedAt": 1780259200000,
+      "endedAt": 1780260700000,
+      "sets": [
+        {
+          "setIndex": 0,
+          "nodeId": "pull_up",
+          "metric": "reps",
+          "prescribed": {
+            "value": 5
+          },
+          "actual": {
+            "value": 5
+          },
+          "isTrial": false,
+          "timestamp": 1780259260000
+        },
+        {
+          "setIndex": 1,
+          "nodeId": "pull_up",
+          "metric": "reps",
+          "prescribed": {
+            "value": 5
+          },
+          "actual": {
+            "value": 5
+          },
+          "isTrial": false,
+          "timestamp": 1780259440000
+        }
+      ]
+    }
+  ],
+  "userActions": [
+    {
+      "id": "a1",
+      "kind": "self_unlock",
+      "nodeId": "pull_up",
+      "at": 1780088260000
+    }
+  ],
+  "overlay": {
+    "format": "skillforge-progression-overlay",
+    "version": 1,
+    "added": [
+      {
+        "id": "user_heavy_pull_up",
+        "branch": "v_pull",
+        "name": "Heavy weighted pull-up",
+        "order": 100,
+        "og_level": 9,
+        "metric": "reps",
+        "working_range": {
+          "min": 1,
+          "max": 3
+        },
+        "trial": {
+          "sets": 3,
+          "target": 3
+        },
+        "prerequisites": [
+          {
+            "node": "one_arm_chin_up",
+            "level": 3
+          }
+        ],
+        "patterns": [
+          "vertical_pull"
+        ],
+        "equipment": [
+          "bar"
+        ],
+        "regression": "one_arm_chin_up_negative",
+        "legendary": true,
+        "cues": [
+          "Palm facing you; start from a full hang with the other hand free.",
+          "Pull the chin over the bar without twisting away from it.",
+          "Keep the free hand off the working arm and the bar."
+        ]
+      }
+    ],
+    "edited": {
+      "pull_up": {
+        "name": "Strict pull-up"
+      }
+    },
+    "hidden": []
+  },
+  "settings": {
+    "onboarding_completed_at": 1780000060000,
+    "tree_view_mode": "map"
+  }
+}

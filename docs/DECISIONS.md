@@ -2359,3 +2359,25 @@ Template:
 - Consequences: every feature that changes what the app stores or shares must update
   `site/privacy/index.html` and its effective date in the same PR (AGENT.md §4, documentation duty). GitHub (Pages host) may log page visitors' IPs
   under its own policy; the app itself never loads the page.
+
+## ADR-068: The first Play upload is 1.0.0 (versionCode 8); moving installs by backup (PLAN 7.3)
+- Date: 2026-10-06 · Status: Accepted (user decision 2026-10-05 on the version; builds on ADR-066)
+- Context: GitHub releases went v0.1.0-preview1 … v0.7.0 (versionCode 1–7). The Play build has a
+  different signer (Google's app signing key, ADR-066), so a GitHub install can't update to it,
+  and the user wants the first store release to read as a finished app.
+- Decision:
+  - `expo.version` 1.0.0, `expo.android.versionCode` **8**: the code continues from GitHub's 7, so
+    it stays monotonic across both channels (`package.json` was already 1.0.0).
+  - Moving a GitHub install to Play (or back) is export → uninstall → install → import. README
+    "Moving from a GitHub APK to Google Play" has the steps; the app says it once in
+    `STORE_SWITCH_NOTE` (`src/data/notices.ts`), shown in the guide's "Backups and your data"
+    entry and the Backup panel. No in-app migration: the signature check is Android's.
+  - A backup from every published release must import: `src/store/fixtures/backup-v*.json` were
+    written by each release's own serializers (run from the tag's `src/`, releases with
+    byte-identical output share a file), and `src/store/releaseBackups.test.ts` imports each one
+    into today's store (schemaVersion 1: v0.1.0-preview1; 2: v0.2.0, v0.3.0; 3: v0.4.0 – v0.7.0,
+    with the class / challenge / companion settings from v0.6.0 and the companion body from
+    v0.7.0).
+- Consequences: a release that changes the backup layout or what the settings hold adds a fixture
+  written by that release (generator: check out the tag's `src/`, call its `serializeBackup`).
+  GitHub pre-release APKs remain for sideloading; they can't update a Play install either.

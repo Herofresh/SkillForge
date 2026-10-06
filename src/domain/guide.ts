@@ -13,7 +13,7 @@
 import { HERO_CLASSES, STARTING_CLASS_ID } from '@/data/classes';
 import { ACCESSORIES } from '@/data/companion/accessories';
 import { CLASS_WEAPONS, UPGRADED_WEAPON_TIER } from '@/data/companion/weapons';
-import { DATA_STORAGE_NOTE, HEALTH_DISCLAIMER } from '@/data/notices';
+import { DATA_STORAGE_NOTE, HEALTH_DISCLAIMER, STORE_SWITCH_NOTE } from '@/data/notices';
 import { BRANCH_NAMES } from '@/data/skills/branches';
 import { MS_PER_HOUR } from '@/lib/time';
 
@@ -448,6 +448,7 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
           'so a backup restores all of them.',
         'Uninstalling the app removes its data from the phone. Android may bring it back from ' +
           'its device backup when you reinstall, but don’t count on it: export a backup first.',
+        STORE_SWITCH_NOTE,
         'Settings → Delete all my data erases everything SkillForge stored on this phone and ' +
           'starts the app fresh.',
       ],
