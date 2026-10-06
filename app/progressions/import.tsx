@@ -50,7 +50,7 @@ export default function ImportProgressionsScreen() {
   return (
     <>
       <Stack.Screen options={stackHeaderOptions('Import progressions')} />
-      <Screen testID="import-progressions-screen">
+      <Screen avoidKeyboard testID="import-progressions-screen">
         <PixelText variant="small" tone="textMuted">
           Shared progressions are merged into yours: their exercises and changes replace yours for
           the same skill, everything else of yours stays.
