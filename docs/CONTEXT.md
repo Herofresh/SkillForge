@@ -105,6 +105,9 @@ scripts/
   buildApkConfig.ts     its pure parts (args, ABIs, SDK path, APK/AAB names, commands, the pinned
                         signers RELEASE_SIGNER_SHA256 (debug key, sideload APKs) and
                         UPLOAD_SIGNER_SHA256 (Play upload key) with their checks), Jest-tested
+docs/play/              Google Play store listing kit (PLAN 7.5): listing.md (title, descriptions, release
+                        notes, store settings), graphics/ (512 px icon, 1024 x 500 feature graphic,
+                        six 1080 x 1920 screenshots, make-graphics.ps1 for the first two)
 site/                   public GitHub Pages site (ADR-067), deployed by .github/workflows/pages.yml:
   index.html            landing page (what the app is, links, contact)
   privacy/index.html    the privacy policy (https://herofresh.github.io/SkillForge/privacy/); update it

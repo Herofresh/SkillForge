@@ -1600,14 +1600,31 @@ from the GitHub releases' 1–7, ADR-068).
   https://herofresh.github.io/SkillForge/privacy/ from `site/` (ADR-067), linked in Settings →
   About. Update it whenever a feature changes what is stored or shared (AGENT.md §4).
   ([PR #69](https://github.com/Herofresh/SkillForge/pull/69); live)
-- [ ] 7.5 Play Console (user, with the agent's help): developer account ($25 once), store listing
+- [~] 7.5 Play Console (user, with the agent's help): developer account ($25 once), store listing
   (texts, screenshots, feature graphic from the pixel assets), content rating, data safety form,
-  app access, target audience.
+  app access, target audience. Done by the user on 2026-10-06: account (developer name Anriar, identity
+  check pending), app created, all "App content" declarations (privacy policy, app access, ads: no,
+  content rating, target audience 18+, Data safety: no data collected, health apps: fitness), main store
+  listing from `docs/play/` (listing.md + graphics/). Left: the 1.0.0 bundle on the closed testing track.
 - [ ] 7.6 Closed test: new personal developer accounts must run a closed test (currently 12
   testers for 14 days) before production; collect feedback, fix, then apply for production.
 - [ ] 7.7 Production release and an update routine (versionCode +1, AAB upload, release notes).
 
 ### Later / Backlog
+- Rank pacing for beginners (found 2026-10-06 while making the store screenshots): a demo hero with
+  six weeks of balanced training (19 sessions, 3 a week, level 19, 5032 XP) is still rank **Novice**
+  ("Branch median Tier 0.5 · Apprentice at Tier 2"). The rank is the median of the branches' best
+  passed Trial tier (`RANK_BRANCHES`, ADR-018/054), so a beginner who trains everything evenly stays
+  at the bottom for a long time while the level climbs. Look at it after the closed test (ask the
+  testers whether ranks feel stuck): e.g. count Proficient nodes, use a lower percentile than the
+  median, or add an in-between rank. Changing the formula needs an ADR; ranks already reached must
+  never drop (upgrade-safe).
+- Source names in exercise notes: two prerequisite notes in content/progressions/handstand.yaml say
+  "About 3 x 20-30 s chest-to-wall first (GMB)." (line ~170) and "About 60 s freestanding handstand
+  first (GMB)." (~332), shown on the node detail. It's
+  attribution, not the listing, but the rest of the UI avoids third-party names since ADR-065
+  (sources are credited in Settings → About). Reword without the brand name (keep the `sources:`
+  entry) and check the other prerequisite/cue texts for the same.
 - Companion headgear readability (after 6.13, ADR-061): with full helmets, hoods and cowls
   (crested_helm, green_hood, nightblade_cowl, shadow_mask) the man and woman read almost the same,
   and faces under helmets are very dark. Ideas: a lighter eye/face pixel under the brim, the
