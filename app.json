@@ -2,7 +2,7 @@
   "expo": {
     "name": "SkillForge",
     "slug": "skillforge",
-    "version": "0.7.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "skillforge",
@@ -26,7 +26,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "at.skillforge.app",
-      "versionCode": 7
+      "versionCode": 8
     },
     "web": {
       "output": "static",
