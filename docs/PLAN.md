@@ -1605,7 +1605,9 @@ from the GitHub releases' 1–7, ADR-068).
   app access, target audience. Done by the user on 2026-10-06: account (developer name Anriar, identity
   check pending), app created, all "App content" declarations (privacy policy, app access, ads: no,
   content rating, target audience 18+, Data safety: no data collected, health apps: fitness), main store
-  listing from `docs/play/` (listing.md + graphics/). Left: the 1.0.0 bundle on the closed testing track.
+  listing from `docs/play/` (listing.md + graphics/). Left: the 1.0.0 bundle on the closed testing track,
+  and re-paste the full description (review of PR #71 corrected two bullets: classes have "up to"
+  three tiers, the Recruit has one; deleting all data is a confirmed sheet in Settings, not one tap).
 - [ ] 7.6 Closed test: new personal developer accounts must run a closed test (currently 12
   testers for 14 days) before production; collect feedback, fix, then apply for production.
 - [ ] 7.7 Production release and an update routine (versionCode +1, AAB upload, release notes).

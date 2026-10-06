@@ -38,7 +38,7 @@ WORKOUTS FOR YOUR TIME AND PLACE
 
 LEVEL UP YOUR HERO
 • Character level, six attributes (push, pull, core, legs, balance, mobility) and ranks
-• 15 hero classes with three tiers each, and a weekly class challenge
+• 15 hero classes with up to three tiers each, and a weekly class challenge
 • A pixel companion that cheers you on, earns gear and changes its mood with your training
 • Home-screen widgets for your streak, level and companion
 
@@ -49,7 +49,7 @@ TRAIN WITH CARE
 YOUR DATA, ON YOUR PHONE
 • No account, no ads, no tracking
 • Everything is stored on your phone; back it up to a file whenever you like
-• Delete all your data with one tap
+• Delete all your data from Settings at any time
 
 SkillForge gives general training suggestions, not medical advice. Check with a doctor before you start a new exercise programme, and stop if you feel pain.
 ```
