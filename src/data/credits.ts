@@ -13,7 +13,7 @@ export interface Credit {
 export const CONTENT_SOURCES: readonly Credit[] = [
   {
     name: 'Overcoming Gravity (Steven Low)',
-    note: 'Difficulty levels (OG2 charts), progressions and tendon safety guidance.',
+    note: 'Tier levels (OG2 charts), progressions and tendon safety guidance.',
     url: 'https://stevenlow.org/overcoming-gravity/',
   },
   {

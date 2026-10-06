@@ -3,7 +3,7 @@ import { fireEvent, render, screen, userEvent } from '@testing-library/react-nat
 import { Linking } from 'react-native';
 
 import { NOT_AFFILIATED_NOTE, PRIVACY_POLICY } from '@/data/credits';
-import { HEALTH_DISCLAIMER } from '@/data/notices';
+import { HEALTH_DISCLAIMER, STORE_SWITCH_NOTE } from '@/data/notices';
 import { ALL_NODES } from '@/data/skills';
 import { openTestDatabase } from '@/db/testing/testDatabase';
 import { serializeBackup } from '@/domain/backup';
@@ -246,6 +246,7 @@ describe('BackupPanel', () => {
     await startStore(access);
     const user = userEvent.setup();
     await render(<BackupPanel />);
+    expect(screen.getByText(STORE_SWITCH_NOTE)).toBeOnTheScreen();
     await user.press(screen.getByTestId('export-backup'));
     expect(access.share).toHaveBeenCalled();
     expect(await screen.findByTestId('backup-exported')).toBeOnTheScreen();

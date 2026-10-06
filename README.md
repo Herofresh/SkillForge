@@ -5,8 +5,8 @@ SkillForge is a gamified calisthenics progression tracker, built as an RPG-style
 Pick the skills you want to learn. The app generates workouts that train their prerequisites, you earn
 XP for every session, your exercises level up, and harder progressions unlock as you go.
 
-> Status: preview releases (currently v0.7.0) as APKs on GitHub; a Google Play release is being
-> prepared (Phase 7). See [docs/PLAN.md](docs/PLAN.md).
+> Status: preview releases (currently v0.7.0) as APKs on GitHub; the first Google Play release
+> (1.0.0) is being prepared (Phase 7). See [docs/PLAN.md](docs/PLAN.md).
 
 ## Install on your phone
 
@@ -26,10 +26,6 @@ SkillForge is Android only for now, and it isn't on the Play Store yet.
 and progress stay. Every preview so far uses the same key, and `npm run build:apk` refuses to
 build with another one (ADR-043).
 
-Preview builds are signed with a development key. A later build signed with the real release key
-can't update them in place: you'll have to uninstall first, which removes the app's data from the
-phone. Export a backup first (Settings → Export backup) and import it again afterwards.
-
 **Build it yourself.** You need Node.js 24 (≥ 22.18), JDK 17 and the Android SDK (Android Studio
 installs it; set `ANDROID_HOME` if it isn't in the default location). No Expo account is needed.
 
@@ -41,6 +37,22 @@ npm run build:apk:universal   # arm64 + x86_64, also runs on the emulator
 
 The APK lands in `builds/` with its SHA-256 printed. Install it with `adb install -r <file>` or copy
 it to the phone.
+
+### Moving from a GitHub APK to Google Play
+
+GitHub APKs are signed with a development key; the Play Store version is signed by Google. Android
+only updates an app with the same signature, so the Play version can't update an installed GitHub
+APK. Moving takes a reinstall:
+
+1. **Export first.** In SkillForge open Settings → Export backup and save the file somewhere off
+   the app, e.g. Google Drive or the Files app. Uninstalling deletes the app's data from the phone.
+2. Uninstall SkillForge.
+3. Install SkillForge from Google Play.
+4. Open Settings → Import backup and pick the file. Your hero, sessions, goals, equipment and your
+   own progressions come back; levels and unlocks are worked out again from the history.
+
+The same goes the other way: GitHub pre-release APKs are for sideloading only and won't update a
+Play install either. A backup from any earlier release imports into the current app.
 
 ## Getting started
 

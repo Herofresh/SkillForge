@@ -311,23 +311,60 @@
   `npm run build:aab` makes a bundle signed with it (clean prebuild, all four ABIs, native debug
   symbols, signer checked against `UPLOAD_SIGNER_SHA256`). `build:apk` keeps the debug key, so
   GitHub APKs still update over earlier ones. targetSdk 36 (React Native's default).
+- Privacy policy (7.4, ADR-067, [PR #69](https://github.com/Herofresh/SkillForge/pull/69)): live at
+  https://herofresh.github.io/SkillForge/privacy/ (developer "Anriar", contact
+  skillforge.application@gmail.com), deployed from `site/`, linked in Settings → About.
+- 1.0.0 prep + moving to Play (7.3, ADR-068, [PR #70](https://github.com/Herofresh/SkillForge/pull/70)): **the first Play upload is 1.0.0,
+  versionCode 8** (continues from GitHub's 7). README "Moving from a GitHub APK to Google Play"
+  (export → uninstall → install from Play → import) and one sentence in the guide and the Backup
+  panel (`STORE_SWITCH_NOTE`). A backup written by every published release (v0.1.0-preview1 …
+  v0.7.0, schemaVersion 1–3) imports into today's store (`src/store/releaseBackups.test.ts`).
+  Fixes from the 2026-10-06 emulator check of 7.0a + 7.0b: the Overcoming Gravity credit says
+  "Tier levels", and the Maestro flows no longer lose the app to `hideKeyboard` on onboarding.
 
 ## Next up
-1. The combined emulator check of 7.0a + 7.0b (Delete all my data → onboarding and the widget
-   redraw, the manifest, the error fallbacks).
-2. 7.3 move-to-Play guide, 7.4 privacy policy (GitHub Pages), then 7.5 Play Console with the user.
-3. Then a release (v0.8.0: 6.15 session length + 7.0a/b) with the usual upgrade check, so it
-   reaches the phone.
-4. On the user's phone: install [v0.7.0](https://github.com/Herofresh/SkillForge/releases/tag/v0.7.0)
-   over the installed build (Update, no uninstall), check both widgets and the Man / Woman choice
-   and report what feels off.
-5. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+1. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
+   assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
+   access, target audience).
+2. The 1.0.0 bundle: `npm run build:aab` on the user's profile (the upload key lives only there)
+   → `builds/SkillForge-1.0.0-vc8-<commit>.aab`, uploaded to the closed testing track.
+3. 7.6 closed test: the user collects ≥ 12 testers for 14 days; collect feedback, fix, then apply
+   for production (7.7).
+4. On the user's phone (replaces the "install v0.7.0" item: 1.0.0 supersedes it): move to the Play
+   1.0.0 as the README says (Export backup → uninstall → install from Play → Import backup),
+   then check that the hero, history and own progressions came back, both widgets (placed again
+   after the reinstall) and the Man / Woman choice, and report what feels off.
+5. Open question for the user: whether GitHub also gets a 1.0.0 sideload APK (`build:apk`, debug
+   key; it would update over v0.7.0 but never over a Play install), or GitHub releases stop at
+   v0.7.0.
+6. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
 ## Blockers
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **1.0.0 prep + moving to Play (task 7.3, ADR-068, [PR #70](https://github.com/Herofresh/SkillForge/pull/70)):**
+  - Version: `app.json` 1.0.0 / versionCode 8; `package.json` was already 1.0.0. No test pins the
+    real app version. Not built here: the 1.0.0 bundle (`npm run build:aab`) is built by the
+    coordinating session on the user's profile.
+  - Texts: `STORE_SWITCH_NOTE` in `src/data/notices.ts` → guide `data` entry (`more`) and
+    `BackupPanel` (second help line). README section "Moving from a GitHub APK to Google Play".
+  - Release backups: `src/store/fixtures/backup-v0.1.0.json` (v0.1.0-preview1, schemaVersion 1),
+    `backup-v0.2.0.json` (v0.2.0 and v0.3.0, 2), `backup-v0.4.0.json` (v0.4.0 and v0.5.0, 3),
+    `backup-v0.6.0.json` (3 + `hero_classes` / `class_challenges` / `hero_companion`),
+    `backup-v0.7.0.json` (3 + companion `look.body` / `hairStyle`). Each was written by the tag's
+    own `serializeBackup` and setting serializers (the tag's `src/` extracted with `git archive`,
+    run with `tsx --tsconfig <tag>/tsconfig.json` so `@/*` points at the tag's `src/*`), and the
+    tag's own `parseBackup` read it back before it was saved. Releases with byte-identical output
+    share a file. `src/store/releaseBackups.test.ts` imports each into today's store and checks
+    hero, goals, profiles, sessions (durations from v2), the self-unlock, the overlay (user node
+    description from v3, the edit), XP, tree mode, onboarding, classes / challenge pin /
+    companion (from v0.6.0) and the body (v0.7.0), then that the re-export reads back.
+  - Credits: "Tier levels (OG2 charts)" (test in `notices.test.ts`).
+  - Maestro: `onboarding.yaml` and `subflows/finish-onboarding.yaml` press `back` after the hero
+    name only when `onboarding-next` is hidden; `settings.yaml` has no `hideKeyboard` after "Gym".
+    Taken from the emulator-verified scratch flows; not re-run in this PR (no emulator).
 - **Play App Bundle (task 7.2, ADR-066, [PR #68](https://github.com/Herofresh/SkillForge/pull/68)):**
   - Code: `plugins/withUploadSigning.js` (+ `.d.ts`, `.test.ts`; registered in app.json),
     `scripts/buildApk.ts --aab` (`checkUploadProperties`, `checkUploadSigner`),
@@ -1532,6 +1569,9 @@ upgrade check from every earlier release). Any new table or column is additive a
   ([PR #65](https://github.com/Herofresh/SkillForge/pull/65))
 
 ### Phase 7: Google Play (local builds, no Expo account, ADR-047)
+The first Play upload is **1.0.0, versionCode 8** (user decision 2026-10-05; the code continues
+from the GitHub releases' 1–7, ADR-068).
+
 - [x] 7.0a Play hardening: blocked unused permissions, root error boundary,
   unreadable stored overlay no longer blocks startup, picked-file size cap, unused native deps
   checked (kept: expo-router depends on them), `.gitignore` for keys/builds, unknown-route redirect, link-open catches, a "Back to the
@@ -1550,14 +1590,16 @@ upgrade check from every earlier release). Any new table or column is additive a
   meets Play's current requirement (checked in review: 36, from React Native's
   `libs.versions.toml`). (`eas.json` is already gone: 7.0a, ADR-064.) (ADR-066,
   [PR #68](https://github.com/Herofresh/SkillForge/pull/68))
-- [ ] 7.3 Move existing installs: the Play build has a different signer, so an install of a GitHub
+- [x] 7.3 Move existing installs: the Play build has a different signer, so an install of a GitHub
   APK can't update to it. In-app/README guide: export backup → uninstall → install from Play →
-  import. Check that a backup from every earlier release imports.
-- [~] 7.4 Privacy policy page on GitHub Pages (free): what the app stores (everything on the
+  import. Check that a backup from every earlier release imports. Done with the 1.0.0 version
+  bump (ADR-068, [PR #70](https://github.com/Herofresh/SkillForge/pull/70))
+- [x] 7.4 Privacy policy page on GitHub Pages (free): what the app stores (everything on the
   device), what leaves the device (the user's own exports, Android device backup), no analytics,
   no ads, no account; contact skillforge.application@gmail.com, developer Anriar (the Play developer name).
   https://herofresh.github.io/SkillForge/privacy/ from `site/` (ADR-067), linked in Settings →
   About. Update it whenever a feature changes what is stored or shared (AGENT.md §4).
+  ([PR #69](https://github.com/Herofresh/SkillForge/pull/69); live)
 - [ ] 7.5 Play Console (user, with the agent's help): developer account ($25 once), store listing
   (texts, screenshots, feature graphic from the pixel assets), content rating, data safety form,
   app access, target audience.

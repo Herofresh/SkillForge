@@ -1,7 +1,7 @@
 import { guideEntry } from '@/domain/guide';
 
-import { NOT_AFFILIATED_NOTE } from './credits';
-import { DATA_STORAGE_NOTE, HEALTH_DISCLAIMER } from './notices';
+import { CONTENT_SOURCES, NOT_AFFILIATED_NOTE } from './credits';
+import { DATA_STORAGE_NOTE, HEALTH_DISCLAIMER, STORE_SWITCH_NOTE } from './notices';
 
 describe('notices (PLAN 7.0b, ADR-065)', () => {
   it('the health disclaimer keeps its substance', () => {
@@ -22,5 +22,18 @@ describe('notices (PLAN 7.0b, ADR-065)', () => {
     expect(guideEntry('safeguards').more).toContain(HEALTH_DISCLAIMER);
     expect(guideEntry('data').summary).toContain(DATA_STORAGE_NOTE);
     expect(guideEntry('data').more.join(' ')).not.toMatch(/deletes its data/);
+    expect(guideEntry('data').more).toContain(STORE_SWITCH_NOTE);
+  });
+
+  it('moving to or from the Play Store version says to export first, then import (PLAN 7.3)', () => {
+    expect(STORE_SWITCH_NOTE).toMatch(/GitHub and the Play Store version/);
+    expect(STORE_SWITCH_NOTE).toMatch(/reinstall/);
+    expect(STORE_SWITCH_NOTE.indexOf('export')).toBeLessThan(STORE_SWITCH_NOTE.indexOf('import'));
+  });
+
+  it('the credits call the OG level "Tier", as the UI does (ADR-065)', () => {
+    const notes = CONTENT_SOURCES.map((source) => source.note).join(' ');
+    expect(notes).not.toMatch(/Difficulty/);
+    expect(notes).toMatch(/Tier levels \(OG2 charts\)/);
   });
 });

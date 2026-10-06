@@ -241,7 +241,8 @@ src/
     credits.ts          About screen content: CONTENT_SOURCES, NOT_AFFILIATED_NOTE, FONT_CREDITS,
                         OFL_CREDIT
     notices.ts          texts shown in several places (ADR-065): HEALTH_DISCLAIMER (+ title),
-                        DATA_STORAGE_NOTE (on this phone; Android's device backup may include it)
+                        DATA_STORAGE_NOTE (on this phone; Android's device backup may include it),
+                        STORE_SWITCH_NOTE (GitHub ↔ Play needs export, reinstall, import; ADR-068)
     testFixtures.ts     synthetic nodes for unit tests
     skills/
       index.ts          ALL_NODES, NODE_BY_ID (what the app imports)
@@ -302,6 +303,8 @@ src/
                         widget snapshot
     bootstrap.ts        startApp(): open, migrate, create store, loadAll (once)
     useAppStore.ts      useAppStore(selector) hook for components below DataGate
+    fixtures/           backup files written by each published release (releaseBackups.test.ts,
+                        ADR-068)
   components/           reusable UI components (visual language: docs/DESIGN.md, ADR-030)
     theme.ts            THE design tokens: Palette, Colors, TierColors, AttributeColors, FontFamily,
                         TypeScale, PIXEL, Spacing, Border, Frames, ButtonStyles, Motion (no RN
@@ -778,7 +781,9 @@ Schema in `src/db/schema.ts`; timestamps are integers in ms since the Unix epoch
   `format: 'skillforge-backup'` and `schemaVersion` (`BACKUP_SCHEMA_VERSION` = 3, independent of the
   database schema version; 2 adds an optional `durationSec` per set, ADR-040; 3 lets the overlay's
   nodes and edits carry `description`, ADR-049; version 1 and 2 files still import). Import replaces
-  everything; a newer `schemaVersion` is refused.
+  everything; a newer `schemaVersion` is refused. `src/store/fixtures/backup-v*.json` are files
+  written by each published release's own code; `src/store/releaseBackups.test.ts` imports every one
+  (ADR-068). A release that changes the layout or the stored settings adds its fixture.
 - **Overlay layout** (`OVERLAY_VERSION` = 2 in `src/domain/overlay.ts`, ADR-049): the same raw shape
   in the `progression_overlay` row, backups and shared files; version 1 (no descriptions) still
   reads, a newer version is refused.
@@ -890,10 +895,17 @@ build is needed.
   bitmap of its full size, and the whole map (~1.9k × 3.3k dp at 3.5× density) crashed Expo Go with
   "Canvas: trying to draw too large bitmap". Edges and lanes are plain Views. Maestro can tap map
   nodes by `testID` while the map is zoomed (`map-node-<id>`; `map-node-.*` for "any visible node").
-- `hideKeyboard` presses back when no keyboard is open, which leaves a tab (4.6). Tabs keep their
-  scroll position between flows; scroll up to a known element first.
+- `hideKeyboard` presses back when no keyboard is open, which leaves a tab (4.6), and also when
+  Gboard shows only its small hardware-keyboard toolbar, which leaves the app. Avoid it where the
+  next tap works without it (`settings.yaml` after "Gym"). On onboarding step 1 the "Train safe"
+  notice puts Next under the full keyboard, so `onboarding.yaml` and
+  `subflows/finish-onboarding.yaml` press `back` only when `onboarding-next` is not visible
+  (`runFlow` + `when: notVisible`). Tabs keep their scroll position between flows; scroll up to a
+  known element first.
 
-## Play build (PLAN 7.1–7.2, ADR-047, ADR-066)
+## Play build (PLAN 7.1–7.3, ADR-047, ADR-066, ADR-068)
+- **Version:** the first Play upload is **1.0.0, versionCode 8** (GitHub releases used 1–7; the
+  code keeps rising across both channels). Every later upload raises `expo.android.versionCode`.
 - **Upload key:** `%USERPROFILE%\keys\skillforge-upload.jks` (alias `upload`, PKCS12, RSA 2048,
   valid ~27 years), created by the user with `keytool` and backed up twice outside the repo. Never
   commit it (`*.jks` / `*.keystore` are gitignored). SHA-256 `02:7D:80:…:72:5D` =
@@ -904,7 +916,8 @@ build is needed.
   PKCS12 key). `build:aab` reads only their names before the build.
 - **Two signers on purpose:** `build:apk` keeps the debug key so GitHub APKs still update over
   earlier ones (ADR-043); Play installs carry Google's app signing key (Play App Signing), so a
-  GitHub install can't update to Play; moving needs export → uninstall → install → import (7.3).
+  GitHub install can't update to Play; moving needs export → uninstall → install → import (7.3:
+  README "Moving from a GitHub APK to Google Play", in the app `STORE_SWITCH_NOTE`).
 - **Lost upload key:** Play Console → App integrity → request an upload key reset (days); then put
   the new digest into `UPLOAD_SIGNER_SHA256`.
 
