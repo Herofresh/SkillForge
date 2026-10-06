@@ -23,7 +23,14 @@ appId: host.exp.exponent
                 id: 'hero-name-input'
             - eraseText: 30
             - inputText: 'Smoke'
-            - hideKeyboard
+            # The keyboard can cover Next; close it with Back only then (hideKeyboard presses Back even
+            # when only the keyboard toolbar shows, which leaves the app).
+            - runFlow:
+                when:
+                  notVisible:
+                    id: 'onboarding-next'
+                commands:
+                  - back
       - runFlow:
           when:
             visible:

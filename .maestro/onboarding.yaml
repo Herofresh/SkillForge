@@ -31,7 +31,14 @@ name: Onboarding - fresh install to the Tree tab
 - tapOn:
     id: 'hero-name-input'
 - inputText: 'Aria'
-- hideKeyboard
+# The keyboard can cover Next; close it with Back only then (hideKeyboard presses Back even
+# when only the keyboard toolbar shows, which leaves the app).
+- runFlow:
+    when:
+      notVisible:
+        id: 'onboarding-next'
+    commands:
+      - back
 - tapOn:
     id: 'onboarding-next'
 # 2. Equipment: the seeded profiles, keep them as they are

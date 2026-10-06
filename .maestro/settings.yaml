@@ -56,7 +56,6 @@ name: Settings - equipment profile, export, import cancel
 - tapOn:
     id: 'new-profile-input'
 - inputText: 'Gym'
-- hideKeyboard
 - scrollUntilVisible:
     element:
       id: 'add-profile'
