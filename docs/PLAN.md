@@ -1612,6 +1612,36 @@ from the GitHub releases' 1–7, ADR-068).
   testers for 14 days) before production; collect feedback, fix, then apply for production.
 - [ ] 7.7 Production release and an update routine (versionCode +1, AAB upload, release notes).
 
+### Phase 8: Ads and a "remove ads" purchase (user request 2026-10-06; after the production release)
+Open decisions for the user before 8.1 starts: the ad format (a banner on the session summary, or
+one full-screen ad after "Done", at most once per session) and whether a public developer address
+is acceptable (8.4).
+- [ ] 8.1 Non-invasive ads only after a workout: on or after the session summary; never during a
+  session, in onboarding, on the Tree / Character / Settings tabs or in the guide. Google AdMob
+  (native SDK: needs prebuild and checks on the release build; Expo Go can't show ads).
+- [ ] 8.2 "Remove ads" for €1.99: one non-consumable in-app purchase with Google Play Billing that
+  turns the ads off for good; restored on reinstall or a new phone through the Google account
+  (restore button in Settings); checked on device, no own server. Each purchase must be
+  acknowledged, or Play refunds it automatically after three days.
+- [ ] 8.3 Policy and declarations in the same release: rewrite the privacy policy (it promises "no
+  ads" and no third-party advertising SDKs; AGENT.md §4), the landing page and the in-app "sends
+  nothing anywhere" note (`DATA_STORAGE_NOTE`, ADR-065); Data safety from "no data collected" to
+  what the AdMob SDK collects and shares with Google (advertising ID / device IDs, approximate
+  location from the IP, app interactions and diagnostics; for advertising, analytics and fraud
+  prevention); Ads declaration "Yes" and the advertising-ID declaration (the SDK adds the `AD_ID`
+  permission); remove "No ads" from the store listing (docs/play/listing.md); EU consent before
+  any ad (Google UMP); target audience stays 18+ (keeps child-directed ad rules out); the "no
+  network requests" statements change. Optional: `app-ads.txt` (AdMob looks for it at the root of
+  the developer website's domain, which a project Pages site under `/SkillForge/` is not).
+- [ ] 8.4 Payments profile (merchant account) in Play Console, needed before the purchase can be
+  created; AdMob payouts need payment and tax details too. A personal account that sells in-app
+  products counts as a trader under the EU Digital Services Act: Google then shows the developer's
+  legal name, address and contact details on the store page, which ends the "Anriar only" public
+  identity (7.4, ADR-067); the user decides before this step. Income falls under Austrian
+  small-business tax rules; keep the developer email for support/refund requests.
+- [ ] 8.5 Tests: the ad never shows during training or before consent; the purchase removes it at
+  once and after a restart / reinstall; refunds turn it back on; upgrade-safe for existing users.
+
 ### Later / Backlog
 - Rank pacing for beginners (found 2026-10-06 while making the store screenshots): a demo hero with
   six weeks of balanced training (19 sessions, 3 a week, level 19, 5032 XP) is still rank **Novice**
