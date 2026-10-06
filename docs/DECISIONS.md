@@ -2381,3 +2381,35 @@ Template:
 - Consequences: a release that changes the backup layout or what the settings hold adds a fixture
   written by that release (generator: check out the tag's `src/`, call its `serializeBackup`).
   GitHub pre-release APKs remain for sideloading; they can't update a Play install either.
+
+## ADR-069: Keyboard handling under edge-to-edge: one KeyboardSafeView on React Native's KeyboardAvoidingView (PLAN 7.8, FB-1)
+- Date: 2026-10-06 · Status: Accepted
+- Context: the first closed-test feedback (FB-1): on onboarding step 1 the hero name field
+  disappeared behind the keyboard. The app targets SDK 36 and draws edge-to-edge (Android 15+), so
+  the window is no longer resized for the soft keyboard (`adjustResize` has no effect), and the app
+  had no keyboard avoidance anywhere. Every screen with a text field near the bottom had the same
+  problem (Settings "Add a place", the editor's description and cues, the import paste field) and so
+  did every sheet with a field (rename profile, the prerequisite / exercise search). The "Train safe"
+  notice (7.0b) pushed the name field low enough on step 1 that every tester hit it.
+- Decision:
+  - One wrapper, `src/components/ui/KeyboardSafeView.tsx`: React Native's own
+    `KeyboardAvoidingView` with `behavior="padding"` on Android too (the window isn't resized, so
+    padding by the keyboard's overlap is what moves the content). No new native dependency
+    (`react-native-keyboard-controller` was not needed).
+  - `KeyboardAvoidingView` compares its frame relative to its parent with the keyboard's
+    screen position, so the wrapper measures its own top with `measure` (`pageY`) and passes it as
+    `keyboardVerticalOffset`; it then works below a stack header, above a tab bar and inside a
+    modal. `measureInWindow` is not used: on Android it leaves out the status bar, while the
+    keyboard's `screenY` counts from the top of the screen.
+  - Used by `Screen avoidKeyboard` (Settings, node editor / new exercise, import progressions),
+    `OnboardingScaffold` (content and footer together, so Back / Skip / Next ride on the keyboard)
+    and `PixelModal` (the sheet shrinks to the room above the keyboard and its content scrolls).
+    The scroll views bring the focused field into view themselves (Android's focus scrolling); no
+    explicit scroll code.
+  - `useKeyboardShown` drops the bottom safe-area inset of the onboarding footer and of sheets while
+    the keyboard is open: the keyboard covers the navigation bar, so the inset would only leave a
+    gap. With the keyboard closed nothing changes (padding 0, insets as before).
+- Consequences: a new screen with a text field must use `Screen avoidKeyboard` (or wrap itself in
+  `KeyboardSafeView` when it has a fixed footer). Keyboard behaviour can't be seen in Jest; it is
+  checked on the emulator with the soft keyboard forced on (`show_ime_with_hard_keyboard 1`).
+  The focused field is scrolled just into view, flush with the keyboard or the footer, not centred.

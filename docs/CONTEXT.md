@@ -396,6 +396,12 @@ src/
                         a list inside a sheet that scrolls by itself sets nestedScrollEnabled),
                         PixelAnimation (looping exercise figure, 6.4), PixelSprite (stepped frames
                         of any pixel grids on the UI thread; PixelAnimation and the companion use it)
+      KeyboardSafeView.tsx  keeps a screen body above the soft keyboard (RN KeyboardAvoidingView,
+                        padding, offset = its own pageY; FB-1, ADR-069). Used by `Screen
+                        avoidKeyboard` (screens with a text field), OnboardingScaffold (around
+                        content + footer) and PixelModal (sheets shrink to the room left)
+      useKeyboardShown.ts  whether the soft keyboard is open; footers/sheets drop the bottom
+                        safe-area inset while it is (the keyboard covers the navigation bar)
       figurePalette.ts  FIGURE_COLORS: animation roles → Palette keys (also used by the sheet script)
       useLevelUpKey.ts  replay key for a LEVEL UP! burst when a level rises while mounted (5.2)
       useNow.ts         the screen clock: re-renders once a second while active (rest, timers)
@@ -900,10 +906,10 @@ build is needed.
   nodes by `testID` while the map is zoomed (`map-node-<id>`; `map-node-.*` for "any visible node").
 - `hideKeyboard` presses back when no keyboard is open, which leaves a tab (4.6), and also when
   Gboard shows only its small hardware-keyboard toolbar, which leaves the app. Avoid it where the
-  next tap works without it (`settings.yaml` after "Gym"). On onboarding step 1 the "Train safe"
-  notice puts Next under the full keyboard, so `onboarding.yaml` and
+  next tap works without it (`settings.yaml` after "Gym"). `onboarding.yaml` and
   `subflows/finish-onboarding.yaml` press `back` only when `onboarding-next` is not visible
-  (`runFlow` + `when: notVisible`). Tabs keep their scroll position between flows; scroll up to a
+  (`runFlow` + `when: notVisible`); since FB-1 (ADR-069) the footer rides on the keyboard, so that
+  step is skipped, but it stays as a guard. Tabs keep their scroll position between flows; scroll up to a
   known element first.
 
 ## Play build (PLAN 7.1–7.3, ADR-047, ADR-066, ADR-068)
@@ -1033,5 +1039,13 @@ without `node_modules`, `android`, `builds` and `.git` to a short folder (e.g.
   - Gradle's warnings about hard links / "failed to create a hard link, copying instead" and
     deprecated features are harmless.
   - Bump `expo.android.versionCode` in app.json for every APK you hand out (no autoIncrement).
+- **Keyboard (ADR-069):** Android 15+ is edge-to-edge, so the window is never resized for the soft
+  keyboard (`adjustResize` does nothing) and nothing moves by itself. A new screen with a text field
+  uses `<Screen avoidKeyboard>`, a screen with a fixed footer wraps content + footer in
+  `KeyboardSafeView`, and `PixelModal` sheets already handle it. Check it on the emulator with the
+  soft keyboard forced on (`adb shell settings put secure show_ime_with_hard_keyboard 1`; reset to
+  0 after), or the AVD's hardware keyboard shows only Gboard's small toolbar and hides the bug.
+  Measure positions with `measure`'s `pageY`: `measureInWindow` leaves out the status bar on
+  Android while the keyboard's `screenY` counts from the top of the screen.
 - **Line endings:** `.gitattributes` forces LF. Git may warn "CRLF will be replaced by LF" once per file;
   that's expected.

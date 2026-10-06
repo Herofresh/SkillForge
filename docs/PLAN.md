@@ -321,15 +321,24 @@
   v0.7.0, schemaVersion 1–3) imports into today's store (`src/store/releaseBackups.test.ts`).
   Fixes from the 2026-10-06 emulator check of 7.0a + 7.0b: the Overcoming Gravity credit says
   "Tier levels", and the Maestro flows no longer lose the app to `hideKeyboard` on onboarding.
+- Feedback phase (7.8) started with the closed test of 1.0.0. **FB-1** fixed (ADR-069, [PR #73](https://github.com/Herofresh/SkillForge/pull/73)):
+  text fields no longer hide behind the keyboard. Android 15+ is edge-to-edge, so the window isn't
+  resized for the keyboard; `KeyboardSafeView` (React Native's `KeyboardAvoidingView`, padding,
+  offset = its own `pageY`) wraps onboarding (content + footer), `Screen avoidKeyboard` (Settings,
+  node editor, import progressions) and every `PixelModal` sheet. App version **1.0.1,
+  versionCode 9** (the next closed-track upload; not built yet).
 
 ## Next up
 1. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
    assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
    access, target audience).
-2. The 1.0.0 bundle: `npm run build:aab` on the user's profile (the upload key lives only there)
-   → `builds/SkillForge-1.0.0-vc8-<commit>.aab`, uploaded to the closed testing track.
-3. 7.6 closed test: the user collects ≥ 12 testers for 14 days; collect feedback, fix, then apply
-   for production (7.7).
+2. The 1.0.1 bundle (FB-1 fix): `npm run build:aab` on the user's profile (the upload key lives
+   only there) → `builds/SkillForge-1.0.1-vc9-<commit>.aab`, uploaded to the closed testing track.
+   Before upload, check onboarding step 1 with the keyboard on the release build (only Expo Go was
+   checked here).
+3. 7.6 / 7.8 closed test and feedback phase: the user collects ≥ 12 testers for 14 days; new
+   feedback goes into the FB list under 7.8 (triage, fix bugs as 1.0.x); then apply for production
+   (7.7). Phase 8 starts only after the feedback phase.
 4. On the user's phone (replaces the "install v0.7.0" item: 1.0.0 supersedes it): move to the Play
    1.0.0 as the README says (Export backup → uninstall → install from Play → Import backup),
    then check that the hero, history and own progressions came back, both widgets (placed again
@@ -344,6 +353,26 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-1 keyboard covers the input (task 7.8, ADR-069, [PR #73](https://github.com/Herofresh/SkillForge/pull/73)):**
+  - Code: `src/components/ui/KeyboardSafeView.tsx`, `src/components/ui/useKeyboardShown.ts`,
+    `Screen`'s `avoidKeyboard` prop, `OnboardingScaffold` (wrapper around content + footer, footer
+    drops the bottom inset while the keyboard is open), `PixelModal` (wrapper; the sheet, its frame
+    and scroll view `flexShrink` so a tall sheet fits above the keyboard; root `paddingTop` =
+    status bar inset). Screens with `avoidKeyboard`: Settings, `NodeEditorBody` (edit + new
+    exercise), import progressions.
+  - Root cause confirmed on the Pixel_8_Pro_API_35 emulator on main (soft keyboard forced on): the
+    keyboard overlays the app without any resize; name field, Next, Settings "Add a place" and the
+    rename sheet were covered. `measureInWindow` was tried first and was off by the status bar
+    height (50 dp in Expo Go); `measure`'s `pageY` matches the keyboard's `screenY`.
+  - Verified in Expo Go with the soft keyboard (before/after in `docs/screenshots/fb1-*.png` and
+    the PR): onboarding step 1 and the equipment step, Settings hero name and "Add a place", the
+    rename sheet, the prerequisite search sheet (node editor), the editor's description, import
+    paste. Not verified: the release build (edge-to-edge is the same, but check step 1 on the
+    1.0.1 bundle before upload), a real phone, other keyboards (e.g. Samsung), landscape.
+  - Known limit: the focused field is scrolled only just into view (its bottom edge flush with the
+    keyboard or the onboarding footer), Android's own focus scrolling; no extra margin.
+  - Maestro: `onboarding.yaml`, `settings.yaml`, `editor.yaml` (results in the PR). The `back` guard
+    for a hidden `onboarding-next` now skips (Next stays visible).
 - **1.0.0 prep + moving to Play (task 7.3, ADR-068, [PR #70](https://github.com/Herofresh/SkillForge/pull/70)):**
   - Version: `app.json` 1.0.0 / versionCode 8; `package.json` was already 1.0.0. No test pins the
     real app version. Not built here: the 1.0.0 bundle (`npm run build:aab`) is built by the
@@ -1611,6 +1640,15 @@ from the GitHub releases' 1–7, ADR-068).
 - [ ] 7.6 Closed test: new personal developer accounts must run a closed test (currently 12
   testers for 14 days) before production; collect feedback, fix, then apply for production.
 - [ ] 7.7 Production release and an update routine (versionCode +1, AAB upload, release notes).
+- [~] 7.8 Feedback phase (closed test, before Phase 8): collect tester feedback (Play's tester
+  feedback to skillforge.application@gmail.com and direct messages) and keep it here as a numbered
+  list FB-n with status; triage each as bug / UX / idea. Bugs are fixed in 1.0.x releases on the
+  closed track (`npm run build:aab`, versionCode +1 each); ideas go to the backlog. Phase 8 (ads)
+  starts only after the feedback phase.
+  - [x] FB-1 (bug, user 2026-10-06): "Beim Namen eingeben verschwindet der Name hinter dem
+    Keyboard. Also man sieht nicht was man eintippt." While typing the hero name in onboarding
+    step 1 the field disappears behind the keyboard, so you can't see what you type. Fixed in
+    1.0.1 (versionCode 9): keyboard avoidance for every text field and sheet (ADR-069, [PR #73](https://github.com/Herofresh/SkillForge/pull/73)).
 
 ### Phase 8: Ads and a "remove ads" purchase (user request 2026-10-06; after the production release)
 Open decisions for the user before 8.1 starts: the ad format (a banner on the session summary, or

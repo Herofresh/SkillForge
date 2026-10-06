@@ -1,12 +1,13 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 
-import { Dimensions } from 'react-native';
+import { DeviceEventEmitter, Dimensions, Platform } from 'react-native';
 
 import { animationFor } from '@/data/animations';
 
 import { Colors, TierColors } from '../theme';
 
 import { EmptyState } from './EmptyState';
+import { KeyboardSafeView } from './KeyboardSafeView';
 import { LevelBadge } from './LevelBadge';
 import { LevelUpBurst } from './LevelUpBurst';
 import { PixelAnimation } from './PixelAnimation';
@@ -15,6 +16,7 @@ import { PixelFrame } from './PixelFrame';
 import { PixelIcon } from './PixelIcon';
 import { PixelModal, SHEET_MAX_HEIGHT_SHARE } from './PixelModal';
 import { PixelText } from './PixelText';
+import { Screen } from './Screen';
 import { StatBar } from './StatBar';
 import { TierChip } from './TierChip';
 import { WarningBanner } from './WarningBanner';
@@ -215,6 +217,64 @@ describe('PixelModal', () => {
       </PixelModal>,
     );
     expect(screen.queryByText('body')).toBeNull();
+  });
+});
+
+/** The keyboard events React Native sends: iOS (Jest's platform) uses the "will" events. */
+const keyboardEvent = (shown: boolean) =>
+  Platform.OS === 'ios'
+    ? shown
+      ? 'keyboardWillShow'
+      : 'keyboardWillHide'
+    : shown
+      ? 'keyboardDidShow'
+      : 'keyboardDidHide';
+
+describe('KeyboardSafeView (FB-1, ADR-069)', () => {
+  it('pads its bottom by the part the keyboard covers, and drops the padding when it closes', async () => {
+    await render(
+      <KeyboardSafeView testID="safe">
+        <PixelText>field</PixelText>
+      </KeyboardSafeView>,
+    );
+    const view = screen.getByTestId('safe');
+    expect(screen.getByText('field')).toBeOnTheScreen();
+    await act(async () => {
+      fireEvent(view, 'layout', {
+        persist: () => undefined,
+        nativeEvent: { layout: { x: 0, y: 0, width: 400, height: 800 } },
+      });
+    });
+    expect(view).toHaveStyle({ paddingBottom: 0 });
+
+    const endCoordinates = { screenX: 0, screenY: 500, width: 400, height: 300 };
+    await act(async () => {
+      DeviceEventEmitter.emit(keyboardEvent(true), {
+        endCoordinates,
+        duration: 0,
+        easing: 'keyboard',
+      });
+    });
+    expect(view).toHaveStyle({ paddingBottom: 300 });
+
+    await act(async () => {
+      DeviceEventEmitter.emit(keyboardEvent(false), {
+        endCoordinates,
+        duration: 0,
+        easing: 'keyboard',
+      });
+    });
+    expect(view).toHaveStyle({ paddingBottom: 0 });
+  });
+
+  it('wraps a Screen that has a text field (avoidKeyboard)', async () => {
+    await render(
+      <Screen avoidKeyboard testID="screen">
+        <PixelText>body</PixelText>
+      </Screen>,
+    );
+    expect(screen.getByTestId('screen')).toBeOnTheScreen();
+    expect(screen.getByText('body')).toBeOnTheScreen();
   });
 });
 

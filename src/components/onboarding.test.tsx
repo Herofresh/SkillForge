@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import { DeviceEventEmitter, Platform } from 'react-native';
 
 import { ALL_NODES, NODE_BY_ID } from '@/data/skills';
 import { openTestDatabase } from '@/db/testing/testDatabase';
@@ -128,6 +129,29 @@ describe('OnboardingScaffold', () => {
     await user.press(screen.getByRole('button', { name: 'Back to the app' }));
     expect(store.getState().onboardingCompletedAt).toBe(NOW);
     expect(store.getState().profile?.heroName).toBe('Aria');
+  });
+
+  it('keeps the field and the footer in one keyboard-safe frame (FB-1)', async () => {
+    await startStore();
+    await render(
+      <OnboardingScaffold
+        step="hero"
+        icon="helmet"
+        title="Welcome"
+        subtitle="Name your hero."
+        next={{ label: 'Next', onPress: jest.fn() }}>
+        <PixelTextInput label="Name your hero" value="" onChangeText={jest.fn()} />
+      </OnboardingScaffold>,
+    );
+    // The keyboard opens: React Native's KeyboardAvoidingView listens to the "will" event on iOS
+    // (Jest's platform), useKeyboardShown to the "did" event.
+    const endCoordinates = { screenX: 0, screenY: 400, width: 400, height: 300 };
+    await act(async () => {
+      if (Platform.OS === 'ios') DeviceEventEmitter.emit('keyboardWillShow', { endCoordinates });
+      DeviceEventEmitter.emit('keyboardDidShow', { endCoordinates });
+    });
+    expect(screen.getByLabelText('Name your hero')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Next' })).toBeOnTheScreen();
   });
 
   it('shows the step, the title and the footer actions', async () => {

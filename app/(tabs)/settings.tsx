@@ -31,7 +31,7 @@ export default function SettingsScreen() {
   const [renaming, setRenaming] = useState<EquipmentProfile | undefined>();
 
   return (
-    <Screen testID="settings-screen">
+    <Screen avoidKeyboard testID="settings-screen">
       <HeroNamePanel key={heroName} />
 
       <View style={styles.gap} testID="settings-equipment">

@@ -6,7 +6,16 @@ import { ONBOARDING_STEPS, onboardingStepNumber, type OnboardingStep } from '@/d
 import { useAppStore } from '@/store/useAppStore';
 
 import { Border, Colors, Spacing } from '../theme';
-import { PixelButton, PixelIcon, PixelText, Screen, SegmentedBar, type IconName } from '../ui';
+import {
+  KeyboardSafeView,
+  PixelButton,
+  PixelIcon,
+  PixelText,
+  Screen,
+  SegmentedBar,
+  type IconName,
+  useKeyboardShown,
+} from '../ui';
 
 type Action = { label: string; onPress: () => void; disabled?: boolean };
 
@@ -26,7 +35,8 @@ type Props = {
 
 /**
  * The frame of every onboarding step: a "STEP n / 5" quest bar, the step's title, its scrolling
- * content and a footer with Back / Skip / Next that stays above the content (and the keyboard).
+ * content and a footer with Back / Skip / Next. Content and footer sit in a `KeyboardSafeView`, so
+ * the footer rides on top of the soft keyboard and a focused field stays visible (FB-1).
  * During a replay of a completed onboarding (PLAN 7.0a) it also offers "Back to the app".
  */
 export function OnboardingScaffold({
@@ -41,6 +51,7 @@ export function OnboardingScaffold({
   testID,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const keyboardShown = useKeyboardShown();
   const replaying = useAppStore((state) => state.onboardingReplay);
   const leaveReplay = useAppStore((state) => state.leaveOnboardingReplay);
   const number = onboardingStepNumber(step);
@@ -65,55 +76,61 @@ export function OnboardingScaffold({
           <SegmentedBar fraction={number / total} segments={total} color={Colors.rune} height={8} />
         </View>
       </View>
-      <Screen testID={testID}>
-        {replaying && (
-          <PixelButton
-            label="Back to the app"
-            variant="secondary"
-            onPress={leaveReplay}
-            accessibilityHint="Leaves the intro. What you already saved on its steps stays."
-            testID="onboarding-leave"
-          />
-        )}
-        <View style={styles.header}>
-          <PixelIcon name={icon} size={48} />
-          <View style={styles.headerText}>
-            <PixelText variant="title" accessibilityRole="header">
-              {title}
-            </PixelText>
-            <PixelText tone="textMuted">{subtitle}</PixelText>
+      <KeyboardSafeView>
+        <Screen testID={testID}>
+          {replaying && (
+            <PixelButton
+              label="Back to the app"
+              variant="secondary"
+              onPress={leaveReplay}
+              accessibilityHint="Leaves the intro. What you already saved on its steps stays."
+              testID="onboarding-leave"
+            />
+          )}
+          <View style={styles.header}>
+            <PixelIcon name={icon} size={48} />
+            <View style={styles.headerText}>
+              <PixelText variant="title" accessibilityRole="header">
+                {title}
+              </PixelText>
+              <PixelText tone="textMuted">{subtitle}</PixelText>
+            </View>
           </View>
+          {children}
+        </Screen>
+        <View
+          style={[
+            styles.footer,
+            { paddingBottom: (keyboardShown ? 0 : insets.bottom) + Spacing.md },
+          ]}>
+          {onBack && (
+            <PixelButton
+              label="Back"
+              variant="secondary"
+              onPress={onBack}
+              testID="onboarding-back"
+              style={styles.side}
+            />
+          )}
+          {skip && (
+            <PixelButton
+              label={skip.label}
+              variant="secondary"
+              onPress={skip.onPress}
+              disabled={skip.disabled}
+              testID="onboarding-skip"
+              style={styles.side}
+            />
+          )}
+          <PixelButton
+            label={next.label}
+            onPress={next.onPress}
+            disabled={next.disabled}
+            testID="onboarding-next"
+            style={styles.main}
+          />
         </View>
-        {children}
-      </Screen>
-      <View style={[styles.footer, { paddingBottom: insets.bottom + Spacing.md }]}>
-        {onBack && (
-          <PixelButton
-            label="Back"
-            variant="secondary"
-            onPress={onBack}
-            testID="onboarding-back"
-            style={styles.side}
-          />
-        )}
-        {skip && (
-          <PixelButton
-            label={skip.label}
-            variant="secondary"
-            onPress={skip.onPress}
-            disabled={skip.disabled}
-            testID="onboarding-skip"
-            style={styles.side}
-          />
-        )}
-        <PixelButton
-          label={next.label}
-          onPress={next.onPress}
-          disabled={next.disabled}
-          testID="onboarding-next"
-          style={styles.main}
-        />
-      </View>
+      </KeyboardSafeView>
     </View>
   );
 }

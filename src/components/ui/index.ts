@@ -1,9 +1,11 @@
 /** The SkillForge UI kit (PLAN 4.0, docs/DESIGN.md). Screens import from here. */
 export { EmptyState } from './EmptyState';
 export { ICON_NAMES, type IconName } from './icons';
+export { KeyboardSafeView } from './KeyboardSafeView';
 export { LevelBadge } from './LevelBadge';
 export { BURST_TITLES, LevelUpBurst } from './LevelUpBurst';
 export { useLevelUpKey } from './useLevelUpKey';
+export { useKeyboardShown } from './useKeyboardShown';
 export { useNow } from './useNow';
 export { NumberStepper } from './NumberStepper';
 export { PixelAnimation } from './PixelAnimation';

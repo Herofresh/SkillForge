@@ -76,7 +76,7 @@ export function NodeEditorBody({ initial, title, saveLabel, onSaved, onCancel }:
   return (
     <>
       <Stack.Screen options={stackHeaderOptions(title)} />
-      <Screen testID="node-editor">
+      <Screen avoidKeyboard testID="node-editor">
         <PixelText variant="small" tone="textMuted">
           {custom
             ? 'Your own exercise. It is checked like the built-in tree: no loops, every prerequisite must exist.'
