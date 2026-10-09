@@ -327,7 +327,7 @@
   offset = its own `pageY`) wraps onboarding (content + footer), `Screen avoidKeyboard` (Settings,
   node editor, import progressions) and every `PixelModal` sheet. App version **1.0.1,
   versionCode 9**.
-- **FB-2** fixed (ADR-070, PR: see 7.8): onboarding's goals step, assessment step (anchors and
+- **FB-2** fixed (ADR-070, [PR #74](https://github.com/Herofresh/SkillForge/pull/74)): onboarding's goals step, assessment step (anchors and
   search results) and assessment Trial form show the "i" on every exercise row (`NodeRow onInfo`,
   also on long press); it opens the shared `ExerciseInfoSheet` (description, looping animation,
   cues) without picking the goal or leaving the step. App version **1.0.2, versionCode 10** (the
@@ -360,7 +360,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **FB-2 exercise info in onboarding (task 7.8, ADR-070):**
+- **FB-2 exercise info in onboarding (task 7.8, ADR-070, [PR #74](https://github.com/Herofresh/SkillForge/pull/74)):**
   - Code: `NodeRow`'s new `onInfo` prop (the `InfoButton` after the status, testID
     `<testID>-info`, and `onLongPress`); `app/onboarding/goals.tsx`, `assessment.tsx` and
     `trial/[nodeId].tsx` keep the open node in state and mount `ExerciseInfoSheet` (no "Open
@@ -1682,8 +1682,7 @@ from the GitHub releases' 1–7, ADR-068).
     can't access the information (not see description, animation or cues). At this point new users
     probably don't know all exercises." Fixed in 1.0.2 (versionCode 10): every exercise row in
     onboarding's goals step, assessment step and assessment Trial has the "i" (and a long press)
-    that opens the shared exercise info sheet without picking or leaving (ADR-070, PR: this
-    branch `feat/onboarding-exercise-info`).
+    that opens the shared exercise info sheet without picking or leaving (ADR-070, [PR #74](https://github.com/Herofresh/SkillForge/pull/74)).
 
 ### Phase 8: Ads and a "remove ads" purchase (user request 2026-10-06; after the production release)
 Open decisions for the user before 8.1 starts: the ad format (a banner on the session summary, or
