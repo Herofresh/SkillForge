@@ -326,16 +326,23 @@
   resized for the keyboard; `KeyboardSafeView` (React Native's `KeyboardAvoidingView`, padding,
   offset = its own `pageY`) wraps onboarding (content + footer), `Screen avoidKeyboard` (Settings,
   node editor, import progressions) and every `PixelModal` sheet. App version **1.0.1,
-  versionCode 9** (the next closed-track upload; not built yet).
+  versionCode 9**.
+- **FB-2** fixed (ADR-070, PR: see 7.8): onboarding's goals step, assessment step (anchors and
+  search results) and assessment Trial form show the "i" on every exercise row (`NodeRow onInfo`,
+  also on long press); it opens the shared `ExerciseInfoSheet` (description, looping animation,
+  cues) without picking the goal or leaving the step. App version **1.0.2, versionCode 10** (the
+  next closed-track upload: FB-1 + FB-2; not built yet). **FB-1b** (cosmetic) is open.
 
 ## Next up
 1. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
    assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
    access, target audience).
-2. The 1.0.1 bundle (FB-1 fix): `npm run build:aab` on the user's profile (the upload key lives
-   only there) → `builds/SkillForge-1.0.1-vc9-<commit>.aab`, uploaded to the closed testing track.
-   Before upload, check onboarding step 1 with the keyboard on the release build (only Expo Go was
-   checked here).
+2. The 1.0.2 bundle (FB-1 + FB-2 fixes; replaces the 1.0.1 upload if that hasn't gone out yet):
+   `npm run build:aab` on the user's profile (the upload key lives only there) →
+   `builds/SkillForge-1.0.2-vc10-<commit>.aab`, uploaded to the closed testing track. Before upload,
+   check on the release build: onboarding step 1 with the keyboard (FB-1, FB-1b), and the goals
+   step's "i" → info sheet with its animation (FB-2; only Expo Go was checked here).
+   Optionally fix FB-1b first (cosmetic, see 7.8).
 3. 7.6 / 7.8 closed test and feedback phase: the user collects ≥ 12 testers for 14 days; new
    feedback goes into the FB list under 7.8 (triage, fix bugs as 1.0.x); then apply for production
    (7.7). Phase 8 starts only after the feedback phase.
@@ -353,6 +360,23 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-2 exercise info in onboarding (task 7.8, ADR-070):**
+  - Code: `NodeRow`'s new `onInfo` prop (the `InfoButton` after the status, testID
+    `<testID>-info`, and `onLongPress`); `app/onboarding/goals.tsx`, `assessment.tsx` and
+    `trial/[nodeId].tsx` keep the open node in state and mount `ExerciseInfoSheet` (no "Open
+    skill"). Tests: the "Onboarding" block in `src/components/exerciseInfo.test.tsx` (an "i" per
+    goal option with "About <name>", right exercise, goal not toggled by "i" or long press,
+    assessment rows don't open the Trial, the Trial form's row). Maestro `onboarding.yaml` opens and
+    closes Pull-up's sheet on the goals step and checks the goal stays unpicked.
+  - Verified in Expo Go on Pixel_8_Pro_API_35 (`docs/screenshots/fb2-*.png`): goals step with the
+    "i" on every row, the sheet with animation, description and cues over the goals step, the
+    assessment step's rows. Not verified: the release build, TalkBack on a device (the "i" sits
+    inside the row's Pressable like the Tree tile's), reduce motion (unchanged sheet code).
+  - Layout note: on the assessment step the "I can do this" status wraps to two lines and the OG
+    level label of the Foundation rows drops below the tier chip; readable, but a candidate for a
+    tidy-up if testers mention it.
+  - Other places that list exercises without the "i" are in the Backlog ("Exercise info entry
+    points").
 - **FB-1 keyboard covers the input (task 7.8, ADR-069, [PR #73](https://github.com/Herofresh/SkillForge/pull/73)):**
   - Code: `src/components/ui/KeyboardSafeView.tsx`, `src/components/ui/useKeyboardShown.ts`,
     `Screen`'s `avoidKeyboard` prop, `OnboardingScaffold` (wrapper around content + footer, footer
@@ -1649,6 +1673,17 @@ from the GitHub releases' 1–7, ADR-068).
     Keyboard. Also man sieht nicht was man eintippt." While typing the hero name in onboarding
     step 1 the field disappears behind the keyboard, so you can't see what you type. Fixed in
     1.0.1 (versionCode 9): keyboard avoidance for every text field and sheet (ADR-069, [PR #73](https://github.com/Herofresh/SkillForge/pull/73)).
+  - [ ] FB-1b (cosmetic, found 2026-10-09 on the 1.0.1 release build): after the FB-1 fix, on
+    onboarding step 1 the focused name field's bottom edge sits slightly under the footer's top
+    border. The field and its text stay readable. ADR-069 notes that Android scrolls the focused
+    field only just into view. Ideas: `fadingEdgeLength` on the scroll view, or measure the field
+    and scroll a few dp further. Open.
+  - [x] FB-2 (UX gap, user 2026-10-09): "In onboarding as you select the skills for your goals you
+    can't access the information (not see description, animation or cues). At this point new users
+    probably don't know all exercises." Fixed in 1.0.2 (versionCode 10): every exercise row in
+    onboarding's goals step, assessment step and assessment Trial has the "i" (and a long press)
+    that opens the shared exercise info sheet without picking or leaving (ADR-070, PR: this
+    branch `feat/onboarding-exercise-info`).
 
 ### Phase 8: Ads and a "remove ads" purchase (user request 2026-10-06; after the production release)
 Open decisions for the user before 8.1 starts: the ad format (a banner on the session summary, or
@@ -1681,6 +1716,23 @@ is acceptable (8.4).
   once and after a restart / reinstall; refunds turn it back on; upgrade-safe for existing users.
 
 ### Later / Backlog
+- Exercise info entry points (found with FB-2, ADR-070): exercise names still listed without the
+  "i" / info sheet. Most use `NodeRow`, so they only need `onInfo` and a mounted
+  `ExerciseInfoSheet`:
+  - Train's swap / add sheet (`NodeOptionSheet`, `NodeRow`); the same sheet is the node editor's
+    prerequisite picker (`NodeEditorForm`), so one change covers both.
+  - The node editor's position sheet (`PositionSheet`, `NodeRow`) and its prerequisite rows (names
+    only).
+  - The live session's exercise list (`SessionRow` in `app/train/session.tsx`): only the current
+    exercise's card has the "i".
+  - The session summary's exercise list and unlocked nodes (`SessionResultPanels`; unlocked ones
+    open the node detail).
+  - The Character tab's goal card (`GoalProgressCard`: goal and "Next:" step names).
+  - Onboarding's summary step (goals and tested-out skills as one line of names; the user has
+    already seen them on the goals step).
+  - The node detail's Trial screen header (`app/node/[nodeId]/trial.tsx`, `NodeRow`; the detail
+    itself has the About panel), node-detail prerequisite rows and Tree prerequisite chips (they
+    navigate to the node detail, which shows the description).
 - Rank pacing for beginners (found 2026-10-06 while making the store screenshots): a demo hero with
   six weeks of balanced training (19 sessions, 3 a week, level 19, 5032 XP) is still rank **Novice**
   ("Branch median Tier 0.5 · Apprentice at Tier 2"). The rank is the median of the branches' best

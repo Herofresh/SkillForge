@@ -1,6 +1,7 @@
 /**
  * Exercise descriptions (PLAN 6.2, ADR-049): the shared info sheet and every place that opens it
- * (Tree tile and map node, plan preview, live session).
+ * (Tree tile and map node, plan preview, live session, onboarding's goals, assessment and Trial
+ * steps: FB-2).
  */
 import 'react-native-gesture-handler/jestSetup';
 
@@ -11,10 +12,14 @@ import { openTestDatabase, type TestDatabase } from '@/db/testing/testDatabase';
 import { NO_DESCRIPTION_TEXT } from '@/domain/format';
 import { mapFocus, mapLayout, mapTiles } from '@/domain/treeMap';
 import { branchColumn } from '@/domain/treeView';
-import type { ExerciseNode } from '@/domain/types';
+import { nodesInBranch } from '@/domain/branch';
+import { BRANCHES, type ExerciseNode } from '@/domain/types';
 import { createAppStore, type AppStore } from '@/store/appStore';
 import { setAppStore } from '@/store/useAppStore';
 
+import AssessmentStep from '../../app/onboarding/assessment';
+import GoalsStep from '../../app/onboarding/goals';
+import OnboardingTrialScreen from '../../app/onboarding/trial/[nodeId]';
 import PlanPreviewScreen from '../../app/train/preview';
 import LiveSessionScreen from '../../app/train/session';
 
@@ -25,15 +30,17 @@ import { TreeMap } from './tree/map/TreeMap';
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 }));
+const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
   ...jest.requireActual('expo-router'),
   Stack: { Screen: () => null },
   useRouter: () => ({
     back: jest.fn(),
-    push: jest.fn(),
+    push: mockPush,
     replace: jest.fn(),
     canGoBack: () => true,
   }),
+  useLocalSearchParams: () => ({ nodeId: 'pull_up' }),
 }));
 
 const NOW = 1_790_000_000_000;
@@ -177,5 +184,85 @@ describe('Train: the "i" opens the sheet without leaving the plan or session', (
     expect(screen.queryByTestId('exercise-info')).toBeNull();
     expect(screen.getByTestId('current-exercise')).toBeOnTheScreen();
     expect(store.getState().activeSession).toBeDefined();
+  });
+});
+
+describe('Onboarding: the "i" opens the sheet without picking or leaving (FB-2)', () => {
+  let test: TestDatabase;
+  let store: AppStore;
+  beforeEach(async () => {
+    test = await openTestDatabase();
+    store = createAppStore({ db: test.db, baseNodes: ALL_NODES, now: () => NOW });
+    store.getState().loadAll();
+    setAppStore(store);
+    mockPush.mockClear();
+  });
+  afterEach(() => test.close());
+
+  it('goals step: every goal option has an "i"', async () => {
+    await render(<GoalsStep />);
+    const options = nodesInBranch(ALL_NODES, BRANCHES[0]);
+    expect(options.length).toBeGreaterThan(0);
+    for (const option of options) {
+      expect(screen.getByTestId(`goal-${option.id}-info`)).toHaveAccessibleName(
+        `About ${option.name}`,
+      );
+    }
+  });
+
+  it('goals step: the "i" and a long press show the right exercise and leave the goal alone', async () => {
+    const [first] = nodesInBranch(ALL_NODES, BRANCHES[0]);
+    const user = userEvent.setup();
+    await render(<GoalsStep />);
+    await user.press(screen.getByTestId(`goal-${first.id}-info`));
+    const sheet = screen.getByTestId('exercise-info');
+    expect(within(sheet).getByText(first.name)).toBeOnTheScreen();
+    expect(screen.getByTestId('exercise-info-description')).toHaveTextContent(first.description);
+    expect(screen.queryByTestId('exercise-info-open')).toBeNull();
+    expect(store.getState().goals).toEqual([]);
+    await user.press(screen.getByTestId('exercise-info-close'));
+    expect(screen.queryByTestId('exercise-info')).toBeNull();
+
+    await user.longPress(screen.getByTestId(`goal-${first.id}`));
+    expect(screen.getByTestId('exercise-info-description')).toHaveTextContent(first.description);
+    expect(store.getState().goals).toEqual([]);
+    expect(screen.getByTestId(`goal-${first.id}`)).not.toBeChecked();
+    await user.press(screen.getByTestId('exercise-info-close'));
+
+    // A tap still picks it, and the "i" doesn't remove it again.
+    await user.press(screen.getByTestId(`goal-${first.id}`));
+    expect(store.getState().goals).toEqual([first.id]);
+    await user.press(screen.getByTestId(`goal-${first.id}-info`));
+    expect(store.getState().goals).toEqual([first.id]);
+    expect(screen.getByTestId(`goal-${first.id}`)).toBeChecked();
+  });
+
+  it('assessment step: anchors and search results have the "i"; it does not open the Trial', async () => {
+    store.getState().toggleGoal('pull_up');
+    const user = userEvent.setup();
+    await render(<AssessmentStep />);
+    await user.press(screen.getByTestId('anchor-pull_up-info'));
+    expect(screen.getByTestId('exercise-info-description')).toHaveTextContent(
+      node('pull_up').description,
+    );
+    expect(mockPush).not.toHaveBeenCalled();
+    await user.press(screen.getByTestId('exercise-info-close'));
+
+    await user.type(screen.getByTestId('assessment-search'), 'pistol');
+    const [hit] = screen.getAllByTestId(/^search-.*-info$/);
+    await user.press(hit);
+    expect(screen.getByTestId('exercise-info')).toBeOnTheScreen();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('assessment Trial: the skill\'s row has the "i" too', async () => {
+    const user = userEvent.setup();
+    await render(<OnboardingTrialScreen />);
+    await user.press(screen.getByRole('button', { name: 'About Pull-up' }));
+    expect(screen.getByTestId('exercise-info-description')).toHaveTextContent(
+      node('pull_up').description,
+    );
+    await user.press(screen.getByTestId('exercise-info-close'));
+    expect(screen.getByTestId('trial-form')).toBeOnTheScreen();
   });
 });

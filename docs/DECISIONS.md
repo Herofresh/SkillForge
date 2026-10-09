@@ -2413,3 +2413,24 @@ Template:
   `KeyboardSafeView` when it has a fixed footer). Keyboard behaviour can't be seen in Jest; it is
   checked on the emulator with the soft keyboard forced on (`show_ime_with_hard_keyboard 1`).
   The focused field is scrolled just into view, flush with the keyboard or the footer, not centred.
+
+## ADR-070: Exercise info in onboarding through NodeRow's "i" (PLAN 7.8, FB-2)
+- Date: 2026-10-09 · Status: Accepted (extends ADR-049; no change to ADR-031's flow)
+- Context: closed-test feedback FB-2: while picking goals in onboarding you can't see what an
+  exercise is (no description, animation or cues), and new users don't know the exercises yet.
+  The info sheet (ADR-049, ADR-053) was only reachable from the Tree and Train; onboarding lists
+  nodes with `NodeRow`, which had no info entry point.
+- Decision:
+  - `NodeRow` gets an optional `onInfo`: the same `InfoButton` ("About <name>", 48 dp, testID
+    `<testID>-info`) at the end of the row, inside the frame like the Tree tile's, and a long press
+    on the row (as on the Tree tile). The "i" and the long press never press the row, so they
+    don't toggle a goal or open a Trial. A row without `onPress` drops its own `accessible` grouping
+    when it has the "i", so the button stays reachable for screen readers.
+  - Onboarding's goals step, assessment step (anchors and search results) and assessment Trial
+    form pass it and mount the shared `ExerciseInfoSheet` (no "Open skill": onboarding stays where
+    it is). No second info component.
+  - Other `NodeRow` / name lists (Train's swap/add sheet, the editor's prerequisite and position
+    sheets, the live session's list, …) are left for a backlog item; they only need `onInfo`.
+- Consequences: any `NodeRow` list can offer the info sheet with one prop. Rows get 48 dp
+  narrower for the text; long statuses ("I can do this") wrap to two lines, and the OG level
+  label can drop below the tier chip on narrow phones.

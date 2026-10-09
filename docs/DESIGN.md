@@ -170,7 +170,9 @@ first panel is "About" (`info` icon) with the description (PLAN 6.2).
 
 **Exercise info (PLAN 6.2, ADR-049):** the `info` icon is a rune ring with a light "i".
 `InfoButton` puts it on a small `raised` frame that drops into its shadow when pressed (no fade),
-centred in a 48 dp target; it sits at the end of a tile's top row and of an `ExerciseCard` header.
+centred in a 48 dp target; it sits at the end of a tile's top row, of an `ExerciseCard` header and
+of a `NodeRow` that passes `onInfo` (onboarding's goals, assessment and Trial rows, FB-2; after the
+status). Where a row has the "i", a long press opens the sheet too.
 `ExerciseInfoSheet` is a `PixelModal` titled with the exercise name: the description in `body`,
 then the cues as `small` bullets in a shadowless parchment frame with a scroll icon and a CUES
 label (the body scrolls above 360 dp), plus a primary "Open skill" in the Tree only. Map nodes open

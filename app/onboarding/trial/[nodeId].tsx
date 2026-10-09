@@ -1,5 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 
+import { ExerciseInfoSheet } from '@/components/node/ExerciseInfoSheet';
 import { NodeRow } from '@/components/NodeRow';
 import { OnboardingScaffold } from '@/components/onboarding/OnboardingScaffold';
 import { SafeguardWarningList } from '@/components/SafeguardWarningList';
@@ -34,6 +36,7 @@ export default function TrialScreen() {
 function TrialForm({ node }: { node: ExerciseNode }) {
   const router = useRouter();
   const attempt = useTrialAttempt(node);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   if (attempt.outcome) {
     const passed = trialPassedIn(attempt.outcome);
@@ -59,7 +62,8 @@ function TrialForm({ node }: { node: ExerciseNode }) {
       onBack={() => router.back()}
       next={{ label: 'Log Trial', onPress: attempt.log, disabled: !attempt.allAcknowledged }}
       testID="trial-form">
-      <NodeRow node={node} icon="sword" />
+      <NodeRow node={node} icon="sword" onInfo={() => setInfoOpen(true)} testID="trial-node" />
+      {infoOpen && <ExerciseInfoSheet node={node} onClose={() => setInfoOpen(false)} />}
       <SafeguardWarningList
         warnings={attempt.warnings}
         acknowledged={attempt.acknowledged}
