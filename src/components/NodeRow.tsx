@@ -5,6 +5,7 @@ import { formatOgLevel, spokenOgLevel } from '@/domain/format';
 import { tierForOgLevel } from '@/domain/tier';
 import type { ExerciseNode } from '@/domain/types';
 
+import { InfoButton } from './node/InfoButton';
 import { Frames, Spacing, TOUCH_TARGET } from './theme';
 import { PixelFrame, PixelIcon, PixelText, TierChip, type IconName } from './ui';
 
@@ -20,13 +21,19 @@ type Props = {
   /** `checkbox` when pressing picks the node, `button` when it opens something. */
   role?: 'checkbox' | 'button';
   accessibilityHint?: string;
+  /**
+   * Opens the exercise info sheet (FB-2, ADR-049): an "i" at the end of the row (`<testID>-info`)
+   * and a long press on the row, like the Tree tile. Neither presses the row itself.
+   */
+  onInfo?: () => void;
   children?: ReactNode;
   testID?: string;
 };
 
 /**
  * One skill node as a list row: icon, name, tier chip, OG level and a straight-arm tag, with an
- * optional status. Used by onboarding (goal picker, assessment) and later the tree column (4.2).
+ * optional status and an optional "i" for the exercise info sheet. Used by onboarding (goal picker,
+ * assessment, Trial), the Trial screen and the editor's / Train's pick sheets.
  */
 export function NodeRow({
   node,
@@ -36,6 +43,7 @@ export function NodeRow({
   onPress,
   role = 'button',
   accessibilityHint,
+  onInfo,
   children,
   testID,
 }: Props) {
@@ -76,13 +84,20 @@ export function NodeRow({
             {status}
           </PixelText>
         )}
+        {onInfo && (
+          <InfoButton
+            name={node.name}
+            onPress={onInfo}
+            testID={testID === undefined ? undefined : `${testID}-info`}
+          />
+        )}
       </View>
       {children}
     </PixelFrame>
   );
   if (!onPress) {
     return (
-      <View testID={testID} accessible accessibilityLabel={label}>
+      <View testID={testID} accessible={!onInfo} accessibilityLabel={label}>
         {body(false)}
       </View>
     );
@@ -90,6 +105,7 @@ export function NodeRow({
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onInfo}
       testID={testID}
       accessibilityRole={role}
       accessibilityLabel={label}

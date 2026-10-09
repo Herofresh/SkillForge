@@ -85,9 +85,12 @@ app/                    expo-router screens (UI only, no game logic)
     _layout.tsx         Stack; redirects to /tree once onboarding is completed
     index.tsx           1 welcome + "Name your hero" (setHeroName)
     equipment.tsx       2 Home/Park tag chips, add/remove (confirmed) profiles (equipment CRUD)
-    goals.tsx           3 branch tabs + node rows, 1–5 goals (toggleGoal)
-    assessment.tsx      4 optional: anchors on the goal paths + search → trial/[nodeId]
-    trial/[nodeId].tsx  Trial form: warnings to acknowledge, a stepper per set, logTrial, result + burst
+    goals.tsx           3 branch tabs + node rows, 1–5 goals (toggleGoal); each row's "i"
+                        (`goal-<id>-info`) / long press opens ExerciseInfoSheet (FB-2)
+    assessment.tsx      4 optional: anchors on the goal paths + search → trial/[nodeId]; rows have
+                        the "i" too (`anchor-<id>-info`, `search-<id>-info`)
+    trial/[nodeId].tsx  Trial form: warnings to acknowledge, a stepper per set, logTrial, result + burst;
+                        the skill row (`trial-node`) has the "i"
     summary.tsx         5 "Your journey begins": hero, level, goals, tested out → completeOnboarding
 content/progressions/   SOURCE OF TRUTH for skill content (ADR-016)
   <branch>.yaml         one file per branch, one block per node (human-editable)
@@ -317,7 +320,8 @@ src/
                         icon build can use them; theme.ts re-exports it, ADR-042)
     theme.test.ts       contrast of every text/fill pair (>= 4.5:1, bars >= 3:1)
     fonts.ts            FONT_ASSETS for useFonts (keys = FontFamily names)
-    NodeRow.tsx         a node as a list row: icon, name, tier chip, OG level, straight-arm tag, status
+    NodeRow.tsx         a node as a list row: icon, name, tier chip, OG level, straight-arm tag, status;
+                        `onInfo` adds the "i" (`<testID>-info`) and a long press for the info sheet
     onboarding/OnboardingScaffold.tsx  step bar "STEP n / 5", title, scrolling body, Back/Skip/Next footer;
                         "Back to the app" while `onboardingReplay` (PLAN 7.0a)
     RootErrorScreen.tsx what the root ErrorBoundary shows: EmptyState + "Try again" (no store, 7.0a)
@@ -572,7 +576,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Backup** | A JSON file of all user data (`skillforge-backup`, `schemaVersion`). Import validates the whole file first and then replaces all data in one transaction; never a merge or a partial import (ADR-028). |
 | **Safety copy** | The backup of the current data that `importBackup` writes to `documents/backups/skillforge-before-import-<UTC>.json` before it replaces anything; importing it undoes the import. |
 | **Description** | A node's 1–3 plain sentences on what the exercise is and what it looks like (not the cues; PLAN 6.2, ADR-049). Required on built-in nodes (`validateNodes`), at most `MAX_DESCRIPTION_LENGTH` (300) characters; a user node saved before 6.2 may have `''` (shown as "No description yet…") and the editor asks for one on its next save. |
-| **Exercise info sheet** | `ExerciseInfoSheet`: name, description and cues over the current screen. Opened by the "i" (`InfoButton`) on Tree tiles, plan-preview cards and the live session's current exercise, or a long press on a tile / map node. Never navigates in Train; adds "Open skill" in the Tree. |
+| **Exercise info sheet** | `ExerciseInfoSheet`: name, description and cues over the current screen. Opened by the "i" (`InfoButton`) on Tree tiles, plan-preview cards, the live session's current exercise and onboarding's goal, assessment and Trial rows (`NodeRow onInfo`, FB-2), or a long press on a tile / map node / onboarding row. Never navigates in Train; adds "Open skill" in the Tree. |
 | **Guide** | "How SkillForge works" (PLAN 6.10c, ADR-060): one entry per system (`GUIDE_TOPICS`: xp, skills, safeguards, attributes, ranks, streak, classes, challenge, companion, generator, widgets, data), a 1–3 sentence summary and details. Every number comes from the owning module's constants (`guideFacts`). Reached through a `GuideButton` "i" next to the system (Character tab, node detail, plan preview, session summary, warning lists, Settings → widgets) or Settings → How SkillForge works. Never opens on its own. |
 | **Exercise animation** | A small looping pixel figure doing the exercise (PLAN 6.4, ADR-053): 1–4 keyframe poses of a side-view stick figure (hip position + absolute joint angles) plus props (floor, wall, bar, rings, rail, parallettes, dip bars, box, pole), interpolated into stepped frames and rasterized to a 32×32 grid. A node without its own animation shows its first pattern's generic one. Shown in the node detail's About panel and the exercise info sheet; reduce motion shows the still keyframe. |
 | **Source** | `core` (built-in YAML) or `user` (from the overlay). |

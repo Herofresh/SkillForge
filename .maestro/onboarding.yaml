@@ -1,5 +1,6 @@
-# First run (PLAN 4.1): a fresh install walks through onboarding (hero name, keep Home, one goal, one
-# test-out with its advisory warning acknowledged, ADR-023) and lands on the Tree tab.
+# First run (PLAN 4.1): a fresh install walks through onboarding (hero name, keep Home, one goal
+# after a look at its info sheet (FB-2), one test-out with its advisory warning acknowledged,
+# ADR-023) and lands on the Tree tab.
 # Prerequisites and run: see smoke.yaml / docs/CONTEXT.md "E2E tests".
 appId: host.exp.exponent
 name: Onboarding - fresh install to the Tree tab
@@ -62,6 +63,24 @@ name: Onboarding - fresh install to the Tree tab
       id: 'goal-pull_up'
     direction: DOWN
     timeout: 90000
+# FB-2: the "i" opens the exercise info sheet without picking the goal
+- tapOn:
+    id: 'goal-pull_up-info'
+- extendedWaitUntil:
+    visible:
+      id: 'exercise-info-description'
+    timeout: 20000
+- assertVisible:
+    id: 'exercise-info-animation'
+- tapOn:
+    id: 'exercise-info-close'
+- extendedWaitUntil:
+    notVisible:
+      id: 'exercise-info'
+    timeout: 20000
+- assertVisible:
+    id: 'goal-pull_up'
+    checked: false
 - tapOn:
     id: 'goal-pull_up'
 - assertVisible:

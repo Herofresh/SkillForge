@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { ExerciseInfoSheet } from '@/components/node/ExerciseInfoSheet';
 import { NodeRow } from '@/components/NodeRow';
 import { OnboardingScaffold } from '@/components/onboarding/OnboardingScaffold';
 import { Spacing } from '@/components/theme';
@@ -10,13 +11,17 @@ import { assessmentAnchors, searchNodes } from '@/domain/assessment';
 import type { ExerciseNode } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
 
-/** Step 4 (optional): "I can already do this" for anchors on the goal paths or any searched skill. */
+/**
+ * Step 4 (optional): "I can already do this" for anchors on the goal paths or any searched skill.
+ * Each row's "i" (or a long press) opens the exercise info sheet (FB-2).
+ */
 export default function AssessmentStep() {
   const router = useRouter();
   const nodes = useAppStore((state) => state.nodes);
   const goals = useAppStore((state) => state.goals);
   const progress = useAppStore((state) => state.engine.progress);
   const [query, setQuery] = useState('');
+  const [infoNode, setInfoNode] = useState<ExerciseNode | undefined>();
   const anchors = useMemo(() => assessmentAnchors(nodes, goals), [nodes, goals]);
   const results = useMemo(() => searchNodes(nodes, query), [nodes, query]);
 
@@ -32,6 +37,7 @@ export default function AssessmentStep() {
           router.push({ pathname: '/onboarding/trial/[nodeId]', params: { nodeId: node.id } })
         }
         accessibilityHint="Opens the Trial for this skill"
+        onInfo={() => setInfoNode(node)}
         testID={`${prefix}-${node.id}`}
       />
     );
@@ -74,6 +80,7 @@ export default function AssessmentStep() {
         )}
         {results.map((node) => row(node, 'search'))}
       </View>
+      {infoNode && <ExerciseInfoSheet node={infoNode} onClose={() => setInfoNode(undefined)} />}
     </OnboardingScaffold>
   );
 }
