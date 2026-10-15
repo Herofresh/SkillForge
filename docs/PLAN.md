@@ -332,14 +332,13 @@
   also on long press); it opens the shared `ExerciseInfoSheet` (description, looping animation,
   cues) without picking the goal or leaving the step. App version **1.0.2, versionCode 10** (the
   next closed-track upload: FB-1 + FB-2; not built yet). **FB-1b** (cosmetic) is open.
-- **7.9 in review** (ADR-071, branch `feat/monster-training`): session monsters (every set a
+- **7.9 merged** (ADR-071, [PR #75](https://github.com/Herofresh/SkillForge/pull/75); on-device check pending): session monsters (every set a
   monster of its branch that takes the hit) and a second training view, Battle (every exercise as a
   row of monsters, logged with taps), picked in Settings → Training view (default Classic). Rep sets
   lost their set timer in the live session; holds keep theirs.
 
 ## Next up
-0. 7.9 Session monsters and the Battle view: PR open (branch `feat/monster-training`), waiting for
-   the reviewer agent; then a check in Expo Go (both views, a hold in Battle, reduce motion) and
+0. 7.9 Session monsters and the Battle view: merged ([PR #75](https://github.com/Herofresh/SkillForge/pull/75)); next a check in Expo Go (both views, a hold in Battle, reduce motion) and
    the user's pick of the version (1.0.3 or 1.1.0) for the next closed-track bundle.
 1. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
    assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
@@ -367,7 +366,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Session monsters + Battle view (task 7.9, ADR-071, branch `feat/monster-training`):**
+- **Session monsters + Battle view (task 7.9, ADR-071, [PR #75](https://github.com/Herofresh/SkillForge/pull/75)):**
   - Domain: `src/domain/monsters.ts` (kinds, `BRANCH_MONSTERS`, `foeState` / `foeHp`, `tapDown`,
     `foeCount` / `foeDamage`) and `src/domain/battleView.ts` (`TRAINING_VIEWS` /
     `parseTrainingView`, `exerciseFoes`, `battleView`, `tapFoe`, `foeSetLabel`); `trainView.ts`
@@ -1710,7 +1709,7 @@ from the GitHub releases' 1–7, ADR-068).
     probably don't know all exercises." Fixed in 1.0.2 (versionCode 10): every exercise row in
     onboarding's goals step, assessment step and assessment Trial has the "i" (and a long press)
     that opens the shared exercise info sheet without picking or leaving (ADR-070, [PR #74](https://github.com/Herofresh/SkillForge/pull/74)).
-- [~] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent):
+- [~] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent; [PR #75](https://github.com/Herofresh/SkillForge/pull/75) merged, on-device check open):
   every set of an exercise is a monster of its branch that takes the hit when the set is logged.
   Two views, picked in Settings → Training view (default Classic): **Classic** keeps the
   one-exercise logger and shows that exercise's monsters above it; **Battle** shows every exercise
