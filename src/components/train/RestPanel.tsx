@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { formatCountdown } from '@/domain/format';
 import { restCue, type SeenReading } from '@/domain/setTimer';
@@ -12,6 +12,13 @@ import { PixelButton, PixelFrame, PixelIcon, PixelText, useNow } from '../ui';
 type Props = {
   session: ActiveSession;
   onSkip: () => void;
+  /**
+   * One row (Battle, PLAN 7.9): pinned under the board, so it never pushes the monsters while it
+   * comes and goes.
+   */
+  compact?: boolean;
+  /** Around the compact bar (its footer padding); nothing is drawn while not resting. */
+  style?: StyleProp<ViewStyle>;
 };
 
 /**
@@ -21,7 +28,7 @@ type Props = {
  * ADR-044); a rest that ended while the app was away stays quiet. Mount it with a key per rest so
  * the clock starts fresh.
  */
-export function RestPanel({ session, onSkip }: Props) {
+export function RestPanel({ session, onSkip, compact = false, style }: Props) {
   const resting = session.restEndsAt !== undefined;
   const now = useNow(resting);
   const seconds = restSecondsLeft(session, now);
@@ -34,6 +41,30 @@ export function RestPanel({ session, onSkip }: Props) {
   }, [resting, seconds, now]);
 
   if (seconds <= 0) return null;
+  const countdown = (
+    <PixelText
+      variant="display"
+      accessibilityLabel={`Rest: ${seconds} seconds left`}
+      testID="rest-countdown">
+      {formatCountdown(seconds)}
+    </PixelText>
+  );
+  if (compact) {
+    return (
+      <View style={style}>
+        <PixelFrame variant="rune" testID="rest-panel">
+          <View style={styles.row}>
+            <PixelIcon name="potion" />
+            {countdown}
+            <PixelText variant="label" tone="rune" style={styles.label}>
+              Rest
+            </PixelText>
+            <PixelButton label="Skip" variant="secondary" onPress={onSkip} testID="skip-rest" />
+          </View>
+        </PixelFrame>
+      </View>
+    );
+  }
   return (
     <PixelFrame variant="rune" contentStyle={styles.content} testID="rest-panel">
       <View style={styles.row}>
@@ -41,12 +72,7 @@ export function RestPanel({ session, onSkip }: Props) {
         <PixelText variant="label" tone="rune" style={styles.label}>
           Rest
         </PixelText>
-        <PixelText
-          variant="display"
-          accessibilityLabel={`Rest: ${seconds} seconds left`}
-          testID="rest-countdown">
-          {formatCountdown(seconds)}
-        </PixelText>
+        {countdown}
       </View>
       <PixelButton label="Skip rest" variant="secondary" onPress={onSkip} testID="skip-rest" />
     </PixelFrame>

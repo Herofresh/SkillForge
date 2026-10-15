@@ -369,6 +369,22 @@ describe('RestPanel', () => {
     expect(vibrate).not.toHaveBeenCalled();
     vibrate.mockRestore();
   });
+
+  it('fits in one row with Skip when compact (the Battle bar, PLAN 7.9)', async () => {
+    const onSkip = jest.fn();
+    await render(
+      <RestPanel
+        session={{ ...session, restEndsAt: NOW + 65_000 }}
+        onSkip={onSkip}
+        compact
+        style={{ padding: 4 }}
+      />,
+    );
+    expect(screen.getByTestId('rest-countdown')).toHaveTextContent('1:05');
+    expect(screen.getByTestId('skip-rest')).toHaveTextContent('Skip');
+    fireEvent.press(screen.getByTestId('skip-rest'));
+    expect(onSkip).toHaveBeenCalled();
+  });
 });
 
 describe('SessionResultPanels', () => {

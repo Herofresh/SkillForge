@@ -1,6 +1,7 @@
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ExerciseInfoSheet } from '@/components/node/ExerciseInfoSheet';
 import { stackHeaderOptions } from '@/components/stackHeader';
@@ -85,6 +86,7 @@ function LiveSession({ session }: { session: ActiveSession }) {
   const addExercise = useAppStore((state) => state.addTrainingExercise);
   const finish = useAppStore((state) => state.finishTraining);
   const abandon = useAppStore((state) => state.abandonTraining);
+  const insets = useSafeAreaInsets();
   const trainingView = useAppStore((state) => state.trainingView);
   const tapFoe = useAppStore((state) => state.tapTrainingFoe);
   const [dialog, setDialog] = useState<Dialog | undefined>();
@@ -147,140 +149,153 @@ function LiveSession({ session }: { session: ActiveSession }) {
   return (
     <>
       <Stack.Screen options={stackHeaderOptions('Session')} />
-      <Screen testID="live-session">
-        <PixelFrame variant="raised" contentStyle={styles.gap}>
-          <XPBar
-            label="Sets"
-            fraction={view.setsFraction}
-            valueText={`${counts.setsLogged} / ${counts.setsPlanned}`}
-            color={Colors.rune}
-            testID="session-progress"
+      <View style={styles.fill}>
+        <Screen testID="live-session">
+          <PixelFrame variant="raised" contentStyle={styles.gap}>
+            <XPBar
+              label="Sets"
+              fraction={view.setsFraction}
+              valueText={`${counts.setsLogged} / ${counts.setsPlanned}`}
+              color={Colors.rune}
+              testID="session-progress"
+            />
+            <View style={styles.row}>
+              <PixelText variant="small" tone="textMuted" style={styles.rowText}>
+                {`${counts.exercisesDone} of ${counts.exercises} exercises done`}
+              </PixelText>
+              <SessionClock startedAt={session.startedAt} />
+            </View>
+          </PixelFrame>
+
+          <TrainWarningList
+            warnings={warnings}
+            acknowledged={session.acknowledged}
+            onAcknowledge={acknowledge}
+            testIDPrefix="session-warning"
           />
-          <View style={styles.row}>
-            <PixelText variant="small" tone="textMuted" style={styles.rowText}>
-              {`${counts.exercisesDone} of ${counts.exercises} exercises done`}
-            </PixelText>
-            <SessionClock startedAt={session.startedAt} />
-          </View>
-        </PixelFrame>
 
-        <TrainWarningList
-          warnings={warnings}
-          acknowledged={session.acknowledged}
-          onAcknowledge={acknowledge}
-          testIDPrefix="session-warning"
-        />
+          {!battle && (
+            <RestPanel key={session.restEndsAt ?? 'none'} session={session} onSkip={skipRest} />
+          )}
 
-        <RestPanel key={session.restEndsAt ?? 'none'} session={session} onSkip={skipRest} />
-
-        {battle ? (
-          <BattleBoard
-            blocks={battle}
-            session={session}
-            disabled={pending}
-            pendingNote={pending ? ACKNOWLEDGE_TO_LOG_NOTE : undefined}
-            onTap={onTapFoe}
-            onLongPress={onLongPressFoe}
-            onInfo={setInfoId}
-            onPauseTimer={pauseTimer}
-            onResumeTimer={resumeTimer}
-            onResetTimer={resetTimer}
-          />
-        ) : current && currentNode ? (
-          <ExerciseCard
-            exercise={current.exercise}
-            highlighted
-            onInfo={() => setInfoId(current.exercise.nodeId)}
-            testID="current-exercise">
-            {currentFoes && (
-              <FoeRow key={current.exercise.key} foes={currentFoes} testID="current-foes" />
-            )}
-            <SetLogger
-              key={`${current.exercise.key}-${current.setNumber}`}
-              node={currentNode}
-              current={current}
-              onLog={(entered, mark) => logSet(current.exercise.key, entered, mark)}
+          {battle ? (
+            <BattleBoard
+              blocks={battle}
+              session={session}
+              disabled={pending}
               pendingNote={pending ? ACKNOWLEDGE_TO_LOG_NOTE : undefined}
-              timer={
-                session.timer?.exerciseKey === current.exercise.key ? session.timer : undefined
-              }
-              onStartTimer={() => startTimer(current.exercise.key)}
-              onStopTimer={stopTimer}
+              onTap={onTapFoe}
+              onLongPress={onLongPressFoe}
+              onInfo={setInfoId}
               onPauseTimer={pauseTimer}
               onResumeTimer={resumeTimer}
               onResetTimer={resetTimer}
-              onEditSet={(set) => setEditing(set.setIndex)}
             />
-            <PixelButton
-              label="Skip exercise"
-              variant="secondary"
-              onPress={() => skipExercise(current.exercise.key)}
-              testID="skip-exercise"
-            />
-          </ExerciseCard>
-        ) : (
-          <PixelFrame variant="gold" testID="all-done">
-            <PixelText>
-              Every exercise is done or skipped. Finish the session to claim your XP, or add one
-              more.
-            </PixelText>
-          </PixelFrame>
-        )}
-
-        {!battle && (
-          <View style={styles.gap}>
-            <View style={styles.row}>
-              <PixelText
-                variant="label"
-                tone="gold"
-                accessibilityRole="header"
-                style={styles.rowText}>
-                This session
-              </PixelText>
-              <PixelButton
-                label={reordering ? 'Done' : 'Reorder'}
-                variant="secondary"
-                onPress={() => setReordering((value) => !value)}
-                accessibilityLabel={reordering ? 'Done reordering' : 'Reorder exercises'}
-                testID="session-reorder"
+          ) : current && currentNode ? (
+            <ExerciseCard
+              exercise={current.exercise}
+              highlighted
+              onInfo={() => setInfoId(current.exercise.nodeId)}
+              testID="current-exercise">
+              {currentFoes && (
+                <FoeRow key={current.exercise.key} foes={currentFoes} testID="current-foes" />
+              )}
+              <SetLogger
+                key={`${current.exercise.key}-${current.setNumber}`}
+                node={currentNode}
+                current={current}
+                onLog={(entered, mark) => logSet(current.exercise.key, entered, mark)}
+                pendingNote={pending ? ACKNOWLEDGE_TO_LOG_NOTE : undefined}
+                timer={
+                  session.timer?.exerciseKey === current.exercise.key ? session.timer : undefined
+                }
+                onStartTimer={() => startTimer(current.exercise.key)}
+                onStopTimer={stopTimer}
+                onPauseTimer={pauseTimer}
+                onResumeTimer={resumeTimer}
+                onResetTimer={resetTimer}
+                onEditSet={(set) => setEditing(set.setIndex)}
               />
-            </View>
-            {view.blocks.flatMap((block) =>
-              block.exercises.map((exercise) => (
-                <SessionRow
-                  key={exercise.key}
-                  exercise={exercise}
-                  blockLabel={block.label}
-                  current={exercise.key === session.currentKey}
-                  onPress={() => selectExercise(exercise.key)}
-                  moves={reordering ? view.moves[exercise.key] : undefined}
-                  onMove={(direction) => moveExercise(exercise.key, direction)}
-                />
-              )),
-            )}
-          </View>
-        )}
+              <PixelButton
+                label="Skip exercise"
+                variant="secondary"
+                onPress={() => skipExercise(current.exercise.key)}
+                testID="skip-exercise"
+              />
+            </ExerciseCard>
+          ) : (
+            <PixelFrame variant="gold" testID="all-done">
+              <PixelText>
+                Every exercise is done or skipped. Finish the session to claim your XP, or add one
+                more.
+              </PixelText>
+            </PixelFrame>
+          )}
 
-        <PixelButton
-          label="Add exercise"
-          icon="rune"
-          variant="secondary"
-          onPress={() => setDialog('add')}
-          testID="session-add"
-        />
-        <PixelButton
-          label="Finish session"
-          icon="star"
-          onPress={() => setDialog('finish')}
-          testID="finish-session"
-        />
-        <PixelButton
-          label="Abandon"
-          variant="danger"
-          onPress={() => setDialog('abandon')}
-          testID="abandon-session"
-        />
-      </Screen>
+          {!battle && (
+            <View style={styles.gap}>
+              <View style={styles.row}>
+                <PixelText
+                  variant="label"
+                  tone="gold"
+                  accessibilityRole="header"
+                  style={styles.rowText}>
+                  This session
+                </PixelText>
+                <PixelButton
+                  label={reordering ? 'Done' : 'Reorder'}
+                  variant="secondary"
+                  onPress={() => setReordering((value) => !value)}
+                  accessibilityLabel={reordering ? 'Done reordering' : 'Reorder exercises'}
+                  testID="session-reorder"
+                />
+              </View>
+              {view.blocks.flatMap((block) =>
+                block.exercises.map((exercise) => (
+                  <SessionRow
+                    key={exercise.key}
+                    exercise={exercise}
+                    blockLabel={block.label}
+                    current={exercise.key === session.currentKey}
+                    onPress={() => selectExercise(exercise.key)}
+                    moves={reordering ? view.moves[exercise.key] : undefined}
+                    onMove={(direction) => moveExercise(exercise.key, direction)}
+                  />
+                )),
+              )}
+            </View>
+          )}
+
+          <PixelButton
+            label="Add exercise"
+            icon="rune"
+            variant="secondary"
+            onPress={() => setDialog('add')}
+            testID="session-add"
+          />
+          <PixelButton
+            label="Finish session"
+            icon="star"
+            onPress={() => setDialog('finish')}
+            testID="finish-session"
+          />
+          <PixelButton
+            label="Abandon"
+            variant="danger"
+            onPress={() => setDialog('abandon')}
+            testID="abandon-session"
+          />
+        </Screen>
+        {battle && (
+          <RestPanel
+            key={session.restEndsAt ?? 'none'}
+            session={session}
+            onSkip={skipRest}
+            compact
+            style={[styles.restBar, { paddingBottom: Spacing.sm + insets.bottom }]}
+          />
+        )}
+      </View>
 
       <PixelModal
         visible={dialog === 'finish'}
@@ -444,6 +459,19 @@ function SessionRow({ exercise, blockLabel, current, onPress, moves, onMove }: R
 }
 
 const styles = StyleSheet.create({
+  fill: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  /**
+   * Battle's rest bar under the scrolling board (PLAN 7.9): coming and going it only shortens the
+   * view from below, so the monsters never move under the finger.
+   */
+  restBar: {
+    paddingTop: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: Colors.background,
+  },
   gap: {
     gap: Spacing.sm,
   },
