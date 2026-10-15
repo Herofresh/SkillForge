@@ -332,8 +332,15 @@
   also on long press); it opens the shared `ExerciseInfoSheet` (description, looping animation,
   cues) without picking the goal or leaving the step. App version **1.0.2, versionCode 10** (the
   next closed-track upload: FB-1 + FB-2; not built yet). **FB-1b** (cosmetic) is open.
+- **7.9 in review** (ADR-071, branch `feat/monster-training`): session monsters (every set a
+  monster of its branch that takes the hit) and a second training view, Battle (every exercise as a
+  row of monsters, logged with taps), picked in Settings → Training view (default Classic). Rep sets
+  lost their set timer in the live session; holds keep theirs.
 
 ## Next up
+0. 7.9 Session monsters and the Battle view: PR open (branch `feat/monster-training`), waiting for
+   the reviewer agent; then a check in Expo Go (both views, a hold in Battle, reduce motion) and
+   the user's pick of the version (1.0.3 or 1.1.0) for the next closed-track bundle.
 1. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
    assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
    access, target audience).
@@ -360,6 +367,26 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Session monsters + Battle view (task 7.9, ADR-071, branch `feat/monster-training`):**
+  - Domain: `src/domain/monsters.ts` (kinds, `BRANCH_MONSTERS`, `foeState` / `foeHp`, `tapDown`,
+    `foeCount` / `foeDamage`) and `src/domain/battleView.ts` (`TRAINING_VIEWS` /
+    `parseTrainingView`, `exerciseFoes`, `battleView`, `tapFoe`, `foeSetLabel`); `trainView.ts`
+    gained `loggedSetViews` (any exercise's logged sets, for the edit sheet). Art:
+    `src/data/monsters.ts`, sheet `npm run monsters:sheet` → `docs/screenshots/7.9-monsters.png`.
+  - Store: `trainingView` + `setTrainingView` (setting `training_view`), `tapTrainingFoe(key, slot)`
+    (returns a hold's `setIndex` to edit). UI: `MonsterToken` / `AddFoeToken`, `FoeRow`,
+    `BattleBoard`, `LogSetSheet` in `src/components/train/`, `TrainingViewPanel` in Settings;
+    `app/train/session.tsx` switches the middle of the screen (header, warnings, rest, Add / Finish
+    / Abandon and the sheets are shared; the info and edit sheets now work for any exercise).
+  - `SetLogger` renders `SetTimerPanel` only for `hold_s`; Trials still offer the stopwatch.
+  - Tests: `monsters.test.ts`, `battleView.test.ts`, `src/data/monsters.test.ts`,
+    `src/components/battle.test.tsx` (setting persists, Classic foes, Battle rows + "i", tap / tap
+    down, extra set, long press sheets); `train.test.tsx` now expects no rep timer.
+  - Not verified yet: on the emulator / a phone (only Jest; the hit animation, the bob, horizontal
+    scrolling of long rows, TalkBack labels, reduce motion). Maestro flows untouched (Classic is
+    the default, so they still apply).
+  - Ideas left for testers' feedback: a switch on the session screen itself, a bigger "current"
+    foe in Classic, rest bar pinned to the bottom in Battle (like the user's reference image).
 - **FB-2 exercise info in onboarding (task 7.8, ADR-070, [PR #74](https://github.com/Herofresh/SkillForge/pull/74)):**
   - Code: `NodeRow`'s new `onInfo` prop (the `InfoButton` after the status, testID
     `<testID>-info`, and `onLongPress`); `app/onboarding/goals.tsx`, `assessment.tsx` and
@@ -1683,6 +1710,15 @@ from the GitHub releases' 1–7, ADR-068).
     probably don't know all exercises." Fixed in 1.0.2 (versionCode 10): every exercise row in
     onboarding's goals step, assessment step and assessment Trial has the "i" (and a long press)
     that opens the shared exercise info sheet without picking or leaving (ADR-070, [PR #74](https://github.com/Herofresh/SkillForge/pull/74)).
+- [~] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent):
+  every set of an exercise is a monster of its branch that takes the hit when the set is logged.
+  Two views, picked in Settings → Training view (default Classic): **Classic** keeps the
+  one-exercise logger and shows that exercise's monsters above it; **Battle** shows every exercise
+  as a row of monsters, each card with its "i": tap a monster to log the target, tap again for one
+  rep fewer (below 0 the set is removed), long press for an exact number / more reps or to edit,
+  "+" for an extra set; holds: tap to start the timer, tap again to log the seconds held. The rep
+  set timer is removed from the live session (the session clock stays; holds keep theirs). Ships
+  as the next 1.0.x / 1.1.0 on the closed track for testers to compare both views.
 
 ### Phase 8: Ads and a "remove ads" purchase (user request 2026-10-06; after the production release)
 Open decisions for the user before 8.1 starts: the ad format (a banner on the session summary, or

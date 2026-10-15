@@ -132,7 +132,8 @@ plugins/
   animationSheet.ts     contact sheets of the exercise animations (a row of frames per animation,
                         labelled with tinyFont.ts, a 3×5 pixel font); animationSheetBuild.ts is the
                         npm run animations:sheet CLI (PLAN 6.4, ADR-053); renderFrameSheet also
-                        draws companionSheetBuild.ts, the npm run companion:sheet CLI (PLAN 6.10)
+                        draws companionSheetBuild.ts, the npm run companion:sheet CLI (PLAN 6.10),
+                        and monsterSheetBuild.ts, the npm run monsters:sheet CLI (PLAN 7.9)
 src/
   domain/               PURE TS game rules. No React/Expo/DB imports (ADR-009)
     types.ts            single source of shared types (nodes, issues, overlay, logged sets, progress)
@@ -192,7 +193,15 @@ src/
     trainView.ts        Train view models: blockViews, exerciseView, liveView, summaryView (with the
                         stored session: time per exercise, session time), loggedSetText
                         ("8 reps · 0:42"), sessionDurationSec, BLOCK_LABELS, OUTCOME_LABELS;
-                        liveView's logged sets carry setIndex + editStart, and moves per exercise
+                        liveView's logged sets carry setIndex + editStart (loggedSetViews), and
+                        moves per exercise
+    monsters.ts         session monsters (PLAN 7.9, ADR-071): MONSTER_KINDS, BRANCH_MONSTERS,
+                        foeState / foeHp (from the logged set vs its prescription), tapDown
+                        (one rep / lowering fewer, undefined below 0), tapLogs, foeCount, foeDamage
+    battleView.ts       the foes of the live session (PLAN 7.9, ADR-071): TRAINING_VIEWS +
+                        parseTrainingView (the training_view setting), exerciseFoes (Classic's row),
+                        battleView (every exercise by block), tapFoe (log / count down / remove,
+                        hold start / stop, or edit a logged hold), foeSetLabel, monsterOf
     characterView.ts    Character tab view model (ADR-035): characterSheet, radarAxes, nextRank,
                         rankHint, activeStreak, characterTotals, balanceNote, recentSessions,
                         goalProgress
@@ -244,6 +253,9 @@ src/
                         companionRole, companionColors(look)
       index.ts          companionFrame / companionFrames / companionStill (grids for app, widget,
                         sheets)
+    monsters.ts         the session monsters' art (PLAN 7.9, ADR-071): MONSTER_ART (one 16 × 16
+                        grid per kind, last row empty), MONSTER_COLORS, HIT_COLORS, BEATEN_COLORS,
+                        monsterFrames (the bob loop)
     credits.ts          About screen content: CONTENT_SOURCES, NOT_AFFILIATED_NOTE, FONT_CREDITS,
                         OFL_CREDIT
     notices.ts          texts shown in several places (ADR-065): HEALTH_DISCLAIMER (+ title),
@@ -347,11 +359,16 @@ src/
                         warnings?" above a list with a tendon warning)
     train/              Train flow parts: ExerciseCard (prescription, rest, markers, "i" via
                         onInfo), SetLogger
-                        (timer + stepper + Log / Partial / Failed; logged-set lines open the
-                        edit sheet), EditSetSheet (edit / delete a logged set, 5.9), RestPanel
-                        (countdown, buzz at its end),
+                        (hold timer, holds only since 7.9 + stepper + Log / Partial / Failed;
+                        logged-set lines open the edit sheet), EditSetSheet (edit / delete a
+                        logged set, 5.9), RestPanel (countdown, buzz at its end),
                         SessionClock (elapsed session time), NodeOptionSheet (swap/add picker),
-                        TrainWarningList (warnings acknowledged by key)
+                        TrainWarningList (warnings acknowledged by key); monsters (PLAN 7.9,
+                        ADR-071): MonsterToken (sprite, HP bar, count; hit flash, shake and
+                        floating damage) + AddFoeToken (the "+" ghost), FoeRow (a row of foes,
+                        Classic above the logger, Battle with taps), BattleBoard (the Battle view:
+                        every exercise card with its foes and a running hold's timer),
+                        LogSetSheet (Battle's long press on a fresh foe)
     timer/SetTimerPanel.tsx  the exercise timer of one set (PLAN 5.4): Start hold / Start set →
                         clock, Pause / Resume (5.8), Stop / Done, Cancel / Reset; buzzes at "go"
                         and at a hold's target, keeps the screen awake while it ticks
@@ -373,7 +390,8 @@ src/
                         ProgressionsPanel (count of tree changes → My progressions),
                         ReplayOnboardingPanel (confirm → replayOnboarding), DeleteDataPanel
                         (what goes, export first, acknowledge → deleteAllData; 7.0b), GuidePanel
-                        ("How SkillForge works": open the guide, the widgets' "i"; 6.10c)
+                        ("How SkillForge works": open the guide, the widgets' "i"; 6.10c),
+                        TrainingViewPanel (Classic | Battle, the training_view setting; 7.9)
     HealthNotice.tsx    the framed health disclaimer (onboarding step 1, About; ADR-065)
     editor/             node editor (PLAN 4.7–4.8, ADR-036): NodeEditorBody (screen body: live
                         issues, Save/Cancel), NodeEditorForm (sections with inline IssueNotes),
@@ -568,7 +586,9 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Widget snapshot** | The small JSON (`WidgetSnapshot`: level, rank, the engine's streak, `lastSessionAt`, top 3 attributes, optionally the worn hero class and tier, PLAN 6.9) the app writes to `widget-snapshot.json` for the home-screen widget. The widget derives "trained today" (same local calendar day as `lastSessionAt`) and the active streak from it at render time (ADR-055). |
 | **Session plan / active session** | The Train flow's editable plan preview (`SessionPlan`, in memory) and the started session (`ActiveSession`, the `active_session` draft) with its logged sets; `finishedSession` turns it into a `LoggedSession` (ADR-034). |
 | **Edit / reorder in the live session** | Tap a logged set's line to change its result (stepper, Save / Partial / Failed against its own prescription; its time stays) or delete it (confirmed; later sets move up, so `setIndex` stays the dense logging position). "Reorder" shows Up / Down per exercise; a strength pair moves as one (PLAN 5.9, ADR-045). |
-| **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics get a stopwatch. It can be paused and resumed (5.8, ADR-044; the paused time is not measured). Stored as timestamps plus the paused time (`ActiveSession.timer`), so it survives an app kill, paused too; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
+| **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics got a stopwatch until PLAN 7.9: the live session now offers the timer for holds only (the session clock covers rep sets; Trials keep the stopwatch). It can be paused and resumed (5.8, ADR-044; the paused time is not measured). Stored as timestamps plus the paused time (`ActiveSession.timer`), so it survives an app kill, paused too; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
+| **Monster / foe** | Every set of a live-session exercise drawn as a monster of the exercise's branch (PLAN 7.9, ADR-071; `BRANCH_MONSTERS`, seven kinds). Its state comes from the logged set against its prescription: fresh, fighting (its hold timer runs), defeated (the target), overkill (more), wounded (some; the HP bar shows what is left), escaped (0). A view only: nothing new is stored, XP and outcomes are unchanged. |
+| **Training view** | How the live session is trained, a setting (`training_view`, Settings → Training view; PLAN 7.9, ADR-071). **Classic**: one exercise at a time with the stepper and Log / Partial / Failed, its foes above the logger. **Battle**: every exercise as a row of foes; tap a fresh foe to log the target (a hold starts its timer, the next tap logs the seconds held), tap a logged foe for one rep fewer (below 0 the set is removed), long press for an exact number or to edit, "+" for an extra set. |
 | **Timer cue** | A moment the phone buzzes (PLAN 5.8, ADR-044): `go` (a hold's get-ready ends: one short buzz), `target` (the hold reaches its target: two long buzzes), `rest_end` (the rest countdown reaches zero: three short buzzes). Only while the screen sees the moment pass; no sound, no background notification. |
 | **Custom node / custom tag** | A node the user added (`user_` id) or edited through the node editor; shown with a "Custom" tag. "Reset to default" removes the edit; a custom node is deleted instead. Overlays can't clear `straightArm` on, or move, a built-in straight-arm node (ADR-036). |
 | **Shared progressions** | The overlay as YAML (`exportOverlay`), shared from My progressions. Importing one merges it into the user's overlay after a preview (`mergeOverlays`, ADR-036). |
@@ -828,6 +848,7 @@ is a set of tags needed together (AND), written `floor + wall` in YAML.
 | `npm run build:apk:universal` | The same with arm64-v8a + x86_64, so it also runs on the x86_64 emulator |
 | `npm run build:aab` | Google Play App Bundle in `builds/` (every ABI, always a clean prebuild), signed with the upload key; fails unless the signer is `UPLOAD_SIGNER_SHA256` (see "Play build") |
 | `npm run animations:sheet` | Render the exercise animations as contact sheets to `docs/screenshots/6.4a-*.png` (v_pull, iconic, patterns). While tuning: `-- --only pull_up,pattern:core --cell 8 --out <png>`. Look at them after every pose change; commit the PNGs. |
+| `npm run monsters:sheet` | Render the session monsters (idle loop, hit flash, beaten greys) to `docs/screenshots/7.9-monsters.png` (`-- --out <png>` while tuning). Commit the PNG after an art change. |
 | `npm run companion:sheet` | Render the companion sprite's contact sheets to `docs/screenshots/6.10-*.png` (animations, accessories per slot, weapons, outfits, looks). While tuning: `-- --only iron_helm,warrior,legend --cell 8 --out <png>` (accessory ids, class ids for weapons, outfit labels). Look at them after every art change; commit the PNGs. |
 | `npm run icon:build` | Render the pixel-art app icon (`scripts/appIcon.ts`) to every PNG app.json points at (`assets/images/`) and `docs/screenshots/5.6-app-icon.png`, plus the widget picker previews (`scripts/widgetPreview.ts` → `assets/images/widget-preview.png`, `widget-companion-preview.png`). Run after editing the grid; commit the PNGs. |
 | `npx expo-doctor` | Checks dependency versions and config against the SDK |

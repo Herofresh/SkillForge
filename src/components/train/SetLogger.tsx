@@ -33,8 +33,8 @@ type Props = {
 const OUTCOME_ICONS = { success: 'check', partial: 'alert', failed: 'cross' } as const;
 
 /**
- * Logging one set of the current exercise: the optional exercise timer, a stepper that starts at the
- * suggestion (last result or the target; for a hold stopped by the timer, the seconds held), then
+ * Logging one set of the current exercise: the optional hold timer (holds only: rep sets have no set
+ * timer since PLAN 7.9, the session clock is enough), a stepper that starts at the suggestion (last result or the target; for a hold stopped by the timer, the seconds held), then
  * "Log set", or mark it partial / failed. Tapping a logged set's line edits it (`onEditSet`). Mount
  * it with a key per set so the stepper starts fresh.
  */
@@ -109,17 +109,19 @@ export function SetLogger({
       <PixelText variant="small" tone="textMuted">
         {`Target: ${formatPerformance(current.metric, current.target)}`}
       </PixelText>
-      <SetTimerPanel
-        metric={current.metric}
-        targetSec={current.target.value}
-        timer={timer}
-        onStart={onStartTimer}
-        onStop={stopTimer}
-        onPause={onPauseTimer}
-        onResume={onResumeTimer}
-        onReset={onResetTimer}
-        testID="set-timer"
-      />
+      {timerModeFor(current.metric) === 'hold' && (
+        <SetTimerPanel
+          metric={current.metric}
+          targetSec={current.target.value}
+          timer={timer}
+          onStart={onStartTimer}
+          onStop={stopTimer}
+          onPause={onPauseTimer}
+          onResume={onResumeTimer}
+          onReset={onResetTimer}
+          testID="set-timer"
+        />
+      )}
       <NumberStepper
         label="Did"
         valueText={formatPerformance(current.metric, entered)}

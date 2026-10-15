@@ -2434,3 +2434,43 @@ Template:
 - Consequences: any `NodeRow` list can offer the info sheet with one prop. Rows get 48 dp
   narrower for the text; long statuses ("I can do this") wrap to two lines, and the OG level
   label can drop below the tier chip on narrow phones.
+
+## ADR-071: Session monsters and a Battle training view (PLAN 7.9)
+- Date: 2026-10-15 · Status: Accepted (extends ADR-034 and ADR-045; narrows ADR-040 in the live session)
+- Context: the user wants the training screen to feel more like the RPG: each set a monster you
+  attack, logged with a tap, as a second view next to today's screen, and the classic screen with
+  monsters too. Open questions were how to log a half-done set or more reps than planned with
+  one-tap logging, and whether rep sets need their own timer.
+- Decision:
+  - **Foes are a view.** Every set of an exercise is a monster of its branch (`BRANCH_MONSTERS`:
+    seven kinds, related branches share one). Its state and hit points come only from the logged
+    set against its prescription (`foeState`, `foeHp` over `setUnits` / `meetsTarget`): fresh,
+    fighting, defeated, overkill, wounded, escaped. Nothing new is stored; XP, outcomes, the
+    generator and the safeguards are unchanged, and old drafts and backups read as before.
+  - **Two training views, a setting** (`training_view`, `TRAINING_VIEWS`, default Classic so
+    nothing changes for existing users; Settings → Training view, in effect at once, also in an
+    open session). Classic keeps the one-exercise logger and shows that exercise's foes above it,
+    taking the hit when a set is logged. Battle shows every exercise as a card with its row of foes
+    and its "i".
+  - **Battle logging (the user's pick, "Option A"):** a tap on a fresh foe logs the next set at the
+    target (any fresh foe: the row fills from the left); a tap on a logged foe takes one rep (or
+    lowering) off, down to 0 (escaped), and a tap on a 0 removes the set (`tapDown`, `tapFoe`).
+    More reps than planned and exact numbers: a long press (fresh foe: `LogSetSheet` with the
+    stepper; logged foe: the existing edit sheet). "+" logs an extra set. The outcome follows from
+    the number, so Battle needs no Partial / Failed buttons. Holds don't count down by taps: a tap
+    starts the hold timer (get-ready, countdown, overtime as before), the next tap or Stop logs the
+    seconds held, a tap on a logged hold opens the edit sheet. The pending "I understand" warnings
+    disable the foes as they disable Log set (advisory, ADR-023).
+  - **No set timer for rep sets** in the live session (user request): the stopwatch for reps,
+    eccentric and load sets is gone from both views; the session clock stays, holds keep their
+    timer. Trials are unchanged (their screen still offers the stopwatch). Rest-pace learning
+    (ADR-063) already estimates the work time when a set has no `durationSec`.
+  - **Animation:** a hit is a white flash, a short shake and a floating damage number, only on the
+    change from fresh to logged; idle foes bob in two frames; reduce motion shows states only.
+  - Original 16 × 16 art in `src/data/monsters.ts`, colours from the palette; state by palette
+    swap (hit white, beaten grey), no extra frames.
+- Consequences: one more setting key, which backups carry like every setting. Sets can be logged
+  in any order in Battle; `setIndex` stays the logging order, so pairs no longer have to alternate
+  there, and rest pace measures the gaps as logged. Tap counting needs a long press for "more than
+  the target", which the tap help on top of the board explains. A third view or more monster kinds
+  only need entries in `TRAINING_VIEWS` / `MONSTER_KINDS`.

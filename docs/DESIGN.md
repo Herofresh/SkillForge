@@ -333,6 +333,22 @@ and one line per accessory ("Iron helm" / "Head · Warrior class, tier I"), and 
 victory pose ("Victory!"). Contact sheets: `npm run companion:sheet` → `docs/screenshots/6.13-*.png` (both bodies; before / after:
 `6.13-before-after.png`).
 
+**Session monsters (PLAN 7.9, ADR-071)** in `src/components/train/`: every set of a live-session
+exercise is a small foe, original pixel art in the spirit of SNES-era JRPG monsters (nothing copied):
+16 × 16 grids (`src/data/monsters.ts`), outlined in ink, three body tones (base, shade, top-left
+highlight), eyes and one accent. Seven kinds, one per pair of related branches: imp (push), bat
+(pull), skeleton (levers), golem (planche, handstand), slime (core, mobility), goblin (legs,
+dynamic), wisp (flexibility, acrobatics). `MonsterToken`: the sprite at 3 dp per pixel (5 dp for
+`large`) on a stone square with a 2 dp edge in the state colour (fresh `border`, fighting `rune`,
+defeated `success`, overkill `gold`, wounded `ember`, escaped `border` at half opacity), and under it
+a 4 dp HP bar (success, ember below half) with the count ("5", "30s") in the same tone. Fresh and
+wounded foes bob (two frames, one cell); beaten and escaped ones are still and grey
+(`BEATEN_COLORS`). The "+" ghost is a dashed square on the night background. `FoeRow` lays them out
+in a sideways-scrolling row with `Spacing.sm` gaps. Classic shows the current exercise's row above
+its logger (display only); Battle (`BattleBoard`) shows every exercise card by block, each with its
+"i", the tap help (or the "acknowledge first" note) on top. Sheet: `npm run monsters:sheet` →
+`docs/screenshots/7.9-monsters.png`.
+
 **Node editor and shared progressions (PLAN 4.7–4.8, ADR-036)** in `src/components/editor/`: the
 editor is a stack of `DetailSection` panels (an arcane "Exercise" panel for a custom node: name,
 metric chips, "Comes after" + `PositionSheet`, difficulty stepper, straight-arm chip; then
@@ -464,6 +480,11 @@ strings (`iconSvg`, crisp edges).
 - Buttons animate by position only (the press drop), no fades.
 - **The companion's idle loops (PLAN 6.10, ADR-059)** repeat too, in the same stepped sprite
   frames; with reduce motion they show their first frame.
+- **A foe takes a hit (PLAN 7.9, ADR-071):** when its set is logged it flashes white
+  (`HIT_COLORS` over the sprite, fading over `Motion.foeHitMs`), shakes sideways by
+  `Motion.foeShakeDistance` and the damage ("-5") floats `Motion.foeDamageRise` up while it fades
+  (`Motion.foeDamageMs`). Only on the change from fresh to logged, never on mount; with reduce
+  motion the new state shows at once and nothing bobs.
 - **Exercise animations loop (PLAN 6.4, ADR-053):** the one exception to "short, never loop".
   They explain a movement rather than celebrate, so they repeat: sprite frames of `FRAME_MS`
   (160 ms) each, switched in whole steps (a linear ramp floored to the frame index on the UI

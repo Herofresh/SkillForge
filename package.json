@@ -76,7 +76,8 @@
     "build:aab": "tsx scripts/buildApk.ts --aab",
     "icon:build": "tsx scripts/iconBuild.ts",
     "animations:sheet": "tsx scripts/animationSheetBuild.ts",
-    "companion:sheet": "tsx scripts/companionSheetBuild.ts"
+    "companion:sheet": "tsx scripts/companionSheetBuild.ts",
+    "monsters:sheet": "tsx scripts/monsterSheetBuild.ts"
   },
   "private": true,
   "devEngines": {

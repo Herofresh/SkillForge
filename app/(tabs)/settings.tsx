@@ -10,6 +10,7 @@ import { DeleteDataPanel } from '@/components/settings/DeleteDataPanel';
 import { GuidePanel } from '@/components/settings/GuidePanel';
 import { ProgressionsPanel } from '@/components/settings/ProgressionsPanel';
 import { ReplayOnboardingPanel } from '@/components/settings/ReplayOnboardingPanel';
+import { TrainingViewPanel } from '@/components/settings/TrainingViewPanel';
 import { Spacing } from '@/components/theme';
 import { PixelButton, PixelModal, PixelText, PixelTextInput, Screen } from '@/components/ui';
 import { HERO_NAME_MAX_LENGTH, normalizeHeroName } from '@/domain/onboarding';
@@ -18,11 +19,10 @@ import { useAppStore } from '@/store/useAppStore';
 
 /**
  * Settings (PLAN 4.6): the hero's name, equipment profiles (add, edit tags, rename, remove with a
- * confirmation), backups (export, import with a "replaces all your data" confirmation, undo the last
+ * confirmation), the training view (Classic | Battle, PLAN 7.9), backups (export, import with a "replaces all your data" confirmation, undo the last
  * import), "My progressions" (tree changes and sharing, PLAN 4.7–4.8), "Replay onboarding" (PLAN
  * 5.10), "Delete all my data" (PLAN 7.0b), "How SkillForge works" (the guide and the widgets' explanation, PLAN 6.10c), about and
- * credits, and the dev-only Style Guide. There are no units or other preferences
- * yet.
+ * credits, and the dev-only Style Guide. There are no units yet.
  */
 export default function SettingsScreen() {
   const router = useRouter();
@@ -44,6 +44,7 @@ export default function SettingsScreen() {
         <EquipmentProfileEditor onRename={setRenaming} />
       </View>
 
+      <TrainingViewPanel />
       <ProgressionsPanel />
       <BackupPanel />
       <ReplayOnboardingPanel />

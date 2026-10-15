@@ -26,6 +26,8 @@
  *   a set, skip, add, reorder, rest) and read back by `loadAll`, so a killed app resumes it.
  *   `finishTraining` logs it as an ordinary session (deleting the draft in the same transaction); `trainSummary` keeps the result
  *   for the summary screen.
+ * - Training views (PLAN 7.9, ADR-071): `setTrainingView` (Classic | Battle, a setting);
+ *   `tapTrainingFoe` is the Battle view's tap on a set's monster (`tapFoe`).
  * - Node editor and shared progressions (PLAN 4.7–4.8, ADR-036): `nodeDraft` / `newNodeDraft`
  *   start an editor draft, `nodeDraftIssues` validates it live (the overlay with the draft through
  *   `applyOverlay`; `nodeDraftWarnings` gives the advice that doesn't stop a save),
@@ -76,6 +78,12 @@ import { HERO_CLASSES } from '@/data/classes';
 import { ACCESSORIES } from '@/data/companion/accessories';
 import { testOutWarnings, trialSession } from '@/domain/assessment';
 import { backupFileName, parseBackup, serializeBackup } from '@/domain/backup';
+import {
+  DEFAULT_TRAINING_VIEW,
+  parseTrainingView,
+  tapFoe,
+  type TrainingView,
+} from '@/domain/battleView';
 import {
   challengePinsToRaw,
   parseChallengePins,
@@ -221,6 +229,9 @@ export const ONBOARDING_COMPLETED_SETTING = 'onboarding_completed_at';
 /** Setting key: the Tree tab's mode, Columns or Map (PLAN 5.1, `parseTreeMode`). */
 export const TREE_MODE_SETTING = 'tree_view_mode';
 
+/** Setting key: how the live session is trained, Classic or Battle (PLAN 7.9, `parseTrainingView`). */
+export const TRAINING_VIEW_SETTING = 'training_view';
+
 /** Setting key: the hero's classes (PLAN 6.9, `ClassSettings`: worn class, reached and seen tiers). */
 export const CLASS_SETTING = 'hero_classes';
 
@@ -346,6 +357,8 @@ export interface AppState {
   onboardingReplay: boolean;
   /** The Tree tab's mode (PLAN 5.1): the branch columns or the whole-tree map. */
   treeMode: TreeMode;
+  /** How the live session is trained (PLAN 7.9): one exercise at a time, or every set as a foe. */
+  trainingView: TrainingView;
   /**
    * The hero's classes (PLAN 6.9): the worn class, every reached tier (kept forever, with the
    * session that reached it) and the tiers already seen in the class sheet.
@@ -424,6 +437,8 @@ export interface AppState {
   leaveOnboardingReplay(): void;
   /** Switches the Tree tab between Columns and Map and remembers it (setting `tree_view_mode`). */
   setTreeMode(mode: TreeMode): void;
+  /** Switches the live session between Classic and Battle and remembers it (setting `training_view`). */
+  setTrainingView(view: TrainingView): void;
   /** Wears a reached class (PLAN 6.9). Throws for an unknown or not yet reached class. */
   selectClass(classId: string): void;
   /** Marks every reached class tier as seen (the class sheet was opened): no more NEW badges. */
@@ -507,6 +522,12 @@ export interface AppState {
   editTrainingSet(setIndex: number, entered: SetPerformance, mark?: SetMark): void;
   /** Deletes the logged set `setIndex`; the later sets move up (dense `setIndex`). */
   deleteTrainingSet(setIndex: number): void;
+  /**
+   * A tap on foe `slot` of exercise `key` in the Battle view (PLAN 7.9, `tapFoe`): logs, counts down
+   * or removes a set, or starts / stops a hold. Returns the `setIndex` of a logged hold to open in the
+   * edit sheet instead.
+   */
+  tapTrainingFoe(key: string, slot: number): number | undefined;
   /** Moves live-session exercise `key` one place up or down (a strength pair moves as one). */
   moveTrainingExercise(key: string, direction: MoveDirection): void;
   skipTrainingExercise(key: string): void;
@@ -762,6 +783,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       goals: [],
       equipmentProfiles: [],
       treeMode: DEFAULT_TREE_MODE,
+      trainingView: DEFAULT_TRAINING_VIEW,
       classes: EMPTY_CLASS_SETTINGS,
       challengePins: [],
       companion: EMPTY_COMPANION_SETTINGS,
@@ -786,6 +808,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           ),
           onboardingReplay: false,
           treeMode: parseTreeMode(getSetting(db, TREE_MODE_SETTING)),
+          trainingView: parseTrainingView(getSetting(db, TRAINING_VIEW_SETTING)),
           classes: parseClassSettings(getSetting(db, CLASS_SETTING), classDefinitions),
           challengePins,
           companion: parseCompanionSettings(
@@ -904,6 +927,11 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       setTreeMode(mode) {
         setSetting(db, TREE_MODE_SETTING, mode);
         set({ treeMode: mode });
+      },
+
+      setTrainingView(view) {
+        setSetting(db, TRAINING_VIEW_SETTING, view);
+        set({ trainingView: view });
       },
 
       selectClass(classId) {
@@ -1064,6 +1092,13 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
 
       deleteTrainingSet(setIndex) {
         saveSession(deleteSessionSet(requireSession(), setIndex));
+      },
+
+      tapTrainingFoe(key, slot) {
+        const tap = tapFoe(requireSession(), key, slot, now());
+        if ('edit' in tap) return tap.edit;
+        saveSession(tap.session);
+        return undefined;
       },
 
       moveTrainingExercise(key, direction) {
