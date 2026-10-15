@@ -229,4 +229,10 @@ export const Motion = {
   burstMs: 640,
   burstSteps: 8,
   burstDistance: 64,
+  /** A session monster's hit (PLAN 7.9): the white flash and the shake. */
+  foeHitMs: 240,
+  foeShakeDistance: 3,
+  /** How long the damage number floats up and fades. */
+  foeDamageMs: 720,
+  foeDamageRise: 24,
 } as const;

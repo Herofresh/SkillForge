@@ -151,7 +151,8 @@ describe('SetLogger', () => {
       />,
     );
     expect(screen.getByTestId('logged-set-0')).toHaveTextContent('Set 1: 8 reps · 0:42');
-    expect(screen.getByTestId('set-timer-start')).toHaveTextContent('Start set');
+    // Rep sets have no set timer (PLAN 7.9): the session clock is enough.
+    expect(screen.queryByTestId('set-timer-start')).toBeNull();
   });
 });
 

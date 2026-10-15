@@ -141,6 +141,17 @@ export interface LoggedSetView {
   editStart: SetPerformance;
 }
 
+/** The logged sets of exercise `key` as the live card and the edit sheet show them. */
+export function loggedSetViews(session: ActiveSession, key: string): LoggedSetView[] {
+  return exerciseSets(session, key).map((set, index) => ({
+    index,
+    setIndex: set.setIndex,
+    text: loggedSetText(set),
+    outcome: setOutcome(set),
+    editStart: set.actual.value > 0 ? set.actual : set.prescribed,
+  }));
+}
+
 /** Whether a row of the session list can move up / down (`canMoveExercise`). */
 export interface ExerciseMoves {
   up: boolean;
@@ -183,13 +194,7 @@ export function liveView(session: ActiveSession, lookup: NodeLookup): LiveView {
       target: exercise.target,
       setNumber: sets.length + 1,
       plannedSets: exercise.sets,
-      sets: sets.map((set, index) => ({
-        index,
-        setIndex: set.setIndex,
-        text: loggedSetText(set),
-        outcome: setOutcome(set),
-        editStart: set.actual.value > 0 ? set.actual : set.prescribed,
-      })),
+      sets: loggedSetViews(session, exercise.key),
       suggested: lastDone?.actual ?? exercise.target,
     };
   }

@@ -417,6 +417,10 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         `More time buys a cool-down, then more sets (up to ${n(facts.maxWorkingSets)} per ` +
           'exercise), then extra exercises.',
         'Its suggestions always keep to the straight-arm safeguards.',
+        'In the session every set is a monster of the exercise’s branch; logging the set beats ' +
+          'it. Settings → Training view picks Classic (one exercise at a time) or Battle (every ' +
+          'exercise at once: tap a monster to log the target, tap again for one rep fewer, long ' +
+          'press for an exact number).',
       ],
     },
     widgets: {

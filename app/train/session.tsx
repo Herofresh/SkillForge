@@ -5,8 +5,11 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ExerciseInfoSheet } from '@/components/node/ExerciseInfoSheet';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { Colors, Frames, Spacing, TOUCH_TARGET } from '@/components/theme';
+import { BattleBoard } from '@/components/train/BattleBoard';
 import { EditSetSheet } from '@/components/train/EditSetSheet';
 import { ExerciseCard } from '@/components/train/ExerciseCard';
+import { FoeRow } from '@/components/train/FoeRow';
+import { LogSetSheet } from '@/components/train/LogSetSheet';
 import { NodeOptionSheet } from '@/components/train/NodeOptionSheet';
 import { RestPanel } from '@/components/train/RestPanel';
 import { SessionClock } from '@/components/train/SessionClock';
@@ -22,11 +25,22 @@ import {
   Screen,
   XPBar,
 } from '@/components/ui';
-import { allAcknowledged, type ActiveSession, type MoveDirection } from '@/domain/train';
-import { liveView, type ExerciseMoves, type ExerciseView } from '@/domain/trainView';
+import { battleView, exerciseFoes, foeSetLabel } from '@/domain/battleView';
+import {
+  allAcknowledged,
+  exerciseSets,
+  type ActiveSession,
+  type MoveDirection,
+} from '@/domain/train';
+import {
+  liveView,
+  loggedSetViews,
+  type ExerciseMoves,
+  type ExerciseView,
+} from '@/domain/trainView';
 import { useAppStore } from '@/store/useAppStore';
 
-type Dialog = 'finish' | 'abandon' | 'add' | 'info';
+type Dialog = 'finish' | 'abandon' | 'add';
 
 const ACKNOWLEDGE_TO_LOG_NOTE = 'Read and acknowledge the notes above to log. It is your call.';
 
@@ -71,19 +85,51 @@ function LiveSession({ session }: { session: ActiveSession }) {
   const addExercise = useAppStore((state) => state.addTrainingExercise);
   const finish = useAppStore((state) => state.finishTraining);
   const abandon = useAppStore((state) => state.abandonTraining);
+  const trainingView = useAppStore((state) => state.trainingView);
+  const tapFoe = useAppStore((state) => state.tapTrainingFoe);
   const [dialog, setDialog] = useState<Dialog | undefined>();
   /** The `setIndex` of the logged set being edited. */
   const [editing, setEditing] = useState<number | undefined>();
+  /** The exercise whose next set is entered with the stepper (Battle's long press). */
+  const [logging, setLogging] = useState<string | undefined>();
+  /** The node whose info sheet is open. */
+  const [infoId, setInfoId] = useState<string | undefined>();
   const [reordering, setReordering] = useState(false);
 
   const lookup = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
   const view = useMemo(() => liveView(session, lookup), [session, lookup]);
+  const battle = useMemo(
+    () => (trainingView === 'battle' ? battleView(session, lookup) : undefined),
+    [trainingView, session, lookup],
+  );
   // Derived from the session in the store; recomputed on every render of this screen.
   const warnings = trainWarnings();
   const pending = !allAcknowledged(warnings, session.acknowledged);
   const { current, counts } = view;
   const currentNode = current && lookup.get(current.exercise.nodeId);
-  const editedSet = current?.sets.find((set) => set.setIndex === editing);
+  const currentExercise = session.exercises.find((entry) => entry.key === current?.exercise.key);
+  const currentFoes =
+    current && currentExercise && exerciseFoes(session, currentExercise, lookup, current.exercise);
+  const editedExercise = session.exercises.find((entry) =>
+    session.sets.some((set) => set.setIndex === editing && set.exerciseKey === entry.key),
+  );
+  const editedNode = editedExercise && lookup.get(editedExercise.nodeId);
+  const editedSet =
+    editedExercise &&
+    loggedSetViews(session, editedExercise.key).find((set) => set.setIndex === editing);
+  const loggingExercise = session.exercises.find((entry) => entry.key === logging);
+  const loggingNode = loggingExercise && lookup.get(loggingExercise.nodeId);
+  const infoNode = infoId === undefined ? undefined : lookup.get(infoId);
+
+  const onTapFoe = (key: string, slot: number) => {
+    const edit = tapFoe(key, slot);
+    if (edit !== undefined) setEditing(edit);
+  };
+  const onLongPressFoe = (key: string, slot: number) => {
+    const set = exerciseSets(session, key)[slot];
+    if (set) setEditing(set.setIndex);
+    else setLogging(key);
+  };
 
   const leave = () => (router.canGoBack() ? router.back() : router.replace('/train'));
   const onFinish = () => {
@@ -127,12 +173,28 @@ function LiveSession({ session }: { session: ActiveSession }) {
 
         <RestPanel key={session.restEndsAt ?? 'none'} session={session} onSkip={skipRest} />
 
-        {current && currentNode ? (
+        {battle ? (
+          <BattleBoard
+            blocks={battle}
+            session={session}
+            disabled={pending}
+            pendingNote={pending ? ACKNOWLEDGE_TO_LOG_NOTE : undefined}
+            onTap={onTapFoe}
+            onLongPress={onLongPressFoe}
+            onInfo={setInfoId}
+            onPauseTimer={pauseTimer}
+            onResumeTimer={resumeTimer}
+            onResetTimer={resetTimer}
+          />
+        ) : current && currentNode ? (
           <ExerciseCard
             exercise={current.exercise}
             highlighted
-            onInfo={() => setDialog('info')}
+            onInfo={() => setInfoId(current.exercise.nodeId)}
             testID="current-exercise">
+            {currentFoes && (
+              <FoeRow key={current.exercise.key} foes={currentFoes} testID="current-foes" />
+            )}
             <SetLogger
               key={`${current.exercise.key}-${current.setNumber}`}
               node={currentNode}
@@ -165,37 +227,39 @@ function LiveSession({ session }: { session: ActiveSession }) {
           </PixelFrame>
         )}
 
-        <View style={styles.gap}>
-          <View style={styles.row}>
-            <PixelText
-              variant="label"
-              tone="gold"
-              accessibilityRole="header"
-              style={styles.rowText}>
-              This session
-            </PixelText>
-            <PixelButton
-              label={reordering ? 'Done' : 'Reorder'}
-              variant="secondary"
-              onPress={() => setReordering((value) => !value)}
-              accessibilityLabel={reordering ? 'Done reordering' : 'Reorder exercises'}
-              testID="session-reorder"
-            />
-          </View>
-          {view.blocks.flatMap((block) =>
-            block.exercises.map((exercise) => (
-              <SessionRow
-                key={exercise.key}
-                exercise={exercise}
-                blockLabel={block.label}
-                current={exercise.key === session.currentKey}
-                onPress={() => selectExercise(exercise.key)}
-                moves={reordering ? view.moves[exercise.key] : undefined}
-                onMove={(direction) => moveExercise(exercise.key, direction)}
+        {!battle && (
+          <View style={styles.gap}>
+            <View style={styles.row}>
+              <PixelText
+                variant="label"
+                tone="gold"
+                accessibilityRole="header"
+                style={styles.rowText}>
+                This session
+              </PixelText>
+              <PixelButton
+                label={reordering ? 'Done' : 'Reorder'}
+                variant="secondary"
+                onPress={() => setReordering((value) => !value)}
+                accessibilityLabel={reordering ? 'Done reordering' : 'Reorder exercises'}
+                testID="session-reorder"
               />
-            )),
-          )}
-        </View>
+            </View>
+            {view.blocks.flatMap((block) =>
+              block.exercises.map((exercise) => (
+                <SessionRow
+                  key={exercise.key}
+                  exercise={exercise}
+                  blockLabel={block.label}
+                  current={exercise.key === session.currentKey}
+                  onPress={() => selectExercise(exercise.key)}
+                  moves={reordering ? view.moves[exercise.key] : undefined}
+                  onMove={(direction) => moveExercise(exercise.key, direction)}
+                />
+              )),
+            )}
+          </View>
+        )}
 
         <PixelButton
           label="Add exercise"
@@ -247,12 +311,12 @@ function LiveSession({ session }: { session: ActiveSession }) {
         />
       </PixelModal>
 
-      {editedSet && current && currentNode && (
+      {editedSet && editedExercise && editedNode && (
         <EditSetSheet
           key={editedSet.setIndex}
-          node={currentNode}
-          metric={current.metric}
-          target={current.target}
+          node={editedNode}
+          metric={editedExercise.metric}
+          target={editedExercise.target}
           set={editedSet}
           onSave={(entered, mark) => {
             editSet(editedSet.setIndex, entered, mark);
@@ -266,9 +330,24 @@ function LiveSession({ session }: { session: ActiveSession }) {
         />
       )}
 
-      {dialog === 'info' && currentNode && (
-        <ExerciseInfoSheet node={currentNode} onClose={() => setDialog(undefined)} />
+      {loggingExercise && loggingNode && (
+        <LogSetSheet
+          node={loggingNode}
+          metric={loggingExercise.metric}
+          target={loggingExercise.target}
+          setLabel={foeSetLabel(
+            exerciseSets(session, loggingExercise.key).length,
+            loggingExercise.sets,
+          )}
+          onLog={(entered) => {
+            logSet(loggingExercise.key, entered);
+            setLogging(undefined);
+          }}
+          onClose={() => setLogging(undefined)}
+        />
       )}
+
+      {infoNode && <ExerciseInfoSheet node={infoNode} onClose={() => setInfoId(undefined)} />}
 
       {dialog === 'add' && (
         <NodeOptionSheet
