@@ -361,7 +361,7 @@ src/
                         onInfo), SetLogger
                         (hold timer, holds only since 7.9 + stepper + Log / Partial / Failed;
                         logged-set lines open the edit sheet), EditSetSheet (edit / delete a
-                        logged set, 5.9), RestPanel (countdown, buzz at its end),
+                        logged set, 5.9), RestPanel (countdown, buzz at its end; `compact`: Battle's one-row bar under the board, 7.9),
                         SessionClock (elapsed session time), NodeOptionSheet (swap/add picker),
                         TrainWarningList (warnings acknowledged by key); monsters (PLAN 7.9,
                         ADR-071): MonsterToken (sprite, HP bar, count; hit flash, shake and

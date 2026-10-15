@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { render, screen, userEvent, within } from '@testing-library/react-native';
 
 import { ALL_NODES } from '@/data/skills';
 import { getActiveSession } from '@/db/activeSessionRepository';
@@ -39,7 +39,10 @@ beforeEach(async () => {
   store.getState().planTraining('home', 30);
   store.getState().startTraining();
 });
-afterEach(() => test.close());
+afterEach(() => {
+  jest.useRealTimers();
+  test.close();
+});
 
 const session = () => {
   const active = store.getState().activeSession;
@@ -122,6 +125,19 @@ describe('Battle view (PLAN 7.9)', () => {
       expect.stringContaining('wounded'),
     );
     expect(getActiveSession(test.db)).toEqual(session());
+  });
+
+  it('shows the rest as a bar under the board, so the monsters never move', async () => {
+    // The countdown reads the clock; pin it to the store's time.
+    jest.useFakeTimers({ now: NOW });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const exercise = tapExercise();
+    await render(<LiveSessionScreen />);
+    expect(screen.queryByTestId('rest-panel')).not.toBeOnTheScreen();
+    await user.press(screen.getByTestId(`battle-${exercise.key}-foes-foe-0`));
+    expect(screen.getByTestId('rest-panel')).toBeOnTheScreen();
+    expect(within(screen.getByTestId('live-session')).queryByTestId('rest-panel')).toBeNull();
+    expect(screen.getByTestId('skip-rest')).toHaveTextContent('Skip');
   });
 
   it('adds an extra set with the ghost', async () => {

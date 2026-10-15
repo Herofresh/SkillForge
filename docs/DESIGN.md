@@ -346,8 +346,12 @@ wounded foes bob (two frames, one cell); beaten and escaped ones are still and g
 (`BEATEN_COLORS`). The "+" ghost is a dashed square on the night background. `FoeRow` lays them out
 in a sideways-scrolling row with `Spacing.sm` gaps. Classic shows the current exercise's row above
 its logger (display only); Battle (`BattleBoard`) shows every exercise card by block, each with its
-"i", the tap help (or the "acknowledge first" note) on top. Sheet: `npm run monsters:sheet` →
-`docs/screenshots/7.9-monsters.png`.
+"i", the tap help (or the "acknowledge first" note) on top. In Battle the rest countdown is a
+one-row rune bar (potion, countdown, "Rest", a small Skip; `RestPanel compact`) pinned under the
+scrolling board: it only shortens the view from below, so a monster never moves under the finger
+between taps. Sheet: `npm run monsters:sheet` → `docs/screenshots/7.9-monsters.png`; screens:
+`docs/screenshots/7.9-*.png` (Settings, Classic reps / hold, Battle overview, states, tap with the
+rest bar, hold, long press).
 
 **Node editor and shared progressions (PLAN 4.7–4.8, ADR-036)** in `src/components/editor/`: the
 editor is a stack of `DetailSection` panels (an arcane "Exercise" panel for a custom node: name,
