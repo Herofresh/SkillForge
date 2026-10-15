@@ -337,11 +337,11 @@
   row of monsters, logged with taps), picked in Settings → Training view (default Classic). Rep sets
   lost their set timer in the live session; holds keep theirs. The device check found the Battle
   board jumping under the finger when the rest panel appeared above it: fixed by pinning a one-row
-  rest bar under the board (branch `fix/battle-rest-bar`).
+  rest bar under the board ([PR #77](https://github.com/Herofresh/SkillForge/pull/77)).
 
 ## Next up
-0. 7.9 Session monsters and the Battle view: done and checked in Expo Go; the rest-bar fix is in
-   review (`fix/battle-rest-bar`). Then the user picks the version (1.0.3 or 1.1.0) for the next
+0. 7.9 Session monsters and the Battle view: done and checked in Expo Go; the rest-bar fix is
+   merged ([PR #77](https://github.com/Herofresh/SkillForge/pull/77)). Then the user picks the version (1.0.3 or 1.1.0) for the next
    closed-track bundle (`npm run build:aab` on the user's profile).
 1. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
    assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
@@ -387,7 +387,7 @@
   - Checked in Expo Go on Pixel_8_Pro_API_35 (2026-10-15, `docs/screenshots/7.9-*.png`): the
     Settings switch, Classic with reps (no timer, overkill) and a hold (wounded), Battle overview
     and states, tap / tap down, the hold timer under its row, the long-press sheet. Found and fixed
-    (`fix/battle-rest-bar`): the rest panel appeared above the board after a tap and pushed the
+    ([PR #77](https://github.com/Herofresh/SkillForge/pull/77)): the rest panel appeared above the board after a tap and pushed the
     monsters down, so the next taps missed; Battle now pins a compact rest bar under the board
     (`RestPanel compact`). Not verified: a real phone, TalkBack, reduce motion, the release build.
   - Known limits: the hit animation can't be screenshotted reliably; in Classic it is rarely seen,
@@ -1719,7 +1719,7 @@ from the GitHub releases' 1–7, ADR-068).
     probably don't know all exercises." Fixed in 1.0.2 (versionCode 10): every exercise row in
     onboarding's goals step, assessment step and assessment Trial has the "i" (and a long press)
     that opens the shared exercise info sheet without picking or leaving (ADR-070, [PR #74](https://github.com/Herofresh/SkillForge/pull/74)).
-- [x] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent; [PR #75](https://github.com/Herofresh/SkillForge/pull/75), checked in Expo Go, rest-bar fix in `fix/battle-rest-bar`):
+- [x] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent; [PR #75](https://github.com/Herofresh/SkillForge/pull/75), checked in Expo Go, rest-bar fix [PR #77](https://github.com/Herofresh/SkillForge/pull/77)):
   every set of an exercise is a monster of its branch that takes the hit when the set is logged.
   Two views, picked in Settings → Training view (default Classic): **Classic** keeps the
   one-exercise logger and shows that exercise's monsters above it; **Battle** shows every exercise
