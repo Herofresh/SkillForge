@@ -33,7 +33,9 @@ WORKOUTS FOR YOUR TIME AND PLACE
 • SkillForge builds a session for your goals: skill work, paired strength, core and a cool-down
 • It learns your pace from the rests you actually take, so a 30-minute plan really takes about 30 minutes
 • Double progression: hit every set and the next target goes up
-• Built-in set timer, hold countdown and rest timer with vibration
+• Every set is a monster of its skill branch: log the set to beat it
+• Two ways to train: one exercise at a time, or Battle – every exercise at once, tap a monster to log it
+• Hold countdown, rest timer with vibration and a session clock
 • Swap, add or skip anything before and during the session
 
 LEVEL UP YOUR HERO
@@ -61,6 +63,12 @@ SkillForge gives general training suggestions, not medical advice. Check with a 
 | App icon | `graphics/icon-512.png` | 512 × 512, 32-bit PNG |
 | Feature graphic | `graphics/feature-1024x500.png` | 1024 × 500, 24-bit PNG (no alpha) |
 | Phone screenshots | `graphics/phone-*.png` | 1080 × 1920 (9:16), 2–8 images |
+
+## Release notes for 1.1.0 (≤ 500, "What's new")
+
+```
+Every set is now a monster of its skill branch that takes the hit when you log it. New in Settings → Training view: Battle, every exercise at once – tap a monster to log the target, tap again for one rep fewer, long press for an exact number. Rep sets no longer have a set timer; holds keep their countdown. Also: the hero name stays above the keyboard, and onboarding shows exercise info ("i") while you pick goals.
+```
 
 ## Release notes for 1.0.0 (≤ 500, "What's new")
 
