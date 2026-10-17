@@ -332,6 +332,10 @@
   also on long press); it opens the shared `ExerciseInfoSheet` (description, looping animation,
   cues) without picking the goal or leaving the step. App version **1.0.2, versionCode 10** (the
   next closed-track upload was planned as FB-1 + FB-2; never built). **FB-1b** (cosmetic) is open.
+- **1.2.0, versionCode 12** (2026-10-17): 7.10 Health Connect. Built so the user can upload it to the
+  closed track as a **draft** first: the Health apps declaration only asks about Health Connect data
+  types once Play has seen a bundle with the permission (checked by the user: the form showed no
+  data-type question). Then declare Exercise (write), and send release + declaration for review.
 - **1.1.0, versionCode 11** (user decision 2026-10-16): the next closed-track upload, with FB-1, FB-2
   and 7.9 (session monsters, the Battle view, no rep-set timer). Not built yet.
 - **7.9 merged** (ADR-071, [PR #75](https://github.com/Herofresh/SkillForge/pull/75); checked in Expo Go on 2026-10-15, screenshots `docs/screenshots/7.9-*.png`): session monsters (every set a
