@@ -9,7 +9,10 @@ import type { LoggedSet, NodeLookup, SetPerformance } from './types';
 
 /** The workout to write. Times are ms since the Unix epoch. */
 export interface HealthWorkout {
-  /** Stable per session (`skillforge-<session id>`), so writing it twice replaces it. */
+  /**
+   * Stable per session (`skillforge-<session id>`): Health Connect ignores a second write with the
+   * same id and version, so a session never shows up twice (ADR-073).
+   */
   clientId: string;
   startMs: number;
   endMs: number;

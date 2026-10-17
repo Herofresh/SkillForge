@@ -2517,3 +2517,14 @@ Template:
   Expo Go. Delete all my data doesn't touch workouts already in Health Connect (the policy says
   so). Writing per-exercise segments or reading data later would need a new ADR and a new
   declaration.
+
+## ADR-073: Correction to ADR-072 – a repeated Health Connect write is ignored, not replaced
+- Date: 2026-10-18 · Status: Accepted (corrects one sentence of ADR-072; found in the review of PR #79)
+- Context: ADR-072 says the `clientRecordId` `skillforge-<session id>` "makes a second write
+  replace, not duplicate". Health Connect only replaces a record with the same `clientRecordId`
+  when the new `clientRecordVersion` is higher; SkillForge always writes version 1.
+- Decision: no code change. A second write of the same session is ignored, which still keeps a
+  session from appearing twice, and each session is written once (after `finishTraining`). If a
+  later feature rewrites a session (e.g. after editing it), it must raise `clientRecordVersion`.
+- Consequences: the wording in `src/domain/healthWorkout.ts` now says "ignores"; ADR-072 stays as
+  written, read together with this note.

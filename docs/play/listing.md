@@ -65,6 +65,12 @@ SkillForge gives general training suggestions, not medical advice. Check with a 
 | Feature graphic | `graphics/feature-1024x500.png` | 1024 × 500, 24-bit PNG (no alpha) |
 | Phone screenshots | `graphics/phone-*.png` | 1080 × 1920 (9:16), 2–8 images |
 
+## Release notes for 1.2.0 (≤ 500, "What's new")
+
+```
+New: add your workouts to Health Connect. Turn it on in Settings → Health Connect, and every workout you finish is added as a calisthenics session with a note of what you did. SkillForge only writes it and reads nothing. SkillForge now needs Android 8 or newer.
+```
+
 ## Release notes for 1.1.0 (≤ 500, "What's new")
 
 ```
