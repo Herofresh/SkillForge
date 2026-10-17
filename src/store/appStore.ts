@@ -79,6 +79,11 @@ import { ACCESSORIES } from '@/data/companion/accessories';
 import { testOutWarnings, trialSession } from '@/domain/assessment';
 import { backupFileName, parseBackup, serializeBackup } from '@/domain/backup';
 import {
+  healthWorkout,
+  parseHealthConnectEnabled,
+  type HealthWorkout,
+} from '@/domain/healthWorkout';
+import {
   DEFAULT_TRAINING_VIEW,
   parseTrainingView,
   tapFoe,
@@ -232,6 +237,9 @@ export const TREE_MODE_SETTING = 'tree_view_mode';
 /** Setting key: how the live session is trained, Classic or Battle (PLAN 7.9, `parseTrainingView`). */
 export const TRAINING_VIEW_SETTING = 'training_view';
 
+/** Setting key: write finished sessions to Health Connect (PLAN 7.10, `parseHealthConnectEnabled`). */
+export const HEALTH_CONNECT_SETTING = 'health_connect';
+
 /** Setting key: the hero's classes (PLAN 6.9, `ClassSettings`: worn class, reached and seen tiers). */
 export const CLASS_SETTING = 'hero_classes';
 
@@ -265,6 +273,43 @@ export interface BackupFiles {
   deleteAppFiles(): string[];
 }
 
+/**
+ * Whether Health Connect can be used (PLAN 7.10): `available`; `needs_update` / `not_installed`
+ * (Android 13 and older need the Health Connect app from Play); `unsupported` (no native module:
+ * Expo Go, web, tests without a fake).
+ */
+export const HEALTH_CONNECT_STATUSES = [
+  'available',
+  'needs_update',
+  'not_installed',
+  'unsupported',
+] as const;
+export type HealthConnectStatus = (typeof HEALTH_CONNECT_STATUSES)[number];
+
+/** Platform Health Connect access (`src/health/healthConnect.ts` in the app, a fake in tests). */
+export interface HealthConnectAccess {
+  status(): Promise<HealthConnectStatus>;
+  /** Shows Android's permission screen for writing exercise; resolves to whether it is granted. */
+  requestWrite(): Promise<boolean>;
+  /** Whether writing exercise is granted now (the user can revoke it in Health Connect). */
+  hasWrite(): Promise<boolean>;
+  /** Writes (or replaces, by `clientId`) one workout. Throws on failure. */
+  writeWorkout(workout: HealthWorkout): Promise<void>;
+  /** Opens Health Connect's own settings (permissions, data). */
+  openSettings(): void;
+}
+
+/** What turning Health Connect on did. */
+export type HealthConnectEnableResult =
+  'enabled' | 'denied' | Exclude<HealthConnectStatus, 'available'>;
+
+/**
+ * Writing a finished session to Health Connect (PLAN 7.10), for its summary: `writing`, `added`,
+ * `no_permission` (the setting is on, but the permission was revoked or never granted on this
+ * phone, e.g. after a backup import) or `failed`.
+ */
+export type HealthWriteState = 'writing' | 'added' | 'no_permission' | 'failed';
+
 /** What `deleteAllData` did: the files it could not delete (normally none). */
 export interface DeleteAllDataResult {
   filesLeft: string[];
@@ -282,6 +327,8 @@ export interface AppStoreDeps {
   classes?: readonly ClassDefinition[];
   /** The companion's accessories (`ACCESSORIES` by default). */
   accessories?: readonly AccessoryDefinition[];
+  /** Health Connect (PLAN 7.10); without it the status is `unsupported` and nothing is written. */
+  health?: HealthConnectAccess;
 }
 
 export interface EquipmentProfileChanges {
@@ -359,6 +406,10 @@ export interface AppState {
   treeMode: TreeMode;
   /** How the live session is trained (PLAN 7.9): one exercise at a time, or every set as a foe. */
   trainingView: TrainingView;
+  /** Whether finished sessions are written to Health Connect (PLAN 7.10, setting `health_connect`). */
+  healthConnectEnabled: boolean;
+  /** Writing the last finished session to Health Connect, for its summary; in memory only. */
+  healthWrite?: { sessionId: string; state: HealthWriteState };
   /**
    * The hero's classes (PLAN 6.9): the worn class, every reached tier (kept forever, with the
    * session that reached it) and the tiers already seen in the class sheet.
@@ -439,6 +490,17 @@ export interface AppState {
   setTreeMode(mode: TreeMode): void;
   /** Switches the live session between Classic and Battle and remembers it (setting `training_view`). */
   setTrainingView(view: TrainingView): void;
+  /** Whether Health Connect can be used on this phone (PLAN 7.10). */
+  healthConnectStatus(): Promise<HealthConnectStatus>;
+  /**
+   * Turns writing to Health Connect on: asks Android for the permission to write exercise and keeps
+   * the setting on only when it is granted. Nothing is written for earlier sessions.
+   */
+  enableHealthConnect(): Promise<HealthConnectEnableResult>;
+  /** Stops writing (the setting only; the permission stays until the user revokes it in Health Connect). */
+  disableHealthConnect(): void;
+  /** Opens Health Connect's settings (to revoke the permission or manage the data). */
+  openHealthConnectSettings(): void;
   /** Wears a reached class (PLAN 6.9). Throws for an unknown or not yet reached class. */
   selectClass(classId: string): void;
   /** Marks every reached class tier as seen (the class sheet was opened): no more NEW badges. */
@@ -615,6 +677,30 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       return node;
     };
 
+    const nodeLookup = () => new Map(get().nodes.map((node) => [node.id, node]));
+
+    /**
+     * Writes a finished session to Health Connect in the background (PLAN 7.10, ADR-072); the
+     * summary shows how it went. A missing permission or a failure never touches the session.
+     */
+    const writeToHealthConnect = async (workout: HealthWorkout, sessionId: string) => {
+      const { health } = deps;
+      if (!health) return;
+      set({ healthWrite: { sessionId, state: 'writing' } });
+      let state: HealthWriteState;
+      try {
+        if (await health.hasWrite()) {
+          await health.writeWorkout(workout);
+          state = 'added';
+        } else {
+          state = 'no_permission';
+        }
+      } catch {
+        state = 'failed';
+      }
+      if (get().healthWrite?.sessionId === sessionId) set({ healthWrite: { sessionId, state } });
+    };
+
     /** Stores the class settings and shows them. */
     const saveClasses = (classes: ClassSettings): void => {
       setSetting(db, CLASS_SETTING, classSettingsToRaw(classes));
@@ -784,6 +870,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       equipmentProfiles: [],
       treeMode: DEFAULT_TREE_MODE,
       trainingView: DEFAULT_TRAINING_VIEW,
+      healthConnectEnabled: false,
       classes: EMPTY_CLASS_SETTINGS,
       challengePins: [],
       companion: EMPTY_COMPANION_SETTINGS,
@@ -809,6 +896,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           onboardingReplay: false,
           treeMode: parseTreeMode(getSetting(db, TREE_MODE_SETTING)),
           trainingView: parseTrainingView(getSetting(db, TRAINING_VIEW_SETTING)),
+          healthConnectEnabled: parseHealthConnectEnabled(getSetting(db, HEALTH_CONNECT_SETTING)),
           classes: parseClassSettings(getSetting(db, CLASS_SETTING), classDefinitions),
           challengePins,
           companion: parseCompanionSettings(
@@ -932,6 +1020,30 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       setTrainingView(view) {
         setSetting(db, TRAINING_VIEW_SETTING, view);
         set({ trainingView: view });
+      },
+
+      async healthConnectStatus() {
+        return deps.health ? deps.health.status() : 'unsupported';
+      },
+
+      async enableHealthConnect() {
+        const { health } = deps;
+        if (!health) return 'unsupported';
+        const status = await health.status();
+        if (status !== 'available') return status;
+        if (!(await health.requestWrite())) return 'denied';
+        setSetting(db, HEALTH_CONNECT_SETTING, true);
+        set({ healthConnectEnabled: true });
+        return 'enabled';
+      },
+
+      disableHealthConnect() {
+        setSetting(db, HEALTH_CONNECT_SETTING, false);
+        set({ healthConnectEnabled: false });
+      },
+
+      openHealthConnectSettings() {
+        deps.health?.openSettings();
       },
 
       selectClass(classId) {
@@ -1179,6 +1291,12 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         set({ activeSession: undefined });
         const result = applyStoredSession({ ...session, endedAt: at });
         set({ trainSummary: { sessionId: session.id, result } });
+        if (get().healthConnectEnabled) {
+          void writeToHealthConnect(
+            healthWorkout(session, at, nodeLookup(), result.xp.total),
+            session.id,
+          );
+        }
         return result;
       },
 

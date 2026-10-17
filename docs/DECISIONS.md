@@ -2474,3 +2474,46 @@ Template:
   there, and rest pace measures the gaps as logged. Tap counting needs a long press for "more than
   the target", which the tap help on top of the board explains. A third view or more monster kinds
   only need entries in `TRAINING_VIEWS` / `MONSTER_KINDS`.
+
+## ADR-072: Write finished workouts to Health Connect (PLAN 7.10)
+- Date: 2026-10-17 · Status: Accepted (user decisions 2026-10-17: session + description, a Settings switch, ships as 1.2.0)
+- Context: the user wants finished workouts to show up in Android's Health Connect, with a
+  description of what was done, if they choose to. SkillForge has no server and no account; all
+  data lives on the phone (ADR-026, ADR-067).
+- Decision:
+  - **Library:** `react-native-health-connect` 4.1.3 (MIT, pinned exactly), which ships its own
+    Expo config plugin and Expo module (no `MainActivity` edits). Health Connect needs
+    **minSdk 26**, set with `expo-build-properties` (first-party Expo): Android 7 phones can no
+    longer install new versions.
+  - **Write only, one permission:** `android.permission.health.WRITE_EXERCISE`. Nothing is read.
+  - **Opt-in:** Settings → Health Connect, off by default (setting `health_connect`). Turning it
+    on shows Android's permission screen; the setting is stored only when the permission is
+    granted. Turning it off only stops writing (Health Connect's own revoke takes effect after an
+    app restart, so the app doesn't call it); "Open Health Connect" leads to permissions and data.
+  - **What is written:** after `finishTraining`, in the background, one `ExerciseSession`
+    (`CALISTHENICS`, actively recorded) from the session's start to its end (at least a minute),
+    title "SkillForge workout", and a note built in `src/domain/healthWorkout.ts`: a header
+    ("6 exercises, 17 sets, +120 XP") and one line per exercise with its sets ("Pull-up: 5, 5, 4
+    reps"; sets logged as 0 left out; Trials marked), cut at 1000 characters. `clientRecordId`
+    `skillforge-<session id>` makes a second write replace, not duplicate. No per-exercise
+    segments (only some exercises have a Health Connect type; the user chose the simple form).
+  - **Never in the way:** the session is saved first; writing checks the permission each time. A
+    revoked permission (or a setting restored from a backup on a new phone) shows "Not added" on
+    the summary with a pointer to Settings; failures show "Couldn't add"; the session is untouched.
+  - **Ports:** `HealthConnectAccess` (store deps) with the device implementation in
+    `src/health/healthConnect.ts`, which loads the library only when its native module exists
+    (Expo Go, web and tests get `unsupported`). Domain stays pure.
+  - **Privacy policy link:** Health Connect requires the app to show its privacy policy from the
+    permission screen (`ACTION_SHOW_PERMISSIONS_RATIONALE` through Android 13, the
+    `ViewPermissionUsageActivity` alias from 14). The library points both at the main activity,
+    which would only open the app; `plugins/withHealthConnectRationale.js` adds a small
+    `HealthPermissionsRationaleActivity` that opens the policy's `#health-connect` section and
+    closes, and points both at it. It must be listed before `react-native-health-connect` in
+    `app.json` (manifest mods run in reverse order, so it runs after the library's).
+  - The privacy policy gets a Health Connect section, the permission and the deletion note
+    (AGENT.md §4). Data safety stays "no data collected": the data stays on the device. Play
+    Console needs the **Health Connect permission declaration** (exercise, write) before 1.2.0.
+- Consequences: Health Connect can only be tried in a native build (release APK / bundle), not in
+  Expo Go. Delete all my data doesn't touch workouts already in Health Connect (the policy says
+  so). Writing per-exercise segments or reading data later would need a new ADR and a new
+  declaration.

@@ -52,6 +52,7 @@ YOUR DATA, ON YOUR PHONE
 • No account, no ads, no tracking
 • Everything is stored on your phone; back it up to a file whenever you like
 • Delete all your data from Settings at any time
+• Optional: add your finished workouts to Health Connect, with a note of what you did
 
 SkillForge gives general training suggestions, not medical advice. Check with a doctor before you start a new exercise programme, and stop if you feel pain.
 ```

@@ -12,7 +12,7 @@
     },
     "android": {
       "allowBackup": true,
-      "permissions": ["android.permission.VIBRATE"],
+      "permissions": ["android.permission.VIBRATE", "android.permission.health.WRITE_EXERCISE"],
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -79,6 +79,16 @@
               "updatePeriodMillis": 1800000
             }
           ]
+        }
+      ],
+      "./plugins/withHealthConnectRationale.js",
+      "react-native-health-connect",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
         }
       ]
     ],

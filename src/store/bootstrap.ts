@@ -6,6 +6,7 @@
 import { ALL_NODES } from '@/data/skills';
 import { migrateDatabase } from '@/db/migrate';
 import { openAppDatabase } from '@/db/openAppDatabase';
+import { deviceHealthConnect } from '@/health/healthConnect';
 import { startWidgetSync } from '@/widget/widgetSync';
 
 import { createAppStore, type AppStore } from './appStore';
@@ -23,7 +24,12 @@ export function startApp(): Promise<AppStore> {
 async function boot(): Promise<AppStore> {
   const db = openAppDatabase();
   await migrateDatabase(db, Date.now());
-  const store = createAppStore({ db, baseNodes: ALL_NODES, files: deviceBackupFiles });
+  const store = createAppStore({
+    db,
+    baseNodes: ALL_NODES,
+    files: deviceBackupFiles,
+    health: deviceHealthConnect,
+  });
   store.getState().loadAll();
   setAppStore(store);
   startWidgetSync(store);
