@@ -13,7 +13,7 @@
     <main>
       <p class="eyebrow"><a href="../">SkillForge</a></p>
       <h1>Privacy Policy</h1>
-      <p class="meta">Effective 5 October 2026 · applies to the SkillForge Android app</p>
+      <p class="meta">Effective 17 October 2026 · applies to the SkillForge Android app</p>
 
       <section>
         <h2>In short</h2>
@@ -27,8 +27,9 @@
             the developer or to anyone else.
           </li>
           <li>
-            Data only leaves your phone when <strong>you</strong> share it (for example a backup
-            file), or through <strong>Android's own device backup</strong> if it is turned on.
+            Data only leaves the app when <strong>you</strong> share it (for example a backup file),
+            through <strong>Android's own device backup</strong> if it is turned on, or to
+            <strong>Health Connect</strong> on your phone if you turn that on.
           </li>
         </ul>
       </section>
@@ -85,6 +86,10 @@
             turn it off in your phone's settings.
           </li>
           <li>
+            <strong>Health Connect</strong> (optional, off unless you turn it on): see
+            <a href="#health-connect">below</a>.
+          </li>
+          <li>
             <strong>Links.</strong> Links in the app (for example to exercise sources) open in your
             browser; the app itself does not load anything from the internet.
           </li>
@@ -95,10 +100,44 @@
         </p>
       </section>
 
+      <section id="health-connect">
+        <h2>Health Connect</h2>
+        <p>
+          Health Connect is Android's own store for health and fitness data on your phone. In
+          <strong>Settings → Health Connect</strong> you can let SkillForge add your workouts to it.
+          It is off unless you turn it on, and Android asks you first.
+        </p>
+        <ul>
+          <li>
+            <strong>What is written:</strong> for every workout you finish, one exercise session
+            (type calisthenics) with its start and end time, the title "SkillForge workout" and a
+            note listing the exercises with their sets and the XP earned.
+          </li>
+          <li>
+            <strong>What is read:</strong> nothing. SkillForge only asks for permission to write
+            exercise and never reads data from Health Connect.
+          </li>
+          <li>
+            <strong>Where it goes:</strong> the workouts stay in Health Connect on your phone. Apps
+            you allow to read exercise in Health Connect can see them; the developer never receives
+            them. They are not used for advertising, sold or used for any other purpose.
+          </li>
+          <li>
+            <strong>Your control:</strong> turn it off in Settings → Health Connect to stop writing.
+            To revoke the permission or delete workouts SkillForge added, use Health Connect itself
+            (Settings → Health Connect → Open Health Connect).
+          </li>
+        </ul>
+      </section>
+
       <section>
         <h2>Permissions</h2>
         <ul>
-          <li><strong>Vibration</strong>: the set timer and rest countdown buzz.</li>
+          <li><strong>Vibration</strong>: the hold timer and rest countdown buzz.</li>
+          <li>
+            <strong>Health Connect: write exercise</strong>: only asked for when you turn on Health
+            Connect, to add your finished workouts (see above).
+          </li>
           <li>
             <strong>Background work, network state, start at boot, wake lock</strong>: requested by
             Android's WorkManager library, which keeps the home-screen widgets up to date. The app
@@ -127,7 +166,8 @@
           </li>
           <li>
             Copies you exported, and Android device backups, are managed where you stored them (for
-            example in your Google account settings).
+            example in your Google account settings). Workouts added to Health Connect stay there
+            until you delete them in Health Connect.
           </li>
         </ul>
         <p>

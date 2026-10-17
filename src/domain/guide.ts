@@ -455,6 +455,9 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         STORE_SWITCH_NOTE,
         'Settings → Delete all my data erases everything SkillForge stored on this phone and ' +
           'starts the app fresh.',
+        'Settings → Health Connect (optional) adds every finished workout to Health Connect on ' +
+          'this phone, with a note of what you did. SkillForge reads nothing from it; workouts ' +
+          'it added stay there until you delete them in Health Connect.',
       ],
     },
   };

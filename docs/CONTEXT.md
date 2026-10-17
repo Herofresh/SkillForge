@@ -120,6 +120,9 @@ plugins/
   withUploadSigning.js  config plugin (ADR-066): `upload` signing config from the SKILLFORGE_UPLOAD_*
                         Gradle properties, used by release only with -PskillforgeUploadSigning;
                         ndk debugSymbolLevel SYMBOL_TABLE (tested in withUploadSigning.test.ts)
+  withHealthConnectRationale.js  config plugin (ADR-072): HealthPermissionsRationaleActivity
+                        (Kotlin, generated) opens the privacy policy for Health Connect's link;
+                        listed before react-native-health-connect in app.json (mods run in reverse)
   appIcon.ts            the app icon as a 32×32 pixel grid (roles → Palette keys), the asset list
                         (paths, sizes, cell size per layer) and the preview sheet (PLAN 5.6, ADR-042)
   iconBuild.ts          npm run icon:build: renders appIcon.ts to assets/images/*.png + the preview,
@@ -198,6 +201,9 @@ src/
     monsters.ts         session monsters (PLAN 7.9, ADR-071): MONSTER_KINDS, BRANCH_MONSTERS,
                         foeState / foeHp (from the logged set vs its prescription), tapDown
                         (one rep / lowering fewer, undefined below 0), tapLogs, foeCount, foeDamage
+    healthWorkout.ts    a finished session as the Health Connect workout (PLAN 7.10, ADR-072):
+                        healthWorkout (clientId, start / end, title), workoutNotes ("Pull-up: 5, 5,
+                        4 reps", ≤ HEALTH_NOTES_MAX), parseHealthConnectEnabled
     battleView.ts       the foes of the live session (PLAN 7.9, ADR-071): TRAINING_VIEWS +
                         parseTrainingView (the training_view setting), exerciseFoes (Classic's row),
                         battleView (every exercise by block), tapFoe (log / count down / remove,
@@ -391,7 +397,9 @@ src/
                         ReplayOnboardingPanel (confirm → replayOnboarding), DeleteDataPanel
                         (what goes, export first, acknowledge → deleteAllData; 7.0b), GuidePanel
                         ("How SkillForge works": open the guide, the widgets' "i"; 6.10c),
-                        TrainingViewPanel (Classic | Battle, the training_view setting; 7.9)
+                        TrainingViewPanel (Classic | Battle, the training_view setting; 7.9),
+                        HealthConnectPanel (status, turn on with the permission, open / turn off;
+                        7.10)
     HealthNotice.tsx    the framed health disclaimer (onboarding step 1, About; ADR-065)
     editor/             node editor (PLAN 4.7–4.8, ADR-036): NodeEditorBody (screen body: live
                         issues, Save/Cancel), NodeEditorForm (sections with inline IssueNotes),
@@ -446,6 +454,9 @@ src/
                         frames, FRAME_MS, stillFrame) (PLAN 6.4, ADR-053), sprite.ts (layered
                         sprites: SpriteCanvas, parts with material / region legends, top-left
                         shading, selective outline, glow, sparkles, ground shadow; PLAN 6.10)
+  health/healthConnect.ts  Health Connect access (PLAN 7.10, ADR-072): status, the write-exercise
+                        permission, writing one workout, opening Health Connect; loads
+                        react-native-health-connect only when its native module exists
   widget/               Android home-screen widget (PLAN 6.6, ADR-055; react-native-android-widget)
     widgetModule.ts     THE guard: widgetsAvailable() (Android + native module `AndroidWidget`),
                         loadNativeWidget() requires nativeWidget.tsx only then (Expo Go, Jest: undefined)
@@ -589,6 +600,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics got a stopwatch until PLAN 7.9: the live session now offers the timer for holds only (the session clock covers rep sets; Trials keep the stopwatch). It can be paused and resumed (5.8, ADR-044; the paused time is not measured). Stored as timestamps plus the paused time (`ActiveSession.timer`), so it survives an app kill, paused too; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
 | **Monster / foe** | Every set of a live-session exercise drawn as a monster of the exercise's branch (PLAN 7.9, ADR-071; `BRANCH_MONSTERS`, seven kinds). Its state comes from the logged set against its prescription: fresh, fighting (its hold timer runs), defeated (the target), overkill (more), wounded (some; the HP bar shows what is left), escaped (0). A view only: nothing new is stored, XP and outcomes are unchanged. |
 | **Training view** | How the live session is trained, a setting (`training_view`, Settings → Training view; PLAN 7.9, ADR-071). **Classic**: one exercise at a time with the stepper and Log / Partial / Failed, its foes above the logger. **Battle**: every exercise as a row of foes; tap a fresh foe to log the target (a hold starts its timer, the next tap logs the seconds held), tap a logged foe for one rep fewer (below 0 the set is removed), long press for an exact number or to edit, "+" for an extra set. |
+| **Health Connect** | Android's on-device health data store. Optional (Settings → Health Connect, setting `health_connect`, PLAN 7.10, ADR-072): every finished session is written as one calisthenics exercise session with a note of what was done; nothing is read. Only in native builds (`src/health/healthConnect.ts`); Expo Go reports `unsupported`. |
 | **Timer cue** | A moment the phone buzzes (PLAN 5.8, ADR-044): `go` (a hold's get-ready ends: one short buzz), `target` (the hold reaches its target: two long buzzes), `rest_end` (the rest countdown reaches zero: three short buzzes). Only while the screen sees the moment pass; no sound, no background notification. |
 | **Custom node / custom tag** | A node the user added (`user_` id) or edited through the node editor; shown with a "Custom" tag. "Reset to default" removes the edit; a custom node is deleted instead. Overlays can't clear `straightArm` on, or move, a built-in straight-arm node (ADR-036). |
 | **Shared progressions** | The overlay as YAML (`exportOverlay`), shared from My progressions. Importing one merges it into the user's overlay after a preview (`mergeOverlays`, ADR-036). |

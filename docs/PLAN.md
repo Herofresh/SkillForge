@@ -373,6 +373,26 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **Health Connect (task 7.10, ADR-072, branch `feat/health-connect`):**
+  - Domain `src/domain/healthWorkout.ts` (workout + notes), adapter `src/health/healthConnect.ts`
+    (`deviceHealthConnect`, injected in `bootstrap.ts`), store: `healthConnectEnabled` (setting
+    `health_connect`), `healthConnectStatus` / `enableHealthConnect` / `disableHealthConnect` /
+    `openHealthConnectSettings`, `healthWrite` (summary line); `finishTraining` writes in the
+    background. UI: `HealthConnectPanel` in Settings, `HealthWriteLine` in `app/train/summary.tsx`.
+  - Native: `react-native-health-connect` 4.1.3 + its plugin, `expo-build-properties` (minSdk 26),
+    `plugins/withHealthConnectRationale.js` (privacy policy screen; keep it before the library in
+    `app.json`). Not testable in Expo Go: the panel says "isn't available in this version".
+  - Docs: privacy policy section `#health-connect` (effective 17 October 2026), guide `data` line.
+  - Checked on Pixel_8_Pro_API_35 (Android 15, Health Connect built in) with a release APK of this
+    branch (`docs/screenshots/7.10-*.png`): the panel finds Health Connect, "Add workouts" opens
+    Health Connect's intro and permission screen (write: Exercise only), its "privacy policy" link
+    opens the policy in the browser through `HealthPermissionsRationaleActivity`, Allow turns it on,
+    a finished session shows "Added to Health Connect." and Health Connect lists "SkillForge workout,
+    Calisthenics" with the note. Not checked: Android 13 or older (Health Connect app from Play), a
+    revoked permission on a device, the Play review of the declaration.
+  - Before 1.2.0 goes to Play (user, in Play Console): App content → Health apps / Health Connect
+    permission declaration (exercise, write; why: "adds the user's finished workouts"), check Data
+    safety (still no data collected, data stays on the device), the new store description lines.
 - **Session monsters + Battle view (task 7.9, ADR-071, [PR #75](https://github.com/Herofresh/SkillForge/pull/75)):**
   - Domain: `src/domain/monsters.ts` (kinds, `BRANCH_MONSTERS`, `foeState` / `foeHp`, `tapDown`,
     `foeCount` / `foeDamage`) and `src/domain/battleView.ts` (`TRAINING_VIEWS` /
@@ -1732,6 +1752,14 @@ from the GitHub releases' 1–7, ADR-068).
   "+" for an extra set; holds: tap to start the timer, tap again to log the seconds held. The rep
   set timer is removed from the live session (the session clock stays; holds keep theirs). Ships
   as the next 1.0.x / 1.1.0 on the closed track for testers to compare both views.
+
+- [x] 7.10 Health Connect (user request 2026-10-17, ADR-072; agent; branch `feat/health-connect`, checked on the emulator): opt-in in Settings → Health
+  Connect (off by default; turning it on asks Android for the write permission). Every finished
+  session is then written as one exercise session (calisthenics, start to end, title "SkillForge
+  workout", a note listing each exercise with its sets) to Health Connect on the phone; nothing is
+  read. The summary says whether it was added. Ships as **1.2.0** (user decision 2026-10-17).
+  Needs: minSdk 26 (Health Connect), the privacy-policy rationale screen, the privacy policy page and
+  the Play Console Health Connect declaration (write: exercise) before that release.
 
 ### Phase 8: Ads and a "remove ads" purchase (user request 2026-10-06; after the production release)
 Open decisions for the user before 8.1 starts: the ad format (a banner on the session summary, or

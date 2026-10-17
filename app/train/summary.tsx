@@ -14,6 +14,7 @@ import { ACCESSORIES } from '@/data/companion/accessories';
 import { sessionClassTierUps, wornClass } from '@/domain/classes';
 import { sessionAccessoryUnlocks } from '@/domain/companion';
 import { summaryView, type SummaryView } from '@/domain/trainView';
+import type { HealthWriteState } from '@/store/appStore';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -22,7 +23,8 @@ import { useAppStore } from '@/store/useAppStore';
  * (PLAN 6.9, CLASS UNLOCKED! / TIER UP!, with "Wear"), the weekly class challenge's progress (PLAN
  * 6.9b, CHALLENGE COMPLETE! when this session finished it), the companion trinkets it earned (PLAN
  * 6.10, NEW TRINKET!) and the companion's victory pose, and the advisory warnings the session raised
- * (ADR-023), each acknowledged before "Done".
+ * (ADR-023), each acknowledged before "Done". With Health Connect on (PLAN 7.10), one line says
+ * whether the workout was added.
  */
 export default function SessionSummaryScreen() {
   const summary = useAppStore((state) => state.trainSummary);
@@ -96,6 +98,7 @@ function SummaryBody({ view, playKey }: { view: SummaryView; playKey: string }) 
           playKey={playKey}
         />
         <CompanionVictory />
+        <HealthWriteLine sessionId={playKey} />
 
         {view.warnings.length > 0 && (
           <PixelText variant="label" tone="ember" accessibilityRole="header">
@@ -122,5 +125,27 @@ function SummaryBody({ view, playKey }: { view: SummaryView; playKey: string }) 
         />
       </Screen>
     </>
+  );
+}
+
+const HEALTH_WRITE_TEXT: Readonly<Record<HealthWriteState, string>> = {
+  writing: 'Adding the workout to Health Connect…',
+  added: 'Added to Health Connect.',
+  no_permission:
+    'Not added to Health Connect: SkillForge may no longer write exercise. Turn it on again in Settings → Health Connect.',
+  failed: 'Couldn’t add the workout to Health Connect. Your session is saved here.',
+};
+
+/** How writing this session to Health Connect went (only when it is turned on). */
+function HealthWriteLine({ sessionId }: { sessionId: string }) {
+  const write = useAppStore((state) => state.healthWrite);
+  if (write?.sessionId !== sessionId) return null;
+  return (
+    <PixelText
+      variant="small"
+      tone={write.state === 'added' ? 'success' : write.state === 'writing' ? 'textMuted' : 'ember'}
+      testID="summary-health-connect">
+      {HEALTH_WRITE_TEXT[write.state]}
+    </PixelText>
   );
 }
