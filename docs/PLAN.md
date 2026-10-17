@@ -373,7 +373,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **Health Connect (task 7.10, ADR-072, branch `feat/health-connect`):**
+- **Health Connect (task 7.10, ADR-072, [PR #79](https://github.com/Herofresh/SkillForge/pull/79)):**
   - Domain `src/domain/healthWorkout.ts` (workout + notes), adapter `src/health/healthConnect.ts`
     (`deviceHealthConnect`, injected in `bootstrap.ts`), store: `healthConnectEnabled` (setting
     `health_connect`), `healthConnectStatus` / `enableHealthConnect` / `disableHealthConnect` /
@@ -1753,7 +1753,7 @@ from the GitHub releases' 1–7, ADR-068).
   set timer is removed from the live session (the session clock stays; holds keep theirs). Ships
   as the next 1.0.x / 1.1.0 on the closed track for testers to compare both views.
 
-- [x] 7.10 Health Connect (user request 2026-10-17, ADR-072; agent; branch `feat/health-connect`, checked on the emulator): opt-in in Settings → Health
+- [x] 7.10 Health Connect (user request 2026-10-17, ADR-072; agent; [PR #79](https://github.com/Herofresh/SkillForge/pull/79), checked on the emulator): opt-in in Settings → Health
   Connect (off by default; turning it on asks Android for the write permission). Every finished
   session is then written as one exercise session (calisthenics, start to end, title "SkillForge
   workout", a note listing each exercise with its sets) to Health Connect on the phone; nothing is
