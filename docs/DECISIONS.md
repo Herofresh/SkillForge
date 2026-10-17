@@ -2519,7 +2519,7 @@ Template:
   declaration.
 
 ## ADR-073: Correction to ADR-072 – a repeated Health Connect write is ignored, not replaced
-- Date: 2026-10-18 · Status: Accepted (corrects one sentence of ADR-072; found in the review of PR #79)
+- Date: 2026-10-17 · Status: Accepted (corrects one sentence of ADR-072; found in the review of PR #79)
 - Context: ADR-072 says the `clientRecordId` `skillforge-<session id>` "makes a second write
   replace, not duplicate". Health Connect only replaces a record with the same `clientRecordId`
   when the new `clientRecordVersion` is higher; SkillForge always writes version 1.
