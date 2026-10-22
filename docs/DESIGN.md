@@ -329,9 +329,12 @@ name as a muted caps label, and a secondary "Customize" button with the helmet p
 Moods are poses, never penalties. `CompanionSheet` (`PixelModal` "Customize"): a 3 dp-per-pixel
 preview, the weapon ("Comes with the class you wear"), chips for Body (Man / Woman), Hair style, Skin,
 Hair and Outfit, then one
-section per slot (bronze rule, heading, the worn item's flavour, chips "None" + the earned items,
-"· NEW" on unseen ones) and the locked items as muted name + gold "Character level 10 · Level 4 /
-10" lines with a gold-dark left rule. The Train summary adds a gold panel with a NEW TRINKET! burst
+section per slot (`WardrobeSlot`, PLAN 7.8 FB-6: bronze rule, heading, the worn item's flavour; the
+earned items and "None" as a grid of tiles, each the still companion at 2 dp per pixel wearing that item,
+its name under it, gold-lined when worn, a rune "New" on unseen ones; the locked items folded into a
+"🔒 LOCKED (n) · Show" row, opened as rows of the companion wearing the item at 1 dp per pixel and 45 %
+opacity, the muted name and the gold "Character level 10 · Level 4 / 10" line, with a gold-dark left
+rule; screenshots `docs/screenshots/fb6-*.png`). The Train summary adds a gold panel with a NEW TRINKET! burst
 and one line per accessory ("Iron helm" / "Head · Warrior class, tier I"), and the companion in its
 victory pose ("Victory!"). Contact sheets: `npm run companion:sheet` → `docs/screenshots/6.13-*.png` (both bodies; before / after:
 `6.13-before-after.png`).

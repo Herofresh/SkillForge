@@ -388,7 +388,8 @@ src/
                         button with onPress), RankLadderSheet (PLAN 6.7), ClassEmblem / ClassBanner /
                         ClassSheet / ClassUnlockPanel + classText.ts (PLAN 6.9), ChallengeCard /
                         ChallengeProgressPanel + challengeText.ts (PLAN 6.9b), CompanionCard /
-                        CompanionSprite / CompanionSheet / CompanionVictory / TrinketUnlockPanel +
+                        CompanionSprite / CompanionSheet (+ WardrobeSlot: preview grid, folded locked items, FB-6) /
+                        CompanionVictory / TrinketUnlockPanel +
                         useCompanion.ts + companionText.ts (PLAN 6.10), SessionHistoryRow,
                         GoalProgressCard
     equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form + the "Remove?"

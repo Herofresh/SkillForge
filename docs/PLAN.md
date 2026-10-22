@@ -380,6 +380,12 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-6 Customize grid (task 7.8, [PR #84](https://github.com/Herofresh/SkillForge/pull/84)):** `src/components/character/WardrobeSlot.tsx`
+  replaces the sheet's chip list per slot: earned items + "None" as preview tiles (`companionStill` with
+  that item in the slot, cached per outfit and look), locked items folded (`<slot>-locked-toggle`, Show /
+  Hide) into dimmed preview rows with rule and progress. Test ids of tiles and locked rows are
+  unchanged (`companion-sheet-<slot>-<id>`, `…-<id>-locked`). Checked in Expo Go
+  (`docs/screenshots/fb6-*.png`) for a new hero (nothing earned yet); not seen with many earned items.
 - **FB-5 training types (task 7.8, ADR-074, [PR #83](https://github.com/Herofresh/SkillForge/pull/83)):** `TrainingType` in
   `types.ts`, `WorkoutRequest.trainingType`; in `generator.ts` `prescribe(…, type)`, `fillTime(…, type)`,
   `COOL_DOWN_MAX_SHARE` / `COOL_DOWN_MAX_EXERCISES` / `CHALLENGING_WORKING_SETS` / `RECOVERY_SETS`, the
@@ -1792,7 +1798,7 @@ from the GitHub releases' 1–7, ADR-068).
     time, leftover time to more sets of what is allowed. Challenging: more working sets, the hard
     end of each range, extra strength before any cool-down, a due Trial if there is one. All keep
     the tendon safeguards and the 48 h pattern rest.
-  - [ ] FB-6 (UX, user 2026-10-22): "Nicht unlocked items einklappen / bessere Übersicht" (the
+  - [x] FB-6 (UX, user 2026-10-22, [PR #84](https://github.com/Herofresh/SkillForge/pull/84)): "Nicht unlocked items einklappen / bessere Übersicht" (the
     companion cosmetics, not the skills). Decided: in Customize, earned items per slot as a grid of
     pixel previews to tap and wear; locked items folded into "Locked (n) ▸", opened as dimmed
     previews with their requirement and progress.
