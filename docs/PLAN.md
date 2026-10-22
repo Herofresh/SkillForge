@@ -380,7 +380,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **FB-7 Trial chain (task 7.8, ADR-075, branch `feat/trial-chain`):** `trialChain` in `progression.ts`;
+- **FB-7 Trial chain (task 7.8, ADR-075, [PR #85](https://github.com/Herofresh/SkillForge/pull/85)):** `trialChain` in `progression.ts`;
   `applySessionWith` in `recompute.ts` passes every hard prerequisite of a Trial passed in the session
   (`passTrial`, at the Trial's time), lists them in `SessionResult.trialsImplied` and the level-ups.
   Shown by `TrialOutcome` (Tree / onboarding Trials) and the summary (`SummaryView.trialsImplied`), text
@@ -1809,7 +1809,7 @@ from the GitHub releases' 1–7, ADR-068).
     companion cosmetics, not the skills). Decided: in Customize, earned items per slot as a grid of
     pixel previews to tap and wear; locked items folded into "Locked (n) ▸", opened as dimmed
     previews with their requirement and progress.
-  - [x] FB-7 (rule change, user 2026-10-22, ADR-075, branch `feat/trial-chain`): a passed Trial also counts for the earlier skills it
+  - [x] FB-7 (rule change, user 2026-10-22, ADR-075, [PR #85](https://github.com/Herofresh/SkillForge/pull/85)): a passed Trial also counts for the earlier skills it
     depends on. Decided: every hard prerequisite, transitively, counts as Trial passed (unlocked,
     at least level 5, Proficient), like a test-out; no extra XP. Needs an ADR (extends ADR-023).
 - [x] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent; [PR #75](https://github.com/Herofresh/SkillForge/pull/75), checked in Expo Go, rest-bar fix [PR #77](https://github.com/Herofresh/SkillForge/pull/77)):
