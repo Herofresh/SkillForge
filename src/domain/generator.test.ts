@@ -2,6 +2,7 @@ import { ALL_NODES, NODE_BY_ID } from '@/data/skills';
 import { makeNode, makeSession, makeSet } from '@/data/testFixtures';
 import {
   CHALLENGING_WORKING_SETS,
+  COOL_DOWN_MAX_EXERCISES,
   COOL_DOWN_MAX_SHARE,
   COOL_DOWN_REST_SEC,
   exerciseSeconds,
@@ -778,7 +779,34 @@ describe('training types (PLAN 7.8 FB-5)', () => {
       .flatMap((block) => block.exercises)
       .reduce((sum, exercise) => sum + exerciseSeconds(exercise, plan.restPace), 0);
 
-  it('keeps the filled cool-down short in a standard session, even after a strength day', () => {
+  it('keeps the cool-down short in a standard session after a strength day, and suggests Recovery', () => {
+    // A beginner who trained push, pull, legs and hangs yesterday: most strength rests today.
+    const yesterday = makeSession(
+      'yesterday',
+      daysAgo(1),
+      ['wall_push_up', 'incline_row', 'assisted_squat', 'dead_hang'].map((nodeId) => {
+        const { metric, workingRange, trial } = node(nodeId);
+        const performance = {
+          value: workingRange.min,
+          ...(trial.reps ? { reps: trial.reps } : {}),
+        };
+        return { nodeId, count: 3, metric, prescribed: performance, actual: performance };
+      }),
+    );
+    for (const minutes of [30, 60, 90]) {
+      const plan = generateWorkout(
+        request({ recentSessions: [yesterday], availableMinutes: minutes }),
+      );
+      const coolDown = plan.blocks
+        .filter((block) => block.kind === 'cool_down')
+        .flatMap((block) => block.exercises);
+      expect(coolDown.length).toBeLessThanOrEqual(COOL_DOWN_MAX_EXERCISES);
+      expect(coolDownSeconds(plan)).toBeLessThanOrEqual(COOL_DOWN_MAX_SHARE * minutes * 60);
+    }
+    const long = generateWorkout(request({ recentSessions: [yesterday], availableMinutes: 90 }));
+    expect(long.notes.some((note) => note.includes('a Recovery session may suit it better'))).toBe(
+      true,
+    );
     for (const minutes of [30, 60, 90]) {
       const plan = generateWorkout(
         request({ recentSessions: afterStrengthDay, availableMinutes: minutes }),
@@ -799,7 +827,9 @@ describe('training types (PLAN 7.8 FB-5)', () => {
     expect(exercises.some((exercise) => node(exercise.nodeId).straightArm)).toBe(false);
     expect(exercises.some((exercise) => exercise.isTrial)).toBe(false);
     for (const exercise of plan.blocks.find((block) => block.kind === 'skill')?.exercises ?? []) {
-      expect(exercise.sets).toBe(RECOVERY_SETS);
+      // Light practice: the easy end of the range (more sets only to fill the time).
+      expect(exercise.target.value).toBe(node(exercise.nodeId).workingRange.min);
+      expect(exercise.sets).toBeGreaterThanOrEqual(RECOVERY_SETS);
     }
     expect(plan.notes[0]).toMatch(/^Recovery session/);
   });

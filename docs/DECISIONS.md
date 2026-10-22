@@ -2528,3 +2528,29 @@ Template:
   later feature rewrites a session (e.g. after editing it), it must raise `clientRecordVersion`.
 - Consequences: the wording in `src/domain/healthWorkout.ts` now says "ignores"; ADR-072 stays as
   written, read together with this note.
+
+## ADR-074: Training types – Standard, Recovery, Challenging (PLAN 7.8 FB-5)
+- Date: 2026-10-22 · Status: Accepted (user decision 2026-10-22; extends ADR-024 and ADR-063)
+- Context: tester feedback: after a week with strength training the plan has "too much
+  cool-down", and a wish to choose between a standard, a recovery or a demanding session. Measured:
+  when the strength patterns rest (48 h, ADR-024), the time fill (ADR-063) adds mobility extras;
+  a beginner got three cool-down exercises next to little main work. The minutes stay small, but
+  the plan reads as mostly stretching.
+- Decision: a training type on the Train tab (`TRAINING_TYPES`, `WorkoutRequest.trainingType`,
+  default `standard`; not remembered, each plan starts on Standard).
+  - **Standard:** today's plan; the cool-down that fills spare time stays within
+    `COOL_DOWN_MAX_SHARE` (15 %) of the time and `COOL_DOWN_MAX_EXERCISES` (2) exercises, the goal
+    mobility slot included. Left-over time stays free (the fill note says so); when patterns rest
+    and the plan is short, a note suggests a Recovery session.
+  - **Recovery:** no strength or core slots, no straight-arm nodes at all; skill slots (non
+    straight-arm) and the cool-down; every exercise `RECOVERY_SETS` (2) at the bottom of the range,
+    no Trials; the fill adds mobility and light skill extras and grows only those sets.
+  - **Challenging:** `CHALLENGING_WORKING_SETS` (4) one `PROGRESSION_STEP` above the
+    double-progression target (inside the range); a node stuck at the level-5 cap (`awaitingTrial`)
+    gets its Trial when the safeguards allow; the fill grows sets and adds training extras first and
+    puts the (capped) cool-down last.
+  - All types keep the ADR-010 safeguards (straight-arm budget, Trial clock, 48 h rest) and the 48 h
+    pattern rest; Challenging never overrides them. The plan's first note names a non-standard type.
+- Consequences: three different plans for the same day; tests in `generator.test.ts`. A future
+  "remember my last type" would be a setting. Recovery fills less time when few mobility exercises
+  are unlocked (e.g. 21 of 90 min for a beginner); the fill note explains it.

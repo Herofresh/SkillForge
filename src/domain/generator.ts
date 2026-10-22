@@ -157,12 +157,16 @@ export const WORKING_SETS = 3;
 // --- Training types (PLAN 7.8 FB-5, ADR-074) ---
 /** Standard and Challenging: the cool-down that fills spare time stays under this share of it. */
 export const COOL_DOWN_MAX_SHARE = 0.15;
+/** Standard and Challenging: at most this many cool-down exercises (a goal's mobility included). */
+export const COOL_DOWN_MAX_EXERCISES = 2;
 /** Challenging: working sets per exercise (the time fill can still add more). */
 export const CHALLENGING_WORKING_SETS = 4;
 /** Recovery: light practice, this many sets at the easy end of the range. */
 export const RECOVERY_SETS = MIN_WORKING_SETS;
 /** Recovery skips these slots: no hard strength. */
 const RECOVERY_SKIPPED_KINDS: readonly WorkoutBlockKind[] = ['strength', 'core'];
+/** Recovery fills its time with more sets of mobility and light skill practice. */
+const RECOVERY_GROWING_KINDS: readonly WorkoutBlockKind[] = ['skill', 'cool_down'];
 /** The plan's first note for a non-standard session. */
 const TRAINING_TYPE_NOTES: Readonly<Record<TrainingType, string | undefined>> = {
   standard: undefined,
@@ -803,9 +807,12 @@ const GROWING_BLOCK_KINDS: readonly WorkoutBlockKind[] = ['skill', 'strength', '
  * Adds one set per round to every main block (to both exercises of a pair) while it fits the time
  * and the straight-arm budget, up to `MAX_WORKING_SETS`. Trials keep their prescribed sets.
  */
-function growSets(builder: Builder): void {
+function growSets(
+  builder: Builder,
+  kinds: readonly WorkoutBlockKind[] = GROWING_BLOCK_KINDS,
+): void {
   const blocks = [...builder.blocks.entries()]
-    .filter(([, block]) => GROWING_BLOCK_KINDS.includes(block.kind))
+    .filter(([, block]) => kinds.includes(block.kind))
     .sort(([a], [b]) => a - b)
     .map(([, block]) => block);
   let grew = true;
@@ -844,6 +851,7 @@ function addExtraExercises(
   firstSlot: number,
   allow: (kind: WorkoutBlockKind) => boolean = () => true,
   coolDownLimit = Number.POSITIVE_INFINITY,
+  coolDownMax = Number.POSITIVE_INFINITY,
 ): number {
   let slot = firstSlot;
   // Training work first; more stretching only when nothing else fits.
@@ -862,7 +870,8 @@ function addExtraExercises(
     if (!fitted || fitted.exercise.sets < MIN_WORKING_SETS) continue;
     if (
       kind === 'cool_down' &&
-      coolDownSeconds(builder) + secondsOf(builder, [fitted.exercise]) > coolDownLimit
+      (coolDownSeconds(builder) + secondsOf(builder, [fitted.exercise]) > coolDownLimit ||
+        coolDownCount(builder) >= coolDownMax)
     ) {
       continue;
     }
@@ -883,6 +892,12 @@ const coolDownSeconds = (builder: Builder): number =>
   [...builder.blocks.values()]
     .filter((block) => block.kind === 'cool_down')
     .reduce((sum, block) => sum + secondsOf(builder, block.exercises), 0);
+
+/** Cool-down exercises planned so far. */
+const coolDownCount = (builder: Builder): number =>
+  [...builder.blocks.values()]
+    .filter((block) => block.kind === 'cool_down')
+    .reduce((sum, block) => sum + block.exercises.length, 0);
 
 /** Adds the extra cool-down when there is none yet and it fits `limit` seconds; the next free slot. */
 function addCoolDown(
@@ -927,6 +942,7 @@ function fillTime(builder: Builder, candidates: readonly Candidate[], type: Trai
       slot,
       (kind) => kind === 'cool_down' || kind === 'skill',
     );
+    growSets(builder, RECOVERY_GROWING_KINDS);
     return;
   }
   if (type === 'challenging') {
@@ -938,7 +954,7 @@ function fillTime(builder: Builder, candidates: readonly Candidate[], type: Trai
   }
   slot = addCoolDown(builder, candidates, slot, limit);
   growSets(builder);
-  addExtraExercises(builder, candidates, slot, () => true, limit);
+  addExtraExercises(builder, candidates, slot, () => true, limit, COOL_DOWN_MAX_EXERCISES);
   growSets(builder);
 }
 
@@ -1166,6 +1182,11 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
       `This plan fills about ${estimatedMinutes} of your ${request.availableMinutes} min: that is ` +
         'all your tree, equipment and rest days suggest today. Add exercises if you want more.',
     );
+    if (type !== 'recovery' && recovering.size > 0) {
+      notes.push(
+        'Much of your strength work is resting today: a Recovery session may suit it better.',
+      );
+    }
   }
 
   return {

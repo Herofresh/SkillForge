@@ -380,6 +380,14 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-5 training types (task 7.8, ADR-074, branch `feat/training-type`):** `TrainingType` in
+  `types.ts`, `WorkoutRequest.trainingType`; in `generator.ts` `prescribe(…, type)`, `fillTime(…, type)`,
+  `COOL_DOWN_MAX_SHARE` / `COOL_DOWN_MAX_EXERCISES` / `CHALLENGING_WORKING_SETS` / `RECOVERY_SETS`, the
+  Recovery slot filter and the type note. Store: `generateWorkout(id, minutes, seed?, type?)`,
+  `planTraining(id, minutes, type?, seed?)`. UI: the "Training" chips on the Train tab (not remembered).
+  Tests: `generator.test.ts` ("training types"), `src/components/trainingType.test.tsx`. Measured with a
+  throwaway script: the old fill gave a beginner after a strength day 3 cool-down exercises; now at
+  most 2 plus the Recovery suggestion. Not checked on a device.
 - **FB-4 "Trial needed" (task 7.8, [PR #82](https://github.com/Herofresh/SkillForge/pull/82)):** `awaitingTrial` /
   `nodesAwaitingTrial` in `progression.ts` (level ≥ 5, Trial not passed; ADR-004 cap),
   `TRIAL_NEEDED_LABEL` / `trialNeededNote` in `format.ts`. Shown on the Tree tile (`tile-trial-needed-<id>`,
@@ -1776,7 +1784,7 @@ from the GitHub releases' 1–7, ADR-068).
     show when a skill is stuck at level 5 until its Trial (ADR-004 cap): a "Trial needed" badge on
     the Tree tile, a note on the plan and session exercise card, a line on the summary ("XP
     banked"), and a small red dot on the Tree tab while any skill waits for its Trial.
-  - [ ] FB-5 (idea, user 2026-10-22): "Manchmal wenn man die Woche schon Strength training hatte gibt
+  - [x] FB-5 (idea, user 2026-10-22, ADR-074, branch `feat/training-type`): "Manchmal wenn man die Woche schon Strength training hatte gibt
     es einen dann zu viel cool down im Plan. Vielleicht als Input noch ob man ein Standard
     Training, ein Recovery Training oder ein forderndes Training haben will". Decided: a training
     type on the Train tab. Recovery: mobility, cool-down, light skill practice, no hard strength,
