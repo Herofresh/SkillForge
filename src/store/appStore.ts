@@ -217,6 +217,7 @@ import {
   type StoredSession,
   type UserAction,
   type ValidationIssue,
+  type TrainingType,
   type WorkoutPlan,
 } from '@/domain/types';
 import { createId } from '@/lib/id';
@@ -515,7 +516,13 @@ export interface AppState {
   updateEquipmentProfile(id: string, changes: EquipmentProfileChanges): void;
   deleteEquipmentProfile(id: string): void;
   /** Suggests a session for the chosen profile and time (ADR-024). `seed` varies the tie-breaks. */
-  generateWorkout(equipmentProfileId: string, availableMinutes: number, seed?: number): WorkoutPlan;
+  generateWorkout(
+    equipmentProfileId: string,
+    availableMinutes: number,
+    seed?: number,
+    /** The kind of session (PLAN 7.8 FB-5); `standard` when unset. */
+    trainingType?: TrainingType,
+  ): WorkoutPlan;
   /**
    * Stores `overlay` as the current one and reloads the tree and progress. Returns the
    * `applyOverlay` issues instead (and writes nothing) when the merged tree would be broken.
@@ -560,7 +567,12 @@ export interface AppState {
   pickOverlayFile(): Promise<string | undefined>;
   // --- Train flow (PLAN 4.4, ADR-034) ---
   /** Generates a plan for the profile and time and makes it the editable `trainPlan`. */
-  planTraining(equipmentProfileId: string, minutes: number, seed?: number): SessionPlan;
+  planTraining(
+    equipmentProfileId: string,
+    minutes: number,
+    trainingType?: TrainingType,
+    seed?: number,
+  ): SessionPlan;
   /** Nodes that can replace plan exercise `key` (same pattern, trainable, doable). */
   swapOptions(key: string): ExerciseNode[];
   swapPlanExercise(key: string, nodeId: string): void;
@@ -1103,7 +1115,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         set({ equipmentProfiles: listEquipmentProfiles(db) });
       },
 
-      generateWorkout(equipmentProfileId, availableMinutes, seed) {
+      generateWorkout(equipmentProfileId, availableMinutes, seed, trainingType) {
         const { equipmentProfiles, goals, sessions } = get();
         const profile = equipmentProfiles.find((candidate) => candidate.id === equipmentProfileId);
         if (!profile) throw new Error(`Unknown equipment profile '${equipmentProfileId}'`);
@@ -1113,11 +1125,12 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           equipment: profile.tags,
           availableMinutes,
           seed: seed ?? sessions.length,
+          ...(trainingType ? { trainingType } : {}),
         });
       },
 
-      planTraining(equipmentProfileId, minutes, seed) {
-        const workout = get().generateWorkout(equipmentProfileId, minutes, seed);
+      planTraining(equipmentProfileId, minutes, trainingType, seed) {
+        const workout = get().generateWorkout(equipmentProfileId, minutes, seed, trainingType);
         const plan = sessionPlan(workout, equipmentProfileId, minutes);
         set({ trainPlan: plan });
         return plan;

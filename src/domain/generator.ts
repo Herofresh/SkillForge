@@ -39,7 +39,7 @@ import {
   nodeAttributes,
   type AttributeValues,
 } from './character';
-import { resolveNode, resolveTree, type NodeStatus } from './progression';
+import { awaitingTrial, resolveNode, resolveTree, type NodeStatus } from './progression';
 import { compareHistory } from './recompute';
 import {
   isStraightArmRested,
@@ -81,6 +81,7 @@ import type {
   WorkoutBlock,
   WorkoutBlockKind,
   WorkoutPlan,
+  TrainingType,
   WorkoutRequest,
 } from './types';
 import { WORKOUT_BLOCK_KINDS } from './types';
@@ -152,6 +153,30 @@ export const PACE_NOTE_DEVIATION = 0.2;
 // --- Prescription and time --------------------------------------------------------------------
 
 export const WORKING_SETS = 3;
+
+// --- Training types (PLAN 7.8 FB-5, ADR-074) ---
+/** Standard and Challenging: the cool-down that fills spare time stays under this share of it. */
+export const COOL_DOWN_MAX_SHARE = 0.15;
+/** Standard and Challenging: at most this many cool-down exercises (a goal's mobility included). */
+export const COOL_DOWN_MAX_EXERCISES = 2;
+/** Challenging: working sets per exercise (the time fill can still add more). */
+export const CHALLENGING_WORKING_SETS = 4;
+/** Recovery: light practice, this many sets at the easy end of the range. */
+export const RECOVERY_SETS = MIN_WORKING_SETS;
+/** Recovery skips these slots: no hard strength. */
+const RECOVERY_SKIPPED_KINDS: readonly WorkoutBlockKind[] = ['strength', 'core'];
+/** Recovery fills its time with more sets of mobility and light skill practice. */
+const RECOVERY_GROWING_KINDS: readonly WorkoutBlockKind[] = ['skill', 'cool_down'];
+/** The plan's first note for a non-standard session. */
+const TRAINING_TYPE_NOTES: Readonly<Record<TrainingType, string | undefined>> = {
+  standard: undefined,
+  recovery:
+    'Recovery session: mobility, a cool-down and light skill practice. No hard strength and no ' +
+    'straight-arm work today.',
+  challenging:
+    'Challenging session: more sets and the harder end of each range, and a Trial if one is due. ' +
+    'End a set when your form breaks.',
+};
 /** Double progression: how much the per-set target grows after a fully successful session. */
 export const PROGRESSION_STEP: Readonly<Record<Metric, number>> = {
   reps: 1,
@@ -410,8 +435,42 @@ const topOfRange = (node: ExerciseNode): Prescription => ({
  * else the weakest set again, always inside the working range. Once every set reached the top of
  * the range and the Trial is not passed yet, the Trial is prescribed, for a straight-arm node only
  * when `isTrialOpenBySafeguards` (ADR-010).
+ *
+ * The training type (FB-5, ADR-074) shifts it: Recovery prescribes `RECOVERY_SETS` at the bottom of
+ * the range and no Trial; Challenging prescribes `CHALLENGING_WORKING_SETS` one step above the
+ * double-progression target (inside the range), and the Trial of a node stuck at the level-5 cap
+ * (`awaitingTrial`) once the safeguards allow it.
  */
 export function prescribe(
+  node: ExerciseNode,
+  progress: NodeProgress | undefined,
+  lastSets: readonly LoggedSet[] | undefined,
+  now: number,
+  type: TrainingType = 'standard',
+): Prescription {
+  if (type === 'recovery') {
+    return {
+      sets: RECOVERY_SETS,
+      target: withRepCount(node, node.workingRange.min),
+      isTrial: false,
+    };
+  }
+  const base = standardPrescription(node, progress, lastSets, now);
+  if (type !== 'challenging' || base.isTrial) return base;
+  if (awaitingTrial(progress) && isTrialOpenBySafeguards(node, progress, now)) {
+    return { sets: node.trial.sets, target: withRepCount(node, node.trial.target), isTrial: true };
+  }
+  const { min, max } = node.workingRange;
+  const harder = roundTarget(clamp(base.target.value + PROGRESSION_STEP[node.metric], min, max));
+  return {
+    ...base,
+    sets: Math.max(base.sets, CHALLENGING_WORKING_SETS),
+    target: { ...base.target, value: harder },
+  };
+}
+
+/** The double progression of a standard session (see `prescribe`). */
+function standardPrescription(
   node: ExerciseNode,
   progress: NodeProgress | undefined,
   lastSets: readonly LoggedSet[] | undefined,
@@ -561,7 +620,13 @@ function prescribeFrom(
   request: WorkoutRequest,
   history: WorkingHistory,
 ): Prescription {
-  return prescribe(node, request.progress[node.id], lastPerformance(node, history), request.now);
+  return prescribe(
+    node,
+    request.progress[node.id],
+    lastPerformance(node, history),
+    request.now,
+    request.trainingType,
+  );
 }
 
 function toExercise(
@@ -742,9 +807,12 @@ const GROWING_BLOCK_KINDS: readonly WorkoutBlockKind[] = ['skill', 'strength', '
  * Adds one set per round to every main block (to both exercises of a pair) while it fits the time
  * and the straight-arm budget, up to `MAX_WORKING_SETS`. Trials keep their prescribed sets.
  */
-function growSets(builder: Builder): void {
+function growSets(
+  builder: Builder,
+  kinds: readonly WorkoutBlockKind[] = GROWING_BLOCK_KINDS,
+): void {
   const blocks = [...builder.blocks.entries()]
-    .filter(([, block]) => GROWING_BLOCK_KINDS.includes(block.kind))
+    .filter(([, block]) => kinds.includes(block.kind))
     .sort(([a], [b]) => a - b)
     .map(([, block]) => block);
   let grew = true;
@@ -774,12 +842,16 @@ function extraBlockKind(node: ExerciseNode): WorkoutBlockKind {
 
 /**
  * Adds up to `MAX_EXTRA_EXERCISES` unused candidates, best score first, each as its own block from
- * slot `firstSlot` on, while they fit. Returns the next free slot.
+ * slot `firstSlot` on, while they fit. Only kinds `allow` accepts; a cool-down extra only while the
+ * cool-down stays within `coolDownLimit` seconds (FB-5). Returns the next free slot.
  */
 function addExtraExercises(
   builder: Builder,
   candidates: readonly Candidate[],
   firstSlot: number,
+  allow: (kind: WorkoutBlockKind) => boolean = () => true,
+  coolDownLimit = Number.POSITIVE_INFINITY,
+  coolDownMax = Number.POSITIVE_INFINITY,
 ): number {
   let slot = firstSlot;
   // Training work first; more stretching only when nothing else fits.
@@ -791,10 +863,18 @@ function addExtraExercises(
     if (slot - firstSlot >= MAX_EXTRA_EXERCISES) break;
     if (builder.usedIds.has(candidate.node.id)) continue;
     const kind = extraBlockKind(candidate.node);
+    if (!allow(kind)) continue;
     const restSec = kind === 'cool_down' ? COOL_DOWN_REST_SEC : SINGLE_REST_SEC;
     const fitted = fitExercise(builder, candidate, restSec, straightArmSecondsLeft(builder));
     // An extra is only worth it as working sets (a straight-arm leftover of one set is not).
     if (!fitted || fitted.exercise.sets < MIN_WORKING_SETS) continue;
+    if (
+      kind === 'cool_down' &&
+      (coolDownSeconds(builder) + secondsOf(builder, [fitted.exercise]) > coolDownLimit ||
+        coolDownCount(builder) >= coolDownMax)
+    ) {
+      continue;
+    }
     if (tryAddBlock(builder, slot, kind, [fitted.exercise], fitted.notes)) slot++;
   }
   return slot;
@@ -807,16 +887,74 @@ const EXTRA_COOL_DOWN: SlotDef = {
   restSec: COOL_DOWN_REST_SEC,
 };
 
+/** Seconds the cool-down blocks take so far. */
+const coolDownSeconds = (builder: Builder): number =>
+  [...builder.blocks.values()]
+    .filter((block) => block.kind === 'cool_down')
+    .reduce((sum, block) => sum + secondsOf(builder, block.exercises), 0);
+
+/** Cool-down exercises planned so far. */
+const coolDownCount = (builder: Builder): number =>
+  [...builder.blocks.values()]
+    .filter((block) => block.kind === 'cool_down')
+    .reduce((sum, block) => sum + block.exercises.length, 0);
+
+/** Adds the extra cool-down when there is none yet and it fits `limit` seconds; the next free slot. */
+function addCoolDown(
+  builder: Builder,
+  candidates: readonly Candidate[],
+  slot: number,
+  limit: number,
+): number {
+  if ([...builder.blocks.values()].some((block) => block.kind === 'cool_down')) return slot;
+  if (!fillSlot(builder, slot, EXTRA_COOL_DOWN, candidates)) return slot;
+  const block = builder.blocks.get(slot);
+  if (block && secondsOf(builder, block.exercises) > limit) {
+    // Too long for the share: two sets, or none.
+    builder.seconds -= secondsOf(builder, block.exercises);
+    const shorter = block.exercises.map((exercise) => reduced(builder, exercise));
+    if (secondsOf(builder, shorter) > limit) {
+      builder.blocks.delete(slot);
+      for (const exercise of block.exercises) builder.usedIds.delete(exercise.nodeId);
+      return slot;
+    }
+    block.exercises = shorter;
+    builder.seconds += secondsOf(builder, shorter);
+  }
+  return slot + 1;
+}
+
 /**
- * Fills the time left after the slots and the warm-up ramp (ADR-063): a cool-down when there is
- * none, then more sets of the main work, then extra exercises (and their sets).
+ * Fills the time left after the slots and the warm-up ramp (ADR-063), by training type (FB-5):
+ * - standard: a cool-down when there is none, then more sets of the main work, then extra exercises
+ *   (and their sets); the cool-down stays within `COOL_DOWN_MAX_SHARE` of the time;
+ * - challenging: more sets and extra training work first, the (short) cool-down last;
+ * - recovery: cool-down and light skill practice only, no extra sets.
  */
-function fillTime(builder: Builder, candidates: readonly Candidate[]): void {
+function fillTime(builder: Builder, candidates: readonly Candidate[], type: TrainingType): void {
   let slot = SLOT_DEFS.length;
-  const hasCoolDown = [...builder.blocks.values()].some((block) => block.kind === 'cool_down');
-  if (!hasCoolDown && fillSlot(builder, slot, EXTRA_COOL_DOWN, candidates)) slot++;
+  const limit = COOL_DOWN_MAX_SHARE * budgetSeconds(builder);
+  if (type === 'recovery') {
+    slot = addCoolDown(builder, candidates, slot, Number.POSITIVE_INFINITY);
+    addExtraExercises(
+      builder,
+      candidates,
+      slot,
+      (kind) => kind === 'cool_down' || kind === 'skill',
+    );
+    growSets(builder, RECOVERY_GROWING_KINDS);
+    return;
+  }
+  if (type === 'challenging') {
+    growSets(builder);
+    slot = addExtraExercises(builder, candidates, slot, (kind) => kind !== 'cool_down');
+    growSets(builder);
+    addCoolDown(builder, candidates, slot, limit);
+    return;
+  }
+  slot = addCoolDown(builder, candidates, slot, limit);
   growSets(builder);
-  addExtraExercises(builder, candidates, slot);
+  addExtraExercises(builder, candidates, slot, () => true, limit, COOL_DOWN_MAX_EXERCISES);
   growSets(builder);
 }
 
@@ -851,6 +989,7 @@ function outgrownIds(
  */
 export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
   const { nodes, progress, equipment, now } = request;
+  const type = request.trainingType ?? 'standard';
   const lookup = lookupOf(nodes);
   const statuses = resolveTree(nodes, progress);
   const history = workingSetsBySession(request.recentSessions);
@@ -894,6 +1033,8 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
       }
       continue;
     }
+    // Recovery (FB-5): no straight-arm load at all.
+    if (node.straightArm && type === 'recovery') continue;
     if (node.straightArm && !straightArmRested) {
       skippedStraightArm = true;
       continue;
@@ -942,7 +1083,12 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
   }
 
   // Slots, best candidate first, while they fit the time and the straight-arm budget.
-  const open = new Set(SLOT_DEFS.keys());
+  // Recovery (FB-5): no strength or core slots; the skill slots get light practice.
+  const open = new Set(
+    [...SLOT_DEFS.keys()].filter(
+      (index) => type !== 'recovery' || !RECOVERY_SKIPPED_KINDS.includes(SLOT_DEFS[index].kind),
+    ),
+  );
   const mainOrder: string[] = [];
   while (open.size > 0) {
     let best: { index: number; score: number } | undefined;
@@ -983,7 +1129,7 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
     if (builder.seconds > before) ramps++;
   }
 
-  fillTime(builder, ranked);
+  fillTime(builder, ranked, type);
 
   const blocks = [...builder.blocks.entries()]
     .sort(
@@ -1026,6 +1172,8 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
     const weaker = peaks.push < peaks.pull ? 'push' : 'pull';
     notes.push(`Your push and pull levels are far apart, so ${weaker} work gets priority.`);
   }
+  const typeNote = TRAINING_TYPE_NOTES[type];
+  if (typeNote) notes.unshift(typeNote);
   const pace = paceNote(builder.pace);
   if (pace) notes.push(pace);
   const estimatedMinutes = Math.ceil(builder.seconds / 60);
@@ -1034,6 +1182,11 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
       `This plan fills about ${estimatedMinutes} of your ${request.availableMinutes} min: that is ` +
         'all your tree, equipment and rest days suggest today. Add exercises if you want more.',
     );
+    if (type !== 'recovery' && recovering.size > 0) {
+      notes.push(
+        'Much of your strength work is resting today: a Recovery session may suit it better.',
+      );
+    }
   }
 
   return {

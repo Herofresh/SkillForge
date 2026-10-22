@@ -728,9 +728,16 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
 
 ## Generator *(Phase 2.5, ADR-024, ADR-063; constants in `src/domain/generator.ts`, rests and time in `src/domain/sessionTime.ts`)*
 
-`generateWorkout({ nodes, goals, progress, equipment, availableMinutes, recentSessions, now, seed })`
+`generateWorkout({ nodes, goals, progress, equipment, availableMinutes, recentSessions, now, seed, trainingType? })`
 → `WorkoutPlan`. Pure and deterministic (same request and seed → same plan, independent of the
 order of `recentSessions`). Pass the merged tree and `EngineState.progress`.
+
+**Training type** (`trainingType`, PLAN 7.8 FB-5, ADR-074; default `standard`): Standard caps the
+filled cool-down at `COOL_DOWN_MAX_SHARE` 15 % of the time and `COOL_DOWN_MAX_EXERCISES` 2; Recovery
+drops strength / core slots and all straight-arm nodes and prescribes `RECOVERY_SETS` 2 at the bottom
+of the range (no Trials), filling with mobility and light skill sets; Challenging prescribes
+`CHALLENGING_WORKING_SETS` 4 one `PROGRESSION_STEP` above the double progression and the Trial of a node
+stuck at the level-5 cap, and puts the cool-down last. Safeguards and the 48 h rest hold for all.
 
 1. **Frontier** (`goalFrontier`): per goal, walk unmet hard prerequisites (from `resolveTree`,
    so alternatives satisfy them) to trainable nodes; a locked prerequisite with a trainable
