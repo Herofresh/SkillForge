@@ -332,6 +332,9 @@
   also on long press); it opens the shared `ExerciseInfoSheet` (description, looping animation,
   cues) without picking the goal or leaving the step. App version **1.0.2, versionCode 10** (the
   next closed-track upload was planned as FB-1 + FB-2; never built). **FB-1b** (cosmetic) is open.
+- **FB-3** fixed ([PR #81](https://github.com/Herofresh/SkillForge/pull/81)): `Screen` pads its end by the navigation bar (`insetBottom`, default on;
+  off on the tab screens and in onboarding), so stack screens no longer end under the 3-button bar
+  or gesture handle. Not in a release build yet. FB-4 … FB-7 are decided, not done (see 7.8).
 - **1.2.0, versionCode 12** (2026-10-17): 7.10 Health Connect. Built so the user can upload it to the
   closed track as a **draft** first: the Health apps declaration only asks about Health Connect data
   types once Play has seen a bundle with the permission (checked by the user: the form showed no
@@ -377,7 +380,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **FB-3 navigation bar overlap (task 7.8, branch `fix/bottom-inset`):** `Screen`'s `insetBottom` (default
+- **FB-3 navigation bar overlap (task 7.8, [PR #81](https://github.com/Herofresh/SkillForge/pull/81)):** `Screen`'s `insetBottom` (default
   on) adds `insets.bottom` to the scroll content's bottom padding; tab screens (Train, Character,
   Settings) and `OnboardingScaffold` pass `false`. Tree has no `Screen`. Verified in Expo Go on
   Pixel_8_Pro_API_35 with 3-button navigation: before, "Start session" under the buttons
@@ -1759,7 +1762,7 @@ from the GitHub releases' 1–7, ADR-068).
     navigation bar (gesture handle or 3-button bar) covered the end of every stack screen (plan,
     session, summary, skill pages, guide, editor): `Screen` had no bottom inset. Fixed: `Screen`
     pads by the navigation bar (`insetBottom`, off on the tab screens and in onboarding, which have
-    a tab bar or footer below). Branch `fix/bottom-inset`; screenshots `docs/screenshots/fb3-*.png`.
+    a tab bar or footer below). [PR #81](https://github.com/Herofresh/SkillForge/pull/81); screenshots `docs/screenshots/fb3-*.png`.
   - [ ] FB-4 (UX, user 2026-10-22): "Anzeigen wenn du einen Trial brauchst um weiter zu Leveln":
     show when a skill is stuck at level 5 until its Trial (ADR-004 cap): a "Trial needed" badge on
     the Tree tile, a note on the plan and session exercise card, a line on the summary ("XP
