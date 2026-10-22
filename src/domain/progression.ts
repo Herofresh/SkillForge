@@ -157,6 +157,29 @@ export function passTrial(progress: NodeProgress, node: ExerciseNode, at: number
 }
 
 /**
+ * The skills a passed Trial of `node` also counts for (PLAN 7.8 FB-7, ADR-075): its hard
+ * prerequisites and theirs, transitively, nearest first. Unknown ids are skipped; a cycle (which
+ * the validator forbids) cannot loop.
+ */
+export function trialChain(node: ExerciseNode, lookup: NodeLookup): ExerciseNode[] {
+  const seen = new Set<string>([node.id]);
+  const chain: ExerciseNode[] = [];
+  const queue = [node];
+  while (queue.length > 0) {
+    const current = queue.shift() as ExerciseNode;
+    for (const prerequisite of current.prerequisites) {
+      if (prerequisite.kind !== 'hard' || seen.has(prerequisite.nodeId)) continue;
+      seen.add(prerequisite.nodeId);
+      const earlier = lookup.get(prerequisite.nodeId);
+      if (!earlier) continue;
+      chain.push(earlier);
+      queue.push(earlier);
+    }
+  }
+  return chain;
+}
+
+/**
  * Whether `sets` contain a passed Trial for `node`: at least `trial.sets` Trial sets of the node's
  * metric, each reaching `trial.target` (and `trial.reps` lowerings or reps where the metric uses them).
  */

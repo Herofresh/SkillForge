@@ -9,6 +9,7 @@ import {
   formatWorkingRange,
   NO_DESCRIPTION_TEXT,
   spokenOgLevel,
+  trialAlsoCountsText,
 } from './format';
 
 describe('formatPerformance', () => {
@@ -92,5 +93,16 @@ describe('formatDescription', () => {
     expect(formatDescription('Hanging from a bar.')).toBe('Hanging from a bar.');
     expect(formatDescription('')).toBe(NO_DESCRIPTION_TEXT);
     expect(formatDescription('  ')).toBe(NO_DESCRIPTION_TEXT);
+  });
+});
+
+describe('trialAlsoCountsText (PLAN 7.8 FB-7)', () => {
+  it('names one, two or more skills', () => {
+    expect(trialAlsoCountsText(['Dead hang'])).toBe(
+      'It also counts for Dead hang: it is proficient now.',
+    );
+    expect(trialAlsoCountsText(['A', 'B', 'C'])).toBe(
+      'It also counts for A, B and C: they are proficient now.',
+    );
   });
 });

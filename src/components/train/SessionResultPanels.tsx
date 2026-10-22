@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { TRIAL_NEEDED_LABEL, trialNeededNote } from '@/domain/format';
+import { TRIAL_NEEDED_LABEL, trialAlsoCountsText, trialNeededNote } from '@/domain/format';
 import type { SummaryView } from '@/domain/trainView';
 
 import { Spacing, TOUCH_TARGET } from '../theme';
@@ -112,6 +112,14 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
               <PixelText tone="rune">{node.name}</PixelText>
             </Pressable>
           ))}
+        </PixelFrame>
+      )}
+
+      {view.trialsImplied.length > 0 && (
+        <PixelFrame variant="rune" contentStyle={styles.gap} testID="summary-trial-also-counts">
+          <PixelText tone="rune">
+            {trialAlsoCountsText(view.trialsImplied.map((node) => node.name))}
+          </PixelText>
         </PixelFrame>
       )}
 

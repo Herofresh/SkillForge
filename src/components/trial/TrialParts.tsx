@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { unlockedByTrial } from '@/domain/assessment';
-import { formatPerformance } from '@/domain/format';
+import { formatPerformance, trialAlsoCountsText } from '@/domain/format';
 import { PROFICIENT_LEVEL } from '@/domain/progression';
 import type { SessionResult } from '@/domain/recompute';
 import { timerModeFor, type SetTimer } from '@/domain/setTimer';
@@ -99,9 +99,9 @@ type OutcomeProps = {
 export function TrialOutcome({ node, outcome, standard }: OutcomeProps) {
   const nodes = useAppStore((state) => state.nodes);
   const passed = trialPassedIn(outcome);
-  const unlockedNames = unlockedByTrial(outcome, node.id).map(
-    (id) => nodes.find((entry) => entry.id === id)?.name ?? id,
-  );
+  const nameOf = (id: string) => nodes.find((entry) => entry.id === id)?.name ?? id;
+  const unlockedNames = unlockedByTrial(outcome, node.id).map(nameOf);
+  const impliedNames = (outcome.trialsImplied ?? []).map(nameOf);
   return (
     <>
       {passed ? (
@@ -110,6 +110,11 @@ export function TrialOutcome({ node, outcome, standard }: OutcomeProps) {
           <PixelText align="center">
             {`${node.name} is now proficient (level ${PROFICIENT_LEVEL}). Its successors are open to train.`}
           </PixelText>
+          {impliedNames.length > 0 && (
+            <PixelText align="center" tone="rune" testID="trial-also-counts">
+              {trialAlsoCountsText(impliedNames)}
+            </PixelText>
+          )}
         </PixelFrame>
       ) : (
         <PixelFrame variant="gold" testID="trial-not-passed">

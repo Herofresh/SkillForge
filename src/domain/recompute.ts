@@ -21,6 +21,7 @@ import {
   passTrial,
   resolveTree,
   selfUnlock,
+  trialChain,
 } from './progression';
 import { prerequisitesWarning, sessionSafeguardWarnings } from './safeguards';
 import type {
@@ -85,6 +86,11 @@ export interface SessionResult {
   levelUps: { nodeId: string; from: number; to: number }[];
   /** Nodes that were locked before the session and are not after it. */
   unlocked: string[];
+  /**
+   * Earlier skills a Trial passed in this session also counted for (PLAN 7.8 FB-7, ADR-075): their
+   * Trial now counts as passed, like a test-out. Absent in results from before 7.8.
+   */
+  trialsImplied?: string[];
   /** Advisory warnings (safeguards, unmet prerequisites) for the summary; never blocking. */
   warnings: SafeguardWarning[];
   /** What the session did for its week's class challenge (PLAN 6.9b); absent without one. */
@@ -190,6 +196,25 @@ function applySessionWith(
     });
   }
 
+  // FB-7 (ADR-075): a passed Trial also counts for the skills it builds on (hard prerequisites,
+  // transitively), like a test-out of each: at least level 5, Proficient. No session XP is added.
+  const trialsImplied: string[] = [];
+  for (const exercise of exercises) {
+    if (!exercise.trialPassed) continue;
+    const passedAt = progress[exercise.nodeId]?.trialPassedAt ?? session.startedAt;
+    for (const earlier of trialChain(lookup.get(exercise.nodeId) as ExerciseNode, lookup)) {
+      const own = progress[earlier.id] ?? emptyProgress(earlier.id);
+      if (own.trialPassed) continue;
+      const passed = passTrial(own, earlier, passedAt);
+      progress[earlier.id] = passed;
+      trialsImplied.push(earlier.id);
+      const from = state.progress[earlier.id]?.level ?? own.level;
+      const trainedUp = levelUps.find((up) => up.nodeId === earlier.id);
+      if (trainedUp) trainedUp.to = passed.level;
+      else if (passed.level > from) levelUps.push({ nodeId: earlier.id, from, to: passed.level });
+    }
+  }
+
   const knownSets = [...groups.values()].flat();
   warnings.push(
     ...sessionSafeguardWarnings(
@@ -232,6 +257,7 @@ function applySessionWith(
       streak,
       levelUps,
       unlocked,
+      ...(trialsImplied.length > 0 ? { trialsImplied } : {}),
       warnings,
       ...(challenge.step ? { challenge: challenge.step } : {}),
     },

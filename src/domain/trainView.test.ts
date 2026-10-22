@@ -241,6 +241,7 @@ describe('Train view models', () => {
         { nodeId: 'chin_up', name: 'Chin-up' },
         { nodeId: 'missing', name: 'missing' },
       ],
+      trialsImplied: [],
       awaitingTrial: [],
       warnings: [],
     });

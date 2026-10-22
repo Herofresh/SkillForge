@@ -86,6 +86,7 @@ describe('"Trial needed" (PLAN 7.8 FB-4)', () => {
       levelUps: [],
       unlocked: [],
       awaitingTrial: [{ nodeId: 'pull_up', name: 'Pull-up', banked: 30 }],
+      trialsImplied: [],
       warnings: [],
     };
     await render(
@@ -102,5 +103,39 @@ describe('"Trial needed" (PLAN 7.8 FB-4)', () => {
     );
     await user.press(screen.getByRole('link', { name: /Pull-up: Level 5 reached/ }));
     expect(onOpenNode).toHaveBeenCalledWith('pull_up');
+  });
+});
+
+describe('a Trial that also counts for earlier skills (PLAN 7.8 FB-7)', () => {
+  it('says so on the summary', async () => {
+    const view: SummaryView = {
+      totalXp: 10,
+      exerciseXp: 10,
+      completionBonus: 0,
+      streakBonus: 0,
+      challengeBonus: 0,
+      streak: 1,
+      exercises: [],
+      levelUps: [],
+      unlocked: [],
+      awaitingTrial: [],
+      trialsImplied: [
+        { nodeId: 'pull_up_negative', name: 'Negative pull-up' },
+        { nodeId: 'dead_hang', name: 'Dead hang' },
+      ],
+      warnings: [],
+    };
+    await render(
+      <SessionResultPanels
+        view={view}
+        celebrate={false}
+        playKey="s"
+        subtitle="Session"
+        onOpenNode={jest.fn()}
+      />,
+    );
+    expect(screen.getByTestId('summary-trial-also-counts')).toHaveTextContent(
+      'It also counts for Negative pull-up and Dead hang: they are proficient now.',
+    );
   });
 });
