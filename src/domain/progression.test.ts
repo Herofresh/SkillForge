@@ -19,6 +19,7 @@ import {
   resolveNode,
   resolveTree,
   selfUnlock,
+  trialChain,
   xpForLevel,
   type ProgressMap,
 } from '@/domain/progression';
@@ -350,5 +351,26 @@ describe('awaitingTrial (PLAN 7.8 FB-4)', () => {
     expect(nodesAwaitingTrial([other, node], progress).map((entry) => entry.id)).toEqual([
       'push_up',
     ]);
+  });
+});
+
+describe('trialChain (PLAN 7.8 FB-7)', () => {
+  it('lists the hard prerequisites transitively, nearest first, skipping recommended and unknown ones', () => {
+    const chain = makeChain();
+    const muscleUp = makeNode({
+      id: 'muscle_up',
+      prerequisites: [
+        { nodeId: 'pull_up', minLevel: 5, kind: 'hard' },
+        { nodeId: 'dip', minLevel: 3, kind: 'recommended' },
+        { nodeId: 'gone', minLevel: 5, kind: 'hard' },
+      ],
+    });
+    const lookup = new Map([...chain, muscleUp].map((node) => [node.id, node]));
+    expect(trialChain(muscleUp, lookup).map((node) => node.id)).toEqual([
+      'pull_up',
+      'pull_up_negative',
+      'dead_hang',
+    ]);
+    expect(trialChain(chain[0], lookup)).toEqual([]);
   });
 });

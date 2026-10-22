@@ -318,3 +318,52 @@ describe('recompute determinism', () => {
     expect(codes(results[0].warnings)).toContain('straight_arm_min_weeks');
   });
 });
+
+describe('a passed Trial counts for the earlier skills (PLAN 7.8 FB-7)', () => {
+  const pullUpTrial = (id: string, day: number) =>
+    makeSession(id, day * MS_PER_DAY, [{ nodeId: 'pull_up', count: 3, isTrial: true }]);
+
+  it('passes the Trials of every hard prerequisite, transitively, like a test-out', () => {
+    const { state, results } = recompute(nodes, [pullUpTrial('t', 1)]);
+    // At the Trial's own time (its last set).
+    const passedAt = state.progress.pull_up.trialPassedAt;
+    expect(passedAt).toBeGreaterThanOrEqual(MS_PER_DAY);
+    for (const id of ['pull_up', 'pull_up_negative', 'dead_hang']) {
+      expect(state.progress[id]).toMatchObject({ trialPassed: true, trialPassedAt: passedAt });
+      expect(state.progress[id].level).toBeGreaterThanOrEqual(PROFICIENT_LEVEL);
+    }
+    const [result] = results;
+    expect('trialsImplied' in result && result.trialsImplied).toEqual([
+      'pull_up_negative',
+      'dead_hang',
+    ]);
+    expect('levelUps' in result && result.levelUps.map((up) => [up.nodeId, up.to])).toEqual(
+      expect.arrayContaining([
+        ['pull_up_negative', PROFICIENT_LEVEL],
+        ['dead_hang', PROFICIENT_LEVEL],
+      ]),
+    );
+    // No session XP for the earlier skills: only the Trial's own sets earn it.
+    const alone = recompute(nodes, [
+      makeSession('n', MS_PER_DAY, [{ nodeId: 'pull_up', count: 3, isTrial: false }]),
+    ]);
+    expect(state.totalXp).toBe(alone.state.totalXp);
+  });
+
+  it('leaves skills already passed as they are and ignores recommended prerequisites and other chains', () => {
+    const earlier = makeSession('e', 0, [{ nodeId: 'dead_hang', count: 3, isTrial: true }]);
+    const { state } = recompute(nodes, [earlier, pullUpTrial('t', 1)]);
+    // Its own, earlier Trial stays the one that counts.
+    expect(state.progress.dead_hang.trialPassedAt).toBeLessThan(MS_PER_DAY);
+    expect(state.progress.tuck_front_lever).toBeUndefined();
+  });
+
+  it('adds nothing for a failed Trial', () => {
+    const failed = makeSession('f', MS_PER_DAY, [
+      { nodeId: 'pull_up', count: 3, isTrial: true, actual: { value: 3 } },
+    ]);
+    const { state } = recompute(nodes, [failed]);
+    expect(state.progress.pull_up_negative).toBeUndefined();
+    expect(state.progress.dead_hang).toBeUndefined();
+  });
+});

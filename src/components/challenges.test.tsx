@@ -194,6 +194,7 @@ describe('the challenge in the class sheet and the summary bonuses', () => {
           levelUps: [],
           unlocked: [],
           awaitingTrial: [],
+          trialsImplied: [],
           warnings: [],
         }}
         celebrate={false}

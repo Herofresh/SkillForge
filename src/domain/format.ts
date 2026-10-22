@@ -106,6 +106,18 @@ export function formatShortDate(at: number): string {
   return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 }
 
+/**
+ * What a passed Trial also counted for (PLAN 7.8 FB-7): "It also counts for Pull-up negative and Dead
+ * hang: they are proficient now."
+ */
+export function trialAlsoCountsText(names: readonly string[]): string {
+  const list =
+    names.length <= 1
+      ? (names[0] ?? '')
+      : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+  return `It also counts for ${list}: ${names.length === 1 ? 'it is' : 'they are'} proficient now.`;
+}
+
 /** The marker of a node stuck at level 5 until its Trial (ADR-004, PLAN 7.8 FB-4). */
 export const TRIAL_NEEDED_LABEL = 'Trial needed';
 

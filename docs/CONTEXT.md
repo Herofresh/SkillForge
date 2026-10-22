@@ -156,7 +156,8 @@ src/
                         everything before an import), backupFileName, BACKUP_SCHEMA_VERSION
     xp.ts               units, difficulty/outcome multipliers, exercise and session XP, streak
     progression.ts      node XP curve, level-5 cap, Trials, test-out, node states, unlocks;
-                        awaitingTrial / nodesAwaitingTrial (stuck at the cap, "Trial needed", FB-4)
+                        awaitingTrial / nodesAwaitingTrial (stuck at the cap, "Trial needed", FB-4);
+                        trialChain (a passed Trial also passes its hard prerequisites, FB-7, ADR-075)
     safeguards.ts       ADR-010 tendon rules (advisory, ADR-023): straight-arm Trial clock, 60 s
                         budget, 48 h rest, and the SafeguardWarning producers
     character.ts        character level, attributes (PATTERN_ATTRIBUTES, trains), rank, balance warning

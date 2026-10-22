@@ -412,6 +412,7 @@ describe('SessionResultPanels', () => {
       levelUps: [],
       unlocked: [],
       awaitingTrial: [],
+      trialsImplied: [],
       warnings: [],
     };
     await render(

@@ -275,6 +275,8 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         'Test-out: you can attempt any skill’s Trial at any time, even a locked one. Passing ' +
           `makes the skill proficient at once (at least level ${n(facts.proficientLevel)}), so ` +
           'you can skip what you already master.',
+        'A passed Trial also counts for the skills it builds on: every earlier skill it needs ' +
+          'becomes proficient too, as if you had passed its Trial.',
         'Unlock anyway: a locked skill can be opened by hand from its page. The app lists what ' +
           'it would normally need, you acknowledge it, and the choice is yours.',
         'A skill unlocks on its own when the skills it builds on (or one of their ' +

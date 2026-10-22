@@ -2554,3 +2554,23 @@ Template:
 - Consequences: three different plans for the same day; tests in `generator.test.ts`. A future
   "remember my last type" would be a setting. Recovery fills less time when few mobility exercises
   are unlocked (e.g. 21 of 90 min for a beginner); the fill note explains it.
+
+## ADR-075: A passed Trial also counts for the skills it builds on (PLAN 7.8 FB-7)
+- Date: 2026-10-22 · Status: Accepted (user decision 2026-10-22; extends ADR-004 and ADR-023)
+- Context: tester feedback: passing the Trial of a harder skill should also unlock the earlier
+  skills. Until now a passed Trial (also a test-out) made only that node proficient; its hard
+  prerequisites kept their own state, so a hero who proved the Pull-up still showed the Dead hang
+  and the Negative pull-up as untrained, with their Trials pending.
+- Decision: when a session passes a node's Trial, every hard prerequisite, transitively
+  (`trialChain`), counts as Trial passed too, exactly like a test-out (`passTrial`: Trial passed,
+  node XP lifted to the level-5 threshold, so at least level 5, Proficient), at the passing
+  Trial's time. Nodes already passed keep their own Trial and time. Recommended prerequisites and
+  unknown ids are skipped. No session or character XP is added (only the Trial's own sets earn
+  XP); levels, unlocks, attributes and rank follow from the lifted node progress as usual. The
+  result lists them (`SessionResult.trialsImplied`); the level-ups include them. The summary and
+  the Trial result say "It also counts for …".
+- Consequences: derived on replay (ADR-008), so existing histories gain it on the next recompute:
+  heroes who passed a hard Trial see its earlier skills proficient. Release backups still import
+  (their tests pass). Straight-arm prerequisites are lifted too (the safeguards gate Trials and
+  training, never what a passed Trial implies; ADR-023 allows test-outs on day one). A Trial of a
+  skill reached by self-unlock still implies its prerequisites: the user proved the harder skill.

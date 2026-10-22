@@ -257,6 +257,8 @@ export interface SummaryView {
    * cap (PLAN 7.8 FB-4). Only with the engine's progress (the summary right after the session).
    */
   awaitingTrial: { nodeId: string; name: string; banked: number }[];
+  /** Earlier skills a Trial passed in this session also counted for (FB-7, ADR-075). */
+  trialsImplied: { nodeId: string; name: string }[];
   warnings: SafeguardWarning[];
 }
 
@@ -310,6 +312,10 @@ export function summaryView(
       name: nameOf(lookup, levelUp.nodeId),
     })),
     unlocked: result.unlocked.map((nodeId) => ({ nodeId, name: nameOf(lookup, nodeId) })),
+    trialsImplied: (result.trialsImplied ?? []).map((nodeId) => ({
+      nodeId,
+      name: nameOf(lookup, nodeId),
+    })),
     awaitingTrial: progress
       ? result.exercises.flatMap(({ nodeId }) => {
           const node = lookup.get(nodeId);

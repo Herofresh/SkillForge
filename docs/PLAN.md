@@ -380,6 +380,13 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-7 Trial chain (task 7.8, ADR-075, branch `feat/trial-chain`):** `trialChain` in `progression.ts`;
+  `applySessionWith` in `recompute.ts` passes every hard prerequisite of a Trial passed in the session
+  (`passTrial`, at the Trial's time), lists them in `SessionResult.trialsImplied` and the level-ups.
+  Shown by `TrialOutcome` (Tree / onboarding Trials) and the summary (`SummaryView.trialsImplied`), text
+  `trialAlsoCountsText`. Retroactive on recompute (derived state). Tests: `recompute.test.ts`,
+  `progression.test.ts`, `format.test.ts`, `trialHint.test.tsx`; release-backup tests unchanged and
+  passing. FB-3 … FB-7 are all done: next is a 1.2.x / 1.3.0 build for the closed track.
 - **FB-6 Customize grid (task 7.8, [PR #84](https://github.com/Herofresh/SkillForge/pull/84)):** `src/components/character/WardrobeSlot.tsx`
   replaces the sheet's chip list per slot: earned items + "None" as preview tiles (`companionStill` with
   that item in the slot, cached per outfit and look), locked items folded (`<slot>-locked-toggle`, Show /
@@ -1802,7 +1809,7 @@ from the GitHub releases' 1–7, ADR-068).
     companion cosmetics, not the skills). Decided: in Customize, earned items per slot as a grid of
     pixel previews to tap and wear; locked items folded into "Locked (n) ▸", opened as dimmed
     previews with their requirement and progress.
-  - [ ] FB-7 (rule change, user 2026-10-22): a passed Trial also counts for the earlier skills it
+  - [x] FB-7 (rule change, user 2026-10-22, ADR-075, branch `feat/trial-chain`): a passed Trial also counts for the earlier skills it
     depends on. Decided: every hard prerequisite, transitively, counts as Trial passed (unlocked,
     at least level 5, Proficient), like a test-out; no extra XP. Needs an ADR (extends ADR-023).
 - [x] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent; [PR #75](https://github.com/Herofresh/SkillForge/pull/75), checked in Expo Go, rest-bar fix [PR #77](https://github.com/Herofresh/SkillForge/pull/77)):
