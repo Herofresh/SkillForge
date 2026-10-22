@@ -10,7 +10,8 @@ import { useAppStore } from '@/store/useAppStore';
 
 /**
  * The Train tab (PLAN 4.4): "Train now" with an equipment profile, a time and the kind of session
- * (Standard / Recovery / Challenging, PLAN 7.8 FB-5), which opens the plan preview. While a session is in progress (also after a restart) it offers to resume it instead.
+ * (Standard / Recovery / Challenging, PLAN 7.8 FB-5), which opens the plan preview. While a session
+ * is in progress (also after a restart) it offers to resume it instead.
  */
 export default function TrainScreen() {
   const activeSession = useAppStore((state) => state.activeSession);

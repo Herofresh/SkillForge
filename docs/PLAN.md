@@ -380,7 +380,7 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
-- **FB-5 training types (task 7.8, ADR-074, branch `feat/training-type`):** `TrainingType` in
+- **FB-5 training types (task 7.8, ADR-074, [PR #83](https://github.com/Herofresh/SkillForge/pull/83)):** `TrainingType` in
   `types.ts`, `WorkoutRequest.trainingType`; in `generator.ts` `prescribe(…, type)`, `fillTime(…, type)`,
   `COOL_DOWN_MAX_SHARE` / `COOL_DOWN_MAX_EXERCISES` / `CHALLENGING_WORKING_SETS` / `RECOVERY_SETS`, the
   Recovery slot filter and the type note. Store: `generateWorkout(id, minutes, seed?, type?)`,
@@ -1784,7 +1784,7 @@ from the GitHub releases' 1–7, ADR-068).
     show when a skill is stuck at level 5 until its Trial (ADR-004 cap): a "Trial needed" badge on
     the Tree tile, a note on the plan and session exercise card, a line on the summary ("XP
     banked"), and a small red dot on the Tree tab while any skill waits for its Trial.
-  - [x] FB-5 (idea, user 2026-10-22, ADR-074, branch `feat/training-type`): "Manchmal wenn man die Woche schon Strength training hatte gibt
+  - [x] FB-5 (idea, user 2026-10-22, ADR-074, [PR #83](https://github.com/Herofresh/SkillForge/pull/83)): "Manchmal wenn man die Woche schon Strength training hatte gibt
     es einen dann zu viel cool down im Plan. Vielleicht als Input noch ob man ein Standard
     Training, ein Recovery Training oder ein forderndes Training haben will". Decided: a training
     type on the Train tab. Recovery: mobility, cool-down, light skill practice, no hard strength,
