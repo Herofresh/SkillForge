@@ -14,7 +14,7 @@ import { useAppStore } from '@/store/useAppStore';
 export default function TrainScreen() {
   const activeSession = useAppStore((state) => state.activeSession);
   return (
-    <Screen testID="train-screen">
+    <Screen insetBottom={false} testID="train-screen">
       <PixelFrame variant="raised" contentStyle={styles.gap}>
         <PixelText variant="label" tone="rune">
           Training Grounds

@@ -77,7 +77,7 @@ export function OnboardingScaffold({
         </View>
       </View>
       <KeyboardSafeView>
-        <Screen testID={testID}>
+        <Screen insetBottom={false} testID={testID}>
           {replaying && (
             <PixelButton
               label="Back to the app"

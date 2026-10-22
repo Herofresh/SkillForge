@@ -22,8 +22,9 @@ import { TierChip } from './TierChip';
 import { WarningBanner } from './WarningBanner';
 import { XPBar } from './XPBar';
 
+const mockInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 jest.mock('react-native-safe-area-context', () => ({
-  useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
+  useSafeAreaInsets: () => mockInsets,
 }));
 
 describe('PixelText', () => {
@@ -275,6 +276,38 @@ describe('KeyboardSafeView (FB-1, ADR-069)', () => {
     );
     expect(screen.getByTestId('screen')).toBeOnTheScreen();
     expect(screen.getByText('body')).toBeOnTheScreen();
+  });
+
+  it('keeps the end of a Screen clear of the navigation bar (FB-3)', async () => {
+    mockInsets.bottom = 48;
+    try {
+      await render(
+        <Screen testID="screen">
+          <PixelText>body</PixelText>
+        </Screen>,
+      );
+      expect(screen.getByTestId('screen').props.contentContainerStyle).toEqual(
+        expect.arrayContaining([{ paddingBottom: 16 + 48 }]),
+      );
+    } finally {
+      mockInsets.bottom = 0;
+    }
+  });
+
+  it('leaves that to the tab bar or a footer with insetBottom={false}', async () => {
+    mockInsets.bottom = 48;
+    try {
+      await render(
+        <Screen insetBottom={false} testID="screen">
+          <PixelText>body</PixelText>
+        </Screen>,
+      );
+      expect(screen.getByTestId('screen').props.contentContainerStyle).not.toEqual(
+        expect.arrayContaining([{ paddingBottom: 16 + 48 }]),
+      );
+    } finally {
+      mockInsets.bottom = 0;
+    }
   });
 });
 
