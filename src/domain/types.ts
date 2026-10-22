@@ -471,7 +471,18 @@ export interface WorkoutRequest {
   now: number;
   /** Seed for tie-breaks between equally good exercises; same inputs + seed = same plan. */
   seed: number;
+  /** What kind of session the user wants (PLAN 7.8 FB-5); `standard` when unset. */
+  trainingType?: TrainingType;
 }
+
+/**
+ * The kind of session the user asks for (PLAN 7.8 FB-5, ADR-074): `standard` (today's plan, the
+ * cool-down kept short), `recovery` (mobility, cool-down and light skill practice; no hard
+ * strength, no straight-arm load) or `challenging` (more sets, the harder end of each range, a due
+ * Trial). All keep the tendon safeguards and the 48 h pattern rest.
+ */
+export const TRAINING_TYPES = ['standard', 'recovery', 'challenging'] as const;
+export type TrainingType = (typeof TRAINING_TYPES)[number];
 
 /** Plan sections in session order (docs/research/progressions.md → Session order). */
 export const WORKOUT_BLOCK_KINDS = ['warm_up', 'skill', 'strength', 'core', 'cool_down'] as const;

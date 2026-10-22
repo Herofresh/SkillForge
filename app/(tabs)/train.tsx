@@ -5,11 +5,12 @@ import { StyleSheet, View } from 'react-native';
 import { Spacing } from '@/components/theme';
 import { PixelButton, PixelChip, PixelFrame, PixelIcon, PixelText, Screen } from '@/components/ui';
 import { DEFAULT_SESSION_MINUTES, SESSION_MINUTES, sessionCounts } from '@/domain/train';
+import type { TrainingType } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
- * The Train tab (PLAN 4.4): "Train now" with an equipment profile and a time, which opens the plan
- * preview. While a session is in progress (also after a restart) it offers to resume it instead.
+ * The Train tab (PLAN 4.4): "Train now" with an equipment profile, a time and the kind of session
+ * (Standard / Recovery / Challenging, PLAN 7.8 FB-5), which opens the plan preview. While a session is in progress (also after a restart) it offers to resume it instead.
  */
 export default function TrainScreen() {
   const activeSession = useAppStore((state) => state.activeSession);
@@ -56,17 +57,39 @@ function ResumePanel() {
   );
 }
 
+const TRAINING_TYPE_OPTIONS: readonly { type: TrainingType; label: string; text: string }[] = [
+  {
+    type: 'standard',
+    label: 'Standard',
+    text: 'Skills, strength and core for your goals, with a short cool-down.',
+  },
+  {
+    type: 'recovery',
+    label: 'Recovery',
+    text: 'Mobility, a cool-down and light skill practice. No hard strength, no straight-arm work.',
+  },
+  {
+    type: 'challenging',
+    label: 'Challenging',
+    text: 'More sets, the harder end of each range, and a Trial if one is due.',
+  },
+];
+
 function SetupPanel() {
   const router = useRouter();
   const profiles = useAppStore((state) => state.equipmentProfiles);
   const planTraining = useAppStore((state) => state.planTraining);
   const [profileId, setProfileId] = useState<string | undefined>(profiles[0]?.id);
   const [minutes, setMinutes] = useState<number>(DEFAULT_SESSION_MINUTES);
+  const [trainingType, setTrainingType] = useState<TrainingType>('standard');
+  const typeOption =
+    TRAINING_TYPE_OPTIONS.find((option) => option.type === trainingType) ??
+    TRAINING_TYPE_OPTIONS[0];
   const chosen = profiles.find((profile) => profile.id === profileId) ?? profiles[0];
 
   const trainNow = () => {
     if (!chosen) return;
-    planTraining(chosen.id, minutes);
+    planTraining(chosen.id, minutes, trainingType);
     router.push('/train/preview');
   };
 
@@ -116,6 +139,29 @@ function SetupPanel() {
             />
           ))}
         </View>
+      </PixelFrame>
+      <PixelFrame contentStyle={styles.gap}>
+        <View style={styles.row}>
+          <PixelIcon name="flame" />
+          <PixelText variant="label" tone="rune" accessibilityRole="header">
+            Training
+          </PixelText>
+        </View>
+        <View style={styles.chips} accessibilityRole="tablist">
+          {TRAINING_TYPE_OPTIONS.map((option) => (
+            <PixelChip
+              key={option.type}
+              label={option.label}
+              role="tab"
+              selected={option.type === trainingType}
+              onPress={() => setTrainingType(option.type)}
+              testID={`training-type-${option.type}`}
+            />
+          ))}
+        </View>
+        <PixelText variant="small" tone="textMuted" testID="training-type-text">
+          {typeOption.text}
+        </PixelText>
       </PixelFrame>
       <PixelButton
         label="Plan my session"

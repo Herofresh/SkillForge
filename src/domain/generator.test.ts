@@ -1,6 +1,8 @@
 import { ALL_NODES, NODE_BY_ID } from '@/data/skills';
 import { makeNode, makeSession, makeSet } from '@/data/testFixtures';
 import {
+  CHALLENGING_WORKING_SETS,
+  COOL_DOWN_MAX_SHARE,
   COOL_DOWN_REST_SEC,
   exerciseSeconds,
   FILL_NOTE_SHARE,
@@ -13,6 +15,7 @@ import {
   planExercises,
   plannedSets,
   prescribe,
+  RECOVERY_SETS,
   scoreCandidate,
   SINGLE_REST_SEC,
   substituteFor,
@@ -730,6 +733,131 @@ estSec after the one before (plus its work). */
       const plan = generateWorkout(request({ goals: ['cossack_squat'], recentSessions }));
       expect(coolDown(plan)).toContain('ankle_rocks');
       expect(plan.warnings.filter((w) => w.nodeId && flexOrMobility(w.nodeId))).toEqual([]);
+    });
+  });
+});
+
+describe('training types (PLAN 7.8 FB-5)', () => {
+  /** The intermediate user, who trained push, pull, legs and core yesterday. */
+  const afterStrengthDay = [
+    ...INTERMEDIATE,
+    makeSession('yesterday', daysAgo(1), [
+      {
+        nodeId: 'push_up',
+        count: 3,
+        metric: 'reps',
+        prescribed: { value: 8 },
+        actual: { value: 8 },
+      },
+      {
+        nodeId: 'pull_up_negative',
+        count: 3,
+        metric: node('pull_up_negative').metric,
+        prescribed: { value: 5, reps: 3 },
+        actual: { value: 5, reps: 3 },
+      },
+      {
+        nodeId: 'squat',
+        count: 3,
+        metric: 'reps',
+        prescribed: { value: 10 },
+        actual: { value: 10 },
+      },
+      {
+        nodeId: 'hollow_hold',
+        count: 3,
+        metric: 'hold_s',
+        prescribed: { value: 20 },
+        actual: { value: 20 },
+      },
+    ]),
+  ];
+  const coolDownSeconds = (plan: WorkoutPlan) =>
+    plan.blocks
+      .filter((block) => block.kind === 'cool_down')
+      .flatMap((block) => block.exercises)
+      .reduce((sum, exercise) => sum + exerciseSeconds(exercise, plan.restPace), 0);
+
+  it('keeps the filled cool-down short in a standard session, even after a strength day', () => {
+    for (const minutes of [30, 60, 90]) {
+      const plan = generateWorkout(
+        request({ recentSessions: afterStrengthDay, availableMinutes: minutes }),
+      );
+      expect(coolDownSeconds(plan)).toBeLessThanOrEqual(COOL_DOWN_MAX_SHARE * minutes * 60);
+    }
+  });
+
+  it('plans a recovery session without strength, core or straight-arm work', () => {
+    const plan = generateWorkout(
+      request({ recentSessions: INTERMEDIATE, availableMinutes: 45, trainingType: 'recovery' }),
+    );
+    const kinds = plan.blocks.map((block) => block.kind);
+    expect(kinds).not.toContain('strength');
+    expect(kinds).not.toContain('core');
+    expect(kinds).toContain('cool_down');
+    const exercises = mainExercises(plan);
+    expect(exercises.some((exercise) => node(exercise.nodeId).straightArm)).toBe(false);
+    expect(exercises.some((exercise) => exercise.isTrial)).toBe(false);
+    for (const exercise of plan.blocks.find((block) => block.kind === 'skill')?.exercises ?? []) {
+      expect(exercise.sets).toBe(RECOVERY_SETS);
+    }
+    expect(plan.notes[0]).toMatch(/^Recovery session/);
+  });
+
+  it('plans a challenging session with more sets and harder targets, cool-down last and short', () => {
+    const standard = generateWorkout(
+      request({ recentSessions: INTERMEDIATE, availableMinutes: 45 }),
+    );
+    const hard = generateWorkout(
+      request({ recentSessions: INTERMEDIATE, availableMinutes: 45, trainingType: 'challenging' }),
+    );
+    const strength = (plan: WorkoutPlan) =>
+      plan.blocks.filter((block) => block.kind === 'strength').flatMap((block) => block.exercises);
+    expect(strength(hard).length).toBeGreaterThan(0);
+    for (const exercise of strength(hard)) {
+      expect(exercise.sets).toBeGreaterThanOrEqual(CHALLENGING_WORKING_SETS);
+      const same = strength(standard).find((entry) => entry.nodeId === exercise.nodeId);
+      if (same && !exercise.isTrial)
+        expect(exercise.target.value).toBeGreaterThanOrEqual(same.target.value);
+    }
+    expect(coolDownSeconds(hard)).toBeLessThanOrEqual(COOL_DOWN_MAX_SHARE * 45 * 60);
+    expect(hard.notes[0]).toMatch(/^Challenging session/);
+    expect(standard.notes[0] ?? '').not.toMatch(/session:/);
+  });
+
+  it('prescribes by training type', () => {
+    const pullUp = node('pull_up');
+    const last = makeSession('last', daysAgo(3), [
+      {
+        nodeId: 'pull_up',
+        count: 3,
+        metric: 'reps',
+        prescribed: { value: 6 },
+        actual: { value: 6 },
+      },
+    ]).sets;
+    const trained: NodeProgress = {
+      nodeId: 'pull_up',
+      xp: 100,
+      level: 3,
+      trialPassed: false,
+      firstTrainedAt: daysAgo(30),
+    };
+    const standard = prescribe(pullUp, trained, last, NOW);
+    expect(prescribe(pullUp, trained, last, NOW, 'recovery')).toEqual({
+      sets: RECOVERY_SETS,
+      target: { value: pullUp.workingRange.min },
+      isTrial: false,
+    });
+    const hard = prescribe(pullUp, trained, last, NOW, 'challenging');
+    expect(hard.sets).toBe(CHALLENGING_WORKING_SETS);
+    expect(hard.target.value).toBe(Math.min(standard.target.value + 1, pullUp.workingRange.max));
+    // Stuck at the level-5 cap (FB-4): Challenging offers the Trial.
+    const capped: NodeProgress = { ...trained, level: 5, xp: 10_000 };
+    expect(prescribe(pullUp, capped, last, NOW).isTrial).toBe(false);
+    expect(prescribe(pullUp, capped, last, NOW, 'challenging')).toMatchObject({
+      isTrial: true,
+      sets: pullUp.trial.sets,
     });
   });
 });
