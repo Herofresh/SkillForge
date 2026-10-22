@@ -32,7 +32,7 @@ export default function SettingsScreen() {
   const [renaming, setRenaming] = useState<EquipmentProfile | undefined>();
 
   return (
-    <Screen avoidKeyboard testID="settings-screen">
+    <Screen avoidKeyboard insetBottom={false} testID="settings-screen">
       <HeroNamePanel key={heroName} />
 
       <View style={styles.gap} testID="settings-equipment">

@@ -144,7 +144,7 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
       : `${sheet.level.xpIntoLevel} / ${sheet.level.xpForLevel} XP`;
 
   return (
-    <Screen testID="character-screen">
+    <Screen insetBottom={false} testID="character-screen">
       <PixelFrame variant="gold" contentStyle={styles.gap}>
         <View style={styles.hero}>
           <View style={styles.flex}>

@@ -332,6 +332,9 @@
   also on long press); it opens the shared `ExerciseInfoSheet` (description, looping animation,
   cues) without picking the goal or leaving the step. App version **1.0.2, versionCode 10** (the
   next closed-track upload was planned as FB-1 + FB-2; never built). **FB-1b** (cosmetic) is open.
+- **FB-3** fixed ([PR #81](https://github.com/Herofresh/SkillForge/pull/81)): `Screen` pads its end by the navigation bar (`insetBottom`, default on;
+  off on the tab screens and in onboarding), so stack screens no longer end under the 3-button bar
+  or gesture handle. Not in a release build yet. FB-4 … FB-7 are decided, not done (see 7.8).
 - **1.2.0, versionCode 12** (2026-10-17): 7.10 Health Connect. Built so the user can upload it to the
   closed track as a **draft** first: the Health apps declaration only asks about Health Connect data
   types once Play has seen a bundle with the permission (checked by the user: the form showed no
@@ -377,6 +380,14 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-3 navigation bar overlap (task 7.8, [PR #81](https://github.com/Herofresh/SkillForge/pull/81)):** `Screen`'s `insetBottom` (default
+  on) adds `insets.bottom` to the scroll content's bottom padding; tab screens (Train, Character,
+  Settings) and `OnboardingScaffold` pass `false`. Tree has no `Screen`. Verified in Expo Go on
+  Pixel_8_Pro_API_35 with 3-button navigation: before, "Start session" under the buttons
+  (`fb3-before-plan.png`); after, the session ends above them (`fb3-after-session.png`); the tab bar
+  was already right. Gotcha: switching the emulator's navigation mode at runtime
+  (`cmd overlay enable com.android.internal.systemui.navbar.threebutton`) reports stale insets until a
+  reboot; check after a cold boot. FB-4 … FB-7 are next (decided, see 7.8).
 - **Health Connect (task 7.10, ADR-072, [PR #79](https://github.com/Herofresh/SkillForge/pull/79)):**
   - Domain `src/domain/healthWorkout.ts` (workout + notes), adapter `src/health/healthConnect.ts`
     (`deviceHealthConnect`, injected in `bootstrap.ts`), store: `healthConnectEnabled` (setting
@@ -1747,6 +1758,30 @@ from the GitHub releases' 1–7, ADR-068).
     probably don't know all exercises." Fixed in 1.0.2 (versionCode 10): every exercise row in
     onboarding's goals step, assessment step and assessment Trial has the "i" (and a long press)
     that opens the shared exercise info sheet without picking or leaving (ADR-070, [PR #74](https://github.com/Herofresh/SkillForge/pull/74)).
+  - [x] FB-3 (bug, user 2026-10-22): "Android buttons overlap with app content at bottom": the
+    navigation bar (gesture handle or 3-button bar) covered the end of every stack screen (plan,
+    session, summary, skill pages, guide, editor): `Screen` had no bottom inset. Fixed: `Screen`
+    pads by the navigation bar (`insetBottom`, off on the tab screens and in onboarding, which have
+    a tab bar or footer below). [PR #81](https://github.com/Herofresh/SkillForge/pull/81); screenshots `docs/screenshots/fb3-*.png`.
+  - [ ] FB-4 (UX, user 2026-10-22): "Anzeigen wenn du einen Trial brauchst um weiter zu Leveln":
+    show when a skill is stuck at level 5 until its Trial (ADR-004 cap): a "Trial needed" badge on
+    the Tree tile, a note on the plan and session exercise card, a line on the summary ("XP
+    banked"), and a small red dot on the Tree tab while any skill waits for its Trial.
+  - [ ] FB-5 (idea, user 2026-10-22): "Manchmal wenn man die Woche schon Strength training hatte gibt
+    es einen dann zu viel cool down im Plan. Vielleicht als Input noch ob man ein Standard
+    Training, ein Recovery Training oder ein forderndes Training haben will". Decided: a training
+    type on the Train tab. Recovery: mobility, cool-down, light skill practice, no hard strength,
+    no straight-arm load. Standard: today's plan with the cool-down capped at about 15 % of the
+    time, leftover time to more sets of what is allowed. Challenging: more working sets, the hard
+    end of each range, extra strength before any cool-down, a due Trial if there is one. All keep
+    the tendon safeguards and the 48 h pattern rest.
+  - [ ] FB-6 (UX, user 2026-10-22): "Nicht unlocked items einklappen / bessere Übersicht" (the
+    companion cosmetics, not the skills). Decided: in Customize, earned items per slot as a grid of
+    pixel previews to tap and wear; locked items folded into "Locked (n) ▸", opened as dimmed
+    previews with their requirement and progress.
+  - [ ] FB-7 (rule change, user 2026-10-22): a passed Trial also counts for the earlier skills it
+    depends on. Decided: every hard prerequisite, transitively, counts as Trial passed (unlocked,
+    at least level 5, Proficient), like a test-out; no extra XP. Needs an ADR (extends ADR-023).
 - [x] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent; [PR #75](https://github.com/Herofresh/SkillForge/pull/75), checked in Expo Go, rest-bar fix [PR #77](https://github.com/Herofresh/SkillForge/pull/77)):
   every set of an exercise is a monster of its branch that takes the hit when the set is logged.
   Two views, picked in Settings → Training view (default Classic): **Classic** keeps the
