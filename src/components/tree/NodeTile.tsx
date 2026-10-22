@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { formatLevelProgress, formatOgLevel } from '@/domain/format';
+import { formatLevelProgress, formatOgLevel, TRIAL_NEEDED_LABEL } from '@/domain/format';
 import { tierForOgLevel } from '@/domain/tier';
 import type { TreeTile } from '@/domain/treeView';
 
@@ -49,7 +49,8 @@ export function GoalMarker({ testID }: { testID?: string }) {
  * One skill node in the tree column (PLAN 4.2): an optional chain to the tile above, then a pixel
  * panel framed by its state (`TileFrames`) with the state icon, name, tier, OG level, a goal
  * marker, a "Custom" tag for the user's own changes, an "i" for the exercise info sheet (PLAN 6.2,
- * also on long press), the level and XP bar once trained, and linked chips for its other
+ * also on long press), the level and XP bar once trained, "Trial needed" when it is stuck at level 5
+ * (PLAN 7.8 FB-4), and linked chips for its other
  * prerequisites.
  * Memoized: the column re-renders only the tiles whose data changed.
  */
@@ -121,6 +122,14 @@ export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false, o
                 </PixelText>
               )}
             </View>
+            {level.capped && (
+              <View style={styles.trialNeeded} testID={`tile-trial-needed-${node.id}`}>
+                <PixelIcon name="shield" />
+                <PixelText variant="label" tone="ember">
+                  {TRIAL_NEEDED_LABEL}
+                </PixelText>
+              </View>
+            )}
             {links.length > 0 && (
               <View style={styles.links}>
                 {links.map((link) => (
@@ -181,6 +190,12 @@ const styles = StyleSheet.create({
   },
   status: {
     marginTop: Spacing.sm,
+  },
+  trialNeeded: {
+    marginTop: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
   links: {
     marginTop: Spacing.sm,

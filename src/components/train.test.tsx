@@ -411,6 +411,7 @@ describe('SessionResultPanels', () => {
       sessionTime: '32:05',
       levelUps: [],
       unlocked: [],
+      awaitingTrial: [],
       warnings: [],
     };
     await render(

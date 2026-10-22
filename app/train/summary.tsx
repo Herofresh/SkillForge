@@ -29,12 +29,13 @@ import { useAppStore } from '@/store/useAppStore';
 export default function SessionSummaryScreen() {
   const summary = useAppStore((state) => state.trainSummary);
   const nodes = useAppStore((state) => state.nodes);
+  const progress = useAppStore((state) => state.engine.progress);
   const session = useAppStore((state) =>
     state.sessions.find((entry) => entry.id === state.trainSummary?.sessionId),
   );
   const view = useMemo(
-    () => (summary ? summaryView(summary.result, nodes, session) : undefined),
-    [summary, nodes, session],
+    () => (summary ? summaryView(summary.result, nodes, session, progress) : undefined),
+    [summary, nodes, session, progress],
   );
   if (!summary || !view) {
     return (

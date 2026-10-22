@@ -99,6 +99,22 @@ export function nodeLevelProgress(
   };
 }
 
+/**
+ * Whether a node is stuck at the level-5 cap waiting for its Trial (ADR-004): trained to
+ * `PROFICIENT_LEVEL` and the Trial not passed yet. Shown as "Trial needed" (PLAN 7.8 FB-4).
+ */
+export function awaitingTrial(progress: NodeProgress | undefined): boolean {
+  return progress !== undefined && !progress.trialPassed && progress.level >= PROFICIENT_LEVEL;
+}
+
+/** The nodes waiting for their Trial, in tree order (the Tree tab's dot, FB-4). */
+export function nodesAwaitingTrial(
+  nodes: readonly ExerciseNode[],
+  progress: ProgressMap,
+): ExerciseNode[] {
+  return nodes.filter((node) => awaitingTrial(progress[node.id]));
+}
+
 export function emptyProgress(nodeId: string): NodeProgress {
   return { nodeId, xp: 0, level: 1, trialPassed: false };
 }

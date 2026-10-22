@@ -16,6 +16,7 @@ import {
   type FoeState,
   type MonsterKind,
 } from './monsters';
+import type { ProgressMap } from './progression';
 import { measuredSeconds } from './setTimer';
 import {
   deleteSessionSet,
@@ -154,9 +155,13 @@ export interface BattleBlock {
 }
 
 /** Every exercise of the session as foes, in session order and blocks (the Battle view). */
-export function battleView(session: ActiveSession, lookup: NodeLookup): BattleBlock[] {
+export function battleView(
+  session: ActiveSession,
+  lookup: NodeLookup,
+  progress?: ProgressMap,
+): BattleBlock[] {
   const byKey = new Map(session.exercises.map((exercise) => [exercise.key, exercise]));
-  return blockViews(session.exercises, lookup, session).map((block) => ({
+  return blockViews(session.exercises, lookup, session, progress).map((block) => ({
     kind: block.kind,
     label: block.label,
     exercises: block.exercises.flatMap((view) => {

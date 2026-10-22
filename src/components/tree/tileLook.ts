@@ -77,6 +77,7 @@ export function tileAccessibilityLabel(tile: TreeTile, custom: boolean): string 
     node.name,
     TILE_LOOKS[state].label,
     TRAINED_TILE_STATES.includes(state) ? `level ${level.level}` : undefined,
+    level.capped ? 'trial needed to level further' : undefined,
     spokenOgLevel(node.ogLevel),
     node.straightArm ? 'straight-arm' : undefined,
     isGoal ? 'goal' : undefined,
