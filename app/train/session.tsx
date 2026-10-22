@@ -68,6 +68,7 @@ export default function LiveSessionScreen() {
 function LiveSession({ session }: { session: ActiveSession }) {
   const router = useRouter();
   const nodes = useAppStore((state) => state.nodes);
+  const progress = useAppStore((state) => state.engine.progress);
   const trainWarnings = useAppStore((state) => state.trainWarnings);
   const acknowledge = useAppStore((state) => state.acknowledgeTrainWarning);
   const logSet = useAppStore((state) => state.logTrainingSet);
@@ -99,10 +100,10 @@ function LiveSession({ session }: { session: ActiveSession }) {
   const [reordering, setReordering] = useState(false);
 
   const lookup = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
-  const view = useMemo(() => liveView(session, lookup), [session, lookup]);
+  const view = useMemo(() => liveView(session, lookup, progress), [session, lookup, progress]);
   const battle = useMemo(
-    () => (trainingView === 'battle' ? battleView(session, lookup) : undefined),
-    [trainingView, session, lookup],
+    () => (trainingView === 'battle' ? battleView(session, lookup, progress) : undefined),
+    [trainingView, session, lookup, progress],
   );
   // Derived from the session in the store; recomputed on every render of this screen.
   const warnings = trainWarnings();

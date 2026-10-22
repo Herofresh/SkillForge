@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { TRIAL_NEEDED_LABEL, trialNeededNote } from '@/domain/format';
 import type { SummaryView } from '@/domain/trainView';
 
 import { Spacing, TOUCH_TARGET } from '../theme';
@@ -109,6 +110,30 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
               style={styles.link}>
               <PixelIcon name="rune" />
               <PixelText tone="rune">{node.name}</PixelText>
+            </Pressable>
+          ))}
+        </PixelFrame>
+      )}
+
+      {view.awaitingTrial.length > 0 && (
+        <PixelFrame variant="stone" contentStyle={styles.gap} testID="summary-trial-needed">
+          <View style={styles.row}>
+            <PixelIcon name="shield" />
+            <PixelText variant="label" tone="ember" accessibilityRole="header">
+              {TRIAL_NEEDED_LABEL}
+            </PixelText>
+          </View>
+          {view.awaitingTrial.map((node) => (
+            <Pressable
+              key={node.nodeId}
+              onPress={() => onOpenNode(node.nodeId)}
+              accessibilityRole="link"
+              accessibilityLabel={`${node.name}: ${trialNeededNote(node.banked)} Opens the skill.`}
+              style={styles.link}>
+              <PixelText style={styles.flex}>
+                <PixelText tone="ember">{node.name}</PixelText>
+                {`: ${trialNeededNote(node.banked)}`}
+              </PixelText>
             </Pressable>
           ))}
         </PixelFrame>

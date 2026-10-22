@@ -28,6 +28,7 @@ export default function PlanPreviewScreen() {
   const router = useRouter();
   const plan = useAppStore((state) => state.trainPlan);
   const nodes = useAppStore((state) => state.nodes);
+  const progress = useAppStore((state) => state.engine.progress);
   const profiles = useAppStore((state) => state.equipmentProfiles);
   const trainWarnings = useAppStore((state) => state.trainWarnings);
   const acknowledge = useAppStore((state) => state.acknowledgeTrainWarning);
@@ -40,7 +41,10 @@ export default function PlanPreviewScreen() {
   const [sheet, setSheet] = useState<Sheet | undefined>();
 
   const lookup = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
-  const blocks = useMemo(() => (plan ? blockViews(plan.exercises, lookup) : []), [plan, lookup]);
+  const blocks = useMemo(
+    () => (plan ? blockViews(plan.exercises, lookup, undefined, progress) : []),
+    [plan, lookup, progress],
+  );
   // Derived from the plan in the store; recomputed on every render (swap, add, remove).
   const warnings = trainWarnings();
   const infoNode = sheet?.kind === 'info' ? lookup.get(sheet.nodeId) : undefined;

@@ -162,7 +162,10 @@ state (`TileFrames` in `theme.ts`): locked = night fill, stone line, lock icon, 
 available = rune double line ("glow"), rune icon, READY · training = raised with gold-dark line, sword,
 "LV n · Training" XP bar · proficient = gold + gold-dark lines, shield, gold name · mastered = gold-light
 + gold lines, star · legendary (locked) = ink silhouette with a gold-dark flame. `GoalMarker` is a
-gold "GOAL" star tag. `ChainLink` draws the prerequisite chain between tiles (`ChainColors`: gold met,
+gold "GOAL" star tag. A tile stuck at level 5 until its Trial adds a "TRIAL NEEDED" line (shield +
+ember caps label) under its XP bar; the map node says "LV 5 · Trial"; plan and session cards get an
+ember "Trial needed" tag and note; the summary a stone "Trial needed" panel with the banked XP; the
+Tree tab a 10 dp `danger` dot (a tab badge without a number) while any skill waits (PLAN 7.8 FB-4). `ChainLink` draws the prerequisite chain between tiles (`ChainColors`: gold met,
 steel unmet); `PrereqChip` is a ✓/✗ + name chip for other prerequisites (36 dp, hit slop to 48 dp).
 `TreeLegend` explains it all. The `cross` icon is the ✗. The node detail (`src/components/node/`) is
 built from `DetailSection` panels (caps heading + icon); its header reuses the tile frame, and the

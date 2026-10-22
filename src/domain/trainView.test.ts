@@ -1,6 +1,7 @@
 import { makeNode } from '@/data/testFixtures';
 
 import { formatCountdown, formatPrescription, formatRest } from './format';
+import { addNodeXp, emptyProgress, PROFICIENT_LEVEL, xpForLevel } from './progression';
 import type { SessionResult } from './recompute';
 import { logSessionSet, replaceExercise, sessionPlan, startSession } from './train';
 import { blockViews, liveView, loggedSetText, sessionDurationSec, summaryView } from './trainView';
@@ -240,7 +241,57 @@ describe('Train view models', () => {
         { nodeId: 'chin_up', name: 'Chin-up' },
         { nodeId: 'missing', name: 'missing' },
       ],
+      awaitingTrial: [],
       warnings: [],
     });
+  });
+
+  it('marks exercises stuck at level 5 until their Trial (PLAN 7.8 FB-4)', () => {
+    const pullUp = NODES[0];
+    const capped = addNodeXp(
+      emptyProgress('pull_up'),
+      pullUp,
+      xpForLevel(PROFICIENT_LEVEL, pullUp.ogLevel) + 12,
+      1,
+    );
+    const progress = { pull_up: capped };
+    const plan = sessionPlan(WORKOUT, 'home', 30);
+    const [, strength] = blockViews(plan.exercises, LOOKUP, undefined, progress);
+    expect(strength.exercises.map((exercise) => [exercise.name, exercise.awaitingTrial])).toEqual([
+      ['Pull-up', true],
+      ['Squat', false],
+    ]);
+    expect(blockViews(plan.exercises, LOOKUP)[1].exercises[0].awaitingTrial).toBe(false);
+
+    const result: SessionResult = {
+      sessionId: 's',
+      exercises: [
+        {
+          nodeId: 'pull_up',
+          outcome: 'success',
+          units: 15,
+          xp: 20,
+          trialAttempted: false,
+          trialPassed: false,
+        },
+        {
+          nodeId: 'squat',
+          outcome: 'success',
+          units: 5,
+          xp: 5,
+          trialAttempted: false,
+          trialPassed: false,
+        },
+      ],
+      xp: { exerciseXp: 25, completionBonus: 0, streakBonus: 0, challengeBonus: 0, total: 25 },
+      streak: 1,
+      levelUps: [],
+      unlocked: [],
+      warnings: [],
+    };
+    expect(summaryView(result, NODES, undefined, progress).awaitingTrial).toEqual([
+      { nodeId: 'pull_up', name: 'Pull-up', banked: 12 },
+    ]);
+    expect(summaryView(result, NODES).awaitingTrial).toEqual([]);
   });
 });

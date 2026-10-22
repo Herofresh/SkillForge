@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Border, Colors, FontFamily, HeaderTitleStyle } from '@/components/theme';
 import { PixelIcon, type IconName } from '@/components/ui';
+import { nodesAwaitingTrial } from '@/domain/progression';
 import { useAppStore } from '@/store/useAppStore';
 
 type TabDef = {
@@ -11,6 +12,8 @@ type TabDef = {
   title: string;
   icon: IconName;
 };
+
+const DOT_SIZE = 10;
 
 const TABS: readonly TabDef[] = [
   { name: 'tree', title: 'Tree', icon: 'tree' },
@@ -35,6 +38,10 @@ function Rule({ edge }: { edge: 'top' | 'bottom' }) {
 export default function TabLayout() {
   // First run (PLAN 4.1): the tabs wait until onboarding is completed.
   const onboarded = useAppStore((state) => state.onboardingCompletedAt !== undefined);
+  // FB-4: a small red dot on the Tree tab while a skill waits for its Trial to keep levelling.
+  const awaiting = useAppStore(
+    (state) => nodesAwaitingTrial(state.nodes, state.engine.progress).length,
+  );
   if (!onboarded) return <Redirect href="/onboarding" />;
   return (
     <Tabs
@@ -57,6 +64,13 @@ export default function TabLayout() {
           options={{
             title,
             tabBarIcon: ({ color }) => <PixelIcon name={icon} tint={color} />,
+            ...(name === 'tree' && awaiting > 0
+              ? {
+                  tabBarBadge: '',
+                  tabBarBadgeStyle: styles.dot,
+                  tabBarAccessibilityLabel: `${title}, ${awaiting} ${awaiting === 1 ? 'skill needs its' : 'skills need their'} Trial`,
+                }
+              : {}),
           }}
         />
       ))}
@@ -65,6 +79,13 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
+  /** The Tree tab's "Trial needed" dot (FB-4): a badge without a number. */
+  dot: {
+    minWidth: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: DOT_SIZE / 2,
+    backgroundColor: Colors.danger,
+  },
   bar: {
     flex: 1,
     backgroundColor: Colors.surface,

@@ -38,7 +38,9 @@ export const MapNode = memo(function MapNode({ tile, place, onOpen, custom, onIn
   const look = TILE_LOOKS[state];
   const silhouette = state === 'legendary';
   const status = TRAINED_TILE_STATES.includes(state)
-    ? `LV ${level.level}` // the state icon (sword, shield, star) says the rest
+    ? level.capped
+      ? `LV ${level.level} · Trial` // stuck at level 5 until the Trial (FB-4)
+      : `LV ${level.level}` // the state icon (sword, shield, star) says the rest
     : tileStateLabel(tile);
   return (
     <Pressable

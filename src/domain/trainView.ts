@@ -5,6 +5,7 @@
  */
 import type { ChallengeStep } from './challenges';
 import { formatClock, formatPerformance, formatPrescription, formatRest } from './format';
+import { awaitingTrial, bankedXp, type ProgressMap } from './progression';
 import type { SessionResult } from './recompute';
 import { elapsedSeconds, totalDurationSec } from './setTimer';
 import {
@@ -68,6 +69,8 @@ export interface ExerciseView {
   /** Live session only (0 / false in the preview). */
   setsLogged: number;
   done: boolean;
+  /** Stuck at level 5 until its Trial (ADR-004): the card says so (PLAN 7.8 FB-4). */
+  awaitingTrial: boolean;
 }
 
 export function exerciseView(
@@ -75,6 +78,8 @@ export function exerciseView(
   lookup: NodeLookup,
   exercises: readonly SessionExercise[],
   session?: ActiveSession,
+  /** The engine's progress: marks exercises waiting for their Trial (FB-4). */
+  progress?: ProgressMap,
 ): ExerciseView {
   const partner = exercises.find((entry) => entry.key === exercise.pairKey);
   return {
@@ -97,6 +102,7 @@ export function exerciseView(
     skipped: exercise.skipped ?? false,
     setsLogged: session ? exerciseSets(session, exercise.key).length : 0,
     done: session ? isExerciseDone(session, exercise) : false,
+    awaitingTrial: awaitingTrial(progress?.[exercise.nodeId]),
   };
 }
 
@@ -111,10 +117,11 @@ export function blockViews(
   exercises: readonly SessionExercise[],
   lookup: NodeLookup,
   session?: ActiveSession,
+  progress?: ProgressMap,
 ): BlockView[] {
   const blocks: BlockView[] = [];
   for (const exercise of exercises) {
-    const view = exerciseView(exercise, lookup, exercises, session);
+    const view = exerciseView(exercise, lookup, exercises, session, progress);
     const last = blocks[blocks.length - 1];
     if (last && last.kind === exercise.block) last.exercises.push(view);
     else
@@ -181,15 +188,19 @@ export interface LiveView {
   moves: Readonly<Record<string, ExerciseMoves>>;
 }
 
-export function liveView(session: ActiveSession, lookup: NodeLookup): LiveView {
-  const blocks = blockViews(session.exercises, lookup, session);
+export function liveView(
+  session: ActiveSession,
+  lookup: NodeLookup,
+  progress?: ProgressMap,
+): LiveView {
+  const blocks = blockViews(session.exercises, lookup, session, progress);
   const exercise = session.exercises.find((entry) => entry.key === session.currentKey);
   let current: CurrentExerciseView | undefined;
   if (exercise) {
     const sets = exerciseSets(session, exercise.key);
     const lastDone = [...sets].reverse().find((set) => set.actual.value > 0);
     current = {
-      exercise: exerciseView(exercise, lookup, session.exercises, session),
+      exercise: exerciseView(exercise, lookup, session.exercises, session, progress),
       metric: exercise.metric,
       target: exercise.target,
       setNumber: sets.length + 1,
@@ -241,6 +252,11 @@ export interface SummaryView {
   sessionTime?: string;
   levelUps: { nodeId: string; name: string; from: number; to: number }[];
   unlocked: { nodeId: string; name: string }[];
+  /**
+   * Exercises of this session now stuck at level 5 until their Trial, with the XP banked beyond the
+   * cap (PLAN 7.8 FB-4). Only with the engine's progress (the summary right after the session).
+   */
+  awaitingTrial: { nodeId: string; name: string; banked: number }[];
   warnings: SafeguardWarning[];
 }
 
@@ -253,12 +269,14 @@ export function sessionDurationSec(session: StoredSession): number | undefined {
 
 /**
  * The summary of `result`. With the stored `session` it also shows the time per exercise (its
- * timed sets) and the session's total time (PLAN 5.4).
+ * timed sets) and the session's total time (PLAN 5.4). With the engine's `progress` after it, the
+ * exercises that now wait for their Trial (FB-4).
  */
 export function summaryView(
   result: SessionResult,
   nodes: readonly ExerciseNode[],
   session?: StoredSession,
+  progress?: ProgressMap,
 ): SummaryView {
   const lookup: NodeLookup = new Map(nodes.map((node) => [node.id, node]));
   const exerciseTime = (nodeId: string): { time?: string } => {
@@ -292,6 +310,15 @@ export function summaryView(
       name: nameOf(lookup, levelUp.nodeId),
     })),
     unlocked: result.unlocked.map((nodeId) => ({ nodeId, name: nameOf(lookup, nodeId) })),
+    awaitingTrial: progress
+      ? result.exercises.flatMap(({ nodeId }) => {
+          const node = lookup.get(nodeId);
+          const own = progress[nodeId];
+          return node && own && awaitingTrial(own)
+            ? [{ nodeId, name: node.name, banked: bankedXp(own, node) }]
+            : [];
+        })
+      : [],
     warnings: result.warnings,
   };
 }

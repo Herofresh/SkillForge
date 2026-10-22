@@ -1,6 +1,7 @@
 import { makeChain, makeNode, makeSet } from '@/data/testFixtures';
 import {
   addNodeXp,
+  awaitingTrial,
   bankedXp,
   BASE_NODE_LEVEL_THRESHOLDS,
   emptyProgress,
@@ -10,6 +11,7 @@ import {
   newlyUnlocked,
   nodeLevel,
   nodeLevelProgress,
+  nodesAwaitingTrial,
   nodeUseWarnings,
   passTrial,
   prerequisiteSatisfiedBy,
@@ -327,5 +329,26 @@ describe('nodeLevelProgress', () => {
       capped: false,
       banked: 0,
     });
+  });
+});
+
+describe('awaitingTrial (PLAN 7.8 FB-4)', () => {
+  const node = makeNode({ id: 'push_up', ogLevel: 0 });
+  const other = makeNode({ id: 'dip', ogLevel: 0 });
+  const capped = addNodeXp(emptyProgress('push_up'), node, xpForLevel(PROFICIENT_LEVEL + 1, 0), 1);
+
+  it('is true at the level-5 cap until the Trial is passed', () => {
+    expect(capped.level).toBe(PROFICIENT_LEVEL);
+    expect(awaitingTrial(capped)).toBe(true);
+    expect(awaitingTrial(passTrial(capped, node, 2))).toBe(false);
+    expect(awaitingTrial(addNodeXp(emptyProgress('push_up'), node, 1, 1))).toBe(false);
+    expect(awaitingTrial(undefined)).toBe(false);
+  });
+
+  it('lists the nodes waiting for their Trial in tree order', () => {
+    const progress: ProgressMap = { push_up: capped, dip: emptyProgress('dip') };
+    expect(nodesAwaitingTrial([other, node], progress).map((entry) => entry.id)).toEqual([
+      'push_up',
+    ]);
   });
 });

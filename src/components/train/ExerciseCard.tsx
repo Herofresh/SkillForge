@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { TRIAL_NEEDED_LABEL, trialNeededNote } from '@/domain/format';
 import type { ExerciseView } from '@/domain/trainView';
 
 import { InfoButton } from '../node/InfoButton';
@@ -20,7 +21,7 @@ type Props = {
 
 /**
  * One exercise of a plan or session: name, sets × target and rest, with its markers: Trial,
- * straight-arm, swapped by the user, replaced for the equipment (ADR-005) and its strength pair,
+ * straight-arm, Trial needed (stuck at level 5, PLAN 7.8 FB-4), swapped by the user, replaced for the equipment (ADR-005) and its strength pair,
  * and an "i" for the exercise info sheet (PLAN 6.2) when `onInfo` is set.
  */
 export function ExerciseCard({ exercise, highlighted = false, children, onInfo, testID }: Props) {
@@ -64,6 +65,11 @@ export function ExerciseCard({ exercise, highlighted = false, children, onInfo, 
           {`Replaces ${exercise.substitutedFromName} (needs equipment you don't have)`}
         </PixelText>
       )}
+      {exercise.awaitingTrial && (
+        <PixelText variant="small" tone="ember" testID={testID && `${testID}-trial-needed`}>
+          {trialNeededNote()}
+        </PixelText>
+      )}
       {exercise.pairedWithName !== undefined && (
         <PixelText variant="small" tone="textMuted">
           {`Pair: alternate sets with ${exercise.pairedWithName}`}
@@ -80,6 +86,7 @@ function exerciseTags(exercise: ExerciseView): Tag[] {
   const tags: Tag[] = [];
   if (exercise.isTrial) tags.push({ text: 'Trial', tone: 'rune' });
   if (exercise.straightArm) tags.push({ text: 'Straight-arm', tone: 'ember' });
+  if (exercise.awaitingTrial) tags.push({ text: TRIAL_NEEDED_LABEL, tone: 'ember' });
   if (exercise.skipped) tags.push({ text: 'Skipped', tone: 'textMuted' });
   else if (exercise.done) tags.push({ text: 'Done', tone: 'success' });
   return tags;

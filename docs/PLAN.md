@@ -380,6 +380,15 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-4 "Trial needed" (task 7.8, [PR #82](https://github.com/Herofresh/SkillForge/pull/82)):** `awaitingTrial` /
+  `nodesAwaitingTrial` in `progression.ts` (level ≥ 5, Trial not passed; ADR-004 cap),
+  `TRIAL_NEEDED_LABEL` / `trialNeededNote` in `format.ts`. Shown on the Tree tile (`tile-trial-needed-<id>`,
+  also in its accessibility label), the map node ("LV 5 · Trial"), plan / session / Battle cards
+  (`ExerciseView.awaitingTrial`: `blockViews` / `liveView` / `battleView` take the engine progress), the
+  summary (`SummaryView.awaitingTrial`, only right after a session: the past-session screen passes no
+  progress), and the Tree tab badge dot (`app/(tabs)/_layout.tsx`). Tests: `progression.test.ts`,
+  `trainView.test.ts`, `src/components/trialHint.test.tsx`. Not checked on a device: needs a skill
+  at level 5 without its Trial; check with the next release build (the tab dot's look especially).
 - **FB-3 navigation bar overlap (task 7.8, [PR #81](https://github.com/Herofresh/SkillForge/pull/81)):** `Screen`'s `insetBottom` (default
   on) adds `insets.bottom` to the scroll content's bottom padding; tab screens (Train, Character,
   Settings) and `OnboardingScaffold` pass `false`. Tree has no `Screen`. Verified in Expo Go on
@@ -1763,7 +1772,7 @@ from the GitHub releases' 1–7, ADR-068).
     session, summary, skill pages, guide, editor): `Screen` had no bottom inset. Fixed: `Screen`
     pads by the navigation bar (`insetBottom`, off on the tab screens and in onboarding, which have
     a tab bar or footer below). [PR #81](https://github.com/Herofresh/SkillForge/pull/81); screenshots `docs/screenshots/fb3-*.png`.
-  - [ ] FB-4 (UX, user 2026-10-22): "Anzeigen wenn du einen Trial brauchst um weiter zu Leveln":
+  - [x] FB-4 (UX, user 2026-10-22, [PR #82](https://github.com/Herofresh/SkillForge/pull/82)): "Anzeigen wenn du einen Trial brauchst um weiter zu Leveln":
     show when a skill is stuck at level 5 until its Trial (ADR-004 cap): a "Trial needed" badge on
     the Tree tile, a note on the plan and session exercise card, a line on the summary ("XP
     banked"), and a small red dot on the Tree tab while any skill waits for its Trial.

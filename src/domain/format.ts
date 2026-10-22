@@ -106,6 +106,15 @@ export function formatShortDate(at: number): string {
   return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 }
 
+/** The marker of a node stuck at level 5 until its Trial (ADR-004, PLAN 7.8 FB-4). */
+export const TRIAL_NEEDED_LABEL = 'Trial needed';
+
+/** What a node stuck at the cap needs, with the XP banked beyond it ("… 12 XP banked."). */
+export function trialNeededNote(banked = 0): string {
+  const note = 'Level 5 reached: pass the Trial to keep levelling.';
+  return banked > 0 ? `${note} ${banked} XP banked.` : note;
+}
+
 /** The value next to a node's XP bar: "34 / 60 XP", "Trial ready" at the cap, "Max" at level 10. */
 export function formatLevelProgress(progress: NodeLevelProgress): string {
   if (progress.capped) return 'Trial ready';

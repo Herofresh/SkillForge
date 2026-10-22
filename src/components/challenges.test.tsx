@@ -193,6 +193,7 @@ describe('the challenge in the class sheet and the summary bonuses', () => {
           exercises: [],
           levelUps: [],
           unlocked: [],
+          awaitingTrial: [],
           warnings: [],
         }}
         celebrate={false}
