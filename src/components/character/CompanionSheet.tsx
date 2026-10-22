@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import {
-  ACCESSORY_BY_ID,
   BODY_SHAPES,
   COMPANION_DYES,
   COMPANION_HAIRS,
@@ -13,14 +12,14 @@ import {
   HAIR_STYLES,
   companionBody,
 } from '@/data/companion';
-import { COMPANION_BODIES, type CompanionLookChoice, type SlotRow } from '@/domain/companion';
+import { COMPANION_BODIES, type CompanionLookChoice } from '@/domain/companion';
 import type { CompanionSlot } from '@/domain/types';
 
 import { Colors, PIXEL, Spacing } from '../theme';
 import { PixelChip, PixelModal, PixelText } from '../ui';
 
-import { companionProgressText, companionRuleText, SLOT_LABELS } from './companionText';
 import { CompanionSprite } from './CompanionSprite';
+import { WardrobeSlot } from './WardrobeSlot';
 import type { CompanionView } from './useCompanion';
 
 type Props = {
@@ -66,73 +65,11 @@ function ColorRow({
   );
 }
 
-function SlotSection({
-  row,
-  newIds,
-  onEquip,
-  testID,
-}: {
-  row: SlotRow;
-  newIds: ReadonlySet<string>;
-  onEquip: (slot: CompanionSlot, accessoryId: string | null) => void;
-  testID: string;
-}) {
-  const earned = row.items.filter((item) => item.status !== 'locked');
-  const locked = row.items.filter((item) => item.status === 'locked');
-  const worn = row.worn ? ACCESSORY_BY_ID.get(row.worn) : undefined;
-  return (
-    <View style={styles.slot} testID={testID}>
-      <PixelText variant="heading" accessibilityRole="header">
-        {SLOT_LABELS[row.slot]}
-      </PixelText>
-      {worn && (
-        <PixelText variant="small" tone="textMuted">
-          {worn.flavor}
-        </PixelText>
-      )}
-      <View style={styles.chips}>
-        <PixelChip
-          label="None"
-          selected={row.worn === undefined}
-          onPress={() => onEquip(row.slot, null)}
-          accessibilityLabel={`${SLOT_LABELS[row.slot]}: nothing`}
-          testID={`${testID}-none`}
-        />
-        {earned.map((item) => (
-          <PixelChip
-            key={item.id}
-            label={newIds.has(item.id) ? `${item.name} · NEW` : item.name}
-            selected={item.status === 'worn'}
-            onPress={() => onEquip(row.slot, item.id)}
-            accessibilityLabel={`${SLOT_LABELS[row.slot]}: ${item.name}${newIds.has(item.id) ? ', new' : ''}`}
-            testID={`${testID}-${item.id}`}
-          />
-        ))}
-      </View>
-      {locked.map((item) => (
-        <View
-          key={item.id}
-          style={styles.locked}
-          accessible
-          accessibilityRole="text"
-          accessibilityLabel={`${item.name}, locked. ${companionRuleText(item.rule)}. ${companionProgressText(item.rule, item.progress)}`}
-          testID={`${testID}-${item.id}-locked`}>
-          <PixelText variant="small" tone="textMuted">
-            {item.name}
-          </PixelText>
-          <PixelText variant="label" tone="gold">
-            {`${companionRuleText(item.rule)} · ${companionProgressText(item.rule, item.progress)}`}
-          </PixelText>
-        </View>
-      ))}
-    </View>
-  );
-}
-
 /**
  * The companion's customize sheet (PLAN 6.10 / 6.13, ADR-059 / ADR-061): a live preview, the body
- * (man or woman), hair style, skin, hair and outfit colors, then every slot with its earned accessories to wear (or None) and the locked ones with
- * what earns them, like the class sheet. The weapon comes from the worn class and is shown, not
+ * (man or woman), hair style, skin, hair and outfit colors, then every slot (`WardrobeSlot`, PLAN 7.8
+ * FB-6): its earned accessories as a grid of previews to wear (or None), the locked ones folded away
+ * with what earns them. The weapon comes from the worn class and is shown, not
  * chosen. NEW tags mark accessories earned since the sheet was last opened (kept while it is
  * open; the screen marks them seen on close). Mount it to open it.
  */
@@ -212,9 +149,11 @@ export function CompanionSheet({
           testID={`${testID}-outfit`}
         />
         {view.wardrobe.map((row) => (
-          <SlotSection
+          <WardrobeSlot
             key={row.slot}
             row={row}
+            outfit={view.outfit}
+            look={view.look}
             newIds={newIds}
             onEquip={onEquip}
             testID={`${testID}-${row.slot}`}
@@ -243,17 +182,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.xs,
-  },
-  slot: {
-    gap: Spacing.xs,
-    paddingTop: Spacing.sm,
-    borderTopWidth: PIXEL,
-    borderTopColor: Colors.bronze,
-  },
-  locked: {
-    paddingLeft: Spacing.sm,
-    borderLeftWidth: PIXEL,
-    borderLeftColor: Colors.goldDark,
   },
   preview: {
     flexDirection: 'row',

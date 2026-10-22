@@ -119,13 +119,25 @@ describe('CompanionSheet', () => {
     );
     expect(screen.getByText('Customize')).toBeOnTheScreen();
     expect(screen.getByTestId('companion-sheet-weapon')).toHaveTextContent('Longsword');
-    expect(screen.getByTestId('companion-sheet-head-iron_helm')).toHaveTextContent(/NEW/);
+    expect(screen.getByTestId('companion-sheet-head-iron_helm')).toHaveTextContent(/New/);
+    // Locked items are folded per slot (PLAN 7.8 FB-6) until opened.
+    expect(screen.queryByTestId('companion-sheet-head-golden_crown-locked')).toBeNull();
+    expect(screen.getByTestId('companion-sheet-head-locked-toggle')).toHaveTextContent(
+      /^Locked \(\d+\)/,
+    );
+    await user.press(screen.getByTestId('companion-sheet-head-locked-toggle'));
+    await user.press(screen.getByTestId('companion-sheet-cloak-locked-toggle'));
     expect(screen.getByTestId('companion-sheet-head-golden_crown-locked')).toHaveTextContent(
       /Rank Legend · Apprentice now/,
     );
     expect(screen.getByTestId('companion-sheet-cloak-hooded_cloak-locked')).toHaveTextContent(
       /Character level 10 · Level 4 \/ 10/,
     );
+    expect(screen.getByTestId('companion-sheet-head-locked-toggle')).toHaveTextContent(/Hide$/);
+    await user.press(screen.getByTestId('companion-sheet-head-locked-toggle'));
+    expect(screen.queryByTestId('companion-sheet-head-golden_crown-locked')).toBeNull();
+    // Earned items are tiles to pick, the worn one selected.
+    expect(screen.getByTestId('companion-sheet-head-rope_headband')).not.toBeSelected();
     await user.press(screen.getByTestId('companion-sheet-head-rope_headband'));
     expect(onEquip).toHaveBeenCalledWith('head', 'rope_headband');
     await user.press(screen.getByTestId('companion-sheet-hands-none'));
