@@ -372,22 +372,22 @@
    notes) and ask whether "Trials get skipped" still happens, and where.
 1. FB-8 German for the whole app including the skill content (user decision 2026-10-30; ships as
    1.4.0): see 7.8.
-1. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
+2. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
    assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
    access, target audience).
-2. Builds: `npm run build:aab` on the user's profile (the upload key lives only there; nothing
+3. Builds: `npm run build:aab` on the user's profile (the upload key lives only there; nothing
    else running, the 1.0.2 build was once killed for low memory). FB-1b (cosmetic) is still open.
-3. 7.6 / 7.8 closed test and feedback phase: the user collects ≥ 12 testers for 14 days; new
+4. 7.6 / 7.8 closed test and feedback phase: the user collects ≥ 12 testers for 14 days; new
    feedback goes into the FB list under 7.8 (triage, fix bugs as 1.0.x); then apply for production
    (7.7). Phase 8 starts only after the feedback phase.
-4. On the user's phone (replaces the "install v0.7.0" item: 1.0.0 supersedes it): move to the Play
+5. On the user's phone (replaces the "install v0.7.0" item: 1.0.0 supersedes it): move to the Play
    1.0.0 as the README says (Export backup → uninstall → install from Play → Import backup),
    then check that the hero, history and own progressions came back, both widgets (placed again
    after the reinstall) and the Man / Woman choice, and report what feels off.
-5. Open question for the user: whether GitHub also gets a 1.0.0 sideload APK (`build:apk`, debug
+6. Open question for the user: whether GitHub also gets a 1.0.0 sideload APK (`build:apk`, debug
    key; it would update over v0.7.0 but never over a Play install), or GitHub releases stop at
    v0.7.0.
-6. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
+7. Phase 1.6: verify inferred OG2 levels; Phase 1.10: coach review of the sheet (needs the user to
    find a coach).
 
 ## Blockers
