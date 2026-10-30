@@ -2655,3 +2655,26 @@ Template:
   (character level may drop slightly: derived state, ADR-008). Ranks are untouched (Trials). The
   class challenge rules count exercises, not XP, so they are unchanged.
 
+## ADR-079: Fourteen more companion items between the first weeks and 50 sessions (PLAN 7.8 FB-14)
+- Date: 2026-10-30 · Status: Accepted (user OK 2026-10-30; extends ADR-059)
+- Context: tester feedback: too few companion items, and unlocking feels slow. The list of 46
+  (ADR-059) gives a new hero about six items in the first weeks (headband, tunic, medallion, ember
+  aura, hooded cloak, a class tier I item), then nothing from about 20 sessions (chainmail) to 50
+  (veteran's scarf); 28 of the 46 hang on class tiers, 14 of them on tier III, and the rank items
+  are slow because ranks are (backlog). ADR-059 made the shown list the spec, so a longer list
+  needed the user's OK.
+- Decision: 14 milestone items on the existing rule kinds, no new kind, no rank items: sessions
+  5 (Wool cap), 10 (Travel scarf), 15 (Spark aura), 25 (Iron bracers), 30 (Fur-lined vest), 200
+  (Champion's cape); best streak 3 (Chalked hands), 14 (Storm cloak), 60 (Blaze aura); Trials
+  passed 3 (Iron pendant), 5 (Laurel wreath), 10 (Golden gauntlets); character level 15 (Studded
+  belt), 30 (Star circlet). The thin hands slot grows from 4 to 7. Each is placed in its slot's
+  humble-to-grand order (the default worn item is the last earned in that order, ADR-059). Art
+  follows ADR-059 / ADR-061: letter grids drawn once for both bodies and every pose; recolours
+  where a region change reads well (bracers, gauntlets, chalked hands, the fur vest), small parts
+  otherwise, checked on the contact sheet.
+- Consequences: 60 items; a hero earns something new roughly every five sessions through the
+  first two months, then at 50, 100 and 200. Heroes with a history earn the ones they already
+  qualify for on the next load (the unlock check runs on every engine commit) and see them as
+  NEW. The guide's counts and lists are derived from the data. Tier II class recolours (allowed
+  by ADR-059) are still open.
+

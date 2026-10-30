@@ -170,6 +170,16 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
   iron_circlet: {
     head: part(0, 2, ['.....EE.....', 'IIIIIEEIIIII']),
   },
+  wool_cap: {
+    hidesHair: true,
+    head: part(-1, -1, ['....XXXXXX....', '..XXXXXXXXXX..', '.XXXXXXXXXXXX.', 'xxxxxxxxxxxxxx']),
+  },
+  laurel_wreath: {
+    head: part(-1, 1, ['VV..........VV', '.VVVVVVVVVVVV.', '..vv..vv..vv..']),
+  },
+  star_circlet: {
+    head: part(0, 1, ['.....!......', '.....GG.....', 'IIIIIGGIIIII']),
+  },
   golden_crown: {
     head: part(2, -4, ['G..GG..G', 'GG.GG.GG', 'GGGRRGGG', 'GEGRRGEG', 'gggggggg']),
   },
@@ -326,6 +336,18 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
   },
 
   // --- Cloak and back ----------------------------------------------------------------------------
+  travel_scarf: {
+    back: part(-6, 0, ['rR......', 'RRr.....', '.RRr....', '..rR....']),
+    front: part(1, 0, ['RRRRRRRRRR', '.rrrrrrrr.', '.......RR.', '.......Rr.', '.......rR.']),
+  },
+  storm_cloak: {
+    back: cloak('N', 'n', 24, (x) => (x % 4 === 1 ? 'W' : 'n')),
+    front: collar(['NNN..........NNN', 'NNNN...WW...NNNN']),
+  },
+  champions_cape: {
+    back: cloak('O', 'o', 26, () => 'G'),
+    front: collar(['OOO..........OOO', 'OGOO...GG...OOGO']),
+  },
   hooded_cloak: {
     back: cloak('X', 'x', 24),
     behindHead: part(-2, 8, [
@@ -428,6 +450,17 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
   chainmail_vest: {
     recolor: { regions: { torso: 'iron', belt: 'leather' }, pattern: rings },
   },
+  iron_pendant: {
+    front: part(3, 1, ['L....L', '.L..L.', '..II..', '.iIIi.', '..ii..']),
+  },
+  studded_belt: {
+    recolor: { regions: { belt: 'iron' } },
+    front: part(1, 9, ['G.G.G.G.G.']),
+  },
+  fur_vest: {
+    recolor: { regions: { torso: 'fur', belt: 'leather' } },
+    front: part(2, 0, ['MMMMMMMM', '.mMmMmM.']),
+  },
   grandmaster_robe: {
     recolor: { regions: { torso: 'robe', sleeve: 'robe', belt: 'leather', legs: 'robe' } },
     front: part(1, 1, [
@@ -447,8 +480,17 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
   },
 
   // --- Hands and arms ----------------------------------------------------------------------------
+  chalk_hands: {
+    recolor: { regions: { hand: 'bone' } },
+  },
   leather_bracers: {
     recolor: { regions: { forearm: 'leather' } },
+  },
+  iron_bracers: {
+    recolor: { regions: { forearm: 'iron' } },
+  },
+  golden_gauntlets: {
+    recolor: { regions: { forearm: 'gold', hand: 'gold' } },
   },
   runed_gauntlets: {
     recolor: { regions: { forearm: 'iron', hand: 'iron' } },
@@ -476,6 +518,43 @@ export const ACCESSORY_ART: Readonly<Record<string, AccessoryArt>> = {
   },
   war_paint: {
     head: part(2, 7, ['R......R', '.R....R.']),
+  },
+  spark_aura: {
+    sparkles: sparkle(
+      [
+        [-4, 2],
+        [16, 5],
+        [-3, 20],
+        [17, 24],
+      ],
+      'sparkWhite',
+    ),
+  },
+  blaze_aura: {
+    glow: 'glowFlame',
+    sparkles: [
+      ...stars(
+        [
+          [-5, 0],
+          [17, -2],
+          [-6, 18],
+          [18, 22],
+        ],
+        'sparkFire',
+        'sparkGold',
+      ),
+      ...sparkle(
+        [
+          [-4, 8],
+          [16, 10],
+          [-5, 28],
+          [17, 31],
+          [12, -4],
+          [-1, -3],
+        ],
+        'sparkFire',
+      ),
+    ],
   },
   ember_aura: {
     glow: 'glowFire',

@@ -252,8 +252,8 @@ src/
     classes.ts          HERO_CLASSES: the 15 hero classes as typed data (ids, tiers with rules,
                         flavor, color, 12×12 emblem), the one place for class thresholds (ADR-057)
     companion/          the companion sprite as typed data (PLAN 6.10, ADR-059)
-      accessories.ts    ACCESSORIES: 46 accessories (slot, flavour, flat unlock rule), the one place
-                        for their rules
+      accessories.ts    ACCESSORIES: 60 accessories (slot, flavour, flat unlock rule; 14 milestone
+                        items added for FB-14, ADR-079), the one place for their rules
       body.ts           SPRITE_SIZE (32 × 44, the one size constant), BODY_SHAPES (man / woman:
                         head, torso, arm inset), HAIR_STYLES (spiky / long / ponytail), arm and leg
                         poses, frame anchors (BodyFrame, STAND, armPlacement), faces, regions
