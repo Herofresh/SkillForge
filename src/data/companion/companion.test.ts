@@ -81,6 +81,21 @@ const SPEC: Readonly<Record<string, string>> = {
   skull_pauldrons: 'berserker 3',
   pointed_hat: 'sorcerer 1',
   arcane_aura: 'sorcerer 3',
+  // FB-14 (ADR-079): milestones between the early items and 50 sessions.
+  wool_cap: 'sessions 5',
+  travel_scarf: 'sessions 10',
+  spark_aura: 'sessions 15',
+  iron_bracers: 'sessions 25',
+  fur_vest: 'sessions 30',
+  champions_cape: 'sessions 200',
+  chalk_hands: 'streak 3',
+  storm_cloak: 'streak 14',
+  blaze_aura: 'streak 60',
+  iron_pendant: 'trials 3',
+  laurel_wreath: 'trials 5',
+  golden_gauntlets: 'trials 10',
+  studded_belt: 'level 15',
+  star_circlet: 'level 30',
 };
 
 function ruleKey(rule: (typeof ACCESSORIES)[number]['rule']): string {

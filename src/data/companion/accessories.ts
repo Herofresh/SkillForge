@@ -5,7 +5,8 @@
  * earned; the store keeps the unlocks forever anyway. Cosmetic only.
  *
  * The list is the one shown to the user (2026-10-03): rank gear, level gear, milestones, and one
- * item for tier I and one for tier III of every class. Within a slot the order runs from humble
+ * item for tier I and one for tier III of every class; 14 milestone items were added on the
+ * user's OK (2026-10-30, FB-14, ADR-079) to fill the gaps between the early items and 50 sessions. Within a slot the order runs from humble
  * to grand: a slot the hero never picked for shows the last earned item in this order.
  *
  * Ids are snake_case and stable forever. The pixel art for each id is in `art.ts`.
@@ -29,11 +30,25 @@ export const ACCESSORIES: readonly Accessory[] = [
     flavor: 'Keeps the sweat out of a novice’s eyes.',
   },
   {
+    id: 'wool_cap',
+    name: 'Wool cap',
+    slot: 'head',
+    rule: { kind: 'sessions', count: 5 },
+    flavor: 'Five sessions in: a cap for the walk to the bar.',
+  },
+  {
     id: 'iron_circlet',
     name: 'Iron circlet',
     slot: 'head',
     rule: { kind: 'rank', rank: 'Adept' },
     flavor: 'A plain band with one rune-stone: the mark of an adept.',
+  },
+  {
+    id: 'laurel_wreath',
+    name: 'Laurel wreath',
+    slot: 'head',
+    rule: { kind: 'trials', count: 5 },
+    flavor: 'Five Trials passed: the old sign of a champion.',
   },
   {
     id: 'iron_helm',
@@ -92,6 +107,13 @@ export const ACCESSORIES: readonly Accessory[] = [
     flavor: 'Every Sorcerer needs one. The stars are optional.',
   },
   {
+    id: 'star_circlet',
+    name: 'Star circlet',
+    slot: 'head',
+    rule: { kind: 'level', level: 30 },
+    flavor: 'An iron band with one golden star for level 30.',
+  },
+  {
     id: 'warlord_helm',
     name: 'Horned warlord helm',
     slot: 'head',
@@ -143,6 +165,13 @@ export const ACCESSORIES: readonly Accessory[] = [
 
   // Cloak and back
   {
+    id: 'travel_scarf',
+    name: 'Travel scarf',
+    slot: 'cloak',
+    rule: { kind: 'sessions', count: 10 },
+    flavor: 'Ten sessions: a red scarf against the morning wind.',
+  },
+  {
     id: 'hooded_cloak',
     name: 'Hooded cloak',
     slot: 'cloak',
@@ -155,6 +184,13 @@ export const ACCESSORIES: readonly Accessory[] = [
     slot: 'cloak',
     rule: classItem('barbarian', 1),
     flavor: 'A Barbarian’s pelt, warm and a little smelly.',
+  },
+  {
+    id: 'storm_cloak',
+    name: 'Storm cloak',
+    slot: 'cloak',
+    rule: { kind: 'streak', count: 14 },
+    flavor: 'Two weeks without a miss: the night-blue cloak of a storm chaser.',
   },
   {
     id: 'veterans_scarf',
@@ -192,6 +228,13 @@ export const ACCESSORIES: readonly Accessory[] = [
     flavor: 'Long, heavy and trimmed with ermine: a High Lord’s cape.',
   },
   {
+    id: 'champions_cape',
+    name: 'Champion’s cape',
+    slot: 'cloak',
+    rule: { kind: 'sessions', count: 200 },
+    flavor: 'Two hundred sessions: orchid silk with a golden hem.',
+  },
+  {
     id: 'phoenix_cloak',
     name: 'Phoenix cloak',
     slot: 'cloak',
@@ -206,6 +249,13 @@ export const ACCESSORIES: readonly Accessory[] = [
     slot: 'body',
     rule: { kind: 'level', level: 5 },
     flavor: 'Sturdy cloth and a belt with a brass buckle.',
+  },
+  {
+    id: 'iron_pendant',
+    name: 'Iron pendant',
+    slot: 'body',
+    rule: { kind: 'trials', count: 3 },
+    flavor: 'A plain iron disc on a cord, one notch per Trial.',
   },
   {
     id: 'prayer_beads',
@@ -229,11 +279,25 @@ export const ACCESSORIES: readonly Accessory[] = [
     flavor: 'The red cross of the Templars over a white tabard.',
   },
   {
+    id: 'studded_belt',
+    name: 'Studded belt',
+    slot: 'body',
+    rule: { kind: 'level', level: 15 },
+    flavor: 'Iron studs on a wide belt for level 15.',
+  },
+  {
     id: 'chainmail_vest',
     name: 'Chainmail vest',
     slot: 'body',
     rule: { kind: 'level', level: 20 },
     flavor: 'Ten thousand rings, each one a rep.',
+  },
+  {
+    id: 'fur_vest',
+    name: 'Fur-lined vest',
+    slot: 'body',
+    rule: { kind: 'sessions', count: 30 },
+    flavor: 'Thirty sessions: warm enough for a winter park.',
   },
   {
     id: 'grandmaster_robe',
@@ -252,6 +316,13 @@ export const ACCESSORIES: readonly Accessory[] = [
 
   // Hands and arms
   {
+    id: 'chalk_hands',
+    name: 'Chalked hands',
+    slot: 'hands',
+    rule: { kind: 'streak', count: 3 },
+    flavor: 'Three sessions in a row: time to chalk up.',
+  },
+  {
     id: 'leather_bracers',
     name: 'Leather bracers',
     slot: 'hands',
@@ -266,11 +337,25 @@ export const ACCESSORIES: readonly Accessory[] = [
     flavor: 'A heater shield with the Paladin’s golden sun.',
   },
   {
+    id: 'iron_bracers',
+    name: 'Iron bracers',
+    slot: 'hands',
+    rule: { kind: 'sessions', count: 25 },
+    flavor: 'Twenty-five sessions: forearm guards of plain iron.',
+  },
+  {
     id: 'runed_gauntlets',
     name: 'Runed gauntlets',
     slot: 'hands',
     rule: { kind: 'level', level: 35 },
     flavor: 'Iron gauntlets with runes that glow under load.',
+  },
+  {
+    id: 'golden_gauntlets',
+    name: 'Golden gauntlets',
+    slot: 'hands',
+    rule: { kind: 'trials', count: 10 },
+    flavor: 'Ten Trials passed: gauntlets that catch the light.',
   },
   {
     id: 'skull_pauldrons',
@@ -287,6 +372,13 @@ export const ACCESSORIES: readonly Accessory[] = [
     slot: 'aura',
     rule: { kind: 'trials', count: 1 },
     flavor: 'Struck for your first passed Trial.',
+  },
+  {
+    id: 'spark_aura',
+    name: 'Spark aura',
+    slot: 'aura',
+    rule: { kind: 'sessions', count: 15 },
+    flavor: 'Fifteen sessions: the first sparks fly.',
   },
   {
     id: 'war_paint',
@@ -336,6 +428,13 @@ export const ACCESSORIES: readonly Accessory[] = [
     slot: 'aura',
     rule: { kind: 'streak', count: 30 },
     flavor: 'Thirty sessions in a row: you are on fire.',
+  },
+  {
+    id: 'blaze_aura',
+    name: 'Blaze aura',
+    slot: 'aura',
+    rule: { kind: 'streak', count: 60 },
+    flavor: 'Sixty sessions in a row. You are the fire now.',
   },
   {
     id: 'starforged_halo',
