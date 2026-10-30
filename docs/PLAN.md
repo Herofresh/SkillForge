@@ -342,6 +342,13 @@
   in all; ADR-079, [PR #90](https://github.com/Herofresh/SkillForge/pull/90)). User decision 2026-10-30: FB-8 German for everything including the
   skill content (next, as 1.4.0). None of the round is in a release build yet: 1.3.0 now, German
   as 1.4.0.
+- **1.3.0, versionCode 13** (2026-10-30, [PR #91](https://github.com/Herofresh/SkillForge/pull/91)): the feedback rounds since 1.2.0: FB-3
+  (navigation bar), FB-4 (Trial needed), FB-5 (training types), FB-6 (Customize grid), FB-7 (Trial
+  chain), FB-9/10/11 (goal reached), FB-12 (Trials planned), FB-13 (XP share), FB-14 (14 more
+  items), FB-15 (custom exercise name). Release notes in `docs/play/listing.md`. Built after the
+  merge with `npm run build:aab` → `builds/SkillForge-1.3.0-vc13-<merge commit>.aab`, for the
+  closed testing track. None of it was checked on a device: the first look at the release build
+  is the user's. German (FB-8) follows as 1.4.0.
 - **1.2.0, versionCode 12** (2026-10-17): 7.10 Health Connect. Built so the user can upload it to the
   closed track as a **draft** first: the Health apps declaration only asks about Health Connect data
   types once Play has seen a bundle with the permission (checked by the user: the form showed no
@@ -356,20 +363,20 @@
   rest bar under the board ([PR #77](https://github.com/Herofresh/SkillForge/pull/77)).
 
 ## Next up
-0. 7.9 Session monsters and the Battle view: done and checked in Expo Go; the rest-bar fix is
-   merged ([PR #77](https://github.com/Herofresh/SkillForge/pull/77)). Then the user picks the version (1.0.3 or 1.1.0) for the next
-   closed-track bundle (`npm run build:aab` on the user's profile).
+0. **Upload 1.3.0 (versionCode 13)** to the closed testing track: `builds/SkillForge-1.3.0-vc13-*.aab`
+   with the 1.3.0 release notes from `docs/play/listing.md` ([PR #91](https://github.com/Herofresh/SkillForge/pull/91)). Then check on the release
+   build what no agent could: the "Trial needed" tag and tab dot (FB-4), the three training chips
+   (FB-5), Customize's preview grid with the new items (FB-6, FB-14), GOAL REACHED! on a summary
+   and the next-goal picker (FB-9/10/11), a warm-up prep Trial once Wrist prep is at level 5
+   (FB-12), the "Warm-up: half XP" note (FB-13). Tell the testers what changed (the release
+   notes) and ask whether "Trials get skipped" still happens, and where.
+1. FB-8 German for the whole app including the skill content (user decision 2026-10-30; ships as
+   1.4.0): see 7.8.
 1. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
    assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
    access, target audience).
-2. The **1.1.0** bundle (user decision 2026-10-16; versionCode 11; FB-1 + FB-2 + the 7.9 monsters
-   and Battle view; replaces the never-built 1.0.2 and the 1.0.1 upload if that hasn't gone out):
-   `npm run build:aab` on the user's profile (the upload key lives only there; nothing else running,
-   the 1.0.2 build was killed for low memory) → `builds/SkillForge-1.1.0-vc11-<commit>.aab`,
-   uploaded to the closed testing track with the release notes in `docs/play/listing.md`. Before upload,
-   check on the release build: onboarding step 1 with the keyboard (FB-1, FB-1b), and the goals
-   step's "i" → info sheet with its animation (FB-2; only Expo Go was checked here).
-   Optionally fix FB-1b first (cosmetic, see 7.8).
+2. Builds: `npm run build:aab` on the user's profile (the upload key lives only there; nothing
+   else running, the 1.0.2 build was once killed for low memory). FB-1b (cosmetic) is still open.
 3. 7.6 / 7.8 closed test and feedback phase: the user collects ≥ 12 testers for 14 days; new
    feedback goes into the FB list under 7.8 (triage, fix bugs as 1.0.x); then apply for production
    (7.7). Phase 8 starts only after the feedback phase.

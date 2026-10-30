@@ -65,6 +65,12 @@ SkillForge gives general training suggestions, not medical advice. Check with a 
 | Feature graphic | `graphics/feature-1024x500.png` | 1024 × 500, 24-bit PNG (no alpha) |
 | Phone screenshots | `graphics/phone-*.png` | 1080 × 1920 (9:16), 2–8 images |
 
+## Release notes for 1.3.0 (≤ 500, "What's new")
+
+```
+Pick a training type on the Train tab: Standard, Recovery or Challenging. Reach a goal and SkillForge celebrates it and offers the next goals to pick, each with its info. A passed Trial also counts for the skills it builds on. The Tree shows when a skill needs its Trial, and the plan says when it comes. 14 new companion items; Customize shows them as previews. Warm-up and cool-down work now earns half XP. Fixed: screens no longer end under the navigation bar.
+```
+
 ## Release notes for 1.2.0 (≤ 500, "What's new")
 
 ```
