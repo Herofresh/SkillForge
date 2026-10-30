@@ -2574,3 +2574,30 @@ Template:
   (their tests pass). Straight-arm prerequisites are lifted too (the safeguards gate Trials and
   training, never what a passed Trial implies; ADR-023 allows test-outs on day one). A Trial of a
   skill reached by self-unlock still implies its prerequisites: the user proved the harder skill.
+
+## ADR-076: Trials the plan never offered (PLAN 7.8 FB-12)
+- Date: 2026-10-30 · Status: Accepted (extends ADR-004, ADR-024 and ADR-074)
+- Context: tester feedback: "Trials get skipped". No Trial result is lost (`passTrial` on replay,
+  the Trial sets of a skipped exercise fail, the summary says "Trial not passed yet"); what
+  testers see is a Trial the app announced but never *planned*. (1) The warm-up prep
+  (`WARM_UP_PREP_IDS`, one set in every session) earns XP and reaches the level-5 cap after about
+  17 sessions; from then on it shows "Trial needed" (FB-4) forever, because one set never counts
+  as working sets (`MIN_WORKING_SETS`), so its Trial is never due by double progression, and the
+  prep is never a slot candidate. (2) A Standard plan offers a Trial only once every working set of
+  the last session reached the top of the range (ADR-024); a node stuck at the cap before that
+  keeps its working sets, and the card said only "pass the Trial to keep levelling", not when.
+  (3) A Trial that doesn't fit the minutes left (or the cool-down share, ADR-074) silently
+  becomes working sets.
+- Decision: (1) a warm-up prep stuck at the cap gets its Trial *in the warm-up* (its sets and
+  target, the warm-up rest), when the safeguards allow and it fits the time, else the usual single
+  set; never in a Recovery session (no Trials, ADR-074). (2) Standard keeps ADR-024's readiness
+  rule (a Trial before the range top is likely to fail), and the card now says when the plan offers
+  the Trial: "once every set reaches <range top>, or right away in a Challenging session"
+  (`trialPlannedNote`, `ExerciseView.trialPlan`; not shown once the exercise is the Trial).
+  (3) A Trial cut to working sets for time gets a plan note naming it and the fix (more minutes).
+- Consequences: the two prep nodes can be passed without leaving the warm-up; a passed prep
+  Trial lifts the cap like any other. The notes make a vanished Trial explainable rather than
+  invisible. Battle needs no change: it uses the same exercise card (shield + "Trial" tag). Still
+  open (backlog): an exercise the user swaps in or adds is prescribed as Standard whatever the
+  plan's training type (`prescribeExercise` has no type).
+

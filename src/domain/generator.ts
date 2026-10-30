@@ -682,6 +682,26 @@ function fitExercise(
   return { exercise, notes };
 }
 
+/**
+ * The plan's note when `before`'s Trials were cut to working sets in `after` (`reduced`): the user
+ * would otherwise see the Trial the card announced ("Trial needed") vanish without a word (FB-12).
+ */
+function trialsCutForTime(
+  builder: Builder,
+  before: readonly PlannedExercise[],
+  after: readonly PlannedExercise[],
+): string[] {
+  return before
+    .filter(
+      (exercise) =>
+        exercise.isTrial && !after.some((e) => e.nodeId === exercise.nodeId && e.isTrial),
+    )
+    .map((exercise) => {
+      const name = builder.lookup.get(exercise.nodeId)?.name ?? exercise.nodeId;
+      return `${name}'s Trial doesn't fit today's time, so it gets working sets instead. Give the session more minutes to attempt it.`;
+    });
+}
+
 /** A copy with at most `MIN_WORKING_SETS` sets; a Trial becomes working sets at the range top. */
 function reduced(builder: Builder, exercise: PlannedExercise): PlannedExercise {
   const sets = Math.min(exercise.sets, MIN_WORKING_SETS);
@@ -711,9 +731,11 @@ function tryAddBlock(
   const budget = budgetSeconds(builder);
   const seconds = (list: PlannedExercise[]) => secondsOf(builder, list);
   let chosen = exercises;
+  const cut: string[] = [];
   if (builder.seconds + seconds(chosen) > budget) {
     chosen = exercises.map((exercise) => reduced(builder, exercise));
     if (builder.seconds + seconds(chosen) > budget) return false;
+    cut.push(...trialsCutForTime(builder, exercises, chosen));
     if (
       budgetedSeconds(builder, [...allExercises(builder), ...chosen]) >
       STRAIGHT_ARM_SESSION_BUDGET_S
@@ -724,7 +746,7 @@ function tryAddBlock(
   builder.blocks.set(slotIndex, { kind, exercises: chosen });
   builder.seconds += seconds(chosen);
   for (const exercise of chosen) builder.usedIds.add(exercise.nodeId);
-  builder.notes.push(...notes);
+  builder.notes.push(...notes, ...cut);
   return true;
 }
 
@@ -783,9 +805,35 @@ function warmUpExercise(node: ExerciseNode): PlannedExercise {
   };
 }
 
-/** Adds `node` to the warm-up block if it fits the time left. */
-function addToWarmUp(builder: Builder, node: ExerciseNode): void {
-  const exercise = warmUpExercise(node);
+/**
+ * The warm-up prep's Trial, in the warm-up itself, once the node is stuck at the level-5 cap
+ * (FB-12, ADR-076): its single set never counts as working sets, so its Trial would otherwise never
+ * be due. Not in a Recovery session (no Trials, ADR-074). `undefined` when it isn't due.
+ */
+function warmUpTrial(builder: Builder, node: ExerciseNode): PlannedExercise | undefined {
+  const progress = builder.request.progress[node.id];
+  const { now, trainingType } = builder.request;
+  if (trainingType === 'recovery') return undefined;
+  if (!awaitingTrial(progress) || !isTrialOpenBySafeguards(node, progress, now)) return undefined;
+  return {
+    nodeId: node.id,
+    sets: node.trial.sets,
+    target: withRepCount(node, node.trial.target),
+    metric: node.metric,
+    restSec: WARM_UP_REST_SEC,
+    isTrial: true,
+  };
+}
+
+/**
+ * Adds `node` to the warm-up block if it fits the time left; with `trialIfDue`, as its Trial when
+ * that is due and fits (else the usual single set).
+ */
+function addToWarmUp(builder: Builder, node: ExerciseNode, trialIfDue = false): void {
+  const fits = (planned: PlannedExercise) =>
+    builder.seconds + exerciseSeconds(planned, builder.pace) <= budgetSeconds(builder);
+  const trial = trialIfDue ? warmUpTrial(builder, node) : undefined;
+  const exercise = trial && fits(trial) ? trial : warmUpExercise(node);
   const cost = exerciseSeconds(exercise, builder.pace);
   if (builder.seconds + cost > budgetSeconds(builder)) return;
   const block = builder.blocks.get(WARM_UP_SLOT) ?? { kind: 'warm_up', exercises: [] };
@@ -918,6 +966,7 @@ function addCoolDown(
       for (const exercise of block.exercises) builder.usedIds.delete(exercise.nodeId);
       return slot;
     }
+    builder.notes.push(...trialsCutForTime(builder, block.exercises, shorter));
     block.exercises = shorter;
     builder.seconds += secondsOf(builder, shorter);
   }
@@ -1079,7 +1128,7 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
   // Fixed prep first, so it is always part of the session.
   for (const id of WARM_UP_PREP_IDS) {
     const node = lookup.get(id);
-    if (node && isDoableWith(node, equipment)) addToWarmUp(builder, node);
+    if (node && isDoableWith(node, equipment)) addToWarmUp(builder, node, true);
   }
 
   // Slots, best candidate first, while they fit the time and the straight-arm budget.

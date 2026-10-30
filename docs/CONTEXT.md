@@ -156,7 +156,8 @@ src/
                         everything before an import), backupFileName, BACKUP_SCHEMA_VERSION
     xp.ts               units, difficulty/outcome multipliers, exercise and session XP, streak
     progression.ts      node XP curve, level-5 cap, Trials, test-out, node states, unlocks;
-                        awaitingTrial / nodesAwaitingTrial (stuck at the cap, "Trial needed", FB-4);
+                        awaitingTrial / nodesAwaitingTrial (stuck at the cap, "Trial needed", FB-4;
+                        the card also says when the plan offers the Trial, `trialPlannedNote`, FB-12);
                         trialChain (a passed Trial also passes its hard prerequisites, FB-7, ADR-075)
     safeguards.ts       ADR-010 tendon rules (advisory, ADR-023): straight-arm Trial clock, 60 s
                         budget, 48 h rest, and the SafeguardWarning producers
@@ -757,7 +758,8 @@ stuck at the level-5 cap, and puts the cool-down last. Safeguards and the 48 h r
    attribute-point deficit share (for nodes training the weaker side) + `STAGNATION_BONUS` 10
    (best set not improved over the last `STAGNATION_SESSIONS` 3 sessions) + `OG_LEVEL_POINTS` 1 ×
    ogLevel. Ties: FNV-1a hash of `seed:nodeId`, then id.
-5. **Slots:** fixed prep `WARM_UP_PREP_IDS` (`wrist_prep`, `shoulder_dislocate`, 1 set each);
+5. **Slots:** fixed prep `WARM_UP_PREP_IDS` (`wrist_prep`, `shoulder_dislocate`, 1 set each; once
+   one is stuck at the level-5 cap its Trial takes that place, except in Recovery: ADR-076);
    then greedily the open slot with the best unused candidate: 2 skill slots (`isSkill` or
    straight-arm; the 2nd for goal skills only), 3 `STRENGTH_PAIRS` (vertical pull + squat, push +
    hinge, horizontal pull + push; a missing side leaves a single), 1 core, 1 cool-down (mobility,
@@ -769,7 +771,7 @@ stuck at the level-5 cap, and puts the cool-down last. Safeguards and the 48 h r
    **Trial day** (ADR-025): if the best-ranked straight-arm candidate's prescription is its Trial,
    all other straight-arm candidates are dropped, so the session has that one Trial (exempt from
    the budget) and no other straight-arm work; a note says so. A Trial trimmed for time becomes
-   working sets that count against the budget again.
+   working sets that count against the budget again, and a note says so (FB-12).
    `warnings` carries the advisory warnings that still apply (a self-unlocked or substituted node's
    `prerequisites_unmet`); the suggestion never triggers a `warning`-severity safeguard.
 7. **Prescription** (`prescribe`, double progression): no history → 3 × range min. After a

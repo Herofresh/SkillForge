@@ -4,7 +4,13 @@
  * only render; the wording comes from `format.ts`.
  */
 import type { ChallengeStep } from './challenges';
-import { formatClock, formatPerformance, formatPrescription, formatRest } from './format';
+import {
+  formatClock,
+  formatPerformance,
+  formatPrescription,
+  formatRest,
+  trialPlannedNote,
+} from './format';
 import { awaitingTrial, bankedXp, type ProgressMap } from './progression';
 import type { SessionResult } from './recompute';
 import { elapsedSeconds, totalDurationSec } from './setTimer';
@@ -71,6 +77,8 @@ export interface ExerciseView {
   done: boolean;
   /** Stuck at level 5 until its Trial (ADR-004): the card says so (PLAN 7.8 FB-4). */
   awaitingTrial: boolean;
+  /** When the plan offers that Trial (`trialPlannedNote`); only while it waits and isn't it (FB-12). */
+  trialPlan?: string;
 }
 
 export function exerciseView(
@@ -82,6 +90,17 @@ export function exerciseView(
   progress?: ProgressMap,
 ): ExerciseView {
   const partner = exercises.find((entry) => entry.key === exercise.pairKey);
+  const node = lookup.get(exercise.nodeId);
+  const waiting = awaitingTrial(progress?.[exercise.nodeId]);
+  const trialPlan =
+    waiting && node && !exercise.isTrial
+      ? trialPlannedNote(
+          formatPerformance(node.metric, {
+            value: node.workingRange.max,
+            ...(node.trial.reps !== undefined ? { reps: node.trial.reps } : {}),
+          }),
+        )
+      : undefined;
   return {
     key: exercise.key,
     nodeId: exercise.nodeId,
@@ -102,7 +121,8 @@ export function exerciseView(
     skipped: exercise.skipped ?? false,
     setsLogged: session ? exerciseSets(session, exercise.key).length : 0,
     done: session ? isExerciseDone(session, exercise) : false,
-    awaitingTrial: awaitingTrial(progress?.[exercise.nodeId]),
+    awaitingTrial: waiting,
+    ...(trialPlan !== undefined ? { trialPlan } : {}),
   };
 }
 

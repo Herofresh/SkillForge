@@ -127,6 +127,15 @@ export function trialNeededNote(banked = 0): string {
   return banked > 0 ? `${note} ${banked} XP banked.` : note;
 }
 
+/**
+ * When a Standard plan offers the Trial of a node stuck at the cap (FB-12): once every set of its
+ * last session reached the top of the working range (`rangeTop`, e.g. "12 reps"), or in a
+ * Challenging session right away (ADR-074).
+ */
+export function trialPlannedNote(rangeTop: string): string {
+  return `Its Trial is planned once every set reaches ${rangeTop}, or right away in a Challenging session.`;
+}
+
 /** The value next to a node's XP bar: "34 / 60 XP", "Trial ready" at the cap, "Max" at level 10. */
 export function formatLevelProgress(progress: NodeLevelProgress): string {
   if (progress.capped) return 'Trial ready';

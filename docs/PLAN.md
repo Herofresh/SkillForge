@@ -335,9 +335,9 @@
 - **FB-3** fixed ([PR #81](https://github.com/Herofresh/SkillForge/pull/81)): `Screen` pads its end by the navigation bar (`insetBottom`, default on;
   off on the tab screens and in onboarding), so stack screens no longer end under the 3-button bar
   or gesture handle. Not in a release build yet. FB-4 … FB-7 are decided, not done (see 7.8).
-- **Second feedback round** (2026-10-30, FB-8 … FB-15 under 7.8): FB-15 fixed ([PR #86](https://github.com/Herofresh/SkillForge/pull/86));
-  FB-12 and FB-9/10/11 are next; FB-8 (German), FB-13 (Mobility points) and FB-14 (more items)
-  need user decisions.
+- **Second feedback round** (2026-10-30, FB-8 … FB-15 under 7.8): FB-15 fixed ([PR #86](https://github.com/Herofresh/SkillForge/pull/86)),
+  FB-12 fixed (ADR-076, [PR #87](https://github.com/Herofresh/SkillForge/pull/87)); FB-9/10/11 are next; FB-8 (German), FB-13 (Mobility
+  points) and FB-14 (more items) need user decisions.
 - **1.2.0, versionCode 12** (2026-10-17): 7.10 Health Connect. Built so the user can upload it to the
   closed track as a **draft** first: the Health apps declaration only asks about Health Connect data
   types once Play has seen a bundle with the permission (checked by the user: the form showed no
@@ -383,6 +383,13 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-12 Trials never planned (task 7.8, ADR-076, [PR #87](https://github.com/Herofresh/SkillForge/pull/87)):** `warmUpTrial` /
+  `addToWarmUp(…, trialIfDue)` and `trialsCutForTime` (in `tryAddBlock` and `addCoolDown`) in
+  `generator.ts`; `trialPlannedNote` in `format.ts`; `ExerciseView.trialPlan` in `trainView.ts`,
+  shown by `ExerciseCard` after the "Trial needed" note. Tests: `generator.test.ts` ("Trials that
+  were never planned"), `trainView.test.ts`, `format.test.ts`, `trialHint.test.tsx`. Not checked on
+  a device. The tester's exact case is unknown; if "skipped" persists, ask which exercise and
+  training type.
 - **FB-15 custom exercise without a name (task 7.8, [PR #86](https://github.com/Herofresh/SkillForge/pull/86)):** `nodeDraftIssues` /
   `nodeDraftWarnings` in `appStore.ts` map the provisional `user_` id back to the draft's id
   (`asDraft`), so `editorIssueText` doesn't prefix it. Wording change in `validate.ts`. Tests:
@@ -1843,7 +1850,7 @@ from the GitHub releases' 1–7, ADR-068).
     the skills whose hard prerequisites include the reached goal, easiest first, same branch
     first; each as a `NodeRow` with the "i" (`ExerciseInfoSheet`) and "Set as goal", plus "Keep my
     goals". Also from the Character tab's reached-goal card.
-  - [ ] FB-12 (bug/UX, user 2026-10-30): "Prüfungen werden übersprungen: wurde gefeedbacked,
+  - [x] FB-12 (bug/UX, user 2026-10-30, ADR-076, [PR #87](https://github.com/Herofresh/SkillForge/pull/87)): "Prüfungen werden übersprungen: wurde gefeedbacked,
     überprüfen, ob es einen Fehler gibt". Found: no dropped data; the Trials are never *planned*.
     (1) A Standard plan prescribes the Trial only when the weakest of the last working sets hit the
     range top (`standardPrescription`); a skill capped at level 5 ("Trial needed", FB-4) keeps
@@ -1851,11 +1858,13 @@ from the GitHub releases' 1–7, ADR-068).
     cap (`generator.test.ts` pins Standard to no Trial). (2) The warm-up prep nodes (`wrist_prep`,
     `shoulder_dislocate`, 1 set every session) reach the cap after ~17 sessions and then show
     "Trial needed" forever: they never have working sets, so their Trial is never due, and they
-    are never candidates. (3) Battle shows no Trial marker (Classic shows the shield + "Trial").
-    (4) A Trial that doesn't fit the time (`tryAddBlock` → `reduced`) or the cool-down share turns
-    into working sets without a note. Fix: a capped node's Trial is due in Standard too (when
-    the safeguards and the six-week clock allow), the warm-up prep's Trial is prescribed in the
-    warm-up itself once capped, Battle marks Trials, and a Trial cut for time says so.
+    are never candidates. (3) A Trial that doesn't fit the time (`tryAddBlock` → `reduced`) or
+    the cool-down share turns into working sets without a note. (Battle was fine: it uses the
+    same card with the shield + "Trial" tag.) Done: the warm-up prep's Trial is prescribed in the
+    warm-up itself once capped (not in Recovery), the card says when a Standard plan offers the
+    Trial ("once every set reaches 12 reps, or right away in a Challenging session"), and a Trial
+    cut for time gets a plan note. Standard keeps the readiness rule (ADR-024): a Trial before the
+    range top would mostly fail. Backlog: a swapped-in or added exercise ignores the training type.
   - [ ] FB-13 (balance, user 2026-10-30): "Mobility Punkte: bekommt viel zu viele Punkte, obwohl
     kein Fokus drauf war (immer im Aufwärmen, eventuell Teil-Punkte geben)". Found: the Mobility
     attribute (`computeAttributes`) adds `difficultyMult × level` for *every* node with XP, and
@@ -1932,6 +1941,8 @@ is acceptable (8.4).
   once and after a restart / reinstall; refunds turn it back on; upgrade-safe for existing users.
 
 ### Later / Backlog
+- A swapped-in or added exercise is prescribed as Standard whatever the plan's training type
+  (`prescribeExercise` has no type; the plan doesn't keep it). Found with FB-12 (ADR-076).
 - Exercise info entry points (found with FB-2, ADR-070): exercise names still listed without the
   "i" / info sheet. Most use `NodeRow`, so they only need `onInfo` and a mounted
   `ExerciseInfoSheet`:
