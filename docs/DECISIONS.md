@@ -2626,3 +2626,32 @@ Template:
   (the user decides). Only direct successors are offered; when they are all proficient the panel
   says the path has ended, and the Tree remains the place to pick anything else.
 
+## ADR-078: Warm-up and cool-down work earns half XP; attributes count skills from level 2 (PLAN 7.8 FB-13)
+- Date: 2026-10-30 · Status: Accepted (user decision 2026-10-30; extends ADR-018 and ADR-050)
+- Context: tester feedback: the Mobility attribute grows far too much although mobility was never
+  a focus. Every session warms up with the two prep exercises (one set each) and most Standard
+  sessions end with a cool-down that rotates through the og 0–1 flexibility and mobility nodes (all
+  of them train the one Mobility attribute, ADR-050). Those sets earned full XP, and the attribute
+  counted every node with any XP at `difficultyMult × level`, so breadth (many nodes touched once,
+  each at level 1–2 after one session) inflated Mobility next to the push / pull work the user
+  actually trains. `session_sets` stores no block role, so the plan's warm-up / cool-down can't be
+  read back from history.
+- Decision: the kind of work is inferred from the logged sets on replay (ADR-008), so old history
+  recomputes the same way and nothing is stored: `xpShareKind` (`xp.ts`) is `warm_up` for fewer
+  than `MIN_WORKING_SETS` (2) sets of a node in a session (the warm-up prep and ramp sets; the
+  constant moved from the generator to `xp.ts`), `cool_down` for a mobility node's sets in a
+  session whose sets are less than half mobility (`ACCESSORY_MOBILITY_MAX_SHARE`), and `full` for
+  working sets, every Trial and mobility work in a mobility-focused session (Recovery, a stretching
+  routine). `warm_up` and `cool_down` earn `LIGHT_WORK_XP_SHARE` (½) of the exercise XP. The
+  attribute contribution (`nodeContribution`) starts at `ATTRIBUTE_MIN_LEVEL` (2): a skill touched
+  once in a warm-up or cool-down (level 1) adds nothing yet. The summary row says "Warm-up: half
+  XP" / "Cool-down: half XP"; the guide's XP and Attributes entries explain both rules.
+- Measured (20 generated 45-minute sessions performed as prescribed, pull / push / legs goals):
+  Mobility 52 → 35 points, Balance 24 → 18, push 79 → 80, pull 87 → 84, core 39 → 37, legs 63.
+- Consequences: a flexibility goal trained in a Standard session's cool-down also earns half (its
+  Trial counts in full; a Recovery session pays in full), accepted. A quick one-set log of any
+  skill counts as a warm-up. Existing heroes see their warm-up / cool-down nodes drop a level or
+  two and Mobility shrink on the next load; character XP already earned is recomputed too
+  (character level may drop slightly: derived state, ADR-008). Ranks are untouched (Trials). The
+  class challenge rules count exercises, not XP, so they are unchanged.
+

@@ -36,7 +36,17 @@ import type {
   UserActionKind,
   WeeklyChallenge,
 } from './types';
-import { exerciseXp, isSessionComplete, nextStreak, sessionXp, type SessionXp } from './xp';
+import { nodeAttributes } from './character';
+import {
+  exerciseXp,
+  isSessionComplete,
+  nextStreak,
+  sessionXp,
+  xpShareKind,
+  type SessionWorkCounts,
+  type SessionXp,
+  type XpShareKind,
+} from './xp';
 
 /** One entry of the logged history. */
 export type HistoryEntry = LoggedSession | UserAction;
@@ -74,6 +84,8 @@ export interface ExerciseResult {
   outcome: Outcome;
   units: number;
   xp: number;
+  /** The share of XP the work earned (ADR-078); absent in results from before 7.8 (= `full`). */
+  xpShare?: XpShareKind;
   trialAttempted: boolean;
   trialPassed: boolean;
 }
@@ -164,11 +176,20 @@ function applySessionWith(
   const levelUps: SessionResult['levelUps'] = [];
   const warnings: SafeguardWarning[] = [];
   const groups = groupSets(session.sets, lookup);
+  const trainsMobility = (id: string): boolean => {
+    const node = lookup.get(id);
+    return node !== undefined && nodeAttributes(node).includes('mobility');
+  };
+  const counts: SessionWorkCounts = {
+    totalSets: session.sets.length,
+    mobilitySets: session.sets.filter((set) => trainsMobility(set.nodeId)).length,
+  };
 
   for (const [nodeId, sets] of groups) {
     const node = lookup.get(nodeId) as ExerciseNode; // groupSets keeps known nodes only
     const before = state.progress[nodeId];
-    const earned = exerciseXp(sets, node.ogLevel);
+    const xpShare = xpShareKind(sets, trainsMobility(nodeId), counts);
+    const earned = exerciseXp(sets, node.ogLevel, xpShare);
     let next = addNodeXp(before ?? emptyProgress(nodeId), node, earned.xp, sets[0].timestamp);
 
     const trialSets = sets.filter((set) => set.isTrial);
@@ -191,6 +212,7 @@ function applySessionWith(
       outcome: earned.outcome,
       units: earned.units,
       xp: earned.xp,
+      xpShare,
       trialAttempted: trialSets.length > 0,
       trialPassed,
     });

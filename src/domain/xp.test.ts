@@ -1,12 +1,14 @@
 import { makeSet } from '@/data/testFixtures';
 import {
-  classifyOutcome,
   CLASS_CHALLENGE_BONUS_XP,
+  classifyOutcome,
   COMPLETION_BONUS_RATIO,
   difficultyMult,
   exerciseXp,
   isSessionComplete,
+  LIGHT_WORK_XP_SHARE,
   meetsTarget,
+  MIN_WORKING_SETS,
   nextStreak,
   OUTCOME_MULT,
   sessionXp,
@@ -14,6 +16,7 @@ import {
   STREAK_BONUS_MAX,
   STREAK_MAX_GAP_MS,
   streakBonusRatio,
+  xpShareKind,
 } from '@/domain/xp';
 
 describe('setUnits', () => {
@@ -161,5 +164,35 @@ describe('session bonuses', () => {
     });
     // Flat: the same bonus for a small session, never scaled by its XP.
     expect(sessionXp([5], false, 1, true).challengeBonus).toBe(CLASS_CHALLENGE_BONUS_XP);
+  });
+});
+
+describe('xpShareKind (PLAN 7.8 FB-13, ADR-078)', () => {
+  const sets = (count: number, isTrial = false) =>
+    Array.from({ length: count }, (_, setIndex) => makeSet({ nodeId: 'x', setIndex, isTrial }));
+  const mostlyOther = { totalSets: 40, mobilitySets: 8 };
+  const mostlyMobility = { totalSets: 20, mobilitySets: 14 };
+
+  it('is warm_up below the working-set count, whatever the node', () => {
+    expect(xpShareKind(sets(MIN_WORKING_SETS - 1), false, mostlyOther)).toBe('warm_up');
+    expect(xpShareKind(sets(1), true, mostlyMobility)).toBe('warm_up');
+  });
+
+  it('is cool_down for mobility work in a session that is mostly other work', () => {
+    expect(xpShareKind(sets(3), true, mostlyOther)).toBe('cool_down');
+    expect(xpShareKind(sets(3), false, mostlyOther)).toBe('full');
+  });
+
+  it('is full for a mobility-focused session, and for every Trial', () => {
+    expect(xpShareKind(sets(3), true, mostlyMobility)).toBe('full');
+    expect(xpShareKind(sets(3), true, { totalSets: 0, mobilitySets: 0 })).toBe('full');
+    expect(xpShareKind(sets(1, true), true, mostlyOther)).toBe('full');
+  });
+
+  it('halves the XP of light work', () => {
+    const three = [1, 2, 3].map(() => makeSet({ nodeId: 'push_up' }));
+    expect(exerciseXp(three, 4, 'cool_down').xp).toBe(48 * LIGHT_WORK_XP_SHARE);
+    expect(exerciseXp([makeSet({ nodeId: 'push_up' })], 4, 'warm_up').xp).toBe(8);
+    expect(exerciseXp(three, 4, 'full')).toEqual(exerciseXp(three, 4));
   });
 });

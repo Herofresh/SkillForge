@@ -4,6 +4,7 @@
  */
 import type { NodeLevelProgress } from './progression';
 import type { Metric, SetPerformance, Trial, WorkingRange } from './types';
+import type { XpShareKind } from './xp';
 
 /** Load values are shown with two decimals (0.05 × BW steps). */
 const LOAD_DECIMALS = 2;
@@ -134,6 +135,18 @@ export function trialNeededNote(banked = 0): string {
  */
 export function trialPlannedNote(rangeTop: string): string {
   return `Its Trial is planned once every set reaches ${rangeTop}, or right away in a Challenging session.`;
+}
+
+/** The summary's note on an exercise that earned a share of its XP (ADR-078); none for full XP. */
+export function xpShareNote(share: XpShareKind | undefined): string | undefined {
+  switch (share) {
+    case 'warm_up':
+      return 'Warm-up: half XP';
+    case 'cool_down':
+      return 'Cool-down: half XP';
+    default:
+      return undefined;
+  }
 }
 
 /** The value next to a node's XP bar: "34 / 60 XP", "Trial ready" at the cap, "Max" at level 10. */

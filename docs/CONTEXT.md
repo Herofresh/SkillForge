@@ -636,7 +636,8 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Mastered** | Node level 10. |
 | **Banked XP** | XP earned while capped at level 5 before passing the Trial. It's applied once the Trial is passed. |
 | **Frontier** | The trainable nodes (available, training or self-unlocked) reached by walking a goal's unmet hard prerequisites; a goal without unmet ones is its own frontier. The generator weights them by how far they are from the goal (critical path first). |
-| **Working sets** | At least `MIN_WORKING_SETS` (2) sets of one node in one session. Only they count for pattern recency, last performance and stagnation; the 1-set warm-up items don't. |
+| **Working sets** | At least `MIN_WORKING_SETS` (2, in `xp.ts`) sets of one node in one session. Only they count for pattern recency, last performance and stagnation, and for full XP; the 1-set warm-up items don't. |
+| **XP share** | How much of its XP an exercise earns by the kind of work it was (`xpShareKind`, ADR-078): `warm_up` (fewer than 2 sets of the node) and `cool_down` (a mobility node's sets in a session that is mostly other work) earn `LIGHT_WORK_XP_SHARE` (½); working sets, Trials and mobility work in a mobility-focused session (≥ half of the sets) earn in full. The summary says "Warm-up: half XP" / "Cool-down: half XP". |
 | **Workout plan** | The generator's output: blocks (`warm_up`, `skill`, `strength` pairs, `core`, `cool_down`) of `PlannedExercise`s (`sets`, `target`, `restSec`, `isTrial?`, `substitutedFrom?`), an estimate in minutes, advisory warnings and notes. A suggestion the user can edit. |
 | **Equipment profile** | A named set of equipment tags, e.g. Home or Park, chosen at session start (ADR-005). |
 | **Straight-arm budget** | About 60 s total of straight-arm holds per session is recommended (ADR-010). Going over it gives a warning, not a block (ADR-023). The sets of one straight-arm Trial don't count (Trial-day exception, ADR-025). |
@@ -645,7 +646,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Self-unlock** | The user unlocks a locked node themselves (`UserAction` kind `self_unlock`, stored in history). The node is no longer `locked` and can be trained; its unmet prerequisites stay listed (ADR-023). |
 | **Advisory safeguard** | A safety rule (ADR-010 tendon rules, prerequisites) that the engine computes and the UI shows as a `SafeguardWarning` with an acknowledge step, but that never blocks the user. The generator's suggestions always respect it (ADR-023). |
 | **Safeguard warning** | `{ code, nodeId?, message, severity }`: `straight_arm_min_weeks`, `straight_arm_budget`, `straight_arm_rest` (`warning`), `prerequisites_unmet` (`info`). |
-| **Attribute contribution** | The points a trained node adds to each attribute it trains: `difficultyMult(ogLevel) × node level`. Which attributes comes from its patterns (`PATTERN_ATTRIBUTES`) or its `trains` override (ADR-023). |
+| **Attribute contribution** | The points a trained node adds to each attribute it trains: `difficultyMult(ogLevel) × node level`, from `ATTRIBUTE_MIN_LEVEL` (2) on (ADR-078). Which attributes comes from its patterns (`PATTERN_ATTRIBUTES`) or its `trains` override (ADR-023). |
 | **Outcome** | How an exercise went vs. its prescription: `success`, `partial` (≥ 50 % of prescribed units), `failed`. |
 | **Streak** | Consecutive sessions at most 72 h apart. Adds a character-XP bonus. |
 | **Engine state** | Derived state rebuilt from history (sessions and user actions): node progress, total XP, streak, last straight-arm session, last applied position (`src/domain/recompute.ts`). |
@@ -678,7 +679,11 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
 - **Outcome** of an exercise (all sets of one node in a session): `success` if every set met its
   prescription; `partial` if achieved units (each set capped at its prescription) ≥ 50 % of
   prescribed units; else `failed`. `outcomeMult` = 1.0 / 0.6 / 0.3.
-- **Exercise XP** = round(units done × difficultyMult × outcomeMult). This is also the node XP.
+- **Exercise XP** = round(units done × difficultyMult × outcomeMult × XP share). This is also the
+  node XP. **XP share** (`xpShareKind`, ADR-078): 1 for working sets (≥ `MIN_WORKING_SETS` 2 sets of
+  the node), Trials and mobility work in a session whose sets are at least half mobility
+  (`ACCESSORY_MOBILITY_MAX_SHARE`); `LIGHT_WORK_XP_SHARE` 0.5 for a warm-up (fewer sets) and for
+  mobility work next to a session's main work (the cool-down).
 - **Session XP** = Σ exercise XP + completion bonus (10 % if no set skipped) + streak bonus
   (5 % per consecutive session after the first, max 25 %; sessions ≤ 72 h apart) + the weekly
   class challenge bonus (flat `CLASS_CHALLENGE_BONUS_XP` = 50, only on the session that completes
@@ -699,7 +704,8 @@ test-out from any state, even `locked`) goes straight to `proficient`. A self-un
   with unmet hard prerequisites, gives an `info` `prerequisites_unmet`.
 - **Character level** (`character.ts`): 100 XP to level 2, ×1.1 per level, max 99.
 - **Attributes** (points): attribute = round(sum over the trained nodes that train it of
-  `difficultyMult(ogLevel) × node level`). A node counts once it has XP (trained or tested out);
+  `difficultyMult(ogLevel) × node level`). A node counts from level `ATTRIBUTE_MIN_LEVEL` 2 on
+  (ADR-078; a skill touched once in a warm-up or cool-down stays at level 1 and adds nothing);
   its level is capped at 5 until the Trial. What a node trains = its `trains` list if set, else the
   union of `PATTERN_ATTRIBUTES` over its patterns: horizontal_push, vertical_push → push ·
   horizontal_pull, vertical_pull → pull · straight_arm_push → push + core · straight_arm_pull →

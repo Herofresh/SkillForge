@@ -88,11 +88,18 @@ export function nodeAttributes(node: Pick<ExerciseNode, 'patterns' | 'trains'>):
 }
 
 /**
+ * A node counts for its attributes from this level on (ADR-078): a skill touched once in a warm-up
+ * or cool-down (level 1) adds nothing; from level 2 it was actually trained (or tested out).
+ */
+export const ATTRIBUTE_MIN_LEVEL = 2;
+
+/**
  * Attribute points one node adds to each attribute it trains: `difficultyMult(ogLevel) × level`
- * once it was trained or tested out (XP > 0), else 0. The level is capped at 5 until the Trial.
+ * once it reached `ATTRIBUTE_MIN_LEVEL` (trained or tested out), else 0. The level is capped at 5
+ * until the Trial.
  */
 export function nodeContribution(node: ExerciseNode, progress: NodeProgress | undefined): number {
-  if (!progress || progress.xp <= 0) return 0;
+  if (!progress || progress.xp <= 0 || progress.level < ATTRIBUTE_MIN_LEVEL) return 0;
   return difficultyMult(node.ogLevel) * progress.level;
 }
 
