@@ -182,7 +182,8 @@ src/
     branch.ts           nodesInBranch (column order)
     treeView.ts         Tree/detail view models: TileState, branchColumn, treeTile (chainAbove, links),
                         prerequisiteViews (alternatives, satisfiedBy), branchSummary, defaultBranch,
-                        nodeHistory, nodeDetail
+                        nodeHistory, nodeDetail, searchTree (FB-17, ≤ MAX_TREE_SEARCH_RESULTS 30 over
+                        searchNodes)
     treeMap.ts          Tree map (PLAN 5.1, ADR-037): TreeMode / parseTreeMode, nodeLayers, mapLayout
                         (layers left → right, branch lanes, elbow edges; once per tree), mapTiles
                         (treeTile per node + met edges), boundsOf, mapFocus, routeRects

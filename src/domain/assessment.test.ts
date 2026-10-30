@@ -90,6 +90,28 @@ describe('searchNodes', () => {
   it('finds nothing for an empty query', () => {
     expect(searchNodes(ALL_NODES, '  ')).toEqual([]);
   });
+
+  it('finds every skill containing the word, and English words by id whatever the name (FB-18)', () => {
+    const rows = searchNodes(ALL_NODES, 'row');
+    expect(rows.map((node) => node.id)).toEqual(
+      expect.arrayContaining([
+        'band_row',
+        'incline_row',
+        'horizontal_row',
+        'wide_row',
+        'archer_row',
+        'one_arm_row',
+        'tuck_front_lever_row',
+      ]),
+    );
+    expect(rows.length).toBeGreaterThanOrEqual(10);
+    // A German name ("Schräges Rudern") still answers to the English words through the id.
+    const german = ALL_NODES.map((node) =>
+      node.id === 'incline_row' ? { ...node, name: 'Schräges Rudern' } : node,
+    );
+    expect(searchNodes(german, 'incline row').map((node) => node.id)).toContain('incline_row');
+    expect(searchNodes(german, 'row').map((node) => node.id)).toContain('incline_row');
+  });
 });
 
 describe('Trial results', () => {

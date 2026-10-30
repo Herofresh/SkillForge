@@ -50,7 +50,7 @@ export const DEFAULT_SESSION_MINUTES = 30;
 
 /** How many swap or add options a list shows at most. */
 export const MAX_SWAP_OPTIONS = 8;
-export const MAX_ADD_OPTIONS = 8;
+export const MAX_ADD_OPTIONS = 30;
 
 /** One exercise of the session being planned or trained. */
 export interface SessionExercise extends PlannedExercise {

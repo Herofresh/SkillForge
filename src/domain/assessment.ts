@@ -22,7 +22,11 @@ import type {
 /** How many path nodes the assessment suggests testing ("a handful"). */
 export const MAX_ASSESSMENT_ANCHORS = 6;
 /** How many search results the assessment shows at most. */
-export const MAX_SEARCH_RESULTS = 8;
+/**
+ * The most results a skill search shows (FB-17/18): enough for every exercise of one movement
+ * ("row" alone names eleven skills); the lists scroll.
+ */
+export const MAX_SEARCH_RESULTS = 30;
 
 const lookupOf = (nodes: readonly ExerciseNode[]): NodeLookup =>
   new Map(nodes.map((node) => [node.id, node]));
@@ -81,10 +85,15 @@ export function searchNodes(
 ): ExerciseNode[] {
   const needle = query.trim().toLowerCase();
   if (needle.length === 0) return [];
+  // The id is the English name in snake_case, so an English word finds a skill whatever the
+  // display language ("row" → incline_row, "incline row" → incline_row); spaces become
+  // underscores for that match.
+  const idNeedle = needle.replace(/[\s-]+/g, '_');
   const matches = nodes.filter(
-    (node) => node.name.toLowerCase().includes(needle) || node.id.includes(needle),
+    (node) => node.name.toLowerCase().includes(needle) || node.id.includes(idNeedle),
   );
-  const starts = (node: ExerciseNode) => (node.name.toLowerCase().startsWith(needle) ? 0 : 1);
+  const starts = (node: ExerciseNode) =>
+    node.name.toLowerCase().startsWith(needle) || node.id.startsWith(idNeedle) ? 0 : 1;
   return matches.sort((a, b) => starts(a) - starts(b) || byDifficulty(a, b)).slice(0, limit);
 }
 

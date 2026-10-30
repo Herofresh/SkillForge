@@ -335,4 +335,10 @@ export const TREE_DE: Dictionary = {
   'Remove {name}?': '{name} entfernen?',
   'The profile and its equipment list are removed. Sessions you logged with it stay in your history.':
     'Das Profil und seine Ausrüstungsliste werden entfernt. Sessions, die du damit geloggt hast, bleiben in deinem Verlauf.',
+  // app/(tabs)/tree.tsx: the search (FB-17)
+  'Search the whole tree by skill name': 'Den ganzen Baum nach Skill-Namen durchsuchen',
+  'Skill name, e.g. dip': 'Skill-Name, z. B. Dip',
+  'No skill matches {query}.': 'Kein Skill passt zu {query}.',
+  '1 skill matches, from every branch': '1 Skill passt, aus allen Zweigen',
+  '{n} skills match, from every branch': '{n} Skills passen, aus allen Zweigen',
 };
