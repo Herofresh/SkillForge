@@ -91,6 +91,7 @@ WORKOUTS FOR YOUR TIME AND PLACE
 • Pick your equipment (home, park, rings…) and a time from 15 to 90 minutes
 • SkillForge builds a session for your goals: skill work, paired strength, core and a cool-down
 • It learns your pace from the rests you actually take, so a 30-minute plan really takes about 30 minutes
+• Standard, recovery or challenging training, whatever the day calls for
 • Double progression: hit every set and the next target goes up
 • Every set is a monster of its skill branch: log the set to beat it
 • Two ways to train: one exercise at a time, or Battle – every exercise at once, tap a monster to log it
@@ -102,6 +103,7 @@ LEVEL UP YOUR HERO
 • 15 hero classes with up to three tiers each, and a weekly class challenge
 • A pixel companion that cheers you on, earns gear and changes its mood with your training
 • Home-screen widgets for your streak, level and companion
+• Reach a goal and the app celebrates it and suggests the next ones
 
 TRAIN WITH CARE
 • Tendon-friendly guidance for straight-arm skills: recommended training time before a Trial, a per-session volume budget and rest days – shown as advice, never as a lock
@@ -112,6 +114,7 @@ YOUR DATA, ON YOUR PHONE
 • Everything is stored on your phone; back it up to a file whenever you like
 • Delete all your data from Settings at any time
 • Optional: add your finished workouts to Health Connect, with a note of what you did
+• In English and German
 
 SkillForge gives general training suggestions, not medical advice. Check with a doctor before you start a new exercise programme, and stop if you feel pain.
 ```
