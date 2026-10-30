@@ -338,9 +338,10 @@
 - **Second feedback round** (2026-10-30, FB-8 … FB-15 under 7.8): FB-15 fixed ([PR #86](https://github.com/Herofresh/SkillForge/pull/86)),
   FB-12 fixed (ADR-076, [PR #87](https://github.com/Herofresh/SkillForge/pull/87)), FB-9/10/11 done (goal reached: celebration and the next
   goal to pick, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)), FB-13 done (warm-up and cool-down work earns half XP,
-  attributes count skills from level 2; ADR-078, [PR #89](https://github.com/Herofresh/SkillForge/pull/89)). User decisions 2026-10-30: FB-8 German
-  for everything including the skill content (next, as 1.4.0), FB-14 more items (OK, next). None
-  of the round is in a release build yet: 1.3.0 after FB-14, German as 1.4.0.
+  attributes count skills from level 2; ADR-078, [PR #89](https://github.com/Herofresh/SkillForge/pull/89)), FB-14 done (14 more companion items, 60
+  in all; ADR-079, [PR #90](https://github.com/Herofresh/SkillForge/pull/90)). User decision 2026-10-30: FB-8 German for everything including the
+  skill content (next, as 1.4.0). None of the round is in a release build yet: 1.3.0 now, German
+  as 1.4.0.
 - **1.2.0, versionCode 12** (2026-10-17): 7.10 Health Connect. Built so the user can upload it to the
   closed track as a **draft** first: the Health apps declaration only asks about Health Connect data
   types once Play has seen a bundle with the permission (checked by the user: the form showed no
@@ -386,6 +387,12 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-14 more items (task 7.8, ADR-079, [PR #90](https://github.com/Herofresh/SkillForge/pull/90)):** 14 entries in `accessories.ts` (placed in each
+  slot's humble-to-grand order, which decides the default worn item) and `art.ts` (recolours,
+  small parts, two auras), the `SPEC` table in `src/data/companion/companion.test.ts`, the count
+  in CONTEXT.md. Reviewed on the contact sheet (`npm run companion:sheet -- --only <ids> --cell 6
+  --out <png>`); the committed `docs/screenshots/6.13-*.png` sheets are regenerated. The guide's
+  item count and level / streak lists come from the data. Not checked on a device.
 - **FB-13 XP share (task 7.8, ADR-078, [PR #89](https://github.com/Herofresh/SkillForge/pull/89)):** `xpShareKind` / `XP_SHARE` / `LIGHT_WORK_XP_SHARE`
   / `ACCESSORY_MOBILITY_MAX_SHARE` and `MIN_WORKING_SETS` (moved from `generator.ts`, re-exported
   there) in `xp.ts`; `applySessionWith` in `recompute.ts` counts the session's mobility sets
@@ -418,8 +425,7 @@
   `nodeDraftWarnings` in `appStore.ts` map the provisional `user_` id back to the draft's id
   (`asDraft`), so `editorIssueText` doesn't prefix it. Wording change in `validate.ts`. Tests:
   `src/store/nodeEditor.test.ts`, `src/components/editor.test.tsx`. The second feedback round
-  (FB-8 … FB-14) is triaged under 7.8: FB-12 and FB-9/10/11 are next for an agent; FB-8, FB-13 and
-  FB-14 wait for the user's decision (see each item).
+  (FB-8 … FB-14) is triaged under 7.8 (the state of each item is on the item itself).
 - **FB-7 Trial chain (task 7.8, ADR-075, [PR #85](https://github.com/Herofresh/SkillForge/pull/85)):** `trialChain` in `progression.ts`;
   `applySessionWith` in `recompute.ts` passes every hard prerequisite of a Trial passed in the session
   (`passTrial`, at the Trial's time), lists them in `SessionResult.trialsImplied` and the level-ups.
@@ -1911,15 +1917,18 @@ from the GitHub releases' 1–7, ADR-068).
     "Cool-down: half XP"; the guide's XP and Attributes entries explain it. Side effect: a
     flexibility goal trained in a Standard session's cool-down also earns half (its Trial counts
     in full, and a Recovery session pays in full).
-  - [ ] FB-14 (content, user 2026-10-30): "Item-Freischaltung: zu wenige Items, Freischaltung zu
+  - [x] FB-14 (content, user 2026-10-30, ADR-079, [PR #90](https://github.com/Herofresh/SkillForge/pull/90)): "Item-Freischaltung: zu wenige Items, Freischaltung zu
     langsam (evtl. 10–20 sinnvolle Optionen hinzufügen)". Found: 46 items in 5 slots (hands has
     4), 28 tied to class tiers (14 at tier III), the level items at 5 / 10 / 20 / 35 / 50 / 75 and
     sessions at 50 / 100; a new hero earns ~6 items in the first weeks, then nothing from ~20 to
     ~50 sessions. Items are letter grids in `src/data/companion/art.ts` (no image assets, both
     bodies and every pose from one grid; `npm run companion:sheet` to review). ADR-059 makes the
-    shown list the spec, so a longer list **needs the user's OK**; proposal: 12–15 items on the
-    existing rule kinds filling the gaps (sessions 5 / 10 / 25 / 200, streak 3 / 14 / 60, Trials
-    3 / 5 / 10, level 15 / 30, Apprentice-rank hands and aura items).
+    shown list the spec; **user OK 2026-10-30.** Done: 14 milestone items on the existing rule
+    kinds (60 in all): Wool cap (5 sessions), Travel scarf (10), Spark aura (15), Iron bracers
+    (25), Fur-lined vest (30), Champion's cape (200); Chalked hands (streak 3), Storm cloak
+    (streak 14), Blaze aura (streak 60); Iron pendant (3 Trials), Laurel wreath (5), Golden
+    gauntlets (10); Studded belt (level 15), Star circlet (level 30). No rank items (ranks are
+    slow, see the backlog). Checked on the contact sheet for both bodies in every pose.
   - [x] FB-15 (bug, user 2026-10-30, [PR #86](https://github.com/Herofresh/SkillForge/pull/86)): "Eigene Übung hinzufügen: wenn kein
     Name angegeben wird, erscheint eine sehr technische Fehlermeldung". The live validator gave
     the new draft its provisional id (`user_exercise`), so the editor took the issue for one about
