@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { unlockedByTrial } from '@/domain/assessment';
 import { formatPerformance, trialAlsoCountsText } from '@/domain/format';
+import { goalsReachedIn } from '@/domain/goalReached';
 import { PROFICIENT_LEVEL } from '@/domain/progression';
 import type { SessionResult } from '@/domain/recompute';
 import { timerModeFor, type SetTimer } from '@/domain/setTimer';
 import type { ExerciseNode, SetPerformance } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
 
+import { GoalReachedPanel } from '../character/GoalReachedPanel';
 import { Spacing } from '../theme';
 import { SetTimerPanel } from '../timer/SetTimerPanel';
 import { BURST_TITLES, LevelUpBurst, NumberStepper, PixelFrame, PixelText } from '../ui';
@@ -93,11 +96,19 @@ type OutcomeProps = {
   node: ExerciseNode;
   outcome: SessionResult;
   standard: string;
+  /** Opens a skill's detail from the goal panel (not in onboarding, which has no detail yet). */
+  onOpenNode?: (nodeId: string) => void;
 };
 
-/** Whether the Trial passed (with the test-out burst) and what it unlocked. */
-export function TrialOutcome({ node, outcome, standard }: OutcomeProps) {
+/**
+ * Whether the Trial passed (with the test-out burst), what it unlocked, and the goal it reached
+ * with the next goal to pick (PLAN 7.8 FB-9/10/11).
+ */
+export function TrialOutcome({ node, outcome, standard, onOpenNode }: OutcomeProps) {
   const nodes = useAppStore((state) => state.nodes);
+  const goals = useAppStore((state) => state.goals);
+  // Fixed on the first render: picking the next goal replaces the reached one (FB-9).
+  const [goalsReached] = useState(() => goalsReachedIn(outcome, goals));
   const passed = trialPassedIn(outcome);
   const nameOf = (id: string) => nodes.find((entry) => entry.id === id)?.name ?? id;
   const unlockedNames = unlockedByTrial(outcome, node.id).map(nameOf);
@@ -123,6 +134,13 @@ export function TrialOutcome({ node, outcome, standard }: OutcomeProps) {
           </PixelText>
         </PixelFrame>
       )}
+      <GoalReachedPanel
+        goalIds={goalsReached}
+        celebrate
+        playKey={outcome.sessionId}
+        {...(onOpenNode ? { onOpenNode } : {})}
+        testID="trial-goal"
+      />
       {unlockedNames.length > 0 && (
         <PixelFrame variant="parchment" contentStyle={styles.gap}>
           <PixelText variant="heading" tone="textOnParchment" accessibilityRole="header">

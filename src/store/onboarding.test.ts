@@ -77,6 +77,17 @@ describe('onboarding store actions', () => {
     test.close();
   });
 
+  it('replaceGoal puts the next goal where the reached one was and persists it (FB-9)', async () => {
+    const test = await openTestDatabase();
+    const store = storeFor(test);
+    store.getState().setGoals(['squat', 'pull_up', 'l_sit']);
+    store.getState().replaceGoal('pull_up', 'l_pull_up');
+    expect(store.getState().goals).toEqual(['squat', 'l_pull_up', 'l_sit']);
+    expect(storeFor(test).getState().goals).toEqual(['squat', 'l_pull_up', 'l_sit']);
+    expect(() => store.getState().replaceGoal('squat', 'nope')).toThrow('Unknown node');
+    test.close();
+  });
+
   it('logTrial tests a node out and persists the Trial session', async () => {
     const test = await openTestDatabase();
     const store = storeFor(test);

@@ -37,6 +37,8 @@ export const BURST_TITLES = {
   challengeComplete: 'CHALLENGE COMPLETE!',
   /** The companion earned an accessory (PLAN 6.10). */
   newTrinket: 'NEW TRINKET!',
+  /** A goal's Trial passed (PLAN 7.8 FB-10). */
+  goalReached: 'GOAL REACHED!',
 } as const;
 
 const PARTICLE_COUNT = 12;

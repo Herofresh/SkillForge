@@ -336,8 +336,10 @@
   off on the tab screens and in onboarding), so stack screens no longer end under the 3-button bar
   or gesture handle. Not in a release build yet. FB-4 … FB-7 are decided, not done (see 7.8).
 - **Second feedback round** (2026-10-30, FB-8 … FB-15 under 7.8): FB-15 fixed ([PR #86](https://github.com/Herofresh/SkillForge/pull/86)),
-  FB-12 fixed (ADR-076, [PR #87](https://github.com/Herofresh/SkillForge/pull/87)); FB-9/10/11 are next; FB-8 (German), FB-13 (Mobility
-  points) and FB-14 (more items) need user decisions.
+  FB-12 fixed (ADR-076, [PR #87](https://github.com/Herofresh/SkillForge/pull/87)), FB-9/10/11 done (goal reached: celebration and the next
+  goal to pick, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)); FB-8 (German), FB-13 (Mobility points) and FB-14 (more items)
+  need user decisions. None of the round is in a release build yet: next is a 1.3.0 bundle for the
+  closed track.
 - **1.2.0, versionCode 12** (2026-10-17): 7.10 Health Connect. Built so the user can upload it to the
   closed track as a **draft** first: the Health apps declaration only asks about Health Connect data
   types once Play has seen a bundle with the permission (checked by the user: the form showed no
@@ -383,6 +385,17 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-9/10/11 goal reached (task 7.8, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)):** `src/domain/goalReached.ts`
+  (`goalsReachedIn`, `nextGoalOptions`), `replaceGoal` in `onboarding.ts` and the store;
+  `src/components/character/GoalReachedPanel.tsx` (burst + question, one frame per reached goal,
+  the reached list is fixed in component state when the screen opens so the panel survives the
+  goal change), `NextGoalPicker.tsx` (rows + "i" + pick / keep, shared), `NextGoalSheet.tsx`
+  (Character tab, from the card's "Pick the next goal"). Wired in `app/train/summary.tsx` and
+  `TrialOutcome` (node Trial and onboarding test-outs). Tests: `goalReached.test.ts`,
+  `onboarding.test.ts` (domain + store), `src/components/goalReached.test.tsx`. Not checked on a
+  device: check the burst next to QUEST COMPLETE on the summary and the sheet on the Character
+  tab. Not done: the generator still weights a reached goal until it is replaced (the picker is the
+  way out); successors of successors are not offered when the direct ones are all proficient.
 - **FB-12 Trials never planned (task 7.8, ADR-076, [PR #87](https://github.com/Herofresh/SkillForge/pull/87)):** `warmUpTrial` /
   `addToWarmUp(…, trialIfDue)` and `trialsCutForTime` (in `tryAddBlock` and `addCoolDown`) in
   `generator.ts`; `trialPlannedNote` in `format.ts`; `ExerciseView.trialPlan` in `trainView.ts`,
@@ -1838,18 +1851,23 @@ from the GitHub releases' 1–7, ADR-068).
     with a Settings override; one or two PRs) or the skill content too (a `de:` field per text in
     the YAML, a translation pass over all 155 nodes; several PRs). German would also need the
     Play listing and the privacy page in German.
-  - [ ] FB-9 (UX, user 2026-10-30): "Wenn ein Ziel erreicht ist, dann fragen, ob man zum nächsten
-    in der Schwierigkeit springen soll". Today nothing notices a reached goal except the check on
-    the Character tab's goal card (`goalProgress`); the generator keeps weighting a Proficient
-    goal. Planned with FB-10 and FB-11 as one feature: the summary (and the Trial outcome) says
-    which goal was reached, and offers the next goal(s).
-  - [ ] FB-10 (UX, user 2026-10-30): "Goals erreichen mehr feiern": a GOAL REACHED! burst and
-    panel on the summary / Trial outcome, like QUEST COMPLETE and LEVEL UP (ADR-038 rules).
-  - [ ] FB-11 (UX, user 2026-10-30): "Nächste Ziel-Optionen: Wenn es nach Abschluss mehrere
+  - [x] FB-9 (UX, user 2026-10-30, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)): "Wenn ein Ziel erreicht ist, dann fragen, ob man zum nächsten
+    in der Schwierigkeit springen soll". Before, nothing noticed a reached goal except the check
+    on the Character tab's goal card (`goalProgress`); the generator keeps weighting a Proficient
+    goal. Done with FB-10 and FB-11 as one feature: a goal is reached when its Trial is passed
+    (`goalsReachedIn`, directly or implied by ADR-075); the session summary and the Trial outcome
+    ask "Jump to the next goal?" and the picked skill takes the reached goal's place in the list
+    (`replaceGoal`), or "Keep my goals". The Character tab's reached-goal card has "Pick the next
+    goal" (`NextGoalSheet`).
+  - [x] FB-10 (UX, user 2026-10-30, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)): "Goals erreichen mehr feiern": a GOAL REACHED! burst
+    and gold panel per reached goal on the summary / Trial outcome (`GoalReachedPanel`), like
+    QUEST COMPLETE and LEVEL UP (ADR-038 rules).
+  - [x] FB-11 (UX, user 2026-10-30, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)): "Nächste Ziel-Optionen: Wenn es nach Abschluss mehrere
     Optionen gibt, soll man auswählen können unter den optimalen (wieder mit Info-i für Details)":
-    the skills whose hard prerequisites include the reached goal, easiest first, same branch
-    first; each as a `NodeRow` with the "i" (`ExerciseInfoSheet`) and "Set as goal", plus "Keep my
-    goals". Also from the Character tab's reached-goal card.
+    `nextGoalOptions`: the skills that build directly on the reached goal (a hard prerequisite),
+    not proficient, not a goal; own branch first, then the ones open now, then easiest; each a
+    `NodeRow` with the "i" (`ExerciseInfoSheet`), "Builds on …" and what it still needs; pick one,
+    then "Make it my goal". At the end of a path the panel says so.
   - [x] FB-12 (bug/UX, user 2026-10-30, ADR-076, [PR #87](https://github.com/Herofresh/SkillForge/pull/87)): "Prüfungen werden übersprungen: wurde gefeedbacked,
     überprüfen, ob es einen Fehler gibt". Found: no dropped data; the Trials are never *planned*.
     (1) A Standard plan prescribes the Trial only when the weakest of the last working sets hit the

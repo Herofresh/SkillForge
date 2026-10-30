@@ -11,6 +11,7 @@ import { CompanionSheet } from '@/components/character/CompanionSheet';
 import { useCompanion } from '@/components/character/useCompanion';
 import { GuideButton } from '@/components/guide/GuideButton';
 import { GoalProgressCard } from '@/components/character/GoalProgressCard';
+import { NextGoalSheet } from '@/components/character/NextGoalSheet';
 import { RankCrest } from '@/components/character/RankCrest';
 import { RankLadderSheet } from '@/components/character/RankLadderSheet';
 import { SessionHistoryRow } from '@/components/character/SessionHistoryRow';
@@ -127,6 +128,8 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
   const [balanceAcknowledged, setBalanceAcknowledged] = useState(false);
   const [ladderOpen, setLadderOpen] = useState(false);
   const [classesOpen, setClassesOpen] = useState(false);
+  /** The reached goal whose next-goal sheet is open (FB-9). */
+  const [nextGoalFor, setNextGoalFor] = useState<string | undefined>(undefined);
   const selectClass = useAppStore((state) => state.selectClass);
   const markClassesSeen = useAppStore((state) => state.markClassesSeen);
   const newClasses = sheet.classes.filter((row) => row.isNew).length;
@@ -215,6 +218,13 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
         )}
       </PixelFrame>
       {ladderOpen && <RankLadderSheet ladder={sheet.ladder} onClose={() => setLadderOpen(false)} />}
+      {nextGoalFor !== undefined && (
+        <NextGoalSheet
+          goalId={nextGoalFor}
+          onClose={() => setNextGoalFor(undefined)}
+          onOpenNode={openNode}
+        />
+      )}
       {classesOpen && (
         <ClassSheet rows={sheet.classes} onWear={selectClass} onClose={closeClasses} />
       )}
@@ -295,7 +305,12 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
         ) : (
           sheet.goals.map((goal) => (
             <PixelFrame key={goal.nodeId}>
-              <GoalProgressCard goal={goal} onOpen={openNode} testID={`goal-${goal.nodeId}`} />
+              <GoalProgressCard
+                goal={goal}
+                onOpen={openNode}
+                onPickNext={setNextGoalFor}
+                testID={`goal-${goal.nodeId}`}
+              />
             </PixelFrame>
           ))
         )}

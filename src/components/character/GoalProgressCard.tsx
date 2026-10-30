@@ -3,11 +3,13 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import type { GoalProgressView } from '@/domain/characterView';
 
 import { Colors, Spacing, TOUCH_TARGET } from '../theme';
-import { PixelIcon, PixelText, SegmentedBar, TierChip } from '../ui';
+import { PixelButton, PixelIcon, PixelText, SegmentedBar, TierChip } from '../ui';
 
 type Props = {
   goal: GoalProgressView;
   onOpen: (nodeId: string) => void;
+  /** A reached goal: opens the next-goal picker (FB-9). */
+  onPickNext?: (goalId: string) => void;
   testID?: string;
 };
 
@@ -18,7 +20,7 @@ const PATH_SEGMENTS = 8;
  * A goal with its progress along its path (proficient path nodes / all path nodes) and the next
  * node to work on. The goal and the next node each open their detail.
  */
-export function GoalProgressCard({ goal, onOpen, testID }: Props) {
+export function GoalProgressCard({ goal, onOpen, onPickNext, testID }: Props) {
   const reached = goal.next === undefined;
   const steps = `${goal.stepsDone} of ${goal.stepsTotal} path skills proficient`;
   return (
@@ -63,6 +65,15 @@ export function GoalProgressCard({ goal, onOpen, testID }: Props) {
         <PixelText variant="label" tone="success">
           Goal reached
         </PixelText>
+      )}
+      {reached && onPickNext && (
+        <PixelButton
+          label="Pick the next goal"
+          icon="star"
+          variant="secondary"
+          onPress={() => onPickNext(goal.nodeId)}
+          testID={testID === undefined ? undefined : `${testID}-pick-next`}
+        />
       )}
     </View>
   );

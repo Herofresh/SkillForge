@@ -2601,3 +2601,28 @@ Template:
   open (backlog): an exercise the user swaps in or adds is prescribed as Standard whatever the
   plan's training type (`prescribeExercise` has no type).
 
+## ADR-077: A reached goal is celebrated and offers the next goal (PLAN 7.8 FB-9/10/11)
+- Date: 2026-10-30 · Status: Accepted (extends ADR-031 and ADR-038)
+- Context: tester feedback: reaching a goal should be celebrated more, the app should ask whether
+  to jump to the next goal in difficulty, and with several sensible options the user should
+  choose among them with the "i" for details. Until now nothing noticed a reached goal except a
+  check mark on the Character tab's goal card; the goal stayed in the list and kept steering the
+  generator (`goalFrontier`).
+- Decision: a goal counts as **reached** when its Trial is passed, directly in the session or
+  implied by ADR-075 (`goalsReachedIn`; a passed Trial makes the whole path proficient). The
+  session summary and the Trial outcome then show, per reached goal, a gold frame with a GOAL
+  REACHED! burst (ADR-038 vocabulary and limits) and the question whether to jump to the next
+  goal. The **options** (`nextGoalOptions`) are the skills that build directly on the reached goal
+  (a hard prerequisite), not proficient and not a goal already; the reached goal's own branch
+  first, then the ones open to train now, then the easiest (`byDifficulty`). Each is a `NodeRow`
+  with the "i" (`ExerciseInfoSheet`), "Builds on <goal>" and, if locked, what it still needs. The
+  user picks one, then "Make it my goal": it takes the reached goal's place in the goal list
+  (`replaceGoal`; the list stays at most `MAX_GOALS` long); or "Keep my goals". At the end of a
+  path the panel says so. The Character tab's reached-goal card gets "Pick the next goal" with the
+  same picker in a sheet. The reached goals are fixed when the screen opens (component state), so
+  the panel stays after the goal list changes.
+- Consequences: no data change (goals stay a list of node ids). A reached goal that the user keeps
+  still steers the generator; the picker is the way out, and nothing is removed without a tap
+  (the user decides). Only direct successors are offered; when they are all proficient the panel
+  says the path has ended, and the Tree remains the place to pick anything else.
+

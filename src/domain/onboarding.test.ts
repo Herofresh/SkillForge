@@ -8,6 +8,7 @@ import {
   onboardingStepNumber,
   onboardingSummary,
   parseOnboardingCompletedAt,
+  replaceGoal,
   toggleGoal,
 } from './onboarding';
 import { emptyProgress } from './progression';
@@ -58,6 +59,22 @@ describe('toggleGoal', () => {
     const full = Array.from({ length: MAX_GOALS }, (_, index) => `g${index}`);
     expect(toggleGoal(full, 'extra')).toEqual({ goals: full, changed: false });
     expect(toggleGoal(full, 'g0').goals).toHaveLength(MAX_GOALS - 1);
+  });
+});
+
+describe('replaceGoal (PLAN 7.8 FB-9)', () => {
+  it('puts the next goal where the reached one was', () => {
+    expect(replaceGoal(['a', 'b', 'c'], 'b', 'x')).toEqual(['a', 'x', 'c']);
+  });
+
+  it('only drops the reached goal when the next one is a goal already', () => {
+    expect(replaceGoal(['a', 'b', 'c'], 'b', 'c')).toEqual(['a', 'c']);
+  });
+
+  it('appends when the reached goal is no goal any more, unless the list is full', () => {
+    expect(replaceGoal(['a'], 'gone', 'x')).toEqual(['a', 'x']);
+    const full = Array.from({ length: MAX_GOALS }, (_, index) => `g${index}`);
+    expect(replaceGoal(full, 'gone', 'x')).toEqual(full);
   });
 });
 

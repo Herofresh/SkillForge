@@ -170,7 +170,7 @@ src/
                         sessions and user actions), ADR-008/021/023
     equipment.ts        HOME_EQUIPMENT, PARK_EQUIPMENT, DEFAULT_EQUIPMENT_PROFILES (seeded),
                         EQUIPMENT_TAG_LABELS, toggleEquipmentTag
-    onboarding.ts       normalizeHeroName, toggleGoal (MAX_GOALS 5), ONBOARDING_STEPS, onboardingSummary,
+    onboarding.ts       normalizeHeroName, toggleGoal (MAX_GOALS 5), replaceGoal (FB-9), ONBOARDING_STEPS, onboardingSummary,
                         parseOnboardingCompletedAt, onboardingCompletionAt (first completion kept)
     assessment.ts       goalPathNodes, assessmentAnchors (≤ 6), searchNodes, trial results +
                         trialSession (a Trial as a session), testOutWarnings, unlockedByTrial
@@ -214,6 +214,9 @@ src/
     characterView.ts    Character tab view model (ADR-035): characterSheet, radarAxes, nextRank,
                         rankHint, activeStreak, characterTotals, balanceNote, recentSessions,
                         goalProgress
+    goalReached.ts      a reached goal and what follows (PLAN 7.8 FB-9/10/11, ADR-077):
+                        goalsReachedIn (goals whose Trial a session passed, directly or implied),
+                        nextGoalOptions (skills building directly on it: own branch, open, easiest)
     rankLadder.ts       rank ladder view model (PLAN 6.7, ADR-054): rankLadder (every rank with
                         reached/current/next/locked, branches at its level, branches below),
                         branchesForMedian, rankRequirement, rankProgressText
@@ -393,7 +396,8 @@ src/
                         CompanionSprite / CompanionSheet (+ WardrobeSlot: preview grid, folded locked items, FB-6) /
                         CompanionVictory / TrinketUnlockPanel +
                         useCompanion.ts + companionText.ts (PLAN 6.10), SessionHistoryRow,
-                        GoalProgressCard
+                        GoalProgressCard (+ "Pick the next goal" once reached), GoalReachedPanel /
+                        NextGoalPicker / NextGoalSheet (FB-9/10/11: GOAL REACHED! and the next goal)
     equipment/EquipmentProfileEditor.tsx  profile cards with tag chips + add form + the "Remove?"
                         confirmation (onboarding, Settings)
     settings/           BackupPanel (export, import confirm, rejection issues, undo), AboutPanel,
@@ -654,6 +658,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Chain / linked chip** | In the column view, a hard prerequisite on the node right above is drawn as a pixel chain (gold when met); any other hard prerequisite is a chip under the tile that opens that node. |
 | **Character sheet** | The Character tab's view model (`characterSheet`): level, rank, radar axes (attributes normalised to the largest), balance note, streak now, totals, goal progress, recent sessions (ADR-035). |
 | **Goal progress** | Proficient nodes on a goal's path (the goal + its transitive hard prerequisites) / path length, plus the next open, not-locked path node. |
+| **Goal reached** | A goal whose Trial is passed (directly or implied, ADR-075): its whole path is proficient. The summary / Trial outcome celebrate it and offer the **next goal options**: the skills that build directly on it (hard prerequisite), not proficient, not a goal; the picked one takes its place in the goal list (FB-9/10/11, ADR-077). |
 | **Undo last import** | Re-importing the safety copy of the last import in this app run (`undoLastImport`); kept in memory only (ADR-035). |
 | **Unlock anyway** | The node detail's self-unlock for a locked node: acknowledge `selfUnlockWarnings`, then `selfUnlock` (ADR-023, ADR-033). |
 

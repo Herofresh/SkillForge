@@ -128,6 +128,7 @@ import {
   normalizeHeroName,
   onboardingCompletionAt,
   parseOnboardingCompletedAt,
+  replaceGoal,
   toggleGoal,
 } from '@/domain/onboarding';
 import {
@@ -452,6 +453,8 @@ export interface AppState {
    * the list is full and nothing changed.
    */
   toggleGoal(nodeId: string): boolean;
+  /** Puts `to` where the reached goal `from` was (`replaceGoal`, FB-9). */
+  replaceGoal(from: string, to: string): void;
   /** Stores the hero name (`normalizeHeroName`). Throws when nothing is left of it. */
   setHeroName(name: string): void;
   /**
@@ -975,6 +978,12 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const { goals, changed } = toggleGoal(get().goals, nodeId);
         if (changed) get().setGoals(goals);
         return changed;
+      },
+
+      replaceGoal(from, to) {
+        requireNode(to);
+        const goals = replaceGoal(get().goals, from, to);
+        if (goals.join(',') !== get().goals.join(',')) get().setGoals(goals);
       },
 
       setHeroName(name) {
