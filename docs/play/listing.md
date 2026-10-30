@@ -17,6 +17,65 @@ names in the listing (ADR-065: the app is not affiliated with its sources). Grap
 | Privacy policy | `https://herofresh.github.io/SkillForge/privacy/` |
 | Developer name (account) | Anriar |
 
+## German listing (Play Console → Store listing → Add language → Deutsch; FB-8, ADR-080)
+
+| Field | Value |
+|---|---|
+| App name (≤ 30) | `SkillForge: Calisthenics RPG` |
+| Short description (≤ 80) | `Calisthenics als RPG-Skill-Baum: level auf, schalte Skills frei, hol dir Pläne.` |
+
+Full description (≤ 4000):
+
+```
+Mach aus Calisthenics ein RPG. SkillForge bildet Bodyweight-Training als Skill-Baum ab: Starte mit den Grundlagen, verdiene mit jedem Satz XP, bring deine Übungen auf ein höheres Level und schalte schwerere Skills frei – von Liegestützen und Klimmzügen bis zu Handstand, Levers, Planche, Spagat und Akrobatik.
+
+DER SKILL-BAUM
+• 155 Übungen in 14 Zweigen: Drücken, Ziehen, Beine, Rumpf, Handstand, Planche, Front Lever, Back Lever und Ringe, dynamische Skills, Beweglichkeit, Mobilität und Akrobatik
+• Jede Übung hat eine kurze Beschreibung, Technik-Hinweise und eine Pixel-Animation
+• Beweise einen Skill in seiner Prüfung, um den nächsten freizuschalten – oder schalte ihn selbst frei: Die App schlägt vor, du entscheidest
+• Füge eigene Übungen hinzu oder ändere jede Progression, damit sie zu deinem Training passt
+
+TRAININGSPLÄNE FÜR DEINE ZEIT UND DEINEN ORT
+• Wähle deine Ausrüstung (Zuhause, Park, Ringe …) und eine Dauer von 15 bis 90 Minuten
+• SkillForge baut eine Session für deine Ziele: Skill-Arbeit, gepaarte Kraftübungen, Rumpf und ein Cool-down
+• Es lernt dein Tempo aus den Pausen, die du wirklich machst – ein 30-Minuten-Plan dauert wirklich etwa 30 Minuten
+• Standard-, Erholungs- oder forderndes Training, wie es gerade passt
+• Doppelte Progression: Schaff jeden Satz, und das nächste Ziel steigt
+• Jeder Satz ist ein Monster seines Skill-Zweigs: Logge den Satz, um es zu besiegen
+• Zwei Arten zu trainieren: eine Übung nach der anderen oder Kampf – alle Übungen auf einmal, tipp ein Monster an, um den Satz zu loggen
+• Halte-Countdown, Pausen-Timer mit Vibration und Session-Uhr
+• Tausche, ergänze oder überspringe alles vor und während der Session
+
+LEVEL DEINEN HELDEN AUF
+• Charakter-Level, sechs Attribute (Drücken, Ziehen, Rumpf, Beine, Balance, Mobilität) und Ränge
+• 15 Heldenklassen mit bis zu drei Stufen und eine wöchentliche Klassen-Challenge
+• Ein Pixel-Begleiter, der dich anfeuert, Ausrüstung verdient und seine Stimmung mit deinem Training ändert
+• Startbildschirm-Widgets für Serie, Level und Begleiter
+• Erreichst du ein Ziel, feiert die App und schlägt dir die nächsten vor
+
+MIT BEDACHT TRAINIEREN
+• Sehnenfreundliche Hinweise für Skills mit gestreckten Armen: empfohlene Trainingszeit vor einer Prüfung, ein Volumen-Budget pro Session und Ruhetage – als Rat, nie als Sperre
+• Eingebauter Leitfaden, der jedes System erklärt
+
+DEINE DATEN, AUF DEINEM HANDY
+• Kein Konto, keine Werbung, kein Tracking
+• Alles liegt auf deinem Handy; sichere es jederzeit in eine Datei
+• Lösche alle deine Daten jederzeit in den Einstellungen
+• Optional: Trag abgeschlossene Trainings mit einer Notiz in Health Connect ein
+• Auf Deutsch und Englisch
+
+SkillForge gibt allgemeine Trainingsvorschläge, keinen medizinischen Rat. Sprich mit einem Arzt oder einer Ärztin, bevor du ein neues Trainingsprogramm beginnst, und hör auf, wenn du Schmerzen spürst.
+```
+
+German release notes for 1.3.0 (≤ 500):
+
+```
+Wähle die Trainingsart: Standard, Erholung oder Fordernd. Erreichst du ein Ziel, feiert SkillForge und schlägt die nächsten Ziele vor, jedes mit Info. Eine bestandene Prüfung zählt auch für die Skills davor. Der Baum zeigt, wann ein Skill seine Prüfung braucht, und der Plan sagt, wann sie kommt. 14 neue Begleiter-Items; Anpassen zeigt sie als Vorschau. Aufwärmen und Cool-down bringen jetzt halbe XP. Behoben: Bildschirme enden nicht mehr unter der Navigationsleiste.
+```
+
+The privacy policy has a German page at `https://herofresh.github.io/SkillForge/privacy/de/`
+(the English page stays the one linked in Play; it links to the German one).
+
 ## Full description (≤ 4000)
 
 ```
