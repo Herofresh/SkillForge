@@ -67,7 +67,7 @@ export function ExerciseCard({ exercise, highlighted = false, children, onInfo, 
       )}
       {exercise.awaitingTrial && (
         <PixelText variant="small" tone="ember" testID={testID && `${testID}-trial-needed`}>
-          {trialNeededNote()}
+          {exercise.trialPlan ? `${trialNeededNote()} ${exercise.trialPlan}` : trialNeededNote()}
         </PixelText>
       )}
       {exercise.pairedWithName !== undefined && (

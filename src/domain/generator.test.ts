@@ -21,6 +21,7 @@ import {
   SINGLE_REST_SEC,
   substituteFor,
   WARM_UP_REST_SEC,
+  WARM_UP_SETS,
   WORKING_SETS,
   type ScoreContext,
 } from '@/domain/generator';
@@ -889,5 +890,80 @@ describe('training types (PLAN 7.8 FB-5)', () => {
       isTrial: true,
       sets: pullUp.trial.sets,
     });
+  });
+});
+
+describe('Trials that were never planned (PLAN 7.8 FB-12, ADR-076)', () => {
+  /** `nodeId` stuck at the level-5 cap, its Trial not passed, trained long enough. */
+  const capped = (nodeId: string): NodeProgress => ({
+    nodeId,
+    xp: 10_000,
+    level: 5,
+    trialPassed: false,
+    firstTrainedAt: daysAgo(60),
+  });
+  const warmUp = (plan: WorkoutPlan) =>
+    plan.blocks.find((block) => block.kind === 'warm_up')?.exercises ?? [];
+  const wristPrep = (plan: WorkoutPlan) =>
+    warmUp(plan).find((exercise) => exercise.nodeId === 'wrist_prep');
+
+  it('puts the capped warm-up prep Trial into the warm-up (its single set is never due)', () => {
+    const base = request({ recentSessions: INTERMEDIATE });
+    const progress = { ...base.progress, wrist_prep: capped('wrist_prep') };
+    const prep = node('wrist_prep');
+    for (const trainingType of ['standard', 'challenging'] as const) {
+      const plan = generateWorkout({ ...base, progress, trainingType });
+      expect(wristPrep(plan)).toMatchObject({
+        sets: prep.trial.sets,
+        target: { value: prep.trial.target },
+        isTrial: true,
+        restSec: WARM_UP_REST_SEC,
+      });
+      // The other prep keeps its single set.
+      const other = warmUp(plan).find((e) => e.nodeId === 'shoulder_dislocate');
+      expect(other).toMatchObject({ sets: WARM_UP_SETS });
+      expect(other?.isTrial).toBeUndefined();
+    }
+  });
+
+  it('keeps the single warm-up set while the prep is not capped, and in Recovery', () => {
+    const base = request({ recentSessions: INTERMEDIATE });
+    expect(wristPrep(generateWorkout(base))).toMatchObject({ sets: WARM_UP_SETS });
+    expect(wristPrep(generateWorkout(base))?.isTrial).toBeUndefined();
+    const progress = { ...base.progress, wrist_prep: capped('wrist_prep') };
+    const recovery = generateWorkout({ ...base, progress, trainingType: 'recovery' });
+    expect(wristPrep(recovery)).toMatchObject({ sets: WARM_UP_SETS });
+    expect(wristPrep(recovery)?.isTrial).toBeUndefined();
+  });
+
+  it('says so when a due Trial is cut to working sets for lack of time', () => {
+    // Pull-up at the top of its range: its Trial is due. Few minutes: the block is trimmed.
+    const pullUp = node('pull_up');
+    const sessions = [
+      ...INTERMEDIATE,
+      workSession('top', daysAgo(3), 'pull_up', pullUp.workingRange.max),
+    ];
+    const long = generateWorkout(
+      request({ goals: ['pull_up'], recentSessions: sessions, availableMinutes: 60 }),
+    );
+    expect(planExercises(long).find((e) => e.nodeId === 'pull_up')?.isTrial).toBe(true);
+    expect(long.notes.some((note) => note.includes("Trial doesn't fit"))).toBe(false);
+
+    const minutes = [...Array(20).keys()].map((i) => i + 3);
+    const short = minutes
+      .map((availableMinutes) =>
+        generateWorkout(
+          request({ goals: ['pull_up'], recentSessions: sessions, availableMinutes }),
+        ),
+      )
+      .find((plan) => {
+        const entry = planExercises(plan).find((e) => e.nodeId === 'pull_up');
+        return entry !== undefined && !entry.isTrial;
+      });
+    expect(short).toBeDefined();
+    expect(short?.notes).toContain(
+      "Pull-up's Trial doesn't fit today's time, so it gets working sets instead. Give the " +
+        'session more minutes to attempt it.',
+    );
   });
 });

@@ -10,6 +10,7 @@ import {
   NO_DESCRIPTION_TEXT,
   spokenOgLevel,
   trialAlsoCountsText,
+  trialPlannedNote,
 } from './format';
 
 describe('formatPerformance', () => {
@@ -93,6 +94,14 @@ describe('formatDescription', () => {
     expect(formatDescription('Hanging from a bar.')).toBe('Hanging from a bar.');
     expect(formatDescription('')).toBe(NO_DESCRIPTION_TEXT);
     expect(formatDescription('  ')).toBe(NO_DESCRIPTION_TEXT);
+  });
+});
+
+describe('trialPlannedNote (PLAN 7.8 FB-12)', () => {
+  it('says when a Standard plan offers the Trial', () => {
+    expect(trialPlannedNote('12 reps')).toBe(
+      'Its Trial is planned once every set reaches 12 reps, or right away in a Challenging session.',
+    );
   });
 });
 

@@ -68,7 +68,8 @@ describe('"Trial needed" (PLAN 7.8 FB-4)', () => {
     await render(<ExerciseCard exercise={block.exercises[0]} testID="card" />);
     expect(screen.getByText('Trial needed')).toBeOnTheScreen();
     expect(screen.getByTestId('card-trial-needed')).toHaveTextContent(
-      'Level 5 reached: pass the Trial to keep levelling.',
+      'Level 5 reached: pass the Trial to keep levelling. Its Trial is planned once every set ' +
+        `reaches ${LOOKUP.get('pull_up')!.workingRange.max} reps, or right away in a Challenging session.`,
     );
   });
 

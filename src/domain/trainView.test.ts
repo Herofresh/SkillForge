@@ -263,6 +263,18 @@ describe('Train view models', () => {
       ['Squat', false],
     ]);
     expect(blockViews(plan.exercises, LOOKUP)[1].exercises[0].awaitingTrial).toBe(false);
+    // The card also says when the plan offers the Trial (FB-12); not once it is the Trial.
+    expect(strength.exercises[0].trialPlan).toBe(
+      'Its Trial is planned once every set reaches 8 reps, or right away in a Challenging session.',
+    );
+    expect(strength.exercises[1].trialPlan).toBeUndefined();
+    const trialPlan = replaceExercise(plan, strength.exercises[0].key, {
+      ...plan.exercises.find((e) => e.key === strength.exercises[0].key)!,
+      isTrial: true,
+    });
+    const [, asTrial] = blockViews(trialPlan.exercises, LOOKUP, undefined, progress);
+    expect(asTrial.exercises[0]).toMatchObject({ awaitingTrial: true, isTrial: true });
+    expect(asTrial.exercises[0].trialPlan).toBeUndefined();
 
     const result: SessionResult = {
       sessionId: 's',
