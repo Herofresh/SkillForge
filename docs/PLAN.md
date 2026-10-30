@@ -370,12 +370,13 @@
    and the next-goal picker (FB-9/10/11), a warm-up prep Trial once Wrist prep is at level 5
    (FB-12), the "Warm-up: half XP" note (FB-13). Tell the testers what changed (the release
    notes) and ask whether "Trials get skipped" still happens, and where.
-1. **German (FB-8, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)) to 1.4.0:** check the German build on a device (Settings →
-   Language → Deutsch; the Train tab's plan notes, a summary, the Tree, Customize, the guide: long
-   German words may wrap or clip in chips and tiles), then the Play listing in German
-   (`docs/play/listing.md`: a German store listing the user pastes into Play Console) and a German
-   privacy page (`site/privacy/`), then `chore: version 1.4.0`. Everything the validator says in
-   the editor and the Maestro flows stay English (ADR-080).
+1. **German (FB-8, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)) to 1.4.0:** the German Play listing (name, short and full
+   description, 1.3.0 release notes; `docs/play/listing.md` → Play Console → Store listing → Add
+   language → Deutsch) and the German privacy page (`site/privacy/de/`, linked from the English
+   one) are in ([PR #93](https://github.com/Herofresh/SkillForge/pull/93)). Left: check the German build on a device (Settings → Language →
+   Deutsch; plan notes, a summary, the Tree, Customize, the guide: long German words may wrap or
+   clip in chips and tiles) and `chore: version 1.4.0`. The validator's texts in the editor and
+   the Maestro flows stay English (ADR-080).
 2. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
    assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
    access, target audience).
