@@ -55,6 +55,24 @@ export interface GoalToggle {
 }
 
 /**
+ * `goals` with `to` in the place of `from` (a reached goal and the next one picked for it, FB-9):
+ * `to` already a goal → only `from` is dropped; `from` not a goal → `to` is appended when there is
+ * room (`max`), else nothing changes.
+ */
+export function replaceGoal(
+  goals: readonly string[],
+  from: string,
+  to: string,
+  max: number = MAX_GOALS,
+): string[] {
+  const rest = goals.filter((id) => id !== from);
+  if (rest.includes(to)) return rest;
+  if (!goals.includes(from)) return rest.length >= max ? [...goals] : [...rest, to];
+  const at = goals.indexOf(from);
+  return [...rest.slice(0, at), to, ...rest.slice(at)];
+}
+
+/**
  * Adds `nodeId` to the end of the goal list, or removes it if it is already a goal. Adding to a
  * full list (`max` goals) changes nothing.
  */

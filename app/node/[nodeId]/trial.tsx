@@ -40,7 +40,14 @@ function NodeTrialForm({ node }: { node: ExerciseNode }) {
       <Stack.Screen options={stackHeaderOptions('The Trial')} />
       {attempt.outcome ? (
         <Screen testID="node-trial-result">
-          <TrialOutcome node={node} outcome={attempt.outcome} standard={attempt.standard} />
+          <TrialOutcome
+            node={node}
+            outcome={attempt.outcome}
+            standard={attempt.standard}
+            onOpenNode={(nodeId) =>
+              router.replace({ pathname: '/node/[nodeId]', params: { nodeId } })
+            }
+          />
           <PixelButton
             label="Back to the skill"
             onPress={() => router.back()}

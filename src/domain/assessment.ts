@@ -28,7 +28,7 @@ const lookupOf = (nodes: readonly ExerciseNode[]): NodeLookup =>
   new Map(nodes.map((node) => [node.id, node]));
 
 /** Easiest first: ogLevel, then branch column position, then id (stable across runs). */
-function byDifficulty(a: ExerciseNode, b: ExerciseNode): number {
+export function byDifficulty(a: ExerciseNode, b: ExerciseNode): number {
   return a.ogLevel - b.ogLevel || a.chainOrder - b.chainOrder || compareCodeUnits(a.id, b.id);
 }
 

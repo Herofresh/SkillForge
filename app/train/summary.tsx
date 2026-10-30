@@ -1,9 +1,10 @@
 import { Stack, useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { ChallengeProgressPanel } from '@/components/character/ChallengeProgressPanel';
 import { ClassUnlockPanel } from '@/components/character/ClassUnlockPanel';
 import { CompanionVictory } from '@/components/character/CompanionVictory';
+import { GoalReachedPanel } from '@/components/character/GoalReachedPanel';
 import { TrinketUnlockPanel } from '@/components/character/TrinketUnlockPanel';
 import { SafeguardWarningList, useAcknowledgements } from '@/components/SafeguardWarningList';
 import { stackHeaderOptions } from '@/components/stackHeader';
@@ -13,6 +14,8 @@ import { HERO_CLASSES } from '@/data/classes';
 import { ACCESSORIES } from '@/data/companion/accessories';
 import { sessionClassTierUps, wornClass } from '@/domain/classes';
 import { sessionAccessoryUnlocks } from '@/domain/companion';
+import { goalsReachedIn } from '@/domain/goalReached';
+import type { SessionResult } from '@/domain/recompute';
 import { summaryView, type SummaryView } from '@/domain/trainView';
 import type { HealthWriteState } from '@/store/appStore';
 import { useAppStore } from '@/store/useAppStore';
@@ -22,7 +25,8 @@ import { useAppStore } from '@/store/useAppStore';
  * and unlocks with the pixel burst, the streak, the hero classes it unlocked or raised a tier
  * (PLAN 6.9, CLASS UNLOCKED! / TIER UP!, with "Wear"), the weekly class challenge's progress (PLAN
  * 6.9b, CHALLENGE COMPLETE! when this session finished it), the companion trinkets it earned (PLAN
- * 6.10, NEW TRINKET!) and the companion's victory pose, and the advisory warnings the session raised
+ * 6.10, NEW TRINKET!), the goals it reached (PLAN 7.8 FB-9/10/11, GOAL REACHED! and the next goal to
+ * pick) and the companion's victory pose, and the advisory warnings the session raised
  * (ADR-023), each acknowledged before "Done". With Health Connect on (PLAN 7.10), one line says
  * whether the workout was added.
  */
@@ -45,11 +49,17 @@ export default function SessionSummaryScreen() {
       </Screen>
     );
   }
-  return <SummaryBody view={view} playKey={summary.sessionId} />;
+  return <SummaryBody view={view} result={summary.result} playKey={summary.sessionId} />;
 }
 
-function SummaryBody({ view, playKey }: { view: SummaryView; playKey: string }) {
+type BodyProps = { view: SummaryView; result: SessionResult; playKey: string };
+
+function SummaryBody({ view, result, playKey }: BodyProps) {
   const router = useRouter();
+  const goals = useAppStore((state) => state.goals);
+  // The goals this session reached, fixed when the summary opens: picking the next goal replaces
+  // the reached one in the store, and the panel must stay (FB-9).
+  const [goalsReached] = useState(() => goalsReachedIn(result, goals));
   const dismiss = useAppStore((state) => state.dismissTrainSummary);
   const classes = useAppStore((state) => state.classes);
   const companion = useAppStore((state) => state.companion);
@@ -77,6 +87,12 @@ function SummaryBody({ view, playKey }: { view: SummaryView; playKey: string }) 
           celebrate
           playKey={playKey}
           subtitle="Session logged"
+          onOpenNode={openNode}
+        />
+        <GoalReachedPanel
+          goalIds={goalsReached}
+          celebrate
+          playKey={playKey}
           onOpenNode={openNode}
         />
         <ClassUnlockPanel

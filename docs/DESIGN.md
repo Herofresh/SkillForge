@@ -502,10 +502,10 @@ strings (`iconSvg`, crisp edges).
   between keyframes. With reduce motion they show one still keyframe and never move.
 - **Reveal moments (PLAN 5.2, ADR-038):** every celebration is a `LevelUpBurst` with a title from
   `BURST_TITLES` (LEVEL UP!, UNLOCKED!, TESTED OUT!, QUEST COMPLETE, CLASS UNLOCKED!, TIER UP!,
-  CHALLENGE COMPLETE!, NEW TRINKET!). The ring bursts from the
+  CHALLENGE COMPLETE!, NEW TRINKET!, GOAL REACHED!). The ring bursts from the
   title's centre. Where they play: Train summary (quest complete, first level-up, first unlock, a class
-  unlocked or a class tier reached, a companion accessory earned),
-  Trial outcome (tested out; node detail and onboarding share `TrialOutcome`), onboarding summary
+  unlocked or a class tier reached, a companion accessory earned, a goal reached),
+  Trial outcome (tested out, a goal reached; node detail and onboarding share `TrialOutcome`), onboarding summary
   (hero name + rank), node detail (UNLOCKED! after unlock anyway, else LEVEL UP! when the node's
   level rose while it was open), Character tab (LEVEL UP! when the character level rose). Level-ups
   use `useLevelUpKey(level)`: it plays only for a rise seen while mounted, never on every visit.
