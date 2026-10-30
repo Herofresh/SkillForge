@@ -130,13 +130,13 @@ SkillForge gives general training suggestions, not medical advice. Check with a 
 ## Release notes for 1.4.0 (≤ 500, "What's new")
 
 ```
-SkillForge now speaks German. It follows your device language, or pick English or Deutsch in Settings → Language. Every exercise has German names, descriptions and cues, and the whole app, the guide and the home-screen widgets change with it. Everything from 1.3.0 is included: training types, goal celebrations with the next goals to pick, Trials that count for the skills they build on, 14 new companion items and half XP for warm-up and cool-down work.
+SkillForge now speaks German: it follows your device language, or pick English or Deutsch in Settings → Language; every exercise has German names, descriptions and cues. New: swap any exercise with one tap, in the plan and during the session, and search the whole skill tree. Also from 1.3.0: training types, goal celebrations with the next goals to pick, Trials that count for the skills they build on, 14 new companion items, half XP for warm-up and cool-down.
 ```
 
 German (Play Console → release notes → de-DE):
 
 ```
-SkillForge spricht jetzt Deutsch: Die App folgt deiner Gerätesprache, oder du wählst unter Einstellungen → Sprache Deutsch oder Englisch. Jede Übung hat deutsche Namen, Beschreibungen und Hinweise; Leitfaden und Widgets wechseln mit. Dazu alles aus 1.3.0: Trainingsarten, Feiern beim Erreichen eines Ziels mit Vorschlägen für die nächsten, Prüfungen, die auch für die Skills davor zählen, 14 neue Begleiter-Items und halbe XP fürs Aufwärmen und den Cool-down.
+SkillForge spricht jetzt Deutsch: Die App folgt deiner Gerätesprache, oder du wählst unter Einstellungen → Sprache Deutsch oder Englisch; jede Übung hat deutsche Namen, Beschreibungen und Hinweise. Neu: Jede Übung mit einem Tipp tauschen, im Plan und in der Session, und den ganzen Skill-Baum durchsuchen. Dazu aus 1.3.0: Trainingsarten, Feiern beim Erreichen eines Ziels mit Vorschlägen, Prüfungen zählen auch für die Skills davor, 14 neue Items, halbe XP fürs Aufwärmen und den Cool-down.
 ```
 
 ## Release notes for 1.3.0 (≤ 500, "What's new")
