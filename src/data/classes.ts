@@ -17,6 +17,7 @@
  * are 12 × 12 grids with the icon roles (`#` main, `+` accent, `*` highlight, `o` shade).
  */
 import type { PaletteColor } from '@/components/palette';
+import { k } from '@/i18n';
 import type {
   Attribute,
   ClassChallengeDefinition,
@@ -60,11 +61,11 @@ const trainIn = (
 export const HERO_CLASSES: readonly HeroClass[] = [
   {
     id: 'recruit',
-    name: 'Recruit',
-    flavor: 'Every legend starts with a first rep.',
+    name: k('Recruit'),
+    flavor: k('Every legend starts with a first rep.'),
     color: 'mist',
     challenge: { goal: { kind: 'sessions' }, targets: [2] },
-    tiers: [{ name: 'Recruit', rule: { kind: 'start' } }],
+    tiers: [{ name: k('Recruit'), rule: { kind: 'start' } }],
     emblem: [
       '............',
       '....####....',
@@ -83,14 +84,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'warrior',
-    name: 'Warrior',
-    flavor: 'Push the world away: dips, push-ups, presses.',
+    name: k('Warrior'),
+    flavor: k('Push the world away: dips, push-ups, presses.'),
     color: 'ember',
     challenge: trainIn(['push'], [2, 3, 3]),
     tiers: [
-      { name: 'Warrior', rule: stats({ push: 30 }) },
-      { name: 'Veteran', rule: stats({ push: 120 }) },
-      { name: 'Warlord', rule: stats({ push: 300 }) },
+      { name: k('Warrior'), rule: stats({ push: 30 }) },
+      { name: k('Veteran'), rule: stats({ push: 120 }) },
+      { name: k('Warlord'), rule: stats({ push: 300 }) },
     ],
     emblem: [
       '..##....##..',
@@ -110,14 +111,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'ranger',
-    name: 'Ranger',
-    flavor: 'A climber of cliffs and trees: pull-ups, rows, levers.',
+    name: k('Ranger'),
+    flavor: k('A climber of cliffs and trees: pull-ups, rows, levers.'),
     color: 'verdant',
     challenge: trainIn(['pull'], [2, 3, 3]),
     tiers: [
-      { name: 'Ranger', rule: stats({ pull: 30 }) },
-      { name: 'Pathfinder', rule: stats({ pull: 120 }) },
-      { name: 'Warden', rule: stats({ pull: 300 }) },
+      { name: k('Ranger'), rule: stats({ pull: 30 }) },
+      { name: k('Pathfinder'), rule: stats({ pull: 120 }) },
+      { name: k('Warden'), rule: stats({ pull: 300 }) },
     ],
     emblem: [
       '..##........',
@@ -137,14 +138,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'monk',
-    name: 'Monk',
-    flavor: 'A centre of stone: hollow holds, L-sits, compression.',
+    name: k('Monk'),
+    flavor: k('A centre of stone: hollow holds, L-sits, compression.'),
     color: 'gold',
     challenge: trainIn(['core'], [2, 3, 3]),
     tiers: [
-      { name: 'Monk', rule: stats({ core: 25 }) },
-      { name: 'Ascetic', rule: stats({ core: 100 }) },
-      { name: 'Grandmaster', rule: stats({ core: 250 }) },
+      { name: k('Monk'), rule: stats({ core: 25 }) },
+      { name: k('Ascetic'), rule: stats({ core: 100 }) },
+      { name: k('Grandmaster'), rule: stats({ core: 250 }) },
     ],
     emblem: [
       '.....##.....',
@@ -164,14 +165,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'barbarian',
-    name: 'Barbarian',
-    flavor: 'Legs like tree trunks: squats, lunges, jumps.',
+    name: k('Barbarian'),
+    flavor: k('Legs like tree trunks: squats, lunges, jumps.'),
     color: 'blood',
     challenge: trainIn(['legs'], [2, 2, 3]),
     tiers: [
-      { name: 'Barbarian', rule: stats({ legs: 25 }) },
-      { name: 'Marauder', rule: stats({ legs: 70 }) },
-      { name: 'Chieftain', rule: stats({ legs: 120 }) },
+      { name: k('Barbarian'), rule: stats({ legs: 25 }) },
+      { name: k('Marauder'), rule: stats({ legs: 70 }) },
+      { name: k('Chieftain'), rule: stats({ legs: 120 }) },
     ],
     emblem: [
       '+..........+',
@@ -191,14 +192,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'rogue',
-    name: 'Rogue',
-    flavor: 'Light on hands and feet: handstands, balance, tumbling.',
+    name: k('Rogue'),
+    flavor: k('Light on hands and feet: handstands, balance, tumbling.'),
     color: 'amethyst',
     challenge: trainIn(['balance'], [2, 3, 3]),
     tiers: [
-      { name: 'Rogue', rule: stats({ balance: 20 }) },
-      { name: 'Shadow', rule: stats({ balance: 60 }) },
-      { name: 'Nightblade', rule: stats({ balance: 150 }) },
+      { name: k('Rogue'), rule: stats({ balance: 20 }) },
+      { name: k('Shadow'), rule: stats({ balance: 60 }) },
+      { name: k('Nightblade'), rule: stats({ balance: 150 }) },
     ],
     emblem: [
       '#..........#',
@@ -218,14 +219,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'druid',
-    name: 'Druid',
-    flavor: 'Bends like a willow: mobility drills and deep ranges.',
+    name: k('Druid'),
+    flavor: k('Bends like a willow: mobility drills and deep ranges.'),
     color: 'lime',
     challenge: { goal: { kind: 'exercises_training', attribute: 'mobility' }, targets: [3, 4, 5] },
     tiers: [
-      { name: 'Druid', rule: stats({ mobility: 20 }) },
-      { name: 'Shaman', rule: stats({ mobility: 60 }) },
-      { name: 'Archdruid', rule: stats({ mobility: 150 }) },
+      { name: k('Druid'), rule: stats({ mobility: 20 }) },
+      { name: k('Shaman'), rule: stats({ mobility: 60 }) },
+      { name: k('Archdruid'), rule: stats({ mobility: 150 }) },
     ],
     emblem: [
       '.........##.',
@@ -245,14 +246,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'paladin',
-    name: 'Paladin',
-    flavor: 'Push and pull in balance, shoulders built to last.',
+    name: k('Paladin'),
+    flavor: k('Push and pull in balance, shoulders built to last.'),
     color: 'goldLight',
     challenge: trainIn(['push', 'pull'], [2, 2, 3]),
     tiers: [
-      { name: 'Paladin', rule: stats({ push: 25, pull: 25 }) },
-      { name: 'Crusader', rule: stats({ push: 100, pull: 100 }) },
-      { name: 'Lightbringer', rule: stats({ push: 250, pull: 250 }) },
+      { name: k('Paladin'), rule: stats({ push: 25, pull: 25 }) },
+      { name: k('Crusader'), rule: stats({ push: 100, pull: 100 }) },
+      { name: k('Lightbringer'), rule: stats({ push: 250, pull: 250 }) },
     ],
     emblem: [
       '..########..',
@@ -272,14 +273,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'samurai',
-    name: 'Samurai',
-    flavor: 'Straight arms and a steel core: the lever path.',
+    name: k('Samurai'),
+    flavor: k('Straight arms and a steel core: the lever path.'),
     color: 'rune',
     challenge: trainIn(['pull', 'core'], [2, 2, 3]),
     tiers: [
-      { name: 'Samurai', rule: stats({ pull: 25, core: 20 }) },
-      { name: 'Kensei', rule: stats({ pull: 100, core: 80 }) },
-      { name: 'Shogun', rule: stats({ pull: 250, core: 200 }) },
+      { name: k('Samurai'), rule: stats({ pull: 25, core: 20 }) },
+      { name: k('Kensei'), rule: stats({ pull: 100, core: 80 }) },
+      { name: k('Shogun'), rule: stats({ pull: 250, core: 200 }) },
     ],
     emblem: [
       '...........#',
@@ -299,14 +300,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'templar',
-    name: 'Templar',
-    flavor: 'Locked arms that hold the body level: the planche path.',
+    name: k('Templar'),
+    flavor: k('Locked arms that hold the body level: the planche path.'),
     color: 'bone',
     challenge: trainIn(['push', 'core'], [2, 2, 3]),
     tiers: [
-      { name: 'Templar', rule: stats({ push: 25, core: 20 }) },
-      { name: 'Inquisitor', rule: stats({ push: 100, core: 80 }) },
-      { name: 'Grand Templar', rule: stats({ push: 250, core: 200 }) },
+      { name: k('Templar'), rule: stats({ push: 25, core: 20 }) },
+      { name: k('Inquisitor'), rule: stats({ push: 100, core: 80 }) },
+      { name: k('Grand Templar'), rule: stats({ push: 250, core: 200 }) },
     ],
     emblem: [
       '############',
@@ -326,14 +327,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'bard',
-    name: 'Bard',
-    flavor: 'Flow and grace: cartwheels, rolls and poised holds.',
+    name: k('Bard'),
+    flavor: k('Flow and grace: cartwheels, rolls and poised holds.'),
     color: 'orchid',
     challenge: trainIn(['balance', 'mobility'], [1, 2, 2]),
     tiers: [
-      { name: 'Bard', rule: stats({ balance: 15, mobility: 15 }) },
-      { name: 'Skald', rule: stats({ balance: 50, mobility: 50 }) },
-      { name: 'Virtuoso', rule: stats({ balance: 120, mobility: 120 }) },
+      { name: k('Bard'), rule: stats({ balance: 15, mobility: 15 }) },
+      { name: k('Skald'), rule: stats({ balance: 50, mobility: 50 }) },
+      { name: k('Virtuoso'), rule: stats({ balance: 120, mobility: 120 }) },
     ],
     emblem: [
       '..........oo',
@@ -353,14 +354,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'cleric',
-    name: 'Cleric',
-    flavor: 'Calm breath, a strong centre and a supple body.',
+    name: k('Cleric'),
+    flavor: k('Calm breath, a strong centre and a supple body.'),
     color: 'sky',
     challenge: trainIn(['core', 'mobility'], [2, 2, 3]),
     tiers: [
-      { name: 'Cleric', rule: stats({ core: 20, mobility: 15 }) },
-      { name: 'Priest', rule: stats({ core: 80, mobility: 50 }) },
-      { name: 'High Priest', rule: stats({ core: 200, mobility: 120 }) },
+      { name: k('Cleric'), rule: stats({ core: 20, mobility: 15 }) },
+      { name: k('Priest'), rule: stats({ core: 80, mobility: 50 }) },
+      { name: k('High Priest'), rule: stats({ core: 200, mobility: 120 }) },
     ],
     emblem: [
       '.....##.....',
@@ -380,21 +381,21 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'knight',
-    name: 'Knight',
-    flavor: 'Trained in every art: all six attributes.',
+    name: k('Knight'),
+    flavor: k('Trained in every art: all six attributes.'),
     color: 'steel',
     challenge: { goal: { kind: 'complete_sessions' }, targets: [2, 3, 3] },
     tiers: [
       {
-        name: 'Knight',
+        name: k('Knight'),
         rule: stats({ push: 15, pull: 15, core: 15, legs: 15, balance: 15, mobility: 15 }),
       },
       {
-        name: 'Knight Commander',
+        name: k('Knight Commander'),
         rule: stats({ push: 50, pull: 50, core: 50, legs: 50, balance: 50, mobility: 50 }),
       },
       {
-        name: 'High Lord',
+        name: k('High Lord'),
         rule: stats({ push: 120, pull: 120, core: 120, legs: 120, balance: 120, mobility: 120 }),
       },
     ],
@@ -416,14 +417,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'berserker',
-    name: 'Berserker',
-    flavor: 'Shows up, again and again: sessions logged.',
+    name: k('Berserker'),
+    flavor: k('Shows up, again and again: sessions logged.'),
     color: 'sunfire',
     challenge: { goal: { kind: 'sessions' }, targets: [3, 3, 4] },
     tiers: [
-      { name: 'Berserker', rule: { kind: 'sessions', count: 20 } },
-      { name: 'Bloodrager', rule: { kind: 'sessions', count: 100 } },
-      { name: 'Warchief', rule: { kind: 'sessions', count: 250 } },
+      { name: k('Berserker'), rule: { kind: 'sessions', count: 20 } },
+      { name: k('Bloodrager'), rule: { kind: 'sessions', count: 100 } },
+      { name: k('Warchief'), rule: { kind: 'sessions', count: 250 } },
     ],
     emblem: [
       '............',
@@ -443,14 +444,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   },
   {
     id: 'sorcerer',
-    name: 'Sorcerer',
-    flavor: 'Mastery across the tree, measured by your rank.',
+    name: k('Sorcerer'),
+    flavor: k('Mastery across the tree, measured by your rank.'),
     color: 'arcane',
     challenge: { goal: { kind: 'trial_attempts' }, targets: [1, 1, 2] },
     tiers: [
-      { name: 'Sorcerer', rule: { kind: 'rank', rank: 'Adept' } },
-      { name: 'Archmage', rule: { kind: 'rank', rank: 'Master' } },
-      { name: 'Ascendant', rule: { kind: 'rank', rank: 'Legend' } },
+      { name: k('Sorcerer'), rule: { kind: 'rank', rank: 'Adept' } },
+      { name: k('Archmage'), rule: { kind: 'rank', rank: 'Master' } },
+      { name: k('Ascendant'), rule: { kind: 'rank', rank: 'Legend' } },
     ],
     emblem: [
       '.......##...',

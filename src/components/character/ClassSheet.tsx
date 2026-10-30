@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { HERO_CLASS_BY_ID } from '@/data/classes';
 import { classChallenge } from '@/domain/challenges';
 import { tierNumeral, type ClassRow, type ClassRowStatus } from '@/domain/classes';
+import { k, t } from '@/i18n';
 
 import { Colors, Spacing, TileFrames, type FrameStyle } from '../theme';
 import { PixelButton, PixelFrame, PixelModal, PixelText, SegmentedBar } from '../ui';
@@ -23,9 +24,9 @@ type Props = {
 };
 
 const STATUS_LABELS: Readonly<Record<ClassRowStatus, string>> = {
-  worn: 'Wearing',
-  unlocked: 'Unlocked',
-  locked: 'Locked',
+  worn: k('Wearing'),
+  unlocked: k('Unlocked'),
+  locked: k('Locked'),
 };
 
 /** Rows like the rank ladder: the worn class in its color, unlocked gold, locked a silhouette. */
@@ -49,14 +50,19 @@ function NextTier({ row, testID }: { row: ClassRow; testID: string }) {
   if (!next) {
     return (
       <PixelText variant="small" tone="gold" testID={`${testID}-next`}>
-        Highest tier reached
+        {t('Highest tier reached')}
       </PixelText>
     );
   }
   const locked = row.status === 'locked';
+  const requirement = requirementText(next.rule);
   const heading = locked
-    ? `Unlock: ${requirementText(next.rule)}`
-    : `Next: ${next.title} (tier ${tierNumeral(next.tier)}) · ${requirementText(next.rule)}`;
+    ? t('Unlock: {requirement}', { requirement })
+    : t('Next: {title} (tier {tier}) · {requirement}', {
+        title: t(next.title),
+        tier: tierNumeral(next.tier),
+        requirement,
+      });
   return (
     <View style={styles.gap} testID={`${testID}-next`}>
       <PixelText variant="small" tone={locked ? 'textMuted' : 'text'}>
@@ -89,26 +95,41 @@ function ClassRowView({
   const heroClass = HERO_CLASS_BY_ID.get(row.classId);
   const challenge = heroClass ? classChallenge(heroClass, row.tier) : undefined;
   const challengeLine = challenge
-    ? `Weekly challenge: ${challengeGoalText(challenge.goal, challenge.target)}`
+    ? t('Weekly challenge: {goal}', {
+        goal: challengeGoalText(challenge.goal, challenge.target),
+      })
     : undefined;
   const locked = row.status === 'locked';
   const tierLine =
     row.tierCount <= 1
-      ? 'Starting class'
+      ? t('Starting class')
       : locked
-        ? `${row.tierCount} tiers`
-        : `Tier ${tierNumeral(row.tier)} of ${tierNumeral(row.tierCount)}`;
+        ? t('{n} tiers', { n: row.tierCount })
+        : t('Tier {tier} of {count}', {
+            tier: tierNumeral(row.tier),
+            count: tierNumeral(row.tierCount),
+          });
+  const title = t(row.title);
+  const name = t(row.name);
+  const status = t(STATUS_LABELS[row.status]);
+  const flavor = heroClass ? t(heroClass.flavor) : undefined;
   const label = [
-    row.title,
-    row.title !== row.name ? `${row.name} class` : undefined,
-    STATUS_LABELS[row.status],
+    title,
+    row.title !== row.name ? t('{name} class', { name }) : undefined,
+    status,
     tierLine,
-    isNew ? 'New' : undefined,
-    heroClass?.flavor,
+    isNew ? t('New') : undefined,
+    flavor,
     challengeLine,
     row.next
-      ? `${locked ? 'Unlock' : `Next tier, ${row.next.title}`}: ${requirementText(row.next.rule)}. ` +
-        row.next.parts.map(partText).join(', ')
+      ? `${
+          locked
+            ? t('Unlock: {requirement}', { requirement: requirementText(row.next.rule) })
+            : t('Next tier, {title}: {requirement}', {
+                title: t(row.next.title),
+                requirement: requirementText(row.next.rule),
+              })
+        }. ` + row.next.parts.map(partText).join(', ')
       : undefined,
   ]
     .filter(Boolean)
@@ -124,10 +145,10 @@ function ClassRowView({
         <ClassEmblem classId={row.classId} tier={row.tier} size={36} />
         <View style={styles.text}>
           <PixelText variant="heading" color={locked ? Colors.textMuted : classColor(row.classId)}>
-            {row.title}
+            {title}
           </PixelText>
           <PixelText variant="label" tone="textMuted">
-            {row.title !== row.name ? `${row.name} · ${tierLine}` : tierLine}
+            {row.title !== row.name ? `${name} · ${tierLine}` : tierLine}
           </PixelText>
         </View>
         {isNew && <NewBadge testID={`${testID}-new`} />}
@@ -135,12 +156,12 @@ function ClassRowView({
           variant="label"
           tone={row.status === 'worn' ? 'gold' : locked ? 'textMuted' : 'rune'}
           testID={`${testID}-status`}>
-          {STATUS_LABELS[row.status]}
+          {status}
         </PixelText>
       </View>
-      {heroClass && (
+      {flavor !== undefined && (
         <PixelText variant="small" tone="textMuted">
-          {heroClass.flavor}
+          {flavor}
         </PixelText>
       )}
       {challengeLine && (
@@ -151,7 +172,7 @@ function ClassRowView({
       <NextTier row={row} testID={testID} />
       {row.status === 'unlocked' && (
         <PixelButton
-          label={`Wear ${row.title}`}
+          label={t('Wear {title}', { title })}
           icon="helmet"
           variant="secondary"
           onPress={() => onWear(row.classId)}
@@ -175,12 +196,11 @@ export function ClassSheet({ rows, onWear, onClose, testID = 'class-sheet' }: Pr
     () => new Set(rows.filter((row) => row.isNew).map((row) => row.classId)),
   );
   return (
-    <PixelModal visible title="Classes" onClose={onClose} testID={testID}>
+    <PixelModal visible title={t('Classes')} onClose={onClose} testID={testID}>
       <PixelText variant="small" tone="textMuted" testID={`${testID}-intro`}>
-        Classes are titles your training earns. Each needs a fixed amount of attribute points (or
-        sessions, or a rank) and grows over three tiers. They change only how your hero looks, and a
-        class you have earned stays yours. Pick one to wear: it also offers an optional weekly
-        challenge.
+        {t(
+          'Classes are titles your training earns. Each needs a fixed amount of attribute points (or sessions, or a rank) and grows over three tiers. They change only how your hero looks, and a class you have earned stays yours. Pick one to wear: it also offers an optional weekly challenge.',
+        )}
       </PixelText>
       <ScrollView nestedScrollEnabled style={styles.scroll} contentContainerStyle={styles.list}>
         {rows.map((row) => (

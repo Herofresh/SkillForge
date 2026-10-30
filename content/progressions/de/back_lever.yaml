@@ -1,0 +1,87 @@
+# German texts for content/progressions/back_lever.yaml (FB-8): same ids, same cues in the same order.
+branch: back_lever
+nodes:
+  - id: german_hang
+    name: "German Hang"
+    description: "Du hängst an Ringen oder einer Stange mit den Armen hinter dir, der Körper ist über die Senkrechte hinaus nach hinten gedreht, sodass die Schultervorderseite gedehnt wird. Bereitet die Schultern auf den Back Lever vor."
+    cues:
+      - "Geh langsam vor; zieh die Knie an und dreh dich aus dem Tuck-Hang nach hinten."
+      - "Stopp bei einer sanften Dehnung vorne in den Schultern, nie bei Schmerz."
+      - "Halte die Arme gestreckt und komm auf demselben Weg wieder heraus."
+
+  - id: skin_the_cat
+    name: "Skin the Cat"
+    description: "Aus dem Hang ziehst du die Knie an und rollst den Körper rückwärts durch die Arme in den German Hang, dann rollst du wieder zurück. Eine langsame Drehung, die die Schultern durch einen großen Bewegungsbereich führt."
+    cues:
+      - "Zieh die Knie an, roll rückwärts durch in den German Hang und dann wieder zurück."
+      - "Beweg dich langsam und kontrolliert; nicht schwingen."
+      - "Die Arme bleiben die ganze Zeit gestreckt."
+    prerequisite_notes:
+      german_hang: "German Hang bequem für 30-60 s."
+
+  - id: tuck_back_lever
+    name: "Tuck Back Lever"
+    description: "Du hängst mit gestreckten Armen unter Ringen oder einer Stange, das Gesicht zeigt nach unten, der Körper ist waagerecht und die Knie sind zur Brust gezogen. Das erste Halten des Back Lever."
+    cues:
+      - "Komm aus dem Skin the Cat hinein und stopp, wenn der Körper nach unten zeigt."
+      - "Knie angezogen, Hüfte auf Schulterhöhe."
+      - "Arme durchgestreckt; halte die Schultern nach unten gedrückt."
+
+  - id: advanced_tuck_back_lever
+    name: "Advanced Tuck Back Lever"
+    description: "Ein Tuck Back Lever mit geöffneter Hüfte und flachem Rücken, die Oberschenkel etwa im rechten Winkel zum Körper. Die längere Form belastet Schultern und Arme stärker."
+    cues:
+      - "Öffne die Hüfte, bis die Oberschenkel etwa 90 Grad zum Körper stehen."
+      - "Rücken flach, Hüfte auf Schulterhöhe."
+      - "Arme durchgestreckt; taste dich langsam heran, die Bizepssehne trägt die Last."
+
+  - id: straddle_back_lever
+    name: "Straddle Back Lever"
+    description: "Ein Back Lever mit gestreckten und weit gegrätschten Beinen, der Körper waagerecht und mit dem Gesicht nach unten unter Ringen oder Stange. Der Schritt vor dem vollen Back Lever."
+    cues:
+      - "Beine gestreckt und weit gegrätscht."
+      - "Halte den Körper in einer Linie, parallel zum Boden, Po angespannt."
+      - "Arme durchgestreckt, Schultern nach unten gedrückt."
+
+  - id: one_leg_back_lever
+    name: "Einbeiniger Back Lever"
+    description: "Ein Back Lever mit einem Bein gestreckt in Verlängerung des Körpers und dem anderen Knie gebeugt, das Gesicht zeigt nach unten unter Ringen oder Stange. Liegt zwischen Straddle und vollem Back Lever."
+    cues:
+      - "Streck ein Bein in Verlängerung des Körpers aus, das andere Knie bleibt gebeugt."
+      - "Spann den Po an; die Hüfte darf nicht unter die Schultern absinken."
+      - "Wechsle das gestreckte Bein zwischen den Sätzen."
+
+  - id: back_lever
+    name: "Back Lever"
+    description: "Du hängst mit gestreckten Armen unter Ringen oder einer Stange, das Gesicht nach unten, der ganze Körper gestreckt und waagerecht hinter den Händen. Ein klassisches Streckarm-Halten aus dem Turnen."
+    cues:
+      - "Beine geschlossen und gestreckt, Zehen gestreckt."
+      - "Halte den Körper gestreckt und waagerecht, kein Hohlkreuz."
+      - "Arme durchgestreckt; die Brust darf nicht unter die Hüfte sinken."
+
+  - id: back_lever_pullout
+    name: "Back Lever Pullout"
+    description: "Aus dem Back Lever ziehst du den gestreckten Körper mit gestreckten Armen zurück nach oben in den Inverted Hang, ohne abzuknicken oder die Arme zu beugen. Trainiert die Kontrolle auf dem Weg aus dem Lever."
+    cues:
+      - "Starte im vollen Back Lever, Körper gestreckt."
+      - "Halte die Arme durchgestreckt und drück die Hände nach unten, um dich in den Inverted Hang zu drehen."
+      - "Beweg dich langsam; stopp bei jedem Schmerz im Bizeps oder in den Ellbogen."
+
+  - id: german_hang_pullout
+    name: "German Hang Pullout"
+    description: "Aus dem German Hang ziehst du dich mit gestreckten Armen durch den Back Lever nach oben in den Inverted Hang. Ein langer Streckarm-Zug durch den vollen Bewegungsbereich der Schultern."
+    cues:
+      - "Starte aus einem entspannten German Hang, Arme gestreckt."
+      - "Zieh durch den Back Lever, ohne die Arme zu beugen oder abzuknicken."
+      - "Beende im Inverted Hang und komm langsam wieder heraus."
+
+  - id: iron_cross
+    name: "Kreuzhang (Iron Cross)"
+    description: "Du hältst dich zwischen zwei Ringen, die Arme seitlich gestreckt wie ein T, der Körper hängt senkrecht darunter. Eines der schwersten Kraft-Halten an den Ringen."
+    cues:
+      - "Arme gestreckt und seitlich ausgebreitet, Körper senkrecht unter den Ringen."
+      - "Drück die Ringe nach unten; zieh die Schultern nicht hoch."
+      - "Überstürze nichts; stopp bei jedem Schmerz im Ellbogen."
+    prerequisite_notes:
+      support_hold: "Zuerst brauchst du ein solides Stützhalten an den Ringen (Ringe nach außen gedreht)."
+      front_lever: "Baue die Streckarm-Kraft langsam auf; der Kreuzhang birgt ein Risiko für eine Sehnenentzündung im Ellbogen."

@@ -1,0 +1,92 @@
+# German texts for content/progressions/v_push.yaml (FB-8): same ids, same cues in the same order.
+branch: v_push
+nodes:
+  - id: support_hold
+    name: "Stützhalten"
+    description: "Du hältst dich auf gestreckten Armen über Dip-Barren, Parallettes oder Ringen, die Füße in der Luft. Es ist die obere Position des Dips und die Basis für die meisten Drück-Skills."
+    cues:
+      - "Arme durchgestreckt, Hände neben der Hüfte."
+      - "Drücke die Schultern nach unten, weg von den Ohren."
+      - "Spanne den Po an und strecke die Zehen; leichter Hollow Body."
+
+  - id: pike_push_up
+    name: "Pike-Liegestütz"
+    description: "Ein Liegestütz aus einem umgekehrten V, Hüfte hoch und Beine gestreckt; du senkst den Kopf vor den Händen Richtung Boden ab. Das verlagert das Drücken über Kopf, wie ein Handstand-Liegestütz mit den Füßen am Boden."
+    cues:
+      - "Hüfte hoch, Körper in einem umgekehrten V; Hände schulterbreit."
+      - "Senke den Kopf zu einem Punkt vor den Händen ab (Kopf und Hände bilden ein Dreieck)."
+      - "Ellbogen zeigen nach hinten, nicht nach außen; drücke, bis die Arme gestreckt sind."
+    prerequisite_notes:
+      push_up: "Ein solider Liegestütz (3 x 8) schafft zuerst die Basis fürs Drücken."
+
+  - id: dip_negative
+    name: "Negativ-Dip"
+    description: "Nur die Abwärtshälfte eines Dips: Starte oben auf gestreckten Armen am Barren und sinke langsam ab, bis die Schultern unter den Ellbogen sind. Statt hochzudrücken steigst oder springst du wieder nach oben."
+    cues:
+      - "Starte oben im Stützhalten, Arme gestreckt."
+      - "Senke dich langsam und gleichmäßig ab, bis die Schultern knapp unter den Ellbogen sind."
+      - "Steige oder springe zurück nach oben; drücke nicht hoch."
+      - "An einer geraden Stange ist es härter für die Schultern; gehe nur so tief, wie es schmerzfrei bleibt."
+
+  - id: elevated_pike_push_up
+    name: "Erhöhter Pike-Liegestütz"
+    description: "Ein Pike-Liegestütz mit den Füßen erhöht auf einer Box oder einem Stuhl, so sitzt die Hüfte höher über den Händen. Mehr von deinem Gewicht liegt auf den Armen, das bringt ihn näher an den Handstand-Liegestütz."
+    cues:
+      - "Füße auf einem Stuhl oder einer Box, Hüfte so hoch wie möglich über den Händen."
+      - "Senke den Kopf zu einem Punkt vor den Händen ab, Ellbogen zeigen nach hinten."
+      - "Je höher die Füße, desto schwerer wird es; drücke zu gestreckten Armen."
+
+  - id: parallel_bar_dip
+    name: "Dip am Barren"
+    description: "Aus dem Stützhalten auf zwei parallelen Holmen beugst du die Arme und senkst den Körper ab, bis die Schultern unter die Ellbogen tauchen, dann drückst du dich wieder hoch. Eine zentrale Kraftübung für Brust, Schultern und Trizeps."
+    cues:
+      - "Starte im Stützhalten, Schultern unten."
+      - "Senke dich ab, bis die Schultern knapp unter den Ellbogen sind; lehne dich leicht nach vorn."
+      - "Drücke dich zu gestreckten Armen zurück, ohne die Schultern hochzuziehen."
+
+  - id: straight_bar_dip
+    name: "Dip an der geraden Stange"
+    description: "Ein Dip oben auf einer einzelnen Stange: Die Stange sitzt an der Hüfte, die Brust lehnt darüber und der Körper senkt sich ab, bis die Stange den oberen Bauch berührt. Es ist das abschließende Drücken des Bar-Muscle-ups."
+    cues:
+      - "Stütz oben auf der Stange, Arme gestreckt, Stange an der Hüfte."
+      - "Lehne die Brust über die Stange und senke dich ab, bis die Stange den oberen Bauch berührt."
+      - "Drücke dich zu gestreckten Armen zurück; halte die Beine leicht vorn für die Balance."
+
+  - id: wall_headstand_push_up
+    name: "Kopfstand-Liegestütz an der Wand"
+    description: "Kopfüber im Handstand an der Wand beugst du die Arme, bis der Kopf den Boden berührt, und drückst dich wieder hoch. Der Weg endet am Kopf, deshalb ist es die kürzere Version des Handstand-Liegestützes."
+    cues:
+      - "Schwinge in den Handstand mit dem Rücken zur Wand, Hände eine Handlänge von ihr entfernt."
+      - "Senke dich ab, bis der Kopf den Boden berührt; Kopf und Hände bilden ein Dreieck."
+      - "Spanne Po und Bauch an, damit der Rücken kein Hohlkreuz macht; drücke zu gestreckten Armen."
+    prerequisite_notes:
+      wall_handstand: "Halte einen Handstand an der Wand ruhig (3 x 30 s), bevor du kopfüber drückst."
+
+  - id: ring_dip
+    name: "Ring-Dip"
+    description: "Ein Dip zwischen zwei Ringen. Aus dem Stütz auf gestreckten Armen senkst du dich ab, bis die Schultern unter den Ellbogen sind, und drückst dich wieder hoch, während du die Ringe stabil an deinen Seiten hältst."
+    cues:
+      - "Starte im Ringstütz, Arme gestreckt, Ringe eng am Körper."
+      - "Senke dich ab, bis die Schultern knapp unter den Ellbogen sind; lass die Ringe nicht nach außen driften."
+      - "Drücke dich zu gestreckten Armen hoch und drehe die Ringe oben leicht nach außen."
+    prerequisite_notes:
+      support_hold: "Zuerst ein stabiles Stützhalten in den Ringen (3 x 30 s)."
+      parallel_bar_dip: "Dips am Barren (3 x 8) machen die ersten Ring-Dips deutlich leichter."
+
+  - id: wall_handstand_push_up
+    name: "Handstand-Liegestütz an der Wand (voller Weg)"
+    description: "Ein Handstand-Liegestütz an der Wand mit den Händen erhöht auf Parallettes, so kann der Kopf unter Handhöhe gehen. Es ist die Version mit vollem Bewegungsweg des Kopfstand-Liegestützes an der Wand, der endet, sobald der Kopf den Boden berührt."
+    cues:
+      - "Hände auf Parallettes an der Wand, damit der Kopf unter die Hände gehen kann."
+      - "Senke dich ab, bis die Schultern nah an den Händen sind, Ellbogen zeigen nach vorn."
+      - "Drücke dich ganz hoch und schiebe oben die Schultern zu den Ohren."
+
+  - id: freestanding_handstand_push_up
+    name: "Freier Handstand-Liegestütz"
+    description: "Ein Handstand-Liegestütz ohne Wand: Aus dem balancierten Handstand senkst du den Kopf Richtung Boden ab und drückst dich wieder hoch, ohne die Balance zu verlieren. Er verbindet Handstand-Balance mit starkem Drücken über Kopf."
+    cues:
+      - "Starte aus einem stabilen freien Handstand."
+      - "Senke dich langsam ab, die Finger greifen in den Boden, um die Balance zu halten."
+      - "Halte den Körper fest und drücke gerade hoch bis zur Streckung."
+    prerequisite_notes:
+      freestanding_handstand: "Du brauchst einen stabilen freien Handstand (etwa 30-60 s), um in der Balance zu drücken."

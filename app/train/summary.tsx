@@ -17,6 +17,7 @@ import { sessionAccessoryUnlocks } from '@/domain/companion';
 import { goalsReachedIn } from '@/domain/goalReached';
 import type { SessionResult } from '@/domain/recompute';
 import { summaryView, type SummaryView } from '@/domain/trainView';
+import { k, t } from '@/i18n';
 import type { HealthWriteState } from '@/store/appStore';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -44,8 +45,12 @@ export default function SessionSummaryScreen() {
   if (!summary || !view) {
     return (
       <Screen centered>
-        <Stack.Screen options={stackHeaderOptions('Victory')} />
-        <EmptyState icon="scroll" title="No summary" message="Finish a session to see one." />
+        <Stack.Screen options={stackHeaderOptions(t('Victory'))} />
+        <EmptyState
+          icon="scroll"
+          title={t('No summary')}
+          message={t('Finish a session to see one.')}
+        />
       </Screen>
     );
   }
@@ -80,13 +85,13 @@ function SummaryBody({ view, result, playKey }: BodyProps) {
 
   return (
     <>
-      <Stack.Screen options={stackHeaderOptions('Victory')} />
+      <Stack.Screen options={stackHeaderOptions(t('Victory'))} />
       <Screen testID="session-summary">
         <SessionResultPanels
           view={view}
           celebrate
           playKey={playKey}
-          subtitle="Session logged"
+          subtitle={t('Session logged')}
           onOpenNode={openNode}
         />
         <GoalReachedPanel
@@ -119,7 +124,7 @@ function SummaryBody({ view, result, playKey }: BodyProps) {
 
         {view.warnings.length > 0 && (
           <PixelText variant="label" tone="ember" accessibilityRole="header">
-            Safeguards
+            {t('Safeguards')}
           </PixelText>
         )}
         <SafeguardWarningList
@@ -130,11 +135,11 @@ function SummaryBody({ view, result, playKey }: BodyProps) {
         />
         {!allAcknowledged && (
           <PixelText variant="small" tone="textMuted">
-            Read and acknowledge the notes above to close the summary.
+            {t('Read and acknowledge the notes above to close the summary.')}
           </PixelText>
         )}
         <PixelButton
-          label="Done"
+          label={t('Done')}
           icon="check"
           onPress={done}
           disabled={!allAcknowledged}
@@ -146,11 +151,12 @@ function SummaryBody({ view, result, playKey }: BodyProps) {
 }
 
 const HEALTH_WRITE_TEXT: Readonly<Record<HealthWriteState, string>> = {
-  writing: 'Adding the workout to Health Connect…',
-  added: 'Added to Health Connect.',
-  no_permission:
+  writing: k('Adding the workout to Health Connect…'),
+  added: k('Added to Health Connect.'),
+  no_permission: k(
     'Not added to Health Connect: SkillForge may no longer write exercise. Turn it on again in Settings → Health Connect.',
-  failed: 'Couldn’t add the workout to Health Connect. Your session is saved here.',
+  ),
+  failed: k('Couldn’t add the workout to Health Connect. Your session is saved here.'),
 };
 
 /** How writing this session to Health Connect went (only when it is turned on). */
@@ -162,7 +168,7 @@ function HealthWriteLine({ sessionId }: { sessionId: string }) {
       variant="small"
       tone={write.state === 'added' ? 'success' : write.state === 'writing' ? 'textMuted' : 'ember'}
       testID="summary-health-connect">
-      {HEALTH_WRITE_TEXT[write.state]}
+      {t(HEALTH_WRITE_TEXT[write.state])}
     </PixelText>
   );
 }

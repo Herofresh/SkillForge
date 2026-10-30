@@ -4,7 +4,8 @@
  * `npm run progressions:build` and commit the result.
  */
 import { formatIssue } from '@/data/validate';
-import { ALL_NODES, NODE_BY_ID } from '@/data/skills';
+import { ALL_NODES, NODE_BY_ID, NODE_TRANSLATIONS } from '@/data/skills';
+import { TRANSLATED_LOCALES } from '@/data/progressionTranslations';
 import { BRANCHES } from '@/domain/types';
 
 import { buildFromDisk, readRepoFile } from '../../../scripts/progressionSources';
@@ -26,6 +27,19 @@ describe('progression dataset', () => {
   it('exports every node from the generated module', () => {
     expect(ALL_NODES).toEqual(result.nodes);
     expect(NODE_BY_ID.size).toBe(ALL_NODES.length);
+  });
+
+  it.each(TRANSLATED_LOCALES)('translates every node into %s, cue for cue (FB-8)', (locale) => {
+    expect(NODE_TRANSLATIONS).toEqual(result.translations);
+    const table = NODE_TRANSLATIONS[locale] ?? {};
+    for (const node of ALL_NODES) {
+      const translation = table[node.id];
+      expect(translation).toBeDefined();
+      expect(translation?.cues?.length ?? 0).toBe(node.cues.length);
+      expect(translation?.name).not.toBe('');
+      expect(translation?.description.length).toBeLessThanOrEqual(300);
+    }
+    expect(Object.keys(table).sort()).toEqual(ALL_NODES.map((node) => node.id).sort());
   });
 
   it('describes every node in 1-3 sentences that are not a copy of its cues (PLAN 6.2)', () => {

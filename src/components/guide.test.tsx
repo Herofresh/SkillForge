@@ -1,6 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 
-import { GUIDE, GUIDE_TOPICS, guideEntry } from '@/domain/guide';
+import { GUIDE_TOPICS, guideEntries, guideEntry } from '@/domain/guide';
 import type { SafeguardWarning } from '@/domain/types';
 
 import GuideScreen from '../../app/guide/index';
@@ -59,7 +59,7 @@ describe('the guide screens', () => {
   it('lists every entry and opens its page', async () => {
     const user = userEvent.setup();
     await render(<GuideScreen />);
-    for (const entry of GUIDE) {
+    for (const entry of guideEntries()) {
       expect(screen.getByRole('button', { name: entry.title })).toBeOnTheScreen();
     }
     await user.press(screen.getByTestId('guide-row-companion'));

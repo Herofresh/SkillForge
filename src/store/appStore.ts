@@ -131,6 +131,19 @@ import {
   replaceGoal,
   toggleGoal,
 } from '@/domain/onboarding';
+import { NODE_TRANSLATIONS } from '@/data/skills';
+import type { NodeTranslations } from '@/data/progressionTranslations';
+import { localizeNodes } from '@/domain/localize';
+import {
+  DEFAULT_LANGUAGE_CHOICE,
+  DEFAULT_LOCALE,
+  parseLanguageChoice,
+  resolveLocale,
+  setLocale,
+  t,
+  type LanguageChoice,
+  type Locale,
+} from '@/i18n';
 import {
   customNodeId,
   draftIssues,
@@ -238,6 +251,8 @@ export const TREE_MODE_SETTING = 'tree_view_mode';
 
 /** Setting key: how the live session is trained, Classic or Battle (PLAN 7.9, `parseTrainingView`). */
 export const TRAINING_VIEW_SETTING = 'training_view';
+/** The language choice (`LanguageChoice`: system | en | de), PLAN 7.8 FB-8, ADR-080. */
+export const LANGUAGE_SETTING = 'language';
 
 /** Setting key: write finished sessions to Health Connect (PLAN 7.10, `parseHealthConnectEnabled`). */
 export const HEALTH_CONNECT_SETTING = 'health_connect';
@@ -331,6 +346,10 @@ export interface AppStoreDeps {
   accessories?: readonly AccessoryDefinition[];
   /** Health Connect (PLAN 7.10); without it the status is `unsupported` and nothing is written. */
   health?: HealthConnectAccess;
+  /** The device language tag ("de_AT"); without it "system" resolves to English (FB-8). */
+  deviceLocaleTag?: () => string | null | undefined;
+  /** The built-in nodes' translations (`NODE_TRANSLATIONS` by default; `{}` keeps English). */
+  translations?: NodeTranslations;
 }
 
 export interface EquipmentProfileChanges {
@@ -367,7 +386,7 @@ export interface SaveNodeDraftResult {
 export interface AppState {
   /** `loadAll` has run at least once. */
   loaded: boolean;
-  /** The built-in tree (`ALL_NODES`) the overlay applies to. */
+  /** The built-in tree (`ALL_NODES`) the overlay applies to, in the current language (FB-8). */
   baseNodes: readonly ExerciseNode[];
   /** The user's tree: `applyOverlay(baseNodes, overlay).nodes`, or the built-in tree on issues. */
   nodes: readonly ExerciseNode[];
@@ -408,6 +427,9 @@ export interface AppState {
   treeMode: TreeMode;
   /** How the live session is trained (PLAN 7.9): one exercise at a time, or every set as a foe. */
   trainingView: TrainingView;
+  /** The language setting and the locale it resolves to (FB-8, ADR-080). */
+  language: LanguageChoice;
+  locale: Locale;
   /** Whether finished sessions are written to Health Connect (PLAN 7.10, setting `health_connect`). */
   healthConnectEnabled: boolean;
   /** Writing the last finished session to Health Connect, for its summary; in memory only. */
@@ -494,6 +516,8 @@ export interface AppState {
   setTreeMode(mode: TreeMode): void;
   /** Switches the live session between Classic and Battle and remembers it (setting `training_view`). */
   setTrainingView(view: TrainingView): void;
+  /** Stores the language choice, switches the texts and reloads (derived texts follow). */
+  setLanguage(choice: LanguageChoice): void;
   /** Whether Health Connect can be used on this phone (PLAN 7.10). */
   healthConnectStatus(): Promise<HealthConnectStatus>;
   /**
@@ -674,7 +698,10 @@ function requireName(name: string): string {
 }
 
 export function createAppStore(deps: AppStoreDeps): AppStore {
-  const { db, baseNodes } = deps;
+  const { db } = deps;
+  const translations = deps.translations ?? NODE_TRANSLATIONS;
+  /** The built-in tree in the current language (`localizeNodes`); set again by every `loadAll`. */
+  let baseNodes = deps.baseNodes;
   const classDefinitions = deps.classes ?? HERO_CLASSES;
   const accessoryDefinitions = deps.accessories ?? ACCESSORIES;
   const now = deps.now ?? Date.now;
@@ -878,8 +905,8 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
 
     return {
       loaded: false,
-      baseNodes,
-      nodes: baseNodes,
+      baseNodes: deps.baseNodes,
+      nodes: deps.baseNodes,
       overlay: EMPTY_OVERLAY,
       overlayIssues: [],
       overlayUnreadable: [],
@@ -892,6 +919,8 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       equipmentProfiles: [],
       treeMode: DEFAULT_TREE_MODE,
       trainingView: DEFAULT_TRAINING_VIEW,
+      language: DEFAULT_LANGUAGE_CHOICE,
+      locale: DEFAULT_LOCALE,
       healthConnectEnabled: false,
       classes: EMPTY_CLASS_SETTINGS,
       challengePins: [],
@@ -899,6 +928,11 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       dataResets: 0,
 
       loadAll() {
+        // The language first: the built-in tree is localized before the overlay goes on top.
+        const language = parseLanguageChoice(getSetting(db, LANGUAGE_SETTING));
+        const locale = resolveLocale(language, deps.deviceLocaleTag?.());
+        setLocale(locale);
+        baseNodes = localizeNodes(deps.baseNodes, translations[locale]);
         const stored = getOverlay(db);
         const overlay = stored?.overlay ?? EMPTY_OVERLAY;
         const { nodes, issues: overlayIssues } = applyOverlay(baseNodes, overlay);
@@ -912,6 +946,9 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           engineChallenges(challengePins),
         );
         commitEngine(engine, {
+          language,
+          locale,
+          baseNodes,
           onboardingCompletedAt: parseOnboardingCompletedAt(
             getSetting(db, ONBOARDING_COMPLETED_SETTING),
           ),
@@ -1048,6 +1085,12 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       setTrainingView(view) {
         setSetting(db, TRAINING_VIEW_SETTING, view);
         set({ trainingView: view });
+      },
+
+      setLanguage(choice) {
+        setSetting(db, LANGUAGE_SETTING, choice);
+        // loadAll reads the setting back, sets the locale and re-derives everything in it.
+        get().loadAll();
       },
 
       async healthConnectStatus() {
@@ -1419,7 +1462,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const { fileName, text } = get().exportOverlay();
         await files.share(fileName, text, {
           mimeType: OVERLAY_MIME_TYPE,
-          dialogTitle: 'Share your SkillForge progressions',
+          dialogTitle: t('Share your SkillForge progressions'),
         });
       },
 

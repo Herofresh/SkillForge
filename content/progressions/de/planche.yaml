@@ -1,0 +1,90 @@
+# German texts for content/progressions/planche.yaml (FB-8): same ids, same cues in the same order.
+branch: planche
+nodes:
+  - id: planche_lean
+    name: "Planche Lean"
+    description: "Aus der Liegestützposition mit gestreckten Armen lehnst du die Schultern nach vorne über die Hände hinaus und hältst. Lehrt die Vorlage und die Handgelenkbelastung der Planche."
+    cues:
+      - "Liegestützposition, Finger leicht nach außen gedreht, Arme durchgestreckt."
+      - "Drück den Boden weg (Schultern nach vorne geschoben) und halte einen leichten Hollow."
+      - "Lehn dich nach vorne, bis die Schultern vor den Händen sind; lehn dich weiter, um zu steigern."
+    prerequisite_notes:
+      push_up: "Etwa 3 x 20 Liegestütze, bevor du an der Planche arbeitest."
+      wrist_prep: "4-6 Wochen Handgelenk-Vorbereitung, bevor du an der Planche arbeitest."
+
+  - id: straight_arm_frog_stand
+    name: "Krähe mit gestreckten Armen"
+    description: "Du balancierst auf gestreckten Armen, die Knie liegen außen an den Armen an, die Füße sind in der Luft. Eine Brücke zwischen der Krähe mit gebeugten Armen und der Tuck Planche."
+    cues:
+      - "Leg die Knie außen an die gestreckten Arme."
+      - "Lehn dich nach vorne, bis die Füße abheben; die Arme bleiben durchgestreckt."
+      - "Drück den Boden weg, Rücken rund."
+
+  - id: tuck_planche
+    name: "Tuck Planche"
+    description: "Du balancierst auf gestreckten Armen, die Knie zur Brust gezogen, die Füße in der Luft, die Hüfte auf Schulterhöhe. Der Körper schwebt wie ein Ball über den Händen; das erste echte Planche-Halten."
+    cues:
+      - "Knie an die Brust, Füße in der Luft, Arme durchgestreckt."
+      - "Mach den Rücken rund und drück den Boden weg."
+      - "Hüfte auf Schulterhöhe; lehn die Schultern über die Hände hinaus."
+    prerequisite_notes:
+      pseudo_planche_push_up: "Baut die Kraft für die Vorlage der Planche auf."
+      wall_handstand: "Etwa 30 s Wandhandstand."
+
+  - id: advanced_tuck_planche
+    name: "Advanced Tuck Planche"
+    description: "Eine Tuck Planche mit flachem Rücken und der Hüfte nach hinten geschoben auf Schulterhöhe, die Knie noch gebeugt. Streckt die Form in Richtung Full Planche."
+    cues:
+      - "Mach den Rücken flach; die Hüfte wandert nach hinten auf Schulterhöhe."
+      - "Die Knie bleiben gebeugt, wandern aber von der Brust weg."
+      - "Arme durchgestreckt, Schultern nach vorne geschoben."
+
+  - id: tuck_planche_push_up
+    name: "Tuck-Planche-Liegestütz"
+    description: "Aus der Tuck Planche beugst du die Arme, senkst die Brust Richtung Boden und drückst dich wieder hoch, während die Füße in der Luft bleiben. Liegestütze in der Planche-Position."
+    cues:
+      - "Starte in der Tuck Planche mit den Schultern vor den Händen."
+      - "Senke dich mit den Ellbogen nah am Körper ab; halte die Hüfte auf Schulterhöhe."
+      - "Drück dich zurück auf gestreckte Arme und drück den Boden weg."
+    prerequisite_notes:
+      pseudo_planche_push_up: "Baut die Kraft mit gebeugten Armen in der Vorlage auf."
+
+  - id: straddle_planche
+    name: "Straddle Planche"
+    description: "Du balancierst auf gestreckten Armen, der Körper waagerecht über dem Boden, die Beine gestreckt und weit gegrätscht. Ein fortgeschrittenes Planche-Halten; die gegrätschten Beine machen es etwas leichter als die volle Version."
+    cues:
+      - "Beine gestreckt und weit gegrätscht, Körper parallel zum Boden."
+      - "Arme durchgestreckt, Schultern nach vorne geschoben und über die Hände hinaus gelehnt."
+      - "Spann den Po an; die Hüfte darf nicht durchhängen."
+
+  - id: advanced_tuck_planche_push_up
+    name: "Advanced-Tuck-Planche-Liegestütz"
+    description: "Ein Planche-Liegestütz aus dem Advanced Tuck, mit flachem Rücken und der Hüfte auf Schulterhöhe. Die längere Form macht jede Wiederholung deutlich schwerer."
+    cues:
+      - "Starte in der Advanced Tuck Planche, Rücken flach."
+      - "Senke dich ab, bis die Brust fast auf Handhöhe ist, ohne die Hüfte fallen zu lassen."
+      - "Drück dich wieder hoch, die Schultern über die Hände hinaus gelehnt."
+
+  - id: half_lay_planche
+    name: "Half-Lay Planche"
+    description: "Eine Planche mit offener Hüfte und geschlossenen Beinen, die Knie gebeugt, sodass der Körper von den Schultern bis zu den Knien waagerecht ist. Liegt zwischen Straddle und Full Planche."
+    cues:
+      - "Beine geschlossen, Knie gebeugt, Hüfte ganz geöffnet in Verlängerung des Körpers."
+      - "Arme durchgestreckt, Schultern nach vorne geschoben und deutlich vor den Händen."
+      - "Spann den Po an; die Hüfte darf nicht durchhängen oder abknicken."
+
+  - id: full_planche
+    name: "Full Planche"
+    description: "Du hältst den ganzen Körper gestreckt und waagerecht über dem Boden, Beine geschlossen, nur auf gestreckten Armen gestützt. Das Ziel des Planche-Zweigs und ein Elite-Skill."
+    cues:
+      - "Beine geschlossen und gestreckt, ganzer Körper waagerecht."
+      - "Arme durchgestreckt, Schultern deutlich vor den Händen."
+      - "Halte einen leichten Hollow; kein Hohlkreuz."
+
+  - id: straddle_planche_push_up
+    name: "Straddle-Planche-Liegestütz"
+    description: "Ein Liegestütz in der Straddle Planche, Beine gestreckt und gegrätscht: Du senkst die Brust Richtung Boden und drückst dich wieder hoch, ohne aufzusetzen. Eine fortgeschrittene Planche-Kraftübung."
+    cues:
+      - "Starte in der Straddle Planche, Beine gestreckt und gegrätscht."
+      - "Senke dich ab, der Körper bleibt waagerecht; die Füße berühren nie den Boden."
+      - "Drück dich zurück auf gestreckte Arme und schieb die Schultern nach vorne."

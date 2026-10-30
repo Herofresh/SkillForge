@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import type { TreeMode } from '@/domain/treeMap';
+import { k, t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { PixelChip } from '../ui';
@@ -11,8 +12,8 @@ type Props = {
 };
 
 const MODES: readonly { mode: TreeMode; label: string; spoken: string }[] = [
-  { mode: 'columns', label: 'Columns', spoken: 'Columns, one branch as a list' },
-  { mode: 'map', label: 'Map', spoken: 'Map of the whole tree' },
+  { mode: 'columns', label: k('Columns'), spoken: k('Columns, one branch as a list') },
+  { mode: 'map', label: k('Map'), spoken: k('Map of the whole tree') },
 ];
 
 /** Columns | Map: the Tree tab's two views (PLAN 5.1, ADR-003). */
@@ -23,8 +24,8 @@ export function TreeModeTabs({ value, onChange }: Props) {
         <PixelChip
           key={mode}
           role="tab"
-          label={label}
-          accessibilityLabel={spoken}
+          label={t(label)}
+          accessibilityLabel={t(spoken)}
           selected={mode === value}
           onPress={() => onChange(mode)}
           testID={`tree-mode-${mode}`}

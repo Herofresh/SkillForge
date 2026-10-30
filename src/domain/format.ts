@@ -2,6 +2,8 @@
  * Plain-language text for prescriptions and Trials (shared by onboarding, node detail and the Train
  * flow). Pure, so the wording is tested once and screens never build it themselves.
  */
+import { k, t } from '@/i18n';
+
 import type { NodeLevelProgress } from './progression';
 import type { Metric, SetPerformance, Trial, WorkingRange } from './types';
 import type { XpShareKind } from './xp';
@@ -14,13 +16,21 @@ export function formatPerformance(metric: Metric, performance: SetPerformance): 
   const reps = performance.reps ?? 1;
   switch (metric) {
     case 'reps':
-      return `${performance.value} ${performance.value === 1 ? 'rep' : 'reps'}`;
+      return performance.value === 1
+        ? t('{n} rep', { n: performance.value })
+        : t('{n} reps', { n: performance.value });
     case 'hold_s':
-      return `${performance.value} s`;
+      return t('{n} s', { n: performance.value });
     case 'eccentric_s':
-      return `${reps} × ${performance.value} s ${reps === 1 ? 'lowering' : 'lowerings'}`;
-    case 'load_xbw':
-      return `${reps} ${reps === 1 ? 'rep' : 'reps'} at ${performance.value.toFixed(LOAD_DECIMALS)}× BW`;
+      return reps === 1
+        ? t('{reps} × {n} s lowering', { reps, n: performance.value })
+        : t('{reps} × {n} s lowerings', { reps, n: performance.value });
+    case 'load_xbw': {
+      const load = performance.value.toFixed(LOAD_DECIMALS);
+      return reps === 1
+        ? t('{reps} rep at {load}× BW', { reps, load })
+        : t('{reps} reps at {load}× BW', { reps, load });
+    }
   }
 }
 
@@ -30,12 +40,14 @@ export function formatTrial(metric: Metric, trial: Trial): string {
     value: trial.target,
     ...(trial.reps !== undefined ? { reps: trial.reps } : {}),
   });
-  return `${trial.sets} ${trial.sets === 1 ? 'set' : 'sets'} of ${perSet}`;
+  return trial.sets === 1
+    ? t('1 set of {perSet}', { perSet })
+    : t('{sets} sets of {perSet}', { sets: trial.sets, perSet });
 }
 
 /** The unit shown next to a stepper for the metric's main value. */
 export const METRIC_UNITS: Readonly<Record<Metric, string>> = {
-  reps: 'reps',
+  reps: k('reps'),
   hold_s: 's',
   eccentric_s: 's',
   load_xbw: '× BW',
@@ -43,10 +55,10 @@ export const METRIC_UNITS: Readonly<Record<Metric, string>> = {
 
 /** What a metric measures, as the node editor names it (PLAN 4.7). */
 export const METRIC_LABELS: Readonly<Record<Metric, string>> = {
-  reps: 'Reps',
-  hold_s: 'Hold',
-  eccentric_s: 'Slow lowering',
-  load_xbw: 'Weighted',
+  reps: k('Reps'),
+  hold_s: k('Hold'),
+  eccentric_s: k('Slow lowering'),
+  load_xbw: k('Weighted'),
 };
 
 /** OG level 0 marks a foundation node below the OG2 chart (see the progressions overview). */
@@ -58,12 +70,12 @@ export const FOUNDATION_OG_LEVEL = 0;
  * with the Beginner–Elite band of `tierForOgLevel` or the hero class tiers I–III.
  */
 export function formatOgLevel(ogLevel: number): string {
-  return ogLevel === FOUNDATION_OG_LEVEL ? 'Foundation' : `Tier ${ogLevel}`;
+  return ogLevel === FOUNDATION_OG_LEVEL ? t('Foundation') : t('Tier {n}', { n: ogLevel });
 }
 
 /** The OG level for screen readers: "foundation" for level 0, else "tier 5". */
 export function spokenOgLevel(ogLevel: number): string {
-  return ogLevel === FOUNDATION_OG_LEVEL ? 'foundation' : `tier ${ogLevel}`;
+  return ogLevel === FOUNDATION_OG_LEVEL ? t('foundation') : t('tier {n}', { n: ogLevel });
 }
 
 /**
@@ -76,35 +88,35 @@ export function formatWorkingRange(metric: Metric, range: WorkingRange): string 
     range.min === range.max ? value(range.min) : `${value(range.min)}–${value(range.max)}`;
   switch (metric) {
     case 'reps':
-      return `${span} ${range.max === 1 ? 'rep' : 'reps'}`;
+      return range.max === 1 ? t('{n} rep', { n: span }) : t('{n} reps', { n: span });
     case 'hold_s':
-      return `${span} s`;
+      return t('{n} s', { n: span });
     case 'eccentric_s':
-      return `${span} s lowerings`;
+      return t('{n} s lowerings', { n: span });
     case 'load_xbw':
-      return `${span}× BW`;
+      return t('{n}× BW', { n: span });
   }
 }
 
 const MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
+  k('Jan'),
+  k('Feb'),
+  k('Mar'),
+  k('Apr'),
+  k('May'),
+  k('Jun'),
+  k('Jul'),
+  k('Aug'),
+  k('Sep'),
+  k('Oct'),
+  k('Nov'),
+  k('Dec'),
 ] as const;
 
 /** A day in the device's time zone, e.g. "27 Sep 2026" (history lists). */
 export function formatShortDate(at: number): string {
   const date = new Date(at);
-  return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+  return `${date.getDate()} ${t(MONTHS[date.getMonth()])} ${date.getFullYear()}`;
 }
 
 /**
@@ -115,17 +127,23 @@ export function trialAlsoCountsText(names: readonly string[]): string {
   const list =
     names.length <= 1
       ? (names[0] ?? '')
-      : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
-  return `It also counts for ${list}: ${names.length === 1 ? 'it is' : 'they are'} proficient now.`;
+      : t('{list} and {last}', {
+          list: names.slice(0, -1).join(', '),
+          last: names[names.length - 1],
+        });
+  return names.length === 1
+    ? t('It also counts for {list}: it is proficient now.', { list })
+    : t('It also counts for {list}: they are proficient now.', { list });
 }
 
 /** The marker of a node stuck at level 5 until its Trial (ADR-004, PLAN 7.8 FB-4). */
-export const TRIAL_NEEDED_LABEL = 'Trial needed';
+export const TRIAL_NEEDED_LABEL = k('Trial needed');
 
 /** What a node stuck at the cap needs, with the XP banked beyond it ("… 12 XP banked."). */
 export function trialNeededNote(banked = 0): string {
-  const note = 'Level 5 reached: pass the Trial to keep levelling.';
-  return banked > 0 ? `${note} ${banked} XP banked.` : note;
+  return banked > 0
+    ? t('Level 5 reached: pass the Trial to keep levelling. {banked} XP banked.', { banked })
+    : t('Level 5 reached: pass the Trial to keep levelling.');
 }
 
 /**
@@ -134,16 +152,19 @@ export function trialNeededNote(banked = 0): string {
  * Challenging session right away (ADR-074).
  */
 export function trialPlannedNote(rangeTop: string): string {
-  return `Its Trial is planned once every set reaches ${rangeTop}, or right away in a Challenging session.`;
+  return t(
+    'Its Trial is planned once every set reaches {rangeTop}, or right away in a Challenging session.',
+    { rangeTop },
+  );
 }
 
 /** The summary's note on an exercise that earned a share of its XP (ADR-078); none for full XP. */
 export function xpShareNote(share: XpShareKind | undefined): string | undefined {
   switch (share) {
     case 'warm_up':
-      return 'Warm-up: half XP';
+      return t('Warm-up: half XP');
     case 'cool_down':
-      return 'Cool-down: half XP';
+      return t('Cool-down: half XP');
     default:
       return undefined;
   }
@@ -151,9 +172,9 @@ export function xpShareNote(share: XpShareKind | undefined): string | undefined 
 
 /** The value next to a node's XP bar: "34 / 60 XP", "Trial ready" at the cap, "Max" at level 10. */
 export function formatLevelProgress(progress: NodeLevelProgress): string {
-  if (progress.capped) return 'Trial ready';
-  if (progress.xpForLevel === 0) return 'Max';
-  return `${progress.xpIntoLevel} / ${progress.xpForLevel} XP`;
+  if (progress.capped) return t('Trial ready');
+  if (progress.xpForLevel === 0) return t('Max');
+  return t('{xp} / {total} XP', { xp: progress.xpIntoLevel, total: progress.xpForLevel });
 }
 
 /** A prescription, e.g. "3 × 8 reps" or "1 × 30 s". */
@@ -190,15 +211,15 @@ export function formatClock(seconds: number): string {
 /** Rest after each set, e.g. "90 s rest" or "3 min rest" (whole minutes from 2 min on). */
 export function formatRest(seconds: number): string {
   if (seconds >= 2 * SECONDS_PER_MINUTE && seconds % SECONDS_PER_MINUTE === 0) {
-    return `${seconds / SECONDS_PER_MINUTE} min rest`;
+    return t('{n} min rest', { n: seconds / SECONDS_PER_MINUTE });
   }
-  return `${seconds} s rest`;
+  return t('{n} s rest', { n: seconds });
 }
 
 /** Shown for a user node saved before descriptions existed (PLAN 6.2, ADR-049). */
-export const NO_DESCRIPTION_TEXT = 'No description yet. Edit this exercise to add one.';
+export const NO_DESCRIPTION_TEXT = k('No description yet. Edit this exercise to add one.');
 
 /** A node's description, or `NO_DESCRIPTION_TEXT` when it has none. */
 export function formatDescription(description: string): string {
-  return description.trim() === '' ? NO_DESCRIPTION_TEXT : description;
+  return description.trim() === '' ? t(NO_DESCRIPTION_TEXT) : description;
 }

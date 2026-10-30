@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { TRIAL_NEEDED_LABEL, trialNeededNote } from '@/domain/format';
 import type { ExerciseView } from '@/domain/trainView';
+import { t } from '@/i18n';
 
 import { InfoButton } from '../node/InfoButton';
 import { Frames, Spacing } from '../theme';
@@ -57,12 +58,14 @@ export function ExerciseCard({ exercise, highlighted = false, children, onInfo, 
       )}
       {exercise.swappedFromName !== undefined && (
         <PixelText variant="small" tone="textMuted" testID={testID && `${testID}-swapped`}>
-          {`Swapped from ${exercise.swappedFromName}`}
+          {t('Swapped from {name}', { name: exercise.swappedFromName })}
         </PixelText>
       )}
       {exercise.substitutedFromName !== undefined && (
         <PixelText variant="small" tone="textMuted">
-          {`Replaces ${exercise.substitutedFromName} (needs equipment you don't have)`}
+          {t("Replaces {name} (needs equipment you don't have)", {
+            name: exercise.substitutedFromName,
+          })}
         </PixelText>
       )}
       {exercise.awaitingTrial && (
@@ -72,7 +75,7 @@ export function ExerciseCard({ exercise, highlighted = false, children, onInfo, 
       )}
       {exercise.pairedWithName !== undefined && (
         <PixelText variant="small" tone="textMuted">
-          {`Pair: alternate sets with ${exercise.pairedWithName}`}
+          {t('Pair: alternate sets with {name}', { name: exercise.pairedWithName })}
         </PixelText>
       )}
       {children}
@@ -84,11 +87,11 @@ type Tag = { text: string; tone: 'rune' | 'ember' | 'textMuted' | 'success' };
 
 function exerciseTags(exercise: ExerciseView): Tag[] {
   const tags: Tag[] = [];
-  if (exercise.isTrial) tags.push({ text: 'Trial', tone: 'rune' });
-  if (exercise.straightArm) tags.push({ text: 'Straight-arm', tone: 'ember' });
-  if (exercise.awaitingTrial) tags.push({ text: TRIAL_NEEDED_LABEL, tone: 'ember' });
-  if (exercise.skipped) tags.push({ text: 'Skipped', tone: 'textMuted' });
-  else if (exercise.done) tags.push({ text: 'Done', tone: 'success' });
+  if (exercise.isTrial) tags.push({ text: t('Trial'), tone: 'rune' });
+  if (exercise.straightArm) tags.push({ text: t('Straight-arm'), tone: 'ember' });
+  if (exercise.awaitingTrial) tags.push({ text: t(TRIAL_NEEDED_LABEL), tone: 'ember' });
+  if (exercise.skipped) tags.push({ text: t('Skipped'), tone: 'textMuted' });
+  else if (exercise.done) tags.push({ text: t('Done'), tone: 'success' });
   return tags;
 }
 

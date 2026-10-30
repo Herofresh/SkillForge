@@ -5,8 +5,8 @@ import { RANK_BRANCHES } from './character';
 import { CONTENT_MAX_DAYS, WAITING_MAX_DAYS } from './companion';
 import {
   buildGuide,
-  GUIDE,
   GUIDE_TOPICS,
+  guideEntries,
   guideEntry,
   guideFacts,
   guideNumber,
@@ -67,8 +67,8 @@ function handWrittenNumbers(real: GuideEntry[], changed: GuideEntry[]): string[]
 
 describe('the guide', () => {
   it('has one entry per topic, in order, each with a title, a short summary and details', () => {
-    expect(GUIDE.map((entry) => entry.id)).toEqual([...GUIDE_TOPICS]);
-    for (const entry of GUIDE) {
+    expect(guideEntries().map((entry) => entry.id)).toEqual([...GUIDE_TOPICS]);
+    for (const entry of guideEntries()) {
       expect(entry.title.length).toBeGreaterThan(0);
       // 1–3 sentences: a sentence ends with ". ", "! " or "? " (or the end of the text).
       const sentences = entry.summary.split(/[.!?](?:\s|$)/).filter((part) => part.trim());
@@ -138,6 +138,6 @@ describe('the guide', () => {
 
   it('only formats: the same facts give the same guide', () => {
     const facts: GuideFacts = guideFacts();
-    expect(buildGuide(facts)).toEqual(GUIDE);
+    expect(buildGuide(facts)).toEqual(guideEntries());
   });
 });

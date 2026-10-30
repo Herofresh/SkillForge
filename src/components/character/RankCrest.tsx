@@ -1,6 +1,8 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { rankLabel } from '@/domain/rankLadder';
 import type { RankTitle } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { Colors, RankColors, Spacing } from '../theme';
 import { PixelFrame, PixelIcon, PixelText, type IconName } from '../ui';
@@ -28,7 +30,8 @@ type Props = {
  * the whole crest is a button and shows a "See all ranks" cue.
  */
 export function RankCrest({ rank, hint, onPress, testID }: Props) {
-  const label = `Rank: ${rank}${hint ? `. ${hint}` : ''}`;
+  const title = rankLabel(rank);
+  const label = `${t('Rank: {rank}', { rank: title })}${hint ? `. ${hint}` : ''}`;
   const body = (pressed: boolean) => (
     <View style={styles.row}>
       <PixelFrame
@@ -39,10 +42,10 @@ export function RankCrest({ rank, hint, onPress, testID }: Props) {
       </PixelFrame>
       <View style={styles.text}>
         <PixelText variant="label" tone="textMuted">
-          Rank
+          {t('Rank')}
         </PixelText>
         <PixelText variant="title" color={RankColors[rank]}>
-          {rank}
+          {title}
         </PixelText>
         {hint !== undefined && (
           <PixelText variant="small" tone="textMuted">
@@ -51,7 +54,7 @@ export function RankCrest({ rank, hint, onPress, testID }: Props) {
         )}
         {onPress && (
           <PixelText variant="label" tone="rune">
-            See all ranks
+            {t('See all ranks')}
           </PixelText>
         )}
       </View>
@@ -70,7 +73,7 @@ export function RankCrest({ rank, hint, onPress, testID }: Props) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityHint="Shows every rank and what the next ones need">
+      accessibilityHint={t('Shows every rank and what the next ones need')}>
       {({ pressed }) => body(pressed)}
     </Pressable>
   );

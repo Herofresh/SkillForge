@@ -94,7 +94,8 @@ app/                    expo-router screens (UI only, no game logic)
     summary.tsx         5 "Your journey begins": hero, level, goals, tested out → completeOnboarding
 content/progressions/   SOURCE OF TRUTH for skill content (ADR-016)
   <branch>.yaml         one file per branch, one block per node (human-editable)
-  README.md             field guide for coaches and contributors
+  de/<branch>.yaml      German name, description, cues and prerequisite notes per node (FB-8, ADR-080)
+  README.md             field guide for coaches and contributors (incl. "Translations")
 scripts/
   progressions.ts       CLI behind npm run progressions:check|build|review (runs via tsx)
   progressionSources.ts Node-only file access shared by the CLI and the dataset test
@@ -154,6 +155,8 @@ src/
                         edits, prerequisiteOptions, issueSection / issuesBySection / editorIssueText
     backup.ts           backup file format (ADR-028): serializeBackup, parseBackup (validates
                         everything before an import), backupFileName, BACKUP_SCHEMA_VERSION
+    localize.ts         localizeNode / localizeNodes: the built-in nodes' texts in the user's
+                        language (FB-8, ADR-080); user nodes untouched
     xp.ts               units, difficulty/outcome multipliers, exercise and session XP, streak
     progression.ts      node XP curve, level-5 cap, Trials, test-out, node states, unlocks;
                         awaitingTrial / nodesAwaitingTrial (stuck at the cap, "Trial needed", FB-4;
@@ -274,9 +277,13 @@ src/
                         DATA_STORAGE_NOTE (on this phone; Android's device backup may include it),
                         STORE_SWITCH_NOTE (GitHub ↔ Play needs export, reinstall, import; ADR-068)
     testFixtures.ts     synthetic nodes for unit tests
+    progressionTranslations.ts  content translations (FB-8, ADR-080): parseTranslationFile,
+                        buildTranslations (checked against the English nodes), renderTranslationsModule,
+                        TRANSLATED_LOCALES
     skills/
-      index.ts          ALL_NODES, NODE_BY_ID (what the app imports)
+      index.ts          ALL_NODES, NODE_BY_ID, NODE_TRANSLATIONS (what the app imports)
       progressions.generated.ts  GENERATED from the YAML; never edit
+      translations.generated.ts  GENERATED from content/progressions/<locale>/; never edit
       dataset.test.ts   real dataset is valid and the generated files are fresh
       crossBranchGates.test.ts  content checks: key gates, straight-arm flags, Home paths
       releasedPositions.ts  test data: node positions of the last release (overlay upgrade test, ADR-052)
@@ -426,6 +433,7 @@ src/
     trial.test.tsx      component tests: TrialSetsPanel timers per hold set
     tree.test.tsx       component tests: tiles, chains, prerequisite list, unlock sheet (real store)
     DataGate.tsx        keeps the splash until fonts + startApp are done; error screen on failure
+    LocaleKey.tsx       remounts the navigator when the language changes (FB-8, ADR-080)
     ui/                 the UI kit; import from '@/components/ui'
       *.tsx             Screen, PixelFrame, PixelText, PixelButton, PixelIcon, SegmentedBar, XPBar,
                         StatBar, LevelBadge, TierChip, WarningBanner, PixelModal, EmptyState,
@@ -462,6 +470,12 @@ src/
                         frames, FRAME_MS, stillFrame) (PLAN 6.4, ADR-053), sprite.ts (layered
                         sprites: SpriteCanvas, parts with material / region legends, top-left
                         shading, selective outline, glow, sparkles, ground shadow; PLAN 6.10)
+  i18n/                 languages (PLAN 7.8 FB-8, ADR-080), pure TS: locale.ts (LOCALES en | de,
+                        LanguageChoice system | en | de, localeFromTag, resolveLocale), t.ts (t: the
+                        English source text is the key, {name} placeholders; k marks translatable
+                        data; setLocale / getLocale), de/ (the German dictionary, one file per area:
+                        common, train, tree, character, settings, editor, guide), i18n.test.ts (every
+                        t('…') / k('…') key has an entry, no entry is unused)
   health/healthConnect.ts  Health Connect access (PLAN 7.10, ADR-072): status, the write-exercise
                         permission, writing one workout, opening Health Connect; loads
                         react-native-health-connect only when its native module exists
@@ -526,7 +540,9 @@ jest.setup.ts           Jest: Reanimated/Worklets JS mocks for component tests, 
 
 **Content flow:** `content/progressions/*.yaml` → `npm run progressions:build` (parse with
 `progressionFormat.ts`, check with `validate.ts`) → `progressions.generated.ts` + review sheet → app
-imports `ALL_NODES` → at runtime `applyOverlay(ALL_NODES, userOverlay)` gives the user's tree.
+imports `ALL_NODES` → at runtime `applyOverlay(localizeNodes(ALL_NODES, NODE_TRANSLATIONS[locale]),
+userOverlay)` gives the user's tree in the user's language (`content/progressions/<locale>/*.yaml`
+→ `translations.generated.ts`, checked against the English nodes by the same build; FB-8, ADR-080).
 
 **Dataset (155 nodes, all `review.status: draft`):**
 
@@ -607,6 +623,7 @@ back in `SessionResult.warnings`. The generator never suggests work that would t
 | **Edit / reorder in the live session** | Tap a logged set's line to change its result (stepper, Save / Partial / Failed against its own prescription; its time stays) or delete it (confirmed; later sets move up, so `setIndex` stays the dense logging position). "Reorder" shows Up / Down per exercise; a strength pair moves as one (PLAN 5.9, ADR-045). |
 | **Exercise timer** | The optional timer of the set being done (PLAN 5.4, ADR-040): a hold counts down from the target after a 3 s get-ready, vibrates and counts on past it ("+7 s"); other metrics got a stopwatch until PLAN 7.9: the live session now offers the timer for holds only (the session clock covers rep sets; Trials keep the stopwatch). It can be paused and resumed (5.8, ADR-044; the paused time is not measured). Stored as timestamps plus the paused time (`ActiveSession.timer`), so it survives an app kill, paused too; the measured whole seconds become the set's `durationSec` (a hold's stepper gets the seconds held). |
 | **Monster / foe** | Every set of a live-session exercise drawn as a monster of the exercise's branch (PLAN 7.9, ADR-071; `BRANCH_MONSTERS`, seven kinds). Its state comes from the logged set against its prescription: fresh, fighting (its hold timer runs), defeated (the target), overkill (more), wounded (some; the HP bar shows what is left), escaped (0). A view only: nothing new is stored, XP and outcomes are unchanged. |
+| **Language** | Settings → Language: System (the device language via `I18nManager`, else English), English or Deutsch; the setting `language`, the resolved `locale` in the store. UI texts go through `t('English source')` / `k()` with the dictionary in `src/i18n/de/`; the built-in skill texts come from `content/progressions/<locale>/` (FB-8, ADR-080). |
 | **Training view** | How the live session is trained, a setting (`training_view`, Settings → Training view; PLAN 7.9, ADR-071). **Classic**: one exercise at a time with the stepper and Log / Partial / Failed, its foes above the logger. **Battle**: every exercise as a row of foes; tap a fresh foe to log the target (a hold starts its timer, the next tap logs the seconds held), tap a logged foe for one rep fewer (below 0 the set is removed), long press for an exact number or to edit, "+" for an extra set. |
 | **Health Connect** | Android's on-device health data store. Optional (Settings → Health Connect, setting `health_connect`, PLAN 7.10, ADR-072): every finished session is written as one calisthenics exercise session with a note of what was done; nothing is read. Only in native builds (`src/health/healthConnect.ts`); Expo Go reports `unsupported`. |
 | **Timer cue** | A moment the phone buzzes (PLAN 5.8, ADR-044): `go` (a hold's get-ready ends: one short buzz), `target` (the hold reaches its target: two long buzzes), `rest_end` (the rest countdown reaches zero: three short buzzes). Only while the screen sees the moment pass; no sound, no background notification. |

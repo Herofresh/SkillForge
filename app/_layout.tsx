@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { DataGate } from '@/components/DataGate';
 import { FONT_ASSETS } from '@/components/fonts';
+import { LocaleKey } from '@/components/LocaleKey';
 import { NavigationTheme } from '@/components/navigationTheme';
 import { RootErrorScreen } from '@/components/RootErrorScreen';
 
@@ -24,7 +25,9 @@ export default function RootLayout() {
     <ThemeProvider value={NavigationTheme}>
       <StatusBar style="light" />
       <DataGate fontsReady={fontsLoaded || fontError !== null}>
-        <Stack screenOptions={{ headerShown: false }} />
+        <LocaleKey>
+          <Stack screenOptions={{ headerShown: false }} />
+        </LocaleKey>
       </DataGate>
     </ThemeProvider>
   );

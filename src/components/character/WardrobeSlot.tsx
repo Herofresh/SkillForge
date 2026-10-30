@@ -12,6 +12,7 @@ import {
 } from '@/data/companion';
 import type { AccessoryRow, SlotRow } from '@/domain/companion';
 import type { CompanionSlot } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { Border, Colors, PIXEL, Spacing, TOUCH_TARGET } from '../theme';
 import { PixelIcon, PixelText } from '../ui';
@@ -107,7 +108,7 @@ function Tile({
       </PixelText>
       {isNew && (
         <PixelText variant="label" tone="rune">
-          New
+          {t('New')}
         </PixelText>
       )}
     </Pressable>
@@ -125,7 +126,7 @@ export function WardrobeSlot({ row, outfit, look, newIds, onEquip, testID }: Pro
   const earned = row.items.filter((item) => item.status !== 'locked');
   const locked = row.items.filter((item) => item.status === 'locked');
   const worn = row.worn ? ACCESSORY_BY_ID.get(row.worn) : undefined;
-  const slotLabel = SLOT_LABELS[row.slot];
+  const slotLabel = t(SLOT_LABELS[row.slot]);
   return (
     <View style={styles.slot} testID={testID}>
       <PixelText variant="heading" accessibilityRole="header">
@@ -133,16 +134,16 @@ export function WardrobeSlot({ row, outfit, look, newIds, onEquip, testID }: Pro
       </PixelText>
       {worn && (
         <PixelText variant="small" tone="textMuted">
-          {worn.flavor}
+          {t(worn.flavor)}
         </PixelText>
       )}
       <View style={styles.grid} accessibilityRole="radiogroup">
         <Tile
-          label="None"
+          label={t('None')}
           selected={row.worn === undefined}
           isNew={false}
           onPress={() => onEquip(row.slot, null)}
-          accessibilityLabel={`${slotLabel}: nothing`}
+          accessibilityLabel={t('{slot}: nothing', { slot: slotLabel })}
           testID={`${testID}-none`}>
           <Preview
             slot={row.slot}
@@ -155,11 +156,15 @@ export function WardrobeSlot({ row, outfit, look, newIds, onEquip, testID }: Pro
         {earned.map((item) => (
           <Tile
             key={item.id}
-            label={item.name}
+            label={t(item.name)}
             selected={item.status === 'worn'}
             isNew={newIds.has(item.id)}
             onPress={() => onEquip(row.slot, item.id)}
-            accessibilityLabel={`${slotLabel}: ${item.name}${newIds.has(item.id) ? ', new' : ''}`}
+            accessibilityLabel={
+              newIds.has(item.id)
+                ? t('{slot}: {name}, new', { slot: slotLabel, name: t(item.name) })
+                : `${slotLabel}: ${t(item.name)}`
+            }
             testID={`${testID}-${item.id}`}>
             <Preview
               slot={row.slot}
@@ -176,16 +181,16 @@ export function WardrobeSlot({ row, outfit, look, newIds, onEquip, testID }: Pro
           onPress={() => setShowLocked((value) => !value)}
           accessibilityRole="button"
           accessibilityState={{ expanded: showLocked }}
-          accessibilityLabel={`${slotLabel}: ${locked.length} locked`}
-          accessibilityHint={showLocked ? 'Hides them' : 'Shows what earns them'}
+          accessibilityLabel={t('{slot}: {n} locked', { slot: slotLabel, n: locked.length })}
+          accessibilityHint={showLocked ? t('Hides them') : t('Shows what earns them')}
           testID={`${testID}-locked-toggle`}
           style={({ pressed }) => [styles.toggle, pressed && styles.pressed]}>
           <PixelIcon name="lock" />
           <PixelText variant="label" tone="gold" style={styles.flex}>
-            {`Locked (${locked.length})`}
+            {t('Locked ({n})', { n: locked.length })}
           </PixelText>
           <PixelText variant="label" tone="gold">
-            {showLocked ? 'Hide' : 'Show'}
+            {showLocked ? t('Hide') : t('Show')}
           </PixelText>
         </Pressable>
       )}
@@ -224,7 +229,11 @@ function LockedRow({
       style={styles.locked}
       accessible
       accessibilityRole="text"
-      accessibilityLabel={`${item.name}, locked. ${rule}. ${progress}`}
+      accessibilityLabel={t('{name}, locked. {rule}. {progress}', {
+        name: t(item.name),
+        rule,
+        progress,
+      })}
       testID={testID}>
       <View style={styles.lockedPreview}>
         <Preview
@@ -237,7 +246,7 @@ function LockedRow({
       </View>
       <View style={styles.flex}>
         <PixelText variant="small" tone="textMuted">
-          {item.name}
+          {t(item.name)}
         </PixelText>
         <PixelText variant="label" tone="gold">
           {`${rule} · ${progress}`}

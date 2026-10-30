@@ -10,6 +10,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
+import { k, t } from '@/i18n';
+
 import { Colors, Motion, PIXEL, Spacing } from '../theme';
 
 import { PixelText } from './PixelText';
@@ -23,22 +25,22 @@ type Props = {
   testID?: string;
 };
 
-/** One vocabulary for every reveal moment (PLAN 5.2, ADR-038). */
+/** One vocabulary for every reveal moment (PLAN 5.2, ADR-038); translated where shown. */
 export const BURST_TITLES = {
-  levelUp: 'LEVEL UP!',
-  unlocked: 'UNLOCKED!',
-  testedOut: 'TESTED OUT!',
-  questComplete: 'QUEST COMPLETE',
+  levelUp: k('LEVEL UP!'),
+  unlocked: k('UNLOCKED!'),
+  testedOut: k('TESTED OUT!'),
+  questComplete: k('QUEST COMPLETE'),
   /** A hero class reached its tier I (PLAN 6.9). */
-  classUnlocked: 'CLASS UNLOCKED!',
+  classUnlocked: k('CLASS UNLOCKED!'),
   /** A hero class reached a higher tier (PLAN 6.9). */
-  classTierUp: 'TIER UP!',
+  classTierUp: k('TIER UP!'),
   /** The week's class challenge was completed (PLAN 6.9b). */
-  challengeComplete: 'CHALLENGE COMPLETE!',
+  challengeComplete: k('CHALLENGE COMPLETE!'),
   /** The companion earned an accessory (PLAN 6.10). */
-  newTrinket: 'NEW TRINKET!',
+  newTrinket: k('NEW TRINKET!'),
   /** A goal's Trial passed (PLAN 7.8 FB-10). */
-  goalReached: 'GOAL REACHED!',
+  goalReached: k('GOAL REACHED!'),
 } as const;
 
 const PARTICLE_COUNT = 12;
@@ -80,6 +82,8 @@ export function LevelUpBurst({
 }: Props) {
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(reduceMotion ? 1 : 0);
+  // A BURST_TITLES key, or a caller's own (already translated) text.
+  const shownTitle = t(title);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -111,7 +115,7 @@ export function LevelUpBurst({
       style={styles.container}
       accessible
       accessibilityRole="alert"
-      accessibilityLabel={subtitle ? `${title} ${subtitle}` : title}>
+      accessibilityLabel={subtitle ? `${shownTitle} ${subtitle}` : shownTitle}>
       {/* The ring bursts from the title's centre (PLAN 5.2), not the centre of title + subtitle. */}
       <View>
         {!reduceMotion && (
@@ -123,7 +127,7 @@ export function LevelUpBurst({
         )}
         <Animated.View style={titleStyle}>
           <PixelText variant="display" align="center">
-            {title}
+            {shownTitle}
           </PixelText>
         </Animated.View>
       </View>

@@ -1,0 +1,93 @@
+# German texts for content/progressions/h_push.yaml (FB-8): same ids, same cues in the same order.
+branch: h_push
+nodes:
+  - id: wall_push_up
+    name: "Wandliegestütz"
+    description: "Ein Liegestütz im Stehen, mit den Händen an einer Wand statt am Boden. Du lehnst dich zur Wand und drückst dich wieder weg; je aufrechter du stehst, desto leichter ist es."
+    cues:
+      - "Hände auf Brusthöhe an die Wand, etwas breiter als die Schultern."
+      - "Körper in einer geraden Linie von Kopf bis Fersen; spanne den Po an."
+      - "Ellbogen etwa 45 Grad vom Körper weg, nicht nach außen abgespreizt."
+      - "Senke dich ab, bis die Brust fast die Wand berührt, dann drücke dich ganz zurück."
+
+  - id: incline_push_up
+    name: "Erhöhter Liegestütz"
+    description: "Ein Liegestütz mit den Händen erhöht auf Box, Bank, Stange oder Parallettes, die Füße bleiben am Boden. Der Körper bildet eine schräge Plank, dadurch ist er leichter als ein Liegestütz am Boden."
+    cues:
+      - "Hände auf einer erhöhten Fläche; je niedriger die Fläche, desto schwerer wird es."
+      - "Körper in einer geraden Linie von Kopf bis Fersen."
+      - "Senke die Brust zur Kante ab, Ellbogen etwa 45 Grad vom Körper weg."
+
+  - id: knee_push_up
+    name: "Knieliegestütz"
+    description: "Ein Liegestütz am Boden auf den Knien statt auf den Zehen. Der Körper bleibt von Kopf bis Knie gerade, so heben die Arme weniger von deinem Gewicht."
+    cues:
+      - "Knie am Boden, Körper von Kopf bis Knie gerade; knicke nicht in der Hüfte ein."
+      - "Hände unter den Schultern, Ellbogen etwa 45 Grad vom Körper weg."
+      - "Brust zum Boden, dann drücke dich hoch, bis die Arme gestreckt sind."
+
+  - id: push_up
+    name: "Liegestütz"
+    description: "Der klassische Liegestütz: eine gerade Plank auf Händen und Zehen, abgesenkt, bis die Brust fast den Boden berührt, und wieder hochgedrückt. Trainiert Brust, Schultern und Trizeps."
+    cues:
+      - "Hände unter den Schultern, Körper in einer geraden Linie; spanne Po und Bauch an."
+      - "Ellbogen etwa 45 Grad vom Körper weg."
+      - "Brust zum Boden (oder zwischen die Parallettes), dann strecke die Arme ganz durch."
+
+  - id: diamond_push_up
+    name: "Diamant-Liegestütz"
+    description: "Ein Liegestütz mit den Händen eng zusammen unter der Brust, Daumen und Zeigefinger berühren sich zu einem Diamanten. Die enge Handstellung verlagert die Arbeit auf den Trizeps."
+    cues:
+      - "Hände zusammen unter der Brust, Daumen und Zeigefinger bilden einen Diamanten."
+      - "Halte die Ellbogen beim Absenken eng am Körper."
+      - "Der Körper bleibt in einer geraden Linie; berühre mit der Brust die Hände."
+
+  - id: ring_push_up
+    name: "Ring-Liegestütz"
+    description: "Ein Liegestütz mit den Händen in Ringen, die wenige Zentimeter über dem Boden hängen. Die Ringe bewegen sich frei, deshalb müssen Brust und Schultern sie zusätzlich stabil halten."
+    cues:
+      - "Ringe tief, knapp über dem Boden; Körper gerade von Kopf bis Fersen."
+      - "Halte die Ringe beim Absenken eng am Körper; lass sie nicht auseinanderdriften."
+      - "Drücke dich zu gestreckten Armen hoch und schiebe die Ringe oben weg."
+
+  - id: elevated_one_arm_push_up
+    name: "Erhöhter einarmiger Liegestütz"
+    description: "Ein einarmiger Liegestütz mit der Arbeitshand auf einer erhöhten Fläche, der andere Arm hinter dem Rücken oder seitlich. Die Füße stehen breit für die Balance; je niedriger die Fläche, desto schwerer."
+    cues:
+      - "Eine Hand auf einer erhöhten Fläche, Füße breit für die Balance."
+      - "Halte Hüfte und Schultern parallel zur Fläche; verdrehe dich nicht."
+      - "Senke die Brust kontrolliert zur Hand ab, Ellbogen eng am Körper."
+
+  - id: archer_push_up
+    name: "Archer-Liegestütz"
+    description: "Ein breiter Liegestütz, bei dem du dich zu einer Hand absenkst, während der andere Arm seitlich gestreckt bleibt. Ein Zwischenschritt zwischen beidarmigem und einarmigem Liegestütz."
+    cues:
+      - "Hände sehr breit; senke dich zu einer Hand ab, während der andere Arm gestreckt bleibt."
+      - "Der gebeugte Arm macht die Arbeit; der gestreckte Arm hilft nur ein wenig."
+      - "Der Körper bleibt in einer geraden Linie von Kopf bis Fersen."
+
+  - id: straddle_one_arm_push_up
+    name: "Einarmiger Straddle-Liegestütz"
+    description: "Ein Liegestütz auf einem Arm am Boden, die Füße breit gespreizt für die Balance und die freie Hand hinter dem Rücken. Der erste einarmige Liegestütz vom Boden aus."
+    cues:
+      - "Füße weit auseinander, Hand unter der Brust, freie Hand hinter dem Rücken."
+      - "Halte Hüfte und Schultern parallel zum Boden; drehe dich nicht auf."
+      - "Senke dich ab, bis die Brust nah an der Hand ist, dann drücke dich wieder hoch."
+
+  - id: pseudo_planche_push_up
+    name: "Pseudo-Planche-Liegestütz"
+    description: "Ein Liegestütz mit den Händen hinten an der Hüfte, Finger nach außen gedreht, die Schultern lehnen vor über die Hände hinaus. Er sieht aus wie ein nach vorn gekippter Liegestütz und baut Kraft für die Planche auf."
+    cues:
+      - "Hände an der Hüfte, Finger nach außen gedreht; lehne die Schultern über die Hände hinaus."
+      - "Halte die Vorlage die ganze Zeit, auch unten."
+      - "Drücke den Boden weg (oberer Rücken leicht rund) am obersten Punkt jeder Wiederholung."
+    prerequisite_notes:
+      planche_lean: "Gewöhne dich zuerst daran, auf gestreckten Armen nach vorn zu lehnen (Planche Lean, 3 x 30 s)."
+
+  - id: one_arm_push_up
+    name: "Einarmiger Liegestütz"
+    description: "Ein Liegestütz auf einem Arm mit eng stehenden Füßen und ganz geradem Körper, ohne Verdrehen. Der klassische einarmige Liegestütz."
+    cues:
+      - "Füße zusammen oder nur leicht auseinander, Körper in einer geraden Linie."
+      - "Spanne den Po an und halte die Körpermitte fest, damit die Hüfte nicht rotiert."
+      - "Senke dich ab, bis die Brust nah an der Hand ist, dann drücke dich wieder hoch."

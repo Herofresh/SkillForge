@@ -4,6 +4,7 @@ import { Keyboard, StyleSheet, View } from 'react-native';
 import { DATA_STORAGE_NOTE, STORE_SWITCH_NOTE } from '@/data/notices';
 import { backupIssueLines } from '@/domain/backup';
 import type { ValidationIssue } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { DetailSection } from '../node/DetailSection';
@@ -22,7 +23,7 @@ type Outcome =
 type Dialog = 'import' | 'undo';
 
 const errorText = (error: unknown): string =>
-  error instanceof Error ? error.message : 'Something went wrong.';
+  error instanceof Error ? error.message : t('Something went wrong.');
 
 /**
  * Backups (PLAN 4.6, ADR-028): export all data to the share sheet; import a backup after a clear
@@ -79,22 +80,22 @@ export function BackupPanel() {
     });
 
   return (
-    <DetailSection title="Backup" icon="scroll" testID="settings-backup">
+    <DetailSection title={t('Backup')} icon="scroll" testID="settings-backup">
       <PixelText variant="small" tone="textMuted">
-        {`${DATA_STORAGE_NOTE} Export a backup now and then, e.g. to your Drive.`}
+        {`${t(DATA_STORAGE_NOTE)} ${t('Export a backup now and then, e.g. to your Drive.')}`}
       </PixelText>
       <PixelText variant="small" tone="textMuted">
-        {STORE_SWITCH_NOTE}
+        {t(STORE_SWITCH_NOTE)}
       </PixelText>
       <PixelButton
-        label="Export backup"
+        label={t('Export backup')}
         icon="scroll"
         onPress={exportData}
         disabled={busy}
         testID="export-backup"
       />
       <PixelButton
-        label="Import backup"
+        label={t('Import backup')}
         variant="secondary"
         onPress={() => setDialog('import')}
         disabled={busy}
@@ -102,7 +103,7 @@ export function BackupPanel() {
       />
       {lastImport && (
         <PixelButton
-          label="Undo last import"
+          label={t('Undo last import')}
           variant="secondary"
           icon="potion"
           onPress={() => setDialog('undo')}
@@ -114,20 +115,21 @@ export function BackupPanel() {
 
       <PixelModal
         visible={dialog === 'import'}
-        title="Replace all data?"
+        title={t('Replace all data?')}
         onClose={() => setDialog(undefined)}
-        closeLabel="Cancel"
+        closeLabel={t('Cancel')}
         testID="import-dialog">
         <PixelText>
-          This replaces all your data: hero, goals, equipment, every logged session and your tree
-          changes.
-          {sessionInProgress ? ' The session in progress is discarded too.' : ''}
+          {t(
+            'This replaces all your data: hero, goals, equipment, every logged session and your tree changes.',
+          )}
+          {sessionInProgress ? ` ${t('The session in progress is discarded too.')}` : ''}
         </PixelText>
         <PixelText variant="small" tone="textMuted">
-          A safety copy of your current data is saved first, so you can undo the import.
+          {t('A safety copy of your current data is saved first, so you can undo the import.')}
         </PixelText>
         <PixelButton
-          label="Choose file and replace"
+          label={t('Choose file and replace')}
           variant="danger"
           onPress={importData}
           testID="import-confirm"
@@ -136,15 +138,21 @@ export function BackupPanel() {
 
       <PixelModal
         visible={dialog === 'undo'}
-        title="Undo the import?"
+        title={t('Undo the import?')}
         onClose={() => setDialog(undefined)}
-        closeLabel="Cancel"
+        closeLabel={t('Cancel')}
         testID="undo-dialog">
         <PixelText>
-          Your data goes back to how it was before the last import. The imported data is replaced (a
-          safety copy of it is saved too).
+          {t(
+            'Your data goes back to how it was before the last import. The imported data is replaced (a safety copy of it is saved too).',
+          )}
         </PixelText>
-        <PixelButton label="Undo import" variant="danger" onPress={undo} testID="undo-confirm" />
+        <PixelButton
+          label={t('Undo import')}
+          variant="danger"
+          onPress={undo}
+          testID="undo-confirm"
+        />
       </PixelModal>
     </DetailSection>
   );
@@ -153,13 +161,15 @@ export function BackupPanel() {
 function outcomeText(outcome: Exclude<Outcome, { kind: 'rejected' }>): string {
   switch (outcome.kind) {
     case 'exported':
-      return 'Backup handed to the share sheet.';
+      return t('Backup handed to the share sheet.');
     case 'imported':
-      return `Backup imported. Your previous data was saved as ${outcome.fileName}.`;
+      return t('Backup imported. Your previous data was saved as {fileName}.', {
+        fileName: outcome.fileName,
+      });
     case 'undone':
-      return 'Import undone: your previous data is back.';
+      return t('Import undone: your previous data is back.');
     case 'canceled':
-      return 'No file chosen. Nothing changed.';
+      return t('No file chosen. Nothing changed.');
     case 'error':
       return outcome.message;
   }
@@ -173,10 +183,10 @@ function OutcomeNote({ outcome }: { outcome: Outcome }) {
         <View style={styles.row} accessibilityLiveRegion="polite">
           <PixelIcon name="alert" />
           <PixelText variant="heading" tone="ember" style={styles.flex}>
-            This file can’t be imported
+            {t('This file can’t be imported')}
           </PixelText>
         </View>
-        <PixelText variant="small">Nothing was changed. What is wrong with it:</PixelText>
+        <PixelText variant="small">{t('Nothing was changed. What is wrong with it:')}</PixelText>
         {lines.map((line, index) => (
           <PixelText key={index} variant="small">
             {`• ${line}`}
@@ -184,7 +194,7 @@ function OutcomeNote({ outcome }: { outcome: Outcome }) {
         ))}
         {more > 0 && (
           <PixelText variant="small" tone="textMuted">
-            {`… and ${more} more`}
+            {more === 1 ? t('… and 1 more') : t('… and {n} more', { n: more })}
           </PixelText>
         )}
       </PixelFrame>

@@ -8,6 +8,7 @@ import { PROFICIENT_LEVEL } from '@/domain/progression';
 import type { SessionResult } from '@/domain/recompute';
 import { timerModeFor, type SetTimer } from '@/domain/setTimer';
 import type { ExerciseNode, SetPerformance } from '@/domain/types';
+import { k, t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { GoalReachedPanel } from '../character/GoalReachedPanel';
@@ -56,12 +57,12 @@ export function TrialSetsPanel({
   return (
     <PixelFrame contentStyle={styles.gap}>
       <PixelText variant="label" tone="rune" accessibilityRole="header">
-        Your result
+        {t('Your result')}
       </PixelText>
       {results.map((result, index) => (
         <View key={index} style={styles.gap}>
           <NumberStepper
-            label={`Set ${index + 1}`}
+            label={t('Set {n}', { n: index + 1 })}
             valueText={formatPerformance(node.metric, result)}
             onDecrement={() => onStep(index, -1)}
             onIncrement={() => onStep(index, 1)}
@@ -117,9 +118,12 @@ export function TrialOutcome({ node, outcome, standard, onOpenNode }: OutcomePro
     <>
       {passed ? (
         <PixelFrame variant="rune" testID="trial-passed">
-          <LevelUpBurst title={BURST_TITLES.testedOut} subtitle={node.name} />
+          <LevelUpBurst title={t(BURST_TITLES.testedOut)} subtitle={node.name} />
           <PixelText align="center">
-            {`${node.name} is now proficient (level ${PROFICIENT_LEVEL}). Its successors are open to train.`}
+            {t('{name} is now proficient (level {level}). Its successors are open to train.', {
+              name: node.name,
+              level: PROFICIENT_LEVEL,
+            })}
           </PixelText>
           {impliedNames.length > 0 && (
             <PixelText align="center" tone="rune" testID="trial-also-counts">
@@ -130,7 +134,10 @@ export function TrialOutcome({ node, outcome, standard, onOpenNode }: OutcomePro
       ) : (
         <PixelFrame variant="gold" testID="trial-not-passed">
           <PixelText>
-            {`Not quite the standard yet (${standard}). Your sets count as training, so the XP is yours. Try the Trial again after a few sessions.`}
+            {t(
+              'Not quite the standard yet ({standard}). Your sets count as training, so the XP is yours. Try the Trial again after a few sessions.',
+              { standard },
+            )}
           </PixelText>
         </PixelFrame>
       )}
@@ -144,7 +151,7 @@ export function TrialOutcome({ node, outcome, standard, onOpenNode }: OutcomePro
       {unlockedNames.length > 0 && (
         <PixelFrame variant="parchment" contentStyle={styles.gap}>
           <PixelText variant="heading" tone="textOnParchment" accessibilityRole="header">
-            Unlocked
+            {t('Unlocked')}
           </PixelText>
           {unlockedNames.map((name) => (
             <PixelText key={name} tone="textOnParchment">
@@ -162,9 +169,10 @@ export function trialPassedIn(outcome: SessionResult): boolean {
   return outcome.exercises.some((exercise) => exercise.trialPassed);
 }
 
-/** The note under the steppers while warnings are unacknowledged. */
-export const ACKNOWLEDGE_TO_LOG_NOTE =
-  'Read and acknowledge the notes above to log the Trial. It is your call.';
+/** The note under the steppers while warnings are unacknowledged (shown through `t`). */
+export const ACKNOWLEDGE_TO_LOG_NOTE = k(
+  'Read and acknowledge the notes above to log the Trial. It is your call.',
+);
 
 const styles = StyleSheet.create({
   gap: {

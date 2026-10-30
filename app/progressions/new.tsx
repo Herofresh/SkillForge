@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { NodeEditorBody } from '@/components/editor/NodeEditorBody';
 import { BRANCHES, type Branch } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 const isBranch = (value: string | undefined): value is Branch =>
@@ -22,8 +23,8 @@ export default function NewExerciseScreen() {
   return (
     <NodeEditorBody
       initial={initial}
-      title="New exercise"
-      saveLabel="Add to the tree"
+      title={t('New exercise')}
+      saveLabel={t('Add to the tree')}
       onSaved={(nodeId) => router.replace({ pathname: '/node/[nodeId]', params: { nodeId } })}
       onCancel={() => router.back()}
     />

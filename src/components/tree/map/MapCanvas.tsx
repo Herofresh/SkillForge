@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { BRANCH_NAMES } from '@/data/skills/branches';
 import { routeRects, type MapEdge, type MapLayout } from '@/domain/treeMap';
+import { t } from '@/i18n';
 
 import { BranchColors, ChainColors, MapStyle, Spacing } from '../../theme';
 import { PixelText } from '../../ui';
@@ -49,7 +50,7 @@ export const MapCanvas = memo(function MapCanvas({ layout, metEdges }: Props) {
             numberOfLines={1}
             maxFontSizeMultiplier={1}
             style={styles.title}>
-            {BRANCH_NAMES[lane.branch]}
+            {t(BRANCH_NAMES[lane.branch])}
           </PixelText>
         </View>
       ))}

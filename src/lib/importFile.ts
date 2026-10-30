@@ -3,6 +3,7 @@
  * picker accepts any file, so a huge one (a video, a disk image) is refused before it is read into
  * memory instead of freezing or crashing the app.
  */
+import { t } from '@/i18n';
 
 const BYTES_PER_MB = 1024 * 1024;
 
@@ -16,5 +17,8 @@ export const MAX_IMPORT_FILE_BYTES = 5 * BYTES_PER_MB;
 export function importFileSizeProblem(size: number | null | undefined): string | undefined {
   if (size === null || size === undefined || size <= MAX_IMPORT_FILE_BYTES) return undefined;
   const megabytes = (bytes: number) => Math.ceil(bytes / BYTES_PER_MB);
-  return `This file is too large to import (${megabytes(size)} MB; the limit is ${megabytes(MAX_IMPORT_FILE_BYTES)} MB). Choose a SkillForge backup or progressions file.`;
+  return t(
+    'This file is too large to import ({size} MB; the limit is {limit} MB). Choose a SkillForge backup or progressions file.',
+    { size: megabytes(size), limit: megabytes(MAX_IMPORT_FILE_BYTES) },
+  );
 }

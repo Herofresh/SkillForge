@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
 import { nextGoalOptions } from '@/domain/goalReached';
+import { k, t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { Spacing, TOUCH_TARGET } from '../theme';
@@ -23,8 +24,9 @@ type Props = {
 
 type Decision = { kind: 'picked'; nodeId: string } | { kind: 'kept' };
 
-export const GOALS_KEPT_TEXT =
-  'Your goals stay as they are. You can pick a new one in the Tree any time.';
+export const GOALS_KEPT_TEXT = k(
+  'Your goals stay as they are. You can pick a new one in the Tree any time.',
+);
 
 /**
  * A goal reached in this session (PLAN 7.8 FB-9/10/11, ADR-077): a GOAL REACHED! burst, then the
@@ -61,17 +63,19 @@ export function GoalReachedPanel({
             testID={`${testID}-${goalId}`}>
             {celebrate ? (
               <LevelUpBurst
-                title={BURST_TITLES.goalReached}
+                title={t(BURST_TITLES.goalReached)}
                 subtitle={name}
                 playKey={`${playKey}-goal-${index}`}
               />
             ) : (
               <PixelText variant="label" tone="gold" accessibilityRole="header">
-                {`Goal reached: ${name}`}
+                {t('Goal reached: {name}', { name })}
               </PixelText>
             )}
             <PixelText align="center" testID={`${testID}-${goalId}-text`}>
-              {`${name} is yours: its Trial is passed and its whole path is proficient.`}
+              {t('{name} is yours: its Trial is passed and its whole path is proficient.', {
+                name,
+              })}
             </PixelText>
             {decision === undefined ? (
               <NextGoalPicker
@@ -90,15 +94,17 @@ export function GoalReachedPanel({
                 onPress={() => onOpenNode?.(decision.nodeId)}
                 disabled={!onOpenNode}
                 accessibilityRole="link"
-                accessibilityLabel={`Next goal: ${nameOf(decision.nodeId)}`}
+                accessibilityLabel={t('Next goal: {name}', { name: nameOf(decision.nodeId) })}
                 style={styles.next}
                 testID={`${testID}-${goalId}-picked`}>
                 <PixelIcon name="star" />
-                <PixelText tone="gold">{`Next goal: ${nameOf(decision.nodeId)}`}</PixelText>
+                <PixelText tone="gold">
+                  {t('Next goal: {name}', { name: nameOf(decision.nodeId) })}
+                </PixelText>
               </Pressable>
             ) : (
               <PixelText variant="small" tone="textMuted" testID={`${testID}-${goalId}-kept`}>
-                {GOALS_KEPT_TEXT}
+                {t(GOALS_KEPT_TEXT)}
               </PixelText>
             )}
           </PixelFrame>

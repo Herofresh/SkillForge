@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import type { ExerciseNode } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { SafeguardWarningList, useAcknowledgements } from '../SafeguardWarningList';
@@ -33,12 +34,15 @@ export function UnlockSheet({ node, onClose, onUnlocked }: Props) {
   return (
     <PixelModal
       visible
-      title="Unlock anyway?"
+      title={t('Unlock anyway?')}
       onClose={onClose}
-      closeLabel="Not now"
+      closeLabel={t('Not now')}
       testID="unlock-sheet">
       <PixelText>
-        {`${node.name} opens for training now. Its prerequisites stay listed, and you can build up to them whenever you like.`}
+        {t(
+          '{name} opens for training now. Its prerequisites stay listed, and you can build up to them whenever you like.',
+          { name: node.name },
+        )}
       </PixelText>
       <SafeguardWarningList
         warnings={warnings}
@@ -47,11 +51,11 @@ export function UnlockSheet({ node, onClose, onUnlocked }: Props) {
         testIDPrefix="unlock-warning"
       />
       <PixelButton
-        label="Unlock anyway"
+        label={t('Unlock anyway')}
         icon="lock"
         onPress={confirm}
         disabled={!allAcknowledged}
-        accessibilityHint={allAcknowledged ? undefined : 'Acknowledge the note above first'}
+        accessibilityHint={allAcknowledged ? undefined : t('Acknowledge the note above first')}
         testID="unlock-confirm"
       />
     </PixelModal>

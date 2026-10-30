@@ -5,6 +5,8 @@
  * upgraded (glowing or ornate) one. The Recruit carries a wooden training sword. The pixel art is
  * in `art.ts` (`WEAPON_ART`, by class id).
  */
+import { k } from '@/i18n';
+
 export interface ClassWeapon {
   classId: string;
   name: string;
@@ -16,21 +18,25 @@ export interface ClassWeapon {
 export const UPGRADED_WEAPON_TIER = 3;
 
 export const CLASS_WEAPONS: readonly ClassWeapon[] = [
-  { classId: 'recruit', name: 'Wooden training sword', upgradedName: 'Wooden training sword' },
-  { classId: 'warrior', name: 'Longsword', upgradedName: 'Runeblade' },
-  { classId: 'ranger', name: 'Longbow', upgradedName: 'Leafsong bow' },
-  { classId: 'monk', name: 'Quarterstaff', upgradedName: 'Ember-tipped staff' },
-  { classId: 'barbarian', name: 'Greataxe', upgradedName: 'Bone greataxe' },
-  { classId: 'rogue', name: 'Twin daggers', upgradedName: 'Shadowfang daggers' },
-  { classId: 'druid', name: 'Gnarled staff', upgradedName: 'Blossoming staff' },
-  { classId: 'paladin', name: 'Warhammer', upgradedName: 'Sunforged hammer' },
-  { classId: 'samurai', name: 'Katana', upgradedName: 'Moonlit katana' },
-  { classId: 'templar', name: 'Mace', upgradedName: 'Golden mace' },
-  { classId: 'bard', name: 'Lute', upgradedName: 'Gilded lute' },
-  { classId: 'cleric', name: 'Holy mace', upgradedName: 'Radiant mace' },
-  { classId: 'knight', name: 'Sword and shield', upgradedName: 'Gilded sword and shield' },
-  { classId: 'berserker', name: 'Twin axes', upgradedName: 'Blood axes' },
-  { classId: 'sorcerer', name: 'Wand', upgradedName: 'Starlit wand' },
+  {
+    classId: 'recruit',
+    name: k('Wooden training sword'),
+    upgradedName: k('Wooden training sword'),
+  },
+  { classId: 'warrior', name: k('Longsword'), upgradedName: k('Runeblade') },
+  { classId: 'ranger', name: k('Longbow'), upgradedName: k('Leafsong bow') },
+  { classId: 'monk', name: k('Quarterstaff'), upgradedName: k('Ember-tipped staff') },
+  { classId: 'barbarian', name: k('Greataxe'), upgradedName: k('Bone greataxe') },
+  { classId: 'rogue', name: k('Twin daggers'), upgradedName: k('Shadowfang daggers') },
+  { classId: 'druid', name: k('Gnarled staff'), upgradedName: k('Blossoming staff') },
+  { classId: 'paladin', name: k('Warhammer'), upgradedName: k('Sunforged hammer') },
+  { classId: 'samurai', name: k('Katana'), upgradedName: k('Moonlit katana') },
+  { classId: 'templar', name: k('Mace'), upgradedName: k('Golden mace') },
+  { classId: 'bard', name: k('Lute'), upgradedName: k('Gilded lute') },
+  { classId: 'cleric', name: k('Holy mace'), upgradedName: k('Radiant mace') },
+  { classId: 'knight', name: k('Sword and shield'), upgradedName: k('Gilded sword and shield') },
+  { classId: 'berserker', name: k('Twin axes'), upgradedName: k('Blood axes') },
+  { classId: 'sorcerer', name: k('Wand'), upgradedName: k('Starlit wand') },
 ];
 
 /** The weapon of the worn class at its tier: its name and whether it shows the upgraded look. */

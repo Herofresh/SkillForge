@@ -4,63 +4,64 @@
  */
 import { spokenOgLevel } from '@/domain/format';
 import type { TileState, TreeTile } from '@/domain/treeView';
+import { k, t } from '@/i18n';
 
 import type { ColorToken } from '../theme';
 import type { IconName } from '../ui';
 
 export interface TileLook {
   icon: IconName;
-  /** Short caps label on the tile, e.g. "LOCKED". */
+  /** Short caps label on the tile, e.g. "LOCKED" (English; shown through `t`). */
   label: string;
   /** Color of the label and the name. */
   tone: ColorToken;
   nameTone: ColorToken;
-  /** One sentence for the legend and screen readers. */
+  /** One sentence for the legend and screen readers (English; shown through `t`). */
   description: string;
 }
 
 export const TILE_LOOKS: Readonly<Record<TileState, TileLook>> = {
   legendary: {
     icon: 'flame',
-    label: 'Legendary',
+    label: k('Legendary'),
     tone: 'gold',
     nameTone: 'textMuted',
-    description: 'A legendary skill far ahead: something to dream of.',
+    description: k('A legendary skill far ahead: something to dream of.'),
   },
   locked: {
     icon: 'lock',
-    label: 'Locked',
+    label: k('Locked'),
     tone: 'textMuted',
     nameTone: 'textMuted',
-    description: 'Its prerequisites are not met yet. You can still unlock it yourself.',
+    description: k('Its prerequisites are not met yet. You can still unlock it yourself.'),
   },
   available: {
     icon: 'rune',
-    label: 'Ready',
+    label: k('Ready'),
     tone: 'rune',
     nameTone: 'text',
-    description: 'Open to train: the next step on the path.',
+    description: k('Open to train: the next step on the path.'),
   },
   training: {
     icon: 'sword',
-    label: 'Training',
+    label: k('Training'),
     tone: 'gold',
     nameTone: 'text',
-    description: 'You are training it: sets earn XP up to level 5 until the Trial.',
+    description: k('You are training it: sets earn XP up to level 5 until the Trial.'),
   },
   proficient: {
     icon: 'shield',
-    label: 'Proficient',
+    label: k('Proficient'),
     tone: 'gold',
     nameTone: 'gold',
-    description: 'Trial passed: it opens the skills that build on it.',
+    description: k('Trial passed: it opens the skills that build on it.'),
   },
   mastered: {
     icon: 'star',
-    label: 'Mastered',
+    label: k('Mastered'),
     tone: 'gold',
     nameTone: 'gold',
-    description: 'Level 10: fully mastered.',
+    description: k('Level 10: fully mastered.'),
   },
 };
 
@@ -75,14 +76,14 @@ export function tileAccessibilityLabel(tile: TreeTile, custom: boolean): string 
   const { node, state, level, isGoal, status } = tile;
   return [
     node.name,
-    TILE_LOOKS[state].label,
-    TRAINED_TILE_STATES.includes(state) ? `level ${level.level}` : undefined,
-    level.capped ? 'trial needed to level further' : undefined,
+    t(TILE_LOOKS[state].label),
+    TRAINED_TILE_STATES.includes(state) ? t('level {n}', { n: level.level }) : undefined,
+    level.capped ? t('trial needed to level further') : undefined,
     spokenOgLevel(node.ogLevel),
-    node.straightArm ? 'straight-arm' : undefined,
-    isGoal ? 'goal' : undefined,
-    custom ? 'custom' : undefined,
-    status.selfUnlocked && status.unmetHard.length > 0 ? 'unlocked by you' : undefined,
+    node.straightArm ? t('straight-arm') : undefined,
+    isGoal ? t('goal') : undefined,
+    custom ? t('custom') : undefined,
+    status.selfUnlocked && status.unmetHard.length > 0 ? t('unlocked by you') : undefined,
   ]
     .filter(Boolean)
     .join(', ');
@@ -91,6 +92,6 @@ export function tileAccessibilityLabel(tile: TreeTile, custom: boolean): string 
 /** The caps state line of an untrained tile ("Ready · Unlocked by you" after a self-unlock). */
 export function tileStateLabel(tile: TreeTile): string {
   return tile.status.selfUnlocked && tile.state === 'available'
-    ? 'Ready · Unlocked by you'
-    : TILE_LOOKS[tile.state].label;
+    ? t('Ready · Unlocked by you')
+    : t(TILE_LOOKS[tile.state].label);
 }

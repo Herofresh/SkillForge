@@ -7,6 +7,7 @@ import { measuredSeconds, timedPerformance, timerModeFor, type SetTimer } from '
 import type { SetMark } from '@/domain/train';
 import type { CurrentExerciseView, LoggedSetView } from '@/domain/trainView';
 import type { ExerciseNode, SetPerformance } from '@/domain/types';
+import { k, t } from '@/i18n';
 
 import { Colors, Spacing, TOUCH_TARGET } from '../theme';
 import { SetTimerPanel } from '../timer/SetTimerPanel';
@@ -31,6 +32,12 @@ type Props = {
 };
 
 const OUTCOME_ICONS = { success: 'check', partial: 'alert', failed: 'cross' } as const;
+/** The outcome as the logged line's icon and screen reader say it. */
+const OUTCOME_WORDS = {
+  success: k('success'),
+  partial: k('partial'),
+  failed: k('failed'),
+} as const;
 
 /**
  * Logging one set of the current exercise: the optional hold timer (holds only: rep sets have no set
@@ -68,15 +75,16 @@ export function SetLogger({
   const waiting = pendingNote !== undefined;
   const setLabel =
     current.setNumber > current.plannedSets
-      ? `Extra set ${current.setNumber}`
-      : `Set ${current.setNumber} of ${current.plannedSets}`;
+      ? t('Extra set {n}', { n: current.setNumber })
+      : t('Set {n} of {total}', { n: current.setNumber, total: current.plannedSets });
   return (
     <View style={styles.gap}>
       {current.sets.map((set) => {
-        const text = `Set ${set.index + 1}: ${set.text}`;
+        const text = t('Set {n}: {result}', { n: set.index + 1, result: set.text });
+        const outcome = t(OUTCOME_WORDS[set.outcome]);
         const line = (
           <>
-            <PixelIcon name={OUTCOME_ICONS[set.outcome]} label={set.outcome} />
+            <PixelIcon name={OUTCOME_ICONS[set.outcome]} label={outcome} />
             <PixelText variant="small" style={styles.lineText}>
               {text}
             </PixelText>
@@ -94,8 +102,8 @@ export function SetLogger({
             key={set.index}
             onPress={() => onEditSet(set)}
             accessibilityRole="button"
-            accessibilityLabel={`${text}, ${set.outcome}`}
-            accessibilityHint="Edit or delete this set"
+            accessibilityLabel={t('{set}, {outcome}', { set: text, outcome })}
+            accessibilityHint={t('Edit or delete this set')}
             testID={`logged-set-${set.index}`}
             style={({ pressed }) => [styles.logged, styles.editable, pressed && styles.pressed]}>
             {line}
@@ -107,7 +115,7 @@ export function SetLogger({
         {setLabel}
       </PixelText>
       <PixelText variant="small" tone="textMuted">
-        {`Target: ${formatPerformance(current.metric, current.target)}`}
+        {t('Target: {target}', { target: formatPerformance(current.metric, current.target) })}
       </PixelText>
       {timerModeFor(current.metric) === 'hold' && (
         <SetTimerPanel
@@ -123,7 +131,7 @@ export function SetLogger({
         />
       )}
       <NumberStepper
-        label="Did"
+        label={t('Did')}
         valueText={formatPerformance(current.metric, entered)}
         onDecrement={() => setEntered((value) => stepTrialResult(node, value, -1))}
         onIncrement={() => setEntered((value) => stepTrialResult(node, value, 1))}
@@ -136,29 +144,29 @@ export function SetLogger({
         </PixelText>
       )}
       <PixelButton
-        label="Log set"
+        label={t('Log set')}
         icon="check"
         onPress={() => onLog(entered, 'done')}
         disabled={waiting}
-        accessibilityHint="Logs the set as entered"
+        accessibilityHint={t('Logs the set as entered')}
         testID="log-set"
       />
       <View style={styles.row}>
         <PixelButton
-          label="Partial"
+          label={t('Partial')}
           variant="secondary"
           onPress={() => onLog(entered, 'partial')}
           disabled={waiting}
-          accessibilityHint="Logs the set as short of the target"
+          accessibilityHint={t('Logs the set as short of the target')}
           testID="log-set-partial"
           style={styles.half}
         />
         <PixelButton
-          label="Failed"
+          label={t('Failed')}
           variant="secondary"
           onPress={() => onLog(entered, 'failed')}
           disabled={waiting}
-          accessibilityHint="Logs the set as not done"
+          accessibilityHint={t('Logs the set as not done')}
           testID="log-set-failed"
           style={styles.half}
         />

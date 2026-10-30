@@ -1,0 +1,98 @@
+# German texts for content/progressions/legs.yaml (FB-8): same ids, same cues in the same order.
+branch: legs
+nodes:
+  - id: assisted_squat
+    name: "Kniebeuge mit Festhalten"
+    description: "Eine Kniebeuge, bei der du dich an etwas Stabilem vor dir festhältst, etwa einem Türrahmen oder einer Stange, als Hilfe für Balance und Tiefe. Sie lehrt das Kniebeugen-Muster vor der freien Version."
+    cues:
+      - "Halte dich an etwas Stabilem vor dir fest und nutze es nur so viel wie nötig."
+      - "Füße schulterbreit, Zehen leicht nach außen, Knie zeigen in Richtung der Zehen."
+      - "Setz dich so tief wie möglich zwischen die Fersen, der Rücken bleibt neutral."
+
+  - id: single_leg_deadlift
+    name: "Einbeiniges Kreuzheben"
+    description: "Du stehst auf einem Bein, kippst in der Hüfte nach vorn und senkst die Brust Richtung Boden, während das freie Bein nach hinten streckt, dann richtest du dich wieder auf. Eine Balance- und Beinbeuger-Übung ohne Geräte."
+    cues:
+      - "Standbein leicht gebeugt; der Rücken bleibt gerade."
+      - "Schieb die Hüfte nach hinten und lass das freie Bein in Linie mit dem Körper aufsteigen."
+      - "Richte dich auf, indem du den Po des Standbeins anspannst."
+
+  - id: squat
+    name: "Kniebeuge"
+    description: "Du stehst schulterbreit, setzt die Hüfte ab, bis die Oberschenkel mindestens parallel zum Boden sind, und stehst wieder auf. Die Grundübung für die Beine."
+    cues:
+      - "Füße schulterbreit, Zehen leicht nach außen."
+      - "Geh runter, bis die Oberschenkel mindestens parallel zum Boden sind."
+      - "Knie zeigen in Richtung der Zehen, Fersen bleiben unten, Brust oben."
+
+  - id: deep_squat
+    name: "Tiefe Kniebeuge"
+    description: "Eine Kniebeuge ganz nach unten, die Hüfte deutlich unter den Knien und die Fersen flach am Boden. Baut Beinkraft über den vollen Bewegungsumfang auf sowie Beweglichkeit in Sprunggelenk und Hüfte."
+    cues:
+      - "Geh ganz nach unten, Hüfte deutlich unter die Knie."
+      - "Die Fersen bleiben die ganze Zeit flach am Boden."
+      - "Halte den Rücken unten neutral; steh ohne Federn auf."
+
+  - id: split_squat
+    name: "Split Squat"
+    description: "In einer langen Schrittstellung, ein Fuß vorn und die hintere Ferse angehoben, senkst du dich gerade nach unten, bis das hintere Knie fast den Boden berührt. Eine Kniebeuge mit Fokus auf ein Bein."
+    cues:
+      - "Lange Schrittstellung, ein Fuß vorn, hintere Ferse angehoben."
+      - "Senk dich gerade nach unten, bis das hintere Knie fast den Boden berührt."
+      - "Vorderes Knie zeigt in Richtung der Zehen; Oberkörper bleibt aufrecht."
+
+  - id: bulgarian_split_squat
+    name: "Bulgarian Split Squat"
+    description: "Ein Split Squat, bei dem der hintere Fuß hinter dir auf einem Stuhl oder einer Box liegt. Mehr Last geht auf das vordere Bein."
+    cues:
+      - "Hinterer Fuß hinter dir auf einem Stuhl oder einer Box."
+      - "Senk dich ab, bis der vordere Oberschenkel etwa parallel zum Boden ist."
+      - "Drück dich über den ganzen vorderen Fuß hoch; Hüfte bleibt gerade."
+
+  - id: beginner_shrimp_squat
+    name: "Shrimp Squat für Einsteiger"
+    description: "Eine einbeinige Kniebeuge, bei der das andere Bein hinter dir angewinkelt ist: Du senkst dich ab, bis hinteres Knie und Zehen zusammen den Boden berühren, und stehst wieder auf. Der erste Schritt auf dem Weg zum Shrimp Squat."
+    cues:
+      - "Winkle das freie Bein hinter dir an; streck die Arme zur Balance nach vorn."
+      - "Senk dich langsam ab, bis hinteres Knie und Zehen den Boden berühren."
+      - "Steh über die vordere Ferse auf; Knie in Linie mit den Zehen."
+
+  - id: assisted_pistol_squat
+    name: "Pistol Squat mit Festhalten"
+    description: "Eine einbeinige Kniebeuge, bei der du dich leicht an einem Türrahmen oder einer Stange festhältst, das andere Bein gerade nach vorn gestreckt. Die Hände helfen so wenig wie möglich."
+    cues:
+      - "Steh auf einem Bein und halte dich leicht an einem Türrahmen oder einer Stange fest."
+      - "Das andere Bein gerade nach vorn gestreckt, über dem Boden."
+      - "Geh ganz nach unten und wieder hoch, nutze die Hände so wenig wie möglich."
+
+  - id: intermediate_shrimp_squat
+    name: "Shrimp Squat für Fortgeschrittene"
+    description: "Ein Shrimp Squat, bei dem unten nur das hintere Knie den Boden berührt, die Zehen bleiben oben. Schwerer als die Einsteiger-Version, weil das Bein über einen tieferen Bewegungsumfang arbeitet."
+    cues:
+      - "Freies Bein hinter dir angewinkelt, Zehen bleiben vom Boden weg."
+      - "Senk dich ab, bis nur das Knie sanft den Boden berührt."
+      - "Steh auf, ohne dass sich der hintere Fuß abdrückt."
+
+  - id: pistol_squat
+    name: "Pistol Squat"
+    description: "Du gehst auf einem Bein ganz nach unten und wieder hoch, während das andere Bein gerade nach vorn über dem Boden gehalten wird. Braucht Kraft, Balance und Beweglichkeit."
+    cues:
+      - "Steh auf einem Bein, das andere Bein gerade nach vorn gestreckt."
+      - "Geh ganz nach unten, Ferse flach am Boden; streck die Arme zur Balance nach vorn."
+      - "Steh auf, ohne zu federn und ohne das Knie nach innen fallen zu lassen."
+
+  - id: nordic_curl_negative
+    name: "Negativ-Nordic-Curl"
+    description: "Du kniest mit fixierten Fersen, lässt den gestreckten Körper so langsam wie möglich nach vorn Richtung Boden ab und fängst dich mit den Händen auf. Baut starke Beinbeuger auf."
+    cues:
+      - "Knie mit fixierten Fersen, Körper gerade von den Knien bis zum Kopf."
+      - "Lass dich so langsam wie möglich nach vorn ab, die Hüfte bleibt gestreckt."
+      - "Fang dich mit den Händen auf und drück dich zurück in die Startposition."
+
+  - id: nordic_curl
+    name: "Nordic Curl"
+    description: "Du kniest mit fixierten Fersen, lässt den gestreckten Körper mit den Beinbeugern Richtung Boden ab und ziehst dich wieder hoch, ohne dich mit den Händen abzudrücken. Der volle Nordic Curl."
+    cues:
+      - "Knie auf einer Unterlage, Fersen fixiert, Körper gerade von den Knien bis zum Kopf."
+      - "Lass dich langsam mit gestreckter Hüfte ab; knicke nicht in der Taille ein."
+      - "Zieh dich mit den Beinbeugern wieder hoch; fang dich nur im Notfall mit den Händen auf."

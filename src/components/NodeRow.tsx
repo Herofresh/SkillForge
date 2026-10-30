@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { formatOgLevel, spokenOgLevel } from '@/domain/format';
 import { tierForOgLevel } from '@/domain/tier';
 import type { ExerciseNode } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { InfoButton } from './node/InfoButton';
 import { Frames, Spacing, TOUCH_TARGET } from './theme';
@@ -51,7 +52,7 @@ export function NodeRow({
   const label = [
     node.name,
     spokenOgLevel(node.ogLevel),
-    node.straightArm ? 'straight-arm' : undefined,
+    node.straightArm ? t('straight-arm') : undefined,
     status,
   ]
     .filter(Boolean)
@@ -74,7 +75,7 @@ export function NodeRow({
             </PixelText>
             {node.straightArm && (
               <PixelText variant="label" tone="ember">
-                Straight-arm
+                {t('Straight-arm')}
               </PixelText>
             )}
           </View>

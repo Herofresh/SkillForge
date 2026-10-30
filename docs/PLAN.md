@@ -339,9 +339,9 @@
   FB-12 fixed (ADR-076, [PR #87](https://github.com/Herofresh/SkillForge/pull/87)), FB-9/10/11 done (goal reached: celebration and the next
   goal to pick, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)), FB-13 done (warm-up and cool-down work earns half XP,
   attributes count skills from level 2; ADR-078, [PR #89](https://github.com/Herofresh/SkillForge/pull/89)), FB-14 done (14 more companion items, 60
-  in all; ADR-079, [PR #90](https://github.com/Herofresh/SkillForge/pull/90)). User decision 2026-10-30: FB-8 German for everything including the
-  skill content (next, as 1.4.0). None of the round is in a release build yet: 1.3.0 now, German
-  as 1.4.0.
+  in all; ADR-079, [PR #90](https://github.com/Herofresh/SkillForge/pull/90)). FB-8 German done (the whole UI and the 155 skills'
+  texts, Settings → Language; ADR-080, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)), to ship as **1.4.0** after a device check of the
+  German build. 1.3.0 (vc13) is built and waits for the user's upload.
 - **1.3.0, versionCode 13** (2026-10-30, [PR #91](https://github.com/Herofresh/SkillForge/pull/91)): the feedback rounds since 1.2.0: FB-3
   (navigation bar), FB-4 (Trial needed), FB-5 (training types), FB-6 (Customize grid), FB-7 (Trial
   chain), FB-9/10/11 (goal reached), FB-12 (Trials planned), FB-13 (XP share), FB-14 (14 more
@@ -370,8 +370,12 @@
    and the next-goal picker (FB-9/10/11), a warm-up prep Trial once Wrist prep is at level 5
    (FB-12), the "Warm-up: half XP" note (FB-13). Tell the testers what changed (the release
    notes) and ask whether "Trials get skipped" still happens, and where.
-1. FB-8 German for the whole app including the skill content (user decision 2026-10-30; ships as
-   1.4.0): see 7.8.
+1. **German (FB-8, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)) to 1.4.0:** check the German build on a device (Settings →
+   Language → Deutsch; the Train tab's plan notes, a summary, the Tree, Customize, the guide: long
+   German words may wrap or clip in chips and tiles), then the Play listing in German
+   (`docs/play/listing.md`: a German store listing the user pastes into Play Console) and a German
+   privacy page (`site/privacy/`), then `chore: version 1.4.0`. Everything the validator says in
+   the editor and the Maestro flows stay English (ADR-080).
 2. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
    assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
    access, target audience).
@@ -394,6 +398,22 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-8 German (task 7.8, ADR-080, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)):** `src/i18n/` (`t`, `k`, `setLocale`, the dictionary
+  `de/*.ts` per area, `i18n.test.ts` = completeness check: every `t('…')` / `k('…')` literal needs
+  an entry and no entry may be unused; it scans `app/` and `src/`). Store: `LANGUAGE_SETTING`,
+  `language` / `locale`, `setLanguage` (reloads), `deps.deviceLocaleTag` (bootstrap passes
+  `I18nManager.getConstants().localeIdentifier`), `deps.translations` (default `NODE_TRANSLATIONS`);
+  `loadAll` resolves the locale first and localizes `baseNodes` (`localizeNodes`) before the
+  overlay. `LocaleKey` remounts the navigator on a change. Content: `content/progressions/de/*.yaml`
+  → `progressionTranslations.ts` (`buildTranslations`, checked by `npm run progressions:build` and
+  the dataset test) → `translations.generated.ts`. The guide is now `guideEntries()` (memoised per
+  locale). Rules for new texts: wrap with `t` / `k`, add the German to the area's part file (the
+  test tells you which key is missing); new nodes need their `de/` entry (the build tells you).
+  Known gaps: validator / overlay-import issue messages are English; the Play listing and the
+  privacy page are English; the widget's German avoids umlauts (its width table is ASCII); not
+  checked on a device. Tests: `src/i18n/i18n.test.ts`, `src/domain/localize.test.ts`,
+  `src/data/progressionTranslations.test.ts`, `src/store/language.test.ts`,
+  `src/components/language.test.tsx`; the existing suites run in English unchanged.
 - **FB-14 more items (task 7.8, ADR-079, [PR #90](https://github.com/Herofresh/SkillForge/pull/90)):** 14 entries in `accessories.ts` (placed in each
   slot's humble-to-grand order, which decides the default worn item) and `art.ts` (recolours,
   small parts, two auras), the `SPEC` table in `src/data/companion/companion.test.ts`, the count
@@ -1867,14 +1887,17 @@ from the GitHub releases' 1–7, ADR-068).
     at least level 5, Proficient), like a test-out; no extra XP. Needs an ADR (extends ADR-023).
   - Second round (user's "Skillforge Ideen" list, 2026-10-30; its first item is FB-3, already
     fixed). Triage by an agent, see the handoff notes for the findings:
-  - [ ] FB-8 (idea, user 2026-10-30): "Vielleicht auf Deutsch anbieten (neue Übersetzung dazu,
-    System-Sprache verwenden oder einstellen)". Not started: there is no i18n layer (every text is
-    an English literal in `src/` and `app/`, ~400 labels plus the guide, the notices and the
-    onboarding copy), and the 155 nodes' names, descriptions and cues live in the YAML (~185 KB).
-    **Needs a user decision** on scope: UI only (a dictionary + `expo-localization`, system language
-    with a Settings override; one or two PRs) or the skill content too (a `de:` field per text in
-    the YAML, a translation pass over all 155 nodes; several PRs). German would also need the
-    Play listing and the privacy page in German.
+  - [x] FB-8 (idea, user 2026-10-30, ADR-080, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)): "Vielleicht auf Deutsch anbieten (neue Übersetzung dazu,
+    System-Sprache verwenden oder einstellen)". **User decision 2026-10-30: German for everything,
+    the skill content included.** Done: `src/i18n/` (`t('English source')` with `{name}`
+    placeholders, `k()` for data texts, the German dictionary `src/i18n/de/*.ts` per area, a test
+    that every key has an entry and none is unused); Settings → Language (System / English /
+    Deutsch, System = the device language via `I18nManager`, no new dependency); `LocaleKey`
+    remounts the navigator on a change; `content/progressions/de/<branch>.yaml` (155 nodes: name,
+    description, cues, prerequisite notes, checked by `npm run progressions:build` against the
+    English nodes) → `translations.generated.ts` → `localizeNodes` before the overlay. Validator
+    / import issue messages and the Maestro flows stay English. Still open: the Play listing and
+    the privacy page in German (`docs/play/listing.md`, `site/privacy/`), see Next up.
   - [x] FB-9 (UX, user 2026-10-30, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)): "Wenn ein Ziel erreicht ist, dann fragen, ob man zum nächsten
     in der Schwierigkeit springen soll". Before, nothing noticed a reached goal except the check
     on the Character tab's goal card (`goalProgress`); the generator keeps weighting a Proficient

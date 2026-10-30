@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { stepTrialResult } from '@/domain/assessment';
 import { formatPerformance } from '@/domain/format';
 import type { ExerciseNode, Metric, SetPerformance } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { NumberStepper, PixelButton, PixelModal, PixelText } from '../ui';
 
@@ -28,13 +29,16 @@ export function LogSetSheet({ node, metric, target, setLabel, onLog, onClose }: 
       visible
       title={setLabel}
       onClose={onClose}
-      closeLabel="Cancel"
+      closeLabel={t('Cancel')}
       testID="log-set-sheet">
       <PixelText variant="small" tone="textMuted">
-        {`${node.name} · Target: ${formatPerformance(metric, target)}`}
+        {t('{name} · Target: {target}', {
+          name: node.name,
+          target: formatPerformance(metric, target),
+        })}
       </PixelText>
       <NumberStepper
-        label="Did"
+        label={t('Did')}
         valueText={formatPerformance(metric, entered)}
         onDecrement={() => setEntered((value) => stepTrialResult(node, value, -1))}
         onIncrement={() => setEntered((value) => stepTrialResult(node, value, 1))}
@@ -42,10 +46,10 @@ export function LogSetSheet({ node, metric, target, setLabel, onLog, onClose }: 
         testID="log-set-sheet-stepper"
       />
       <PixelButton
-        label="Log set"
+        label={t('Log set')}
         icon="check"
         onPress={() => onLog(entered)}
-        accessibilityHint="Logs the set as entered"
+        accessibilityHint={t('Logs the set as entered')}
         testID="log-set-sheet-log"
       />
     </PixelModal>

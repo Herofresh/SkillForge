@@ -4,12 +4,14 @@ import { BRANCH_NAMES } from '@/data/skills/branches';
 import { NON_RANK_BRANCHES } from '@/domain/character';
 import { formatOgLevel, spokenOgLevel } from '@/domain/format';
 import {
+  rankLabel,
   rankProgressText,
   rankRequirement,
   type RankLadder,
   type RankLadderStep,
   type RankStepStatus,
 } from '@/domain/rankLadder';
+import { k, t } from '@/i18n';
 
 import { Colors, RankColors, Spacing, TileFrames, type FrameStyle } from '../theme';
 import { PixelFrame, PixelIcon, PixelModal, PixelText, SegmentedBar } from '../ui';
@@ -24,10 +26,10 @@ type Props = {
 
 /** Caps label of each step's state, also read out. */
 const STATUS_LABELS: Readonly<Record<RankStepStatus, string>> = {
-  reached: 'Reached',
-  current: 'Your rank',
-  next: 'Next rank',
-  locked: 'Locked',
+  reached: k('Reached'),
+  current: k('Your rank'),
+  next: k('Next rank'),
+  locked: k('Locked'),
 };
 
 /**
@@ -48,7 +50,13 @@ function frameOf(step: RankLadderStep): FrameStyle {
   }
 }
 
-const NON_RANK_NAMES = NON_RANK_BRANCHES.map((branch) => BRANCH_NAMES[branch]).join(' and ');
+/** "Acrobatics and Mobility": the branches left out of the rank, in the current language. */
+function nonRankNames(): string {
+  const names = NON_RANK_BRANCHES.map((branch) => t(BRANCH_NAMES[branch]));
+  return names.length === 1
+    ? names[0]
+    : t('{a} and {b}', { a: names.slice(0, -1).join(', '), b: names[names.length - 1] });
+}
 
 function RankStep({
   step,
@@ -63,15 +71,19 @@ function RankStep({
   const requirement = rankRequirement(step);
   const progress = rankProgressText(step, branchesForRank);
   const closest = step.status === 'next' ? step.branchesBelow : [];
+  const title = rankLabel(step.rank);
+  const status = t(STATUS_LABELS[step.status]);
   const label = [
-    step.rank,
-    STATUS_LABELS[step.status],
+    title,
+    status,
     requirement,
     progress || undefined,
     closest.length > 0
-      ? `Still below: ${closest
-          .map((peak) => `${BRANCH_NAMES[peak.branch]} ${spokenOgLevel(peak.ogLevel)}`)
-          .join(', ')}`
+      ? t('Still below: {list}', {
+          list: closest
+            .map((peak) => `${t(BRANCH_NAMES[peak.branch])} ${spokenOgLevel(peak.ogLevel)}`)
+            .join(', '),
+        })
       : undefined,
   ]
     .filter(Boolean)
@@ -87,7 +99,7 @@ function RankStep({
         <PixelIcon name={RANK_ICONS[step.rank]} tint={locked ? Colors.goldDark : undefined} />
         <View style={styles.text}>
           <PixelText variant="heading" color={locked ? Colors.textMuted : RankColors[step.rank]}>
-            {step.rank}
+            {title}
           </PixelText>
           <PixelText variant="small" tone="textMuted">
             {requirement}
@@ -97,7 +109,7 @@ function RankStep({
           variant="label"
           tone={step.status === 'next' ? 'rune' : locked ? 'textMuted' : 'gold'}
           testID={`${testID}-status`}>
-          {STATUS_LABELS[step.status]}
+          {status}
         </PixelText>
       </View>
       {progress !== '' && (
@@ -116,12 +128,14 @@ function RankStep({
       {closest.length > 0 && (
         <View style={styles.gap} testID={`${testID}-below`}>
           <PixelText variant="label" tone="rune">
-            {`Still below ${formatOgLevel(step.minMedianOgLevel)}, closest first`}
+            {t('Still below {level}, closest first', {
+              level: formatOgLevel(step.minMedianOgLevel),
+            })}
           </PixelText>
           {closest.map((peak) => (
             <View key={peak.branch} style={styles.branch}>
               <PixelText variant="small" style={styles.text}>
-                {BRANCH_NAMES[peak.branch]}
+                {t(BRANCH_NAMES[peak.branch])}
               </PixelText>
               <PixelText variant="label" tone="textMuted">
                 {formatOgLevel(peak.ogLevel)}
@@ -143,12 +157,17 @@ function RankStep({
  */
 export function RankLadderSheet({ ladder, onClose, testID = 'rank-ladder' }: Props) {
   return (
-    <PixelModal visible title="Rank ladder" onClose={onClose} testID={testID}>
+    <PixelModal visible title={t('Rank ladder')} onClose={onClose} testID={testID}>
       <PixelText variant="small" tone="textMuted" testID={`${testID}-intro`}>
-        {`Your rank is the median of your best Trial's tier in each of the ` +
-          `${ladder.rankBranchCount} main branches (now ${formatOgLevel(ladder.medianOgLevel)}). ` +
-          `${NON_RANK_NAMES} don't count. Reaching a rank's level in ` +
-          `${ladder.branchesForRank} branches always earns it.`}
+        {t(
+          "Your rank is the median of your best Trial's tier in each of the {count} main branches (now {median}). {excluded} don't count. Reaching a rank's level in {n} branches always earns it.",
+          {
+            count: ladder.rankBranchCount,
+            median: formatOgLevel(ladder.medianOgLevel),
+            excluded: nonRankNames(),
+            n: ladder.branchesForRank,
+          },
+        )}
       </PixelText>
       <ScrollView nestedScrollEnabled style={styles.scroll} contentContainerStyle={styles.list}>
         {ladder.steps.map((step) => (

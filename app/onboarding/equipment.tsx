@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 
 import { EquipmentProfileEditor } from '@/components/equipment/EquipmentProfileEditor';
 import { OnboardingScaffold } from '@/components/onboarding/OnboardingScaffold';
+import { t } from '@/i18n';
 
 /** Step 2: review the Home and Park equipment sets, edit them, add your own. */
 export default function EquipmentStep() {
@@ -10,10 +11,10 @@ export default function EquipmentStep() {
     <OnboardingScaffold
       step="equipment"
       icon="bar"
-      title="Your armory"
-      subtitle="Where do you train? Workouts only use the equipment of the place you pick."
+      title={t('Your armory')}
+      subtitle={t('Where do you train? Workouts only use the equipment of the place you pick.')}
       onBack={() => router.back()}
-      next={{ label: 'Next', onPress: () => router.push('/onboarding/goals') }}
+      next={{ label: t('Next'), onPress: () => router.push('/onboarding/goals') }}
       testID="onboarding-equipment">
       <EquipmentProfileEditor />
     </OnboardingScaffold>

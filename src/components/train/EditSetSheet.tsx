@@ -6,6 +6,7 @@ import { formatPerformance } from '@/domain/format';
 import type { SetMark } from '@/domain/train';
 import type { LoggedSetView } from '@/domain/trainView';
 import type { ExerciseNode, Metric, SetPerformance } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { NumberStepper, PixelButton, PixelModal, PixelText } from '../ui';
@@ -28,30 +29,35 @@ type Props = {
 export function EditSetSheet({ node, metric, target, set, onSave, onDelete, onClose }: Props) {
   const [entered, setEntered] = useState<SetPerformance>(set.editStart);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const title = `Set ${set.index + 1}`;
+  const title = t('Set {n}', { n: set.index + 1 });
   return (
     <PixelModal
       visible
-      title={`Edit set ${set.index + 1}`}
+      title={t('Edit set {n}', { n: set.index + 1 })}
       onClose={onClose}
-      closeLabel="Cancel"
+      closeLabel={t('Cancel')}
       testID="edit-set-sheet">
       <PixelText variant="small" tone="textMuted">
-        {`Logged: ${set.text} · Target: ${formatPerformance(metric, target)}`}
+        {t('Logged: {logged} · Target: {target}', {
+          logged: set.text,
+          target: formatPerformance(metric, target),
+        })}
       </PixelText>
       {confirmDelete ? (
         <View style={styles.gap}>
           <PixelText>
-            {`Delete ${title}? Its result is removed from the session and the later sets move up.`}
+            {t('Delete {set}? Its result is removed from the session and the later sets move up.', {
+              set: title,
+            })}
           </PixelText>
           <PixelButton
-            label="Delete set"
+            label={t('Delete set')}
             variant="danger"
             onPress={onDelete}
             testID="edit-set-delete-confirm"
           />
           <PixelButton
-            label="Keep set"
+            label={t('Keep set')}
             variant="secondary"
             onPress={() => setConfirmDelete(false)}
             testID="edit-set-keep"
@@ -60,7 +66,7 @@ export function EditSetSheet({ node, metric, target, set, onSave, onDelete, onCl
       ) : (
         <View style={styles.gap}>
           <NumberStepper
-            label="Did"
+            label={t('Did')}
             valueText={formatPerformance(metric, entered)}
             onDecrement={() => setEntered((value) => stepTrialResult(node, value, -1))}
             onIncrement={() => setEntered((value) => stepTrialResult(node, value, 1))}
@@ -68,35 +74,35 @@ export function EditSetSheet({ node, metric, target, set, onSave, onDelete, onCl
             testID="edit-set-stepper"
           />
           <PixelButton
-            label="Save"
+            label={t('Save')}
             icon="check"
             onPress={() => onSave(entered, 'done')}
-            accessibilityHint="Saves the set as entered"
+            accessibilityHint={t('Saves the set as entered')}
             testID="edit-set-save"
           />
           <View style={styles.row}>
             <PixelButton
-              label="Partial"
+              label={t('Partial')}
               variant="secondary"
               onPress={() => onSave(entered, 'partial')}
-              accessibilityHint="Saves the set as short of the target"
+              accessibilityHint={t('Saves the set as short of the target')}
               testID="edit-set-partial"
               style={styles.half}
             />
             <PixelButton
-              label="Failed"
+              label={t('Failed')}
               variant="secondary"
               onPress={() => onSave(entered, 'failed')}
-              accessibilityHint="Saves the set as not done"
+              accessibilityHint={t('Saves the set as not done')}
               testID="edit-set-failed"
               style={styles.half}
             />
           </View>
           <PixelButton
-            label="Delete set"
+            label={t('Delete set')}
             variant="danger"
             onPress={() => setConfirmDelete(true)}
-            accessibilityHint="Asks before removing the set"
+            accessibilityHint={t('Asks before removing the set')}
             testID="edit-set-delete"
           />
         </View>

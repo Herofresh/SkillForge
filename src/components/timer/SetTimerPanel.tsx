@@ -16,6 +16,7 @@ import {
   type TimerPhase,
 } from '@/domain/setTimer';
 import type { Metric } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { PixelButton, PixelFrame, PixelIcon, PixelText, useNow } from '../ui';
@@ -65,14 +66,14 @@ export function SetTimerPanel({
   if (!timer) {
     return (
       <PixelButton
-        label={mode === 'hold' ? 'Start hold' : 'Start set'}
+        label={mode === 'hold' ? t('Start hold') : t('Start set')}
         icon="hourglass"
         variant="secondary"
         onPress={onStart}
         accessibilityHint={
           mode === 'hold'
-            ? `Counts down from ${targetSec} seconds after a short get-ready`
-            : 'Starts a stopwatch for this set'
+            ? t('Counts down from {n} seconds after a short get-ready', { n: targetSec })
+            : t('Starts a stopwatch for this set')
         }
         testID={`${testID}-start`}
       />
@@ -132,7 +133,7 @@ function TimerReadout({
     lastSeen.current = { value: reading.phase, at: now };
   }, [mode, ticking, reading.phase, now]);
 
-  const stopLabel = mode === 'hold' ? 'Stop' : 'Done';
+  const stopLabel = mode === 'hold' ? t('Stop') : t('Done');
   const clock = reading.running ? formatTimerClock(reading) : formatClock(reading.durationSec);
   const overtime = reading.running && reading.phase === 'overtime';
   return (
@@ -155,20 +156,20 @@ function TimerReadout({
           <View style={styles.row}>
             {reading.paused ? (
               <PixelButton
-                label="Resume"
+                label={t('Resume')}
                 icon="hourglass"
                 variant="secondary"
                 onPress={onResume}
-                accessibilityHint="Runs the timer on from where it was paused"
+                accessibilityHint={t('Runs the timer on from where it was paused')}
                 testID={`${testID}-resume`}
                 style={styles.half}
               />
             ) : (
               <PixelButton
-                label="Pause"
+                label={t('Pause')}
                 variant="secondary"
                 onPress={onPause}
-                accessibilityHint="Stops the clock until you resume; the pause is not counted"
+                accessibilityHint={t('Stops the clock until you resume; the pause is not counted')}
                 testID={`${testID}-pause`}
                 style={styles.half}
               />
@@ -180,8 +181,8 @@ function TimerReadout({
                 onPress={onStop}
                 accessibilityHint={
                   mode === 'hold'
-                    ? 'Puts the seconds held into the result'
-                    : 'Keeps the time for this set'
+                    ? t('Puts the seconds held into the result')
+                    : t('Keeps the time for this set')
                 }
                 testID={`${testID}-stop`}
                 style={styles.half}
@@ -189,19 +190,19 @@ function TimerReadout({
             )}
           </View>
           <PixelButton
-            label="Cancel"
+            label={t('Cancel')}
             variant="secondary"
             onPress={onReset}
-            accessibilityHint="Throws this timer away"
+            accessibilityHint={t('Throws this timer away')}
             testID={`${testID}-reset`}
           />
         </>
       ) : (
         <PixelButton
-          label="Reset timer"
+          label={t('Reset timer')}
           variant="secondary"
           onPress={onReset}
-          accessibilityHint="Clears the measured time; the set is logged without it"
+          accessibilityHint={t('Clears the measured time; the set is logged without it')}
           testID={`${testID}-reset`}
         />
       )}

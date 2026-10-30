@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import type { SessionListItem } from '@/domain/characterView';
 import { formatShortDate } from '@/domain/format';
+import { t } from '@/i18n';
 
 import { Colors, Spacing, TOUCH_TARGET } from '../theme';
 import { PixelIcon, PixelText } from '../ui';
@@ -14,15 +15,27 @@ type Props = {
 
 /** One past session on parchment: date, what was trained, sets and XP; opens its summary. */
 export function SessionHistoryRow({ item, onPress, testID }: Props) {
-  const sets = `${item.sets} ${item.sets === 1 ? 'set' : 'sets'}`;
-  const trials = item.trialsPassed > 0 ? ` · ${item.trialsPassed} Trial passed` : '';
+  const sets = item.sets === 1 ? t('1 set') : t('{n} sets', { n: item.sets });
+  const trials =
+    item.trialsPassed === 0
+      ? ''
+      : ` · ${
+          item.trialsPassed === 1
+            ? t('1 Trial passed')
+            : t('{n} Trials passed', { n: item.trialsPassed })
+        }`;
   return (
     <Pressable
       onPress={onPress}
       testID={testID}
       accessibilityRole="button"
-      accessibilityLabel={`${formatShortDate(item.at)}: ${item.title}, ${sets}, ${item.xp} XP`}
-      accessibilityHint="Opens the session summary"
+      accessibilityLabel={t('{date}: {title}, {sets}, {xp} XP', {
+        date: formatShortDate(item.at),
+        title: item.title,
+        sets,
+        xp: item.xp,
+      })}
+      accessibilityHint={t('Opens the session summary')}
       style={styles.row}>
       <PixelIcon name={item.trialsPassed > 0 ? 'shield' : 'scroll'} tint={Colors.bronze} />
       <View style={styles.text}>

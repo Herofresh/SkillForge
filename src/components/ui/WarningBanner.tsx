@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import type { SafeguardSeverity } from '@/domain/types';
+import { k, t } from '@/i18n';
 
 import { Spacing } from '../theme';
 
@@ -22,8 +23,8 @@ type Props = {
 };
 
 const DEFAULT_TITLES: Readonly<Record<SafeguardSeverity, string>> = {
-  warning: 'Take care',
-  info: 'Good to know',
+  warning: k('Take care'),
+  info: k('Good to know'),
 };
 
 /**
@@ -33,10 +34,10 @@ const DEFAULT_TITLES: Readonly<Record<SafeguardSeverity, string>> = {
 export function WarningBanner({
   message,
   severity,
-  title = DEFAULT_TITLES[severity],
+  title = t(DEFAULT_TITLES[severity]),
   acknowledged,
   onAcknowledge,
-  acknowledgeLabel = 'I understand',
+  acknowledgeLabel = t('I understand'),
   testID,
 }: Props) {
   const isWarning = severity === 'warning';
@@ -59,7 +60,7 @@ export function WarningBanner({
             <View style={styles.acknowledged} testID={testID && `${testID}-acknowledged`}>
               <PixelIcon name="check" />
               <PixelText variant="label" tone="success">
-                Acknowledged
+                {t('Acknowledged')}
               </PixelText>
             </View>
           ) : (

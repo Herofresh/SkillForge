@@ -5,6 +5,7 @@
  * what these return.
  */
 import { HERO_CLASSES } from '@/data/classes';
+import { k, t } from '@/i18n';
 import { compareCodeUnits } from '@/lib/compare';
 
 import { goalPathNodes } from './assessment';
@@ -25,7 +26,7 @@ import {
 } from './classes';
 import { formatOgLevel } from './format';
 import { resolveNode, type ProgressMap } from './progression';
-import { rankLadder, type RankLadder } from './rankLadder';
+import { rankLabel, rankLadder, type RankLadder } from './rankLadder';
 import type { EngineState, SessionResult } from './recompute';
 import { tierForOgLevel } from './tier';
 import {
@@ -50,6 +51,19 @@ const lookupOf = (nodes: readonly ExerciseNode[]): NodeLookup =>
   new Map(nodes.map((node) => [node.id, node]));
 
 const nameOf = (lookup: NodeLookup, id: string): string => lookup.get(id)?.name ?? id;
+
+/**
+ * The attributes as words inside a sentence ("pull work", "4 mobility exercises"): lowercase in
+ * English; the German nouns stay capitalised. Translated where shown: `t(ATTRIBUTE_WORDS[a])`.
+ */
+export const ATTRIBUTE_WORDS: Readonly<Record<Attribute, string>> = {
+  push: k('push'),
+  pull: k('pull'),
+  core: k('core'),
+  legs: k('legs'),
+  balance: k('balance'),
+  mobility: k('mobility'),
+};
 
 /** One radar axis: the attribute points and their share of the largest attribute (0–1). */
 export interface RadarAxis {
@@ -87,10 +101,14 @@ export function rankHint(
   medianOgLevel: number,
   next: { rank: RankTitle; minMedianOgLevel: number } | undefined,
 ): string {
-  const standing = `Branch median ${formatOgLevel(medianOgLevel)}`;
+  const median = formatOgLevel(medianOgLevel);
   return next
-    ? `${standing} · ${next.rank} at ${formatOgLevel(next.minMedianOgLevel)}`
-    : `${standing} · the highest rank`;
+    ? t('Branch median {median} · {rank} at {level}', {
+        median,
+        rank: rankLabel(next.rank),
+        level: formatOgLevel(next.minMedianOgLevel),
+      })
+    : t('Branch median {median} · the highest rank', { median });
 }
 
 /**
@@ -138,10 +156,15 @@ export interface BalanceNote {
 export function balanceNote(peakOgLevels: Readonly<AttributeValues>): BalanceNote {
   const weaker = peakOgLevels.push < peakOgLevels.pull ? 'push' : 'pull';
   const stronger = weaker === 'push' ? 'pull' : 'push';
-  const message =
-    `Your best ${stronger} skill (${formatOgLevel(peakOgLevels[stronger])}) is well ahead of ` +
-    `your best ${weaker} skill (${formatOgLevel(peakOgLevels[weaker])}). Unbalanced shoulders ` +
-    `get hurt more often: give ${weaker} work some extra attention. Workouts already favour it.`;
+  const message = t(
+    'Your best {stronger} skill ({strongerLevel}) is well ahead of your best {weaker} skill ({weakerLevel}). Unbalanced shoulders get hurt more often: give {weaker} work some extra attention. Workouts already favour it.',
+    {
+      stronger: t(ATTRIBUTE_WORDS[stronger]),
+      strongerLevel: formatOgLevel(peakOgLevels[stronger]),
+      weaker: t(ATTRIBUTE_WORDS[weaker]),
+      weakerLevel: formatOgLevel(peakOgLevels[weaker]),
+    },
+  );
   return { pushPeak: peakOgLevels.push, pullPeak: peakOgLevels.pull, weaker, message };
 }
 
@@ -177,12 +200,14 @@ export function sessionListItem(
   const more = ids.length - names.length;
   const title =
     allTrial && ids.length === 1
-      ? `Trial: ${names[0]}`
-      : names.join(', ') + (more > 0 ? ` + ${more} more` : '');
+      ? t('Trial: {name}', { name: names[0] })
+      : more > 0
+        ? t('{names} + {n} more', { names: names.join(', '), n: more })
+        : names.join(', ');
   return {
     sessionId: session.id,
     at: session.startedAt,
-    title: title.length > 0 ? title : 'Empty session',
+    title: title.length > 0 ? title : t('Empty session'),
     exercises: ids.length,
     sets: session.sets.filter((set) => set.actual.value > 0).length,
     xp: result?.xp.total ?? 0,

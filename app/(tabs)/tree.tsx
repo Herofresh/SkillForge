@@ -15,6 +15,7 @@ import { customizedNodeIds } from '@/domain/overlayEdit';
 import { mapFocus, mapLayout, mapTiles } from '@/domain/treeMap';
 import { branchColumn, branchSummary, defaultBranch, type TreeTile } from '@/domain/treeView';
 import type { Branch } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -78,31 +79,35 @@ export default function TreeScreen() {
   const header = (
     <PixelFrame variant="raised" contentStyle={styles.header}>
       <PixelText variant="label" tone="rune">
-        Skill Tree
+        {t('Skill Tree')}
       </PixelText>
       <PixelText variant="title" accessibilityRole="header" testID="tree-branch-title">
-        {BRANCH_NAMES[branch]}
+        {t(BRANCH_NAMES[branch])}
       </PixelText>
       <PixelText variant="small" tone="textMuted" testID="tree-branch-summary">
-        {`${summary.open} of ${summary.total} open · ${summary.proficient} proficient` +
+        {t('{open} of {total} open · {proficient} proficient', {
+          open: summary.open,
+          total: summary.total,
+          proficient: summary.proficient,
+        }) +
           (summary.goals > 0
-            ? ` · ${summary.goals} ${summary.goals === 1 ? 'goal' : 'goals'}`
+            ? ` · ${summary.goals === 1 ? t('1 goal') : t('{n} goals', { n: summary.goals })}`
             : '')}
       </PixelText>
       <View style={styles.headerButtons}>
         <PixelButton
-          label="Legend"
+          label={t('Legend')}
           icon="scroll"
           variant="secondary"
           onPress={() => setLegendOpen(true)}
           testID="tree-legend"
         />
         <PixelButton
-          label="Add exercise"
+          label={t('Add exercise')}
           icon="quill"
           variant="secondary"
           onPress={() => router.push({ pathname: '/progressions/new', params: { branch } })}
-          accessibilityHint="Adds your own exercise to this branch"
+          accessibilityHint={t('Adds your own exercise to this branch')}
           testID="tree-add-exercise"
         />
       </View>

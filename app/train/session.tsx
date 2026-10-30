@@ -39,11 +39,12 @@ import {
   type ExerciseMoves,
   type ExerciseView,
 } from '@/domain/trainView';
+import { k, t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 type Dialog = 'finish' | 'abandon' | 'add';
 
-const ACKNOWLEDGE_TO_LOG_NOTE = 'Read and acknowledge the notes above to log. It is your call.';
+const ACKNOWLEDGE_TO_LOG_NOTE = k('Read and acknowledge the notes above to log. It is your call.');
 
 /**
  * The live session (PLAN 4.4): the current exercise with per-set logging (stepper, log / partial /
@@ -57,8 +58,12 @@ export default function LiveSessionScreen() {
   if (!session) {
     return (
       <Screen centered>
-        <Stack.Screen options={stackHeaderOptions('Session')} />
-        <EmptyState icon="sword" title="No session" message="Start one on the Train tab." />
+        <Stack.Screen options={stackHeaderOptions(t('Session'))} />
+        <EmptyState
+          icon="sword"
+          title={t('No session')}
+          message={t('Start one on the Train tab.')}
+        />
       </Screen>
     );
   }
@@ -149,12 +154,12 @@ function LiveSession({ session }: { session: ActiveSession }) {
 
   return (
     <>
-      <Stack.Screen options={stackHeaderOptions('Session')} />
+      <Stack.Screen options={stackHeaderOptions(t('Session'))} />
       <View style={styles.fill}>
         <Screen testID="live-session">
           <PixelFrame variant="raised" contentStyle={styles.gap}>
             <XPBar
-              label="Sets"
+              label={t('Sets')}
               fraction={view.setsFraction}
               valueText={`${counts.setsLogged} / ${counts.setsPlanned}`}
               color={Colors.rune}
@@ -162,7 +167,10 @@ function LiveSession({ session }: { session: ActiveSession }) {
             />
             <View style={styles.row}>
               <PixelText variant="small" tone="textMuted" style={styles.rowText}>
-                {`${counts.exercisesDone} of ${counts.exercises} exercises done`}
+                {t('{done} of {total} exercises done', {
+                  done: counts.exercisesDone,
+                  total: counts.exercises,
+                })}
               </PixelText>
               <SessionClock startedAt={session.startedAt} />
             </View>
@@ -184,7 +192,7 @@ function LiveSession({ session }: { session: ActiveSession }) {
               blocks={battle}
               session={session}
               disabled={pending}
-              pendingNote={pending ? ACKNOWLEDGE_TO_LOG_NOTE : undefined}
+              pendingNote={pending ? t(ACKNOWLEDGE_TO_LOG_NOTE) : undefined}
               onTap={onTapFoe}
               onLongPress={onLongPressFoe}
               onInfo={setInfoId}
@@ -206,7 +214,7 @@ function LiveSession({ session }: { session: ActiveSession }) {
                 node={currentNode}
                 current={current}
                 onLog={(entered, mark) => logSet(current.exercise.key, entered, mark)}
-                pendingNote={pending ? ACKNOWLEDGE_TO_LOG_NOTE : undefined}
+                pendingNote={pending ? t(ACKNOWLEDGE_TO_LOG_NOTE) : undefined}
                 timer={
                   session.timer?.exerciseKey === current.exercise.key ? session.timer : undefined
                 }
@@ -218,7 +226,7 @@ function LiveSession({ session }: { session: ActiveSession }) {
                 onEditSet={(set) => setEditing(set.setIndex)}
               />
               <PixelButton
-                label="Skip exercise"
+                label={t('Skip exercise')}
                 variant="secondary"
                 onPress={() => skipExercise(current.exercise.key)}
                 testID="skip-exercise"
@@ -227,8 +235,9 @@ function LiveSession({ session }: { session: ActiveSession }) {
           ) : (
             <PixelFrame variant="gold" testID="all-done">
               <PixelText>
-                Every exercise is done or skipped. Finish the session to claim your XP, or add one
-                more.
+                {t(
+                  'Every exercise is done or skipped. Finish the session to claim your XP, or add one more.',
+                )}
               </PixelText>
             </PixelFrame>
           )}
@@ -241,13 +250,13 @@ function LiveSession({ session }: { session: ActiveSession }) {
                   tone="gold"
                   accessibilityRole="header"
                   style={styles.rowText}>
-                  This session
+                  {t('This session')}
                 </PixelText>
                 <PixelButton
-                  label={reordering ? 'Done' : 'Reorder'}
+                  label={reordering ? t('Done') : t('Reorder')}
                   variant="secondary"
                   onPress={() => setReordering((value) => !value)}
-                  accessibilityLabel={reordering ? 'Done reordering' : 'Reorder exercises'}
+                  accessibilityLabel={reordering ? t('Done reordering') : t('Reorder exercises')}
                   testID="session-reorder"
                 />
               </View>
@@ -268,20 +277,20 @@ function LiveSession({ session }: { session: ActiveSession }) {
           )}
 
           <PixelButton
-            label="Add exercise"
+            label={t('Add exercise')}
             icon="rune"
             variant="secondary"
             onPress={() => setDialog('add')}
             testID="session-add"
           />
           <PixelButton
-            label="Finish session"
+            label={t('Finish session')}
             icon="star"
             onPress={() => setDialog('finish')}
             testID="finish-session"
           />
           <PixelButton
-            label="Abandon"
+            label={t('Abandon')}
             variant="danger"
             onPress={() => setDialog('abandon')}
             testID="abandon-session"
@@ -300,27 +309,30 @@ function LiveSession({ session }: { session: ActiveSession }) {
 
       <PixelModal
         visible={dialog === 'finish'}
-        title="Finish session?"
+        title={t('Finish session?')}
         onClose={() => setDialog(undefined)}
-        closeLabel="Keep training"
+        closeLabel={t('Keep training')}
         testID="finish-dialog">
         <PixelText>
           {counts.setsLogged === 0
-            ? 'Nothing is logged yet, so finishing ends the session without saving it.'
-            : `${counts.setsLogged} of ${counts.setsPlanned} sets are logged. Missing sets of exercises you started count as skipped; exercises you never started are left out.`}
+            ? t('Nothing is logged yet, so finishing ends the session without saving it.')
+            : t(
+                '{logged} of {planned} sets are logged. Missing sets of exercises you started count as skipped; exercises you never started are left out.',
+                { logged: counts.setsLogged, planned: counts.setsPlanned },
+              )}
         </PixelText>
-        <PixelButton label="Finish" icon="star" onPress={onFinish} testID="finish-confirm" />
+        <PixelButton label={t('Finish')} icon="star" onPress={onFinish} testID="finish-confirm" />
       </PixelModal>
 
       <PixelModal
         visible={dialog === 'abandon'}
-        title="Abandon session?"
+        title={t('Abandon session?')}
         onClose={() => setDialog(undefined)}
-        closeLabel="Keep training"
+        closeLabel={t('Keep training')}
         testID="abandon-dialog">
-        <PixelText>Your logged sets are thrown away and earn no XP.</PixelText>
+        <PixelText>{t('Your logged sets are thrown away and earn no XP.')}</PixelText>
         <PixelButton
-          label="Abandon"
+          label={t('Abandon')}
           variant="danger"
           onPress={onAbandon}
           testID="abandon-confirm"
@@ -367,8 +379,8 @@ function LiveSession({ session }: { session: ActiveSession }) {
 
       {dialog === 'add' && (
         <NodeOptionSheet
-          title="Add exercise"
-          intro="Suggestions from your open skills, or search any skill by name."
+          title={t('Add exercise')}
+          intro={t('Suggestions from your open skills, or search any skill by name.')}
           options={(query) => addOptions(query)}
           onPick={(nodeId) => {
             addExercise(nodeId);
@@ -376,7 +388,7 @@ function LiveSession({ session }: { session: ActiveSession }) {
           }}
           onClose={() => setDialog(undefined)}
           searchable
-          empty="Nothing found that your equipment allows."
+          empty={t('Nothing found that your equipment allows.')}
           testID="add-sheet"
         />
       )}
@@ -396,7 +408,7 @@ type RowProps = {
 
 /** One exercise in the session list: tap to train it now, or move it while reordering. */
 function SessionRow({ exercise, blockLabel, current, onPress, moves, onMove }: RowProps) {
-  const status = exercise.skipped ? 'Skipped' : `${exercise.setsLogged} / ${exercise.sets}`;
+  const status = exercise.skipped ? t('Skipped') : `${exercise.setsLogged} / ${exercise.sets}`;
   if (moves) {
     return (
       <View testID={`session-row-${exercise.key}`}>
@@ -405,23 +417,23 @@ function SessionRow({ exercise, blockLabel, current, onPress, moves, onMove }: R
             <View style={styles.rowText}>
               <PixelText tone={current ? 'gold' : 'text'}>{exercise.name}</PixelText>
               <PixelText variant="small" tone="textMuted">
-                {exercise.pairedWithName ? `${blockLabel} · pair` : blockLabel}
+                {exercise.pairedWithName ? t('{block} · pair', { block: blockLabel }) : blockLabel}
               </PixelText>
             </View>
             <PixelButton
-              label="Up"
+              label={t('Up')}
               variant="secondary"
               onPress={() => onMove(-1)}
               disabled={!moves.up}
-              accessibilityLabel={`Move ${exercise.name} up`}
+              accessibilityLabel={t('Move {name} up', { name: exercise.name })}
               testID={`move-up-${exercise.key}`}
             />
             <PixelButton
-              label="Down"
+              label={t('Down')}
               variant="secondary"
               onPress={() => onMove(1)}
               disabled={!moves.down}
-              accessibilityLabel={`Move ${exercise.name} down`}
+              accessibilityLabel={t('Move {name} down', { name: exercise.name })}
               testID={`move-down-${exercise.key}`}
             />
           </View>
@@ -433,7 +445,11 @@ function SessionRow({ exercise, blockLabel, current, onPress, moves, onMove }: R
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${exercise.name}, ${blockLabel}, ${status}`}
+      accessibilityLabel={t('{name}, {block}, {status}', {
+        name: exercise.name,
+        block: blockLabel,
+        status,
+      })}
       accessibilityState={{ selected: current }}
       testID={`session-row-${exercise.key}`}>
       {({ pressed }) => (

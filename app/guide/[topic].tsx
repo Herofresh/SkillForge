@@ -3,7 +3,8 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { GuideArticle } from '@/components/guide/GuidePage';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { EmptyState, PixelButton, Screen } from '@/components/ui';
-import { GUIDE, GUIDE_TOPICS, guideEntry, isGuideTopic } from '@/domain/guide';
+import { GUIDE_TOPICS, guideEntries, guideEntry, isGuideTopic } from '@/domain/guide';
+import { t } from '@/i18n';
 
 /**
  * One page of "How SkillForge works" (PLAN 6.10c): the entry's summary and its details, and a
@@ -15,13 +16,17 @@ export default function GuideTopicScreen() {
   if (!isGuideTopic(topic)) {
     return (
       <Screen centered>
-        <Stack.Screen options={stackHeaderOptions('How it works')} />
-        <EmptyState icon="scroll" title="Unknown topic" message={`No topic '${topic}' here.`} />
+        <Stack.Screen options={stackHeaderOptions(t('How it works'))} />
+        <EmptyState
+          icon="scroll"
+          title={t('Unknown topic')}
+          message={t("No topic '{topic}' here.", { topic })}
+        />
       </Screen>
     );
   }
   const entry = guideEntry(topic);
-  const next = GUIDE[GUIDE_TOPICS.indexOf(topic) + 1];
+  const next = guideEntries()[GUIDE_TOPICS.indexOf(topic) + 1];
   return (
     <>
       <Stack.Screen options={stackHeaderOptions(entry.title)} />
@@ -29,7 +34,7 @@ export default function GuideTopicScreen() {
         <GuideArticle entry={entry} />
         {next && (
           <PixelButton
-            label={`Next: ${next.title}`}
+            label={t('Next: {title}', { title: next.title })}
             variant="secondary"
             onPress={() =>
               router.replace({ pathname: '/guide/[topic]', params: { topic: next.id } })

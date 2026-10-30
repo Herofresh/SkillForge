@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 
 import { PROGRESSIONS_GUIDE_URL } from '@/domain/overlay';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { DetailSection } from '../node/DetailSection';
@@ -17,7 +18,7 @@ type Props = {
 type Outcome = { kind: 'shared' } | { kind: 'error'; message: string };
 
 const errorText = (error: unknown): string =>
-  error instanceof Error ? error.message : 'Something went wrong.';
+  error instanceof Error ? error.message : t('Something went wrong.');
 
 /**
  * Sharing progressions (PLAN 4.8, ADR-036): "Share my progressions" hands the overlay as a YAML
@@ -44,20 +45,21 @@ export function SharePanel({ hasChanges }: Props) {
 
   return (
     <>
-      <DetailSection title="Share" icon="scroll" testID="progressions-share">
+      <DetailSection title={t('Share')} icon="scroll" testID="progressions-share">
         <PixelText variant="small" tone="textMuted">
-          Your changes as one YAML file, in the same format as the app’s own progressions. A friend
-          can import it, or you can keep it as a copy.
+          {t(
+            'Your changes as one YAML file, in the same format as the app’s own progressions. A friend can import it, or you can keep it as a copy.',
+          )}
         </PixelText>
         <PixelButton
-          label="Share my progressions"
+          label={t('Share my progressions')}
           icon="scroll"
           onPress={share}
           disabled={busy || !hasChanges}
           testID="share-progressions"
         />
         <PixelButton
-          label="Import progressions"
+          label={t('Import progressions')}
           variant="secondary"
           icon="rune"
           onPress={() => router.push('/progressions/import')}
@@ -73,28 +75,28 @@ export function SharePanel({ hasChanges }: Props) {
               variant="small"
               tone={outcome.kind === 'error' ? 'danger' : 'success'}
               style={styles.flex}>
-              {outcome.kind === 'error' ? outcome.message : 'Handed to the share sheet.'}
+              {outcome.kind === 'error' ? outcome.message : t('Handed to the share sheet.')}
             </PixelText>
           </View>
         )}
       </DetailSection>
 
       <DetailSection
-        title="Suggest to project"
+        title={t('Suggest to project')}
         icon="star"
         variant="parchment"
         testID="suggest-project">
         <PixelText tone="textOnParchment">
-          Found a better standard or a missing exercise? SkillForge’s progressions are open. Share
-          your YAML, then paste it into a GitHub issue or pull request. The contributor guide
-          explains the fields and asks for a source for every standard.
+          {t(
+            'Found a better standard or a missing exercise? SkillForge’s progressions are open. Share your YAML, then paste it into a GitHub issue or pull request. The contributor guide explains the fields and asks for a source for every standard.',
+          )}
         </PixelText>
         <PixelButton
-          label="Open the contributor guide"
+          label={t('Open the contributor guide')}
           icon="scroll"
           variant="secondary"
           onPress={() => void Linking.openURL(PROGRESSIONS_GUIDE_URL).catch(() => undefined)}
-          accessibilityHint="Opens content/progressions/README.md on GitHub in the browser"
+          accessibilityHint={t('Opens content/progressions/README.md on GitHub in the browser')}
           testID="open-contributor-guide"
         />
       </DetailSection>

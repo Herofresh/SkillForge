@@ -9,6 +9,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
 import { BACKUP_MIME_TYPE } from '@/domain/backup';
+import { t } from '@/i18n';
 import { importFileSizeProblem } from '@/lib/importFile';
 import { WIDGET_SNAPSHOT_FILE, deleteWidgetSnapshot } from '@/widget/widgetStorage';
 
@@ -25,13 +26,13 @@ const PICKABLE_TYPES = '*/*';
 
 async function share(fileName: string, text: string, options: ShareOptions = {}): Promise<void> {
   if (!(await Sharing.isAvailableAsync())) {
-    throw new Error('Sharing files is not available on this device');
+    throw new Error(t('Sharing files is not available on this device'));
   }
   const file = new File(Paths.cache, fileName);
   file.write(text);
   await Sharing.shareAsync(file.uri, {
     mimeType: options.mimeType ?? BACKUP_MIME_TYPE,
-    dialogTitle: options.dialogTitle ?? 'Save your SkillForge backup',
+    dialogTitle: options.dialogTitle ?? t('Save your SkillForge backup'),
   });
 }
 

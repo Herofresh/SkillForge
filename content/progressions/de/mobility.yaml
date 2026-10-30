@@ -1,0 +1,99 @@
+# German texts for content/progressions/mobility.yaml (FB-8): same ids, same cues in the same order.
+branch: mobility
+nodes:
+  - id: cat_cow
+    name: "Katze-Kuh"
+    description: "Im Vierfüßlerstand rundest du langsam den ganzen Rücken nach oben zur Decke (Katze) und lässt ihn dann mit der Brust nach vorne ins Hohlkreuz sinken (Kuh). Ein sanftes Aufwärmen, das die Wirbelsäule durch Beugung und Streckung bewegt."
+    cues:
+      - "Hände unter den Schultern, Knie unter den Hüften."
+      - "Bewege ein Segment nach dem anderen, vom Steißbein bis zum Kopf und zurück."
+      - "Atme beim Runden aus, beim Hohlkreuz ein; langsam und fließend."
+
+  - id: ankle_rocks
+    name: "Sprunggelenk-Wippen zur Wand"
+    description: "Du stehst in einem kurzen Ausfallschritt vor einer Wand und wippst das vordere Knie über die Zehen nach vorne, bis es die Wand berührt, während die Ferse unten bleibt. Trainiert die Dorsalflexion im Sprunggelenk für tiefe Kniebeugen und Pistols."
+    cues:
+      - "Die vordere Ferse bleibt flach; das Knie wandert über die mittleren Zehen, nicht nach innen."
+      - "Stelle den Fuß etwas weiter zurück, sobald das Knie die Wand leicht berührt."
+      - "Test: Zehen 12,5 cm oder weiter von der Wand bei Wandkontakt des Knies zählen als normaler Bewegungsumfang."
+
+  - id: hip_cars
+    name: "Hüft-CARs"
+    description: "Du stehst auf einem Bein (oder im Vierfüßlerstand) und ziehst mit dem anderen Knie den größtmöglichen langsamen Kreis, während der Rest des Körpers still bleibt. Controlled Articular Rotations aus dem Functional Range Conditioning; sie halten die volle Hüftbeweglichkeit unter deiner Kontrolle."
+    cues:
+      - "Spanne den ganzen Körper an, damit sich nur die Hüfte bewegt; halte dich an einer Wand, wenn die Balance limitiert."
+      - "Geh langsam und mache den Kreis so groß, wie du ihn kontrollieren kannst."
+      - "Kreise vorwärts, dann rückwärts, auf jeder Seite."
+
+  - id: shoulder_cars
+    name: "Schulter-CARs"
+    description: "Du stehst aufrecht mit einem gestreckten Arm und führst ihn im größtmöglichen langsamen Kreis: nach vorne, hoch am Ohr vorbei, nach hinten und wieder hinunter, ohne den Körper zu verdrehen. Controlled Articular Rotations für die Schulter."
+    cues:
+      - "Balle die Faust und spanne den ganzen Körper an, damit Rippen und Hüften still bleiben."
+      - "Drehe die Handfläche, wenn der Arm über Kopf geht, damit der Kreis fließend bleibt."
+      - "Langsam ist der Sinn der Sache; kreise auf jeder Seite in beide Richtungen."
+
+  - id: open_book
+    name: "Open Book"
+    description: "Du liegst auf der Seite mit gebeugten Knien und beiden Armen gestreckt vor dir, hebst den oberen Arm hoch und hinüber zur anderen Seite und lässt die Brust mitdrehen, während die Knie zusammenbleiben. Mobilisiert den oberen Rücken in Rotation."
+    cues:
+      - "Halte die Knie übereinander und am Boden, damit die Drehung aus dem oberen Rücken kommt."
+      - "Folge der Hand mit den Augen; atme beim Öffnen aus."
+      - "Halte kurz inne, wo es dehnt, dann schließe das Buch langsam."
+
+  - id: wall_angel
+    name: "Wandengel"
+    description: "Du stehst mit Kopf, Rücken und Armen an einer Wand, die Arme wie ein Torpfosten gebeugt, und schiebst die Arme über Kopf hoch und wieder hinunter, ohne dass etwas die Wand verlässt. Trainiert die Überkopf-Beweglichkeit von Schultern und oberem Rücken."
+    cues:
+      - "Füße eine Handbreit von der Wand; lass den unteren Rücken nicht ins Hohlkreuz von der Wand weg."
+      - "Ellbogen, Handgelenke und Handrücken bleiben an der Wand."
+      - "Schiebe nur so hoch, wie du den Kontakt halten kannst."
+
+  - id: hip_90_90_switch
+    name: "90/90-Hüftwechsel"
+    description: "Du sitzt mit beiden Knien im 90-Grad-Winkel, ein Bein vorne, eines zur Seite, und schwingst beide Knie ohne Hände auf die andere Seite. Trainiert Innen- und Außenrotation der Hüfte."
+    cues:
+      - "Sitze aufrecht; stütze dich zuerst hinten auf die Hände, dann nimm sie weg."
+      - "Hebe die Knie und drehe aus den Hüften, die Füße bleiben ungefähr an Ort und Stelle."
+      - "Halte in jeder 90/90-Position kurz inne, die Brust über dem vorderen Schienbein."
+      - "Lass es aus oder frag zuerst einen Physio, wenn du ein Hüftimpingement oder Knieprobleme hast."
+
+  - id: deep_squat_hold
+    name: "Tiefe Hocke halten"
+    description: "Du ruhst am tiefsten Punkt einer Kniebeuge, die Hüften tief zwischen den Fersen, die Füße flach, die Arme locker vorne. Eher eine Ruheposition als eine Kraftübung; sie öffnet Sprunggelenke, Hüften und unteren Rücken."
+    cues:
+      - "Füße etwas weiter als hüftbreit und nach außen gedreht; die Fersen bleiben unten."
+      - "Drücke die Knie mit den Ellbogen nach außen und lass den Rücken locker."
+      - "Halte dich zuerst an einem Türrahmen oder Pfosten fest, wenn du nach hinten kippst."
+    prerequisite_notes:
+      squat: "Die Kniebeuge lehrt den Weg hinunter und wieder hinauf."
+
+  - id: cossack_squat
+    name: "Cossack Squat"
+    description: "Aus breitem Stand sinkst du seitlich in eine tiefe Kniebeuge über einem Bein, während das andere gestreckt bleibt mit den Zehen nach oben, dann wechselst du zur anderen Seite. Kraft und Beweglichkeit für Hüften, Oberschenkel-Innenseiten und Sprunggelenke."
+    cues:
+      - "Die Ferse des gebeugten Beins bleibt flach, das Knie folgt den Zehen."
+      - "Brust hoch; halte die Hände vorne als Gegengewicht."
+      - "Geh nur so tief, wie du es kontrollieren kannst, und wechsle langsam hinüber."
+    prerequisite_notes:
+      hip_90_90_switch: "Hüftrotation hilft dem gebeugten Bein, in der Linie zu bleiben."
+
+  - id: three_point_bridge
+    name: "Dreipunkt-Brücke"
+    description: "Aus dem Sitz mit den Händen hinter dir hebst du die Hüften und drehst dich auf eine Hand und beide Füße, der andere Arm greift über den Kopf, sodass sich die Brust zur Decke öffnet. Eine drehende Brücke, die oberen Rücken und Schultern mobilisiert."
+    cues:
+      - "Drücke die Hüften hoch und spanne den Po an, während du drehst."
+      - "Strecke den freien Arm lang über den Kopf und schau unter ihm hindurch."
+      - "Halte oben 5-10 s, dann setze dich wieder ab und wechsle die Seite."
+    prerequisite_notes:
+      table_bridge: "Die Tischbrücke lehrt das Anheben der Hüften."
+
+  - id: overhead_squat
+    name: "Überkopf-Kniebeuge"
+    description: "Eine Kniebeuge mit Körpergewicht bis ganz nach unten, die Arme gestreckt über Kopf, oft mit einem Besenstiel oder Band breit gehalten. Prüft Sprunggelenke, Hüften, oberen Rücken und Schultern zusammen; ein verbreiteter Bewegungs-Screen."
+    cues:
+      - "Die Arme bleiben den ganzen Weg hinunter in Linie mit den Ohren; lass sie nicht nach vorne wandern."
+      - "Fersen unten, Knie nach außen über die Zehen, Brust hoch."
+      - "Verschränke stattdessen die Hände hinter dem Kopf, wenn die Arme das Limit sind."
+    prerequisite_notes:
+      shoulder_dislocate: "Offene Schultern halten die Arme davon ab, nach vorne zu wandern."

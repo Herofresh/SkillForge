@@ -28,6 +28,7 @@
  * The generator's suggestions always respect the advisory safeguards (AGENT.md §5); the warnings
  * that still apply (e.g. a self-unlocked node's prerequisites) are attached to the plan.
  */
+import { k, t } from '@/i18n';
 import { clamp } from '@/lib/clamp';
 import { hashString } from '@/lib/hash';
 import { MS_PER_DAY, MS_PER_HOUR } from '@/lib/time';
@@ -167,12 +168,12 @@ const RECOVERY_GROWING_KINDS: readonly WorkoutBlockKind[] = ['skill', 'cool_down
 /** The plan's first note for a non-standard session. */
 const TRAINING_TYPE_NOTES: Readonly<Record<TrainingType, string | undefined>> = {
   standard: undefined,
-  recovery:
-    'Recovery session: mobility, a cool-down and light skill practice. No hard strength and no ' +
-    'straight-arm work today.',
-  challenging:
-    'Challenging session: more sets and the harder end of each range, and a Trial if one is due. ' +
-    'End a set when your form breaks.',
+  recovery: k(
+    'Recovery session: mobility, a cool-down and light skill practice. No hard strength and no straight-arm work today.',
+  ),
+  challenging: k(
+    'Challenging session: more sets and the harder end of each range, and a Trial if one is due. End a set when your form breaks.',
+  ),
 };
 /** Double progression: how much the per-set target grows after a fully successful session. */
 export const PROGRESSION_STEP: Readonly<Record<Metric, number>> = {
@@ -205,7 +206,22 @@ const usesRepCount = (metric: Metric): boolean => metric === 'eccentric_s' || me
 const roundTarget = (value: number): number =>
   Math.round(value * TARGET_DECIMALS) / TARGET_DECIMALS;
 
-const patternLabel = (pattern: Pattern): string => pattern.replace(/_/g, ' ');
+/** A movement pattern as the plan's notes name it. */
+const PATTERN_LABELS: Readonly<Record<Pattern, string>> = {
+  horizontal_push: k('horizontal push'),
+  vertical_push: k('vertical push'),
+  vertical_pull: k('vertical pull'),
+  horizontal_pull: k('horizontal pull'),
+  straight_arm_push: k('straight arm push'),
+  straight_arm_pull: k('straight arm pull'),
+  squat: k('squat'),
+  hinge: k('hinge'),
+  core: k('core'),
+  balance: k('balance'),
+  mobility: k('mobility'),
+  explosive: k('explosive'),
+};
+const patternLabel = (pattern: Pattern): string => t(PATTERN_LABELS[pattern]);
 
 /** Whether one equipment option (an AND-set of tags) of `node` fits the profile (ADR-005). */
 export function isDoableWith(node: ExerciseNode, equipment: readonly EquipmentTag[]): boolean {
@@ -666,14 +682,22 @@ function fitExercise(
     const days = Math.ceil((prescription.trialDeferredUntil - builder.request.now) / MS_PER_DAY);
     notes.push(
       Number.isFinite(days)
-        ? `${node.name}: top of the range reached. Its Trial is recommended in ${days} days ` +
-            `(${MIN_WEEKS_AT_LEVEL} weeks of straight-arm training first).`
-        : `${node.name}: its Trial is recommended after ${MIN_WEEKS_AT_LEVEL} weeks of training.`,
+        ? t(
+            '{name}: top of the range reached. Its Trial is recommended in {days} days ({weeks} weeks of straight-arm training first).',
+            { name: node.name, days, weeks: MIN_WEEKS_AT_LEVEL },
+          )
+        : t('{name}: its Trial is recommended after {weeks} weeks of training.', {
+            name: node.name,
+            weeks: MIN_WEEKS_AT_LEVEL,
+          }),
     );
   }
   if (candidate.stalled) {
     notes.push(
-      `${node.name} has not improved in ${STAGNATION_SESSIONS} sessions, so it gets priority today.`,
+      t('{name} has not improved in {sessions} sessions, so it gets priority today.', {
+        name: node.name,
+        sessions: STAGNATION_SESSIONS,
+      }),
     );
   }
   return { exercise, notes };
@@ -695,7 +719,10 @@ function trialsCutForTime(
     )
     .map((exercise) => {
       const name = builder.lookup.get(exercise.nodeId)?.name ?? exercise.nodeId;
-      return `${name}'s Trial doesn't fit today's time, so it gets working sets instead. Give the session more minutes to attempt it.`;
+      return t(
+        "{name}'s Trial doesn't fit today's time, so it gets working sets instead. Give the session more minutes to attempt it.",
+        { name },
+      );
     });
 }
 
@@ -1006,9 +1033,9 @@ function fillTime(builder: Builder, candidates: readonly Candidate[], type: Trai
 
 function paceNote(pace: number): string | undefined {
   if (Math.abs(pace - DEFAULT_REST_PACE) < PACE_NOTE_DEVIATION) return undefined;
-  return (
-    `Planned at your pace: in your last sessions you rested about ${Math.round(pace * 100)}% ` +
-    'of the suggested rest, so the time estimate counts that.'
+  return t(
+    'Planned at your pace: in your last sessions you rested about {percent}% of the suggested rest, so the time estimate counts that.',
+    { percent: Math.round(pace * 100) },
   );
 }
 
@@ -1051,7 +1078,9 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
   const notes: string[] = [];
 
   for (const goal of request.goals) {
-    if (!lookup.has(goal)) notes.push(`Goal '${goal}' is not in your skill tree and was skipped.`);
+    if (!lookup.has(goal)) {
+      notes.push(t("Goal '{goal}' is not in your skill tree and was skipped.", { goal }));
+    }
   }
 
   // Candidates: the frontier first, then everything trainable the user has not outgrown.
@@ -1073,8 +1102,10 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
     if (!node) {
       if (fromGoal) {
         notes.push(
-          `${original.name} is on the way to your goal but needs equipment this profile doesn't ` +
-            'have, and no alternative fits.',
+          t(
+            "{name} is on the way to your goal but needs equipment this profile doesn't have, and no alternative fits.",
+            { name: original.name },
+          ),
         );
       }
       continue;
@@ -1190,11 +1221,15 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
     if (!exercise.substitutedFrom) continue;
     const from = lookup.get(exercise.substitutedFrom)?.name ?? exercise.substitutedFrom;
     const to = lookup.get(exercise.nodeId)?.name ?? exercise.nodeId;
-    notes.push(`${to} replaces ${from}, which needs equipment this profile doesn't have.`);
+    notes.push(
+      t("{to} replaces {from}, which needs equipment this profile doesn't have.", { to, from }),
+    );
   }
   if (recovering.size > 0) {
     const list = [...recovering].map(patternLabel).join(', ');
-    notes.push(`Resting ${list}: trained less than ${PATTERN_REST_HOURS} h ago.`);
+    notes.push(
+      t('Resting {list}: trained less than {hours} h ago.', { list, hours: PATTERN_REST_HOURS }),
+    );
   }
   const trialDayExercise = exercises.find(
     (exercise) => exercise.isTrial && lookup.get(exercise.nodeId)?.straightArm,
@@ -1202,35 +1237,42 @@ export function generateWorkout(request: WorkoutRequest): WorkoutPlan {
   if (trialDayExercise) {
     const name = lookup.get(trialDayExercise.nodeId)?.name ?? trialDayExercise.nodeId;
     notes.push(
-      `Trial day: ${name}'s Trial is today's only straight-arm work. Its sets don't count against ` +
-        `the ~${STRAIGHT_ARM_SESSION_BUDGET_S} s straight-arm budget; extra straight-arm work on ` +
-        'top of it is not recommended.',
+      t(
+        "Trial day: {name}'s Trial is today's only straight-arm work. Its sets don't count against the ~{budget} s straight-arm budget; extra straight-arm work on top of it is not recommended.",
+        { name, budget: STRAIGHT_ARM_SESSION_BUDGET_S },
+      ),
     );
   }
   if (skippedStraightArm) {
     notes.push(
-      `No straight-arm work today: your last straight-arm session was less than ` +
-        `${STRAIGHT_ARM_REST_HOURS} h ago.`,
+      t('No straight-arm work today: your last straight-arm session was less than {hours} h ago.', {
+        hours: STRAIGHT_ARM_REST_HOURS,
+      }),
     );
   }
   const peaks = attributePeakOgLevels(nodes, progress);
   if (hasPushPullImbalance(peaks)) {
-    const weaker = peaks.push < peaks.pull ? 'push' : 'pull';
-    notes.push(`Your push and pull levels are far apart, so ${weaker} work gets priority.`);
+    notes.push(
+      peaks.push < peaks.pull
+        ? t('Your push and pull levels are far apart, so push work gets priority.')
+        : t('Your push and pull levels are far apart, so pull work gets priority.'),
+    );
   }
   const typeNote = TRAINING_TYPE_NOTES[type];
-  if (typeNote) notes.unshift(typeNote);
+  if (typeNote) notes.unshift(t(typeNote));
   const pace = paceNote(builder.pace);
   if (pace) notes.push(pace);
   const estimatedMinutes = Math.ceil(builder.seconds / 60);
   if (estimatedMinutes < FILL_NOTE_SHARE * request.availableMinutes) {
     notes.push(
-      `This plan fills about ${estimatedMinutes} of your ${request.availableMinutes} min: that is ` +
-        'all your tree, equipment and rest days suggest today. Add exercises if you want more.',
+      t(
+        'This plan fills about {minutes} of your {available} min: that is all your tree, equipment and rest days suggest today. Add exercises if you want more.',
+        { minutes: estimatedMinutes, available: request.availableMinutes },
+      ),
     );
     if (type !== 'recovery' && recovering.size > 0) {
       notes.push(
-        'Much of your strength work is resting today: a Recovery session may suit it better.',
+        t('Much of your strength work is resting today: a Recovery session may suit it better.'),
       );
     }
   }

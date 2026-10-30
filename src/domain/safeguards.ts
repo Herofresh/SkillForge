@@ -15,6 +15,7 @@
  *   counting the sets of one straight-arm Trial (the Trial-day exception, ADR-025);
  * - straight-arm sessions are at least `STRAIGHT_ARM_REST_HOURS` apart.
  */
+import { t } from '@/i18n';
 import { MS_PER_HOUR, MS_PER_WEEK } from '@/lib/time';
 
 import type {
@@ -139,11 +140,16 @@ export function trialWarnings(
 ): SafeguardWarning[] {
   if (isTrialOpenBySafeguards(node, progress, now)) return [];
   const trained = progress?.firstTrainedAt !== undefined;
+  const params = { name: node.name, weeks: MIN_WEEKS_AT_LEVEL };
   const message = trained
-    ? `${node.name} is straight-arm work: a Trial is recommended after ${MIN_WEEKS_AT_LEVEL} weeks of ` +
-      'training it, so your tendons can catch up with your muscles.'
-    : `${node.name} is straight-arm work you have not trained here yet: a Trial is recommended ` +
-      `after ${MIN_WEEKS_AT_LEVEL} weeks of training it. Only test out if you already train it.`;
+    ? t(
+        '{name} is straight-arm work: a Trial is recommended after {weeks} weeks of training it, so your tendons can catch up with your muscles.',
+        params,
+      )
+    : t(
+        '{name} is straight-arm work you have not trained here yet: a Trial is recommended after {weeks} weeks of training it. Only test out if you already train it.',
+        params,
+      );
   return [{ code: 'straight_arm_min_weeks', nodeId: node.id, message, severity: 'warning' }];
 }
 
@@ -163,21 +169,29 @@ export function sessionSafeguardWarnings(
   if (!sets.some((set) => nodes.get(set.nodeId)?.straightArm)) return warnings;
   const used = straightArmSecondsUsed(sets, nodes);
   if (used > STRAIGHT_ARM_SESSION_BUDGET_S) {
-    const besides = budgetExemptTrialSets(sets, nodes).size > 0 ? ' besides the Trial' : '';
+    const params = { used: roundSeconds(used), budget: STRAIGHT_ARM_SESSION_BUDGET_S };
     warnings.push({
       code: 'straight_arm_budget',
       message:
-        `This session has about ${roundSeconds(used)} s of straight-arm work${besides}; about ` +
-        `${STRAIGHT_ARM_SESSION_BUDGET_S} s per session is recommended for tendon health.`,
+        budgetExemptTrialSets(sets, nodes).size > 0
+          ? t(
+              'This session has about {used} s of straight-arm work besides the Trial; about {budget} s per session is recommended for tendon health.',
+              params,
+            )
+          : t(
+              'This session has about {used} s of straight-arm work; about {budget} s per session is recommended for tendon health.',
+              params,
+            ),
       severity: 'warning',
     });
   }
   if (!isStraightArmRested(lastStraightArmAt, startedAt)) {
     warnings.push({
       code: 'straight_arm_rest',
-      message:
-        `Your last straight-arm session was less than ${STRAIGHT_ARM_REST_HOURS} h ago; ` +
-        `${STRAIGHT_ARM_REST_HOURS} h of rest between straight-arm sessions is recommended.`,
+      message: t(
+        'Your last straight-arm session was less than {hours} h ago; {hours} h of rest between straight-arm sessions is recommended.',
+        { hours: STRAIGHT_ARM_REST_HOURS },
+      ),
       severity: 'warning',
     });
   }
@@ -192,12 +206,20 @@ export function prerequisitesWarning(
 ): SafeguardWarning | undefined {
   if (unmetHard.length === 0) return undefined;
   const list = unmetHard
-    .map((prereq) => `${nodes.get(prereq.nodeId)?.name ?? prereq.nodeId} L${prereq.minLevel}`)
+    .map((prereq) =>
+      t('{name} L{level}', {
+        name: nodes.get(prereq.nodeId)?.name ?? prereq.nodeId,
+        level: prereq.minLevel,
+      }),
+    )
     .join(', ');
   return {
     code: 'prerequisites_unmet',
     nodeId: node.id,
-    message: `${node.name} usually comes after ${list}. You chose to go ahead; build up if it feels too hard.`,
+    message: t(
+      '{name} usually comes after {list}. You chose to go ahead; build up if it feels too hard.',
+      { name: node.name, list },
+    ),
     severity: 'info',
   };
 }

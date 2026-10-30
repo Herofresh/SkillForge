@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { ACCESSORY_BY_ID } from '@/data/companion/accessories';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { BURST_TITLES, LevelUpBurst, PixelFrame, PixelText } from '../ui';
@@ -30,13 +31,13 @@ export function TrinketUnlockPanel({ accessoryIds, celebrate, playKey }: Props) 
     <PixelFrame variant="gold" contentStyle={styles.gap} testID="summary-trinkets">
       {celebrate ? (
         <LevelUpBurst
-          title={BURST_TITLES.newTrinket}
-          subtitle={items[0].name}
+          title={t(BURST_TITLES.newTrinket)}
+          subtitle={t(items[0].name)}
           playKey={`${playKey}-trinket`}
         />
       ) : (
         <PixelText variant="label" tone="gold" accessibilityRole="header">
-          Trinkets earned
+          {t('Trinkets earned')}
         </PixelText>
       )}
       {items.map((item) => (
@@ -44,16 +45,16 @@ export function TrinketUnlockPanel({ accessoryIds, celebrate, playKey }: Props) 
           key={item.id}
           accessible
           accessibilityRole="text"
-          accessibilityLabel={`${item.name}, ${SLOT_LABELS[item.slot]}. ${companionRuleText(item.rule)}`}
+          accessibilityLabel={`${t(item.name)}, ${t(SLOT_LABELS[item.slot])}. ${companionRuleText(item.rule)}`}
           testID={`summary-trinket-${item.id}`}>
-          <PixelText variant="heading">{item.name}</PixelText>
+          <PixelText variant="heading">{t(item.name)}</PixelText>
           <PixelText variant="label" tone="textMuted">
-            {`${SLOT_LABELS[item.slot]} · ${companionRuleText(item.rule)}`}
+            {`${t(SLOT_LABELS[item.slot])} · ${companionRuleText(item.rule)}`}
           </PixelText>
         </View>
       ))}
       <PixelText variant="small" tone="textMuted">
-        See it on your companion in the Character tab.
+        {t('See it on your companion in the Character tab.')}
       </PixelText>
     </PixelFrame>
   );

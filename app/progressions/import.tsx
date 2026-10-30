@@ -8,6 +8,7 @@ import { DetailSection } from '@/components/node/DetailSection';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { PixelButton, PixelText, PixelTextInput, Screen } from '@/components/ui';
 import { formatIssue } from '@/data/validate';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 import type { OverlayTextPreview } from '@/store/appStore';
 
@@ -37,7 +38,7 @@ export default function ImportProgressionsScreen() {
       setText(picked);
       show(picked);
     } catch (error) {
-      setFailure([error instanceof Error ? error.message : 'The file could not be read.']);
+      setFailure([error instanceof Error ? error.message : t('The file could not be read.')]);
     }
   };
   const confirm = () => {
@@ -49,14 +50,15 @@ export default function ImportProgressionsScreen() {
 
   return (
     <>
-      <Stack.Screen options={stackHeaderOptions('Import progressions')} />
+      <Stack.Screen options={stackHeaderOptions(t('Import progressions'))} />
       <Screen avoidKeyboard testID="import-progressions-screen">
         <PixelText variant="small" tone="textMuted">
-          Shared progressions are merged into yours: their exercises and changes replace yours for
-          the same skill, everything else of yours stays.
+          {t(
+            'Shared progressions are merged into yours: their exercises and changes replace yours for the same skill, everything else of yours stays.',
+          )}
         </PixelText>
         <PixelTextInput
-          label="Paste the YAML"
+          label={t('Paste the YAML')}
           value={text}
           onChangeText={(value) => {
             setText(value);
@@ -69,14 +71,14 @@ export default function ImportProgressionsScreen() {
           testID="import-text"
         />
         <PixelButton
-          label="Preview"
+          label={t('Preview')}
           icon="scroll"
           onPress={() => show(text)}
           disabled={text.trim() === ''}
           testID="import-preview"
         />
         <PixelButton
-          label="Choose file"
+          label={t('Choose file')}
           icon="rune"
           variant="secondary"
           onPress={pick}
@@ -85,15 +87,19 @@ export default function ImportProgressionsScreen() {
 
         {preview?.status === 'unreadable' && (
           <IssueNotes
-            title="This can't be read"
+            title={t("This can't be read")}
             messages={preview.issues.map(formatIssue)}
             testID="import-unreadable"
           />
         )}
         {ready && (
-          <DetailSection title="What changes" icon="quill" variant="arcane" testID="import-changes">
+          <DetailSection
+            title={t('What changes')}
+            icon="quill"
+            variant="arcane"
+            testID="import-changes">
             {ready.changes.length === 0 ? (
-              <PixelText variant="small">Nothing: the file has no changes.</PixelText>
+              <PixelText variant="small">{t('Nothing: the file has no changes.')}</PixelText>
             ) : (
               ready.changes.map((change) => (
                 <OverlayEntryRow
@@ -104,13 +110,13 @@ export default function ImportProgressionsScreen() {
               ))
             )}
             <IssueNotes
-              title="It doesn't fit your tree"
+              title={t("It doesn't fit your tree")}
               messages={ready.issues.map(formatIssue)}
               testID="import-issues"
             />
             {ready.issues.length === 0 && ready.changes.length > 0 && (
               <PixelButton
-                label="Import"
+                label={t('Import')}
                 icon="check"
                 onPress={confirm}
                 testID="import-confirm-progressions"
@@ -118,7 +124,7 @@ export default function ImportProgressionsScreen() {
             )}
           </DetailSection>
         )}
-        <IssueNotes title="Not imported" messages={failure} testID="import-failed" />
+        <IssueNotes title={t('Not imported')} messages={failure} testID="import-failed" />
       </Screen>
     </>
   );

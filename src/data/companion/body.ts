@@ -12,6 +12,7 @@
  * the legs; accessories and weapons are placed from these anchors, so they follow every pose.
  */
 import type { CompanionBody } from '@/domain/companion';
+import { k } from '@/i18n';
 import type { Legend, Point, SpriteCell, SpritePart } from '@/lib/sprite';
 
 /** The sprite canvas in sprite pixels. The one place its size is set (UI, widget, scripts). */
@@ -360,7 +361,7 @@ const placed = (dx: number, dy: number, rows: readonly string[]): PlacedBodyPart
 export const HAIR_STYLES: readonly HairStyle[] = [
   {
     id: 'spiky',
-    name: 'Spiky',
+    name: k('Spiky'),
     top: placed(-1, -3, [
       '......H...H...',
       '..H..HH..HH...',
@@ -374,7 +375,7 @@ export const HAIR_STYLES: readonly HairStyle[] = [
   },
   {
     id: 'long',
-    name: 'Long',
+    name: k('Long'),
     top: placed(-1, -2, [
       '....HHHHHH....',
       '..HHHHHHHHHH..',
@@ -409,7 +410,7 @@ export const HAIR_STYLES: readonly HairStyle[] = [
   },
   {
     id: 'ponytail',
-    name: 'Ponytail',
+    name: k('Ponytail'),
     top: placed(-1, -2, [
       '....HHHHHH....',
       '..HHHHHHHHHH..',
@@ -458,7 +459,7 @@ export interface BodyShape {
 export const BODY_SHAPES: Readonly<Record<CompanionBody, BodyShape>> = {
   man: {
     id: 'man',
-    name: 'Man',
+    name: k('Man'),
     head: HEAD_MAN,
     torso: TORSO_MAN,
     armInset: 0,
@@ -467,7 +468,7 @@ export const BODY_SHAPES: Readonly<Record<CompanionBody, BodyShape>> = {
   },
   woman: {
     id: 'woman',
-    name: 'Woman',
+    name: k('Woman'),
     head: HEAD_WOMAN,
     torso: TORSO_WOMAN,
     armInset: 1,

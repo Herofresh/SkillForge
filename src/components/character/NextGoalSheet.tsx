@@ -1,4 +1,5 @@
 import { nextGoalOptions } from '@/domain/goalReached';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { PixelModal } from '../ui';
@@ -24,7 +25,7 @@ export function NextGoalSheet({ goalId, onClose, onOpenNode, testID = 'next-goal
   const replaceGoal = useAppStore((state) => state.replaceGoal);
   const name = nodes.find((node) => node.id === goalId)?.name ?? goalId;
   return (
-    <PixelModal visible title={`After ${name}`} onClose={onClose} testID={testID}>
+    <PixelModal visible title={t('After {name}', { name })} onClose={onClose} testID={testID}>
       <NextGoalPicker
         goalName={name}
         options={nextGoalOptions(nodes, progress, goalId, goals)}

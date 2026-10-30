@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { BRANCH_NAMES } from '@/data/skills/branches';
 import { BRANCHES, type Branch } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { Spacing } from './theme';
 import { PixelChip } from './ui';
@@ -39,7 +40,7 @@ export function BranchTabs({ value, onChange, testIDPrefix = 'branch' }: Props) 
           }}>
           <PixelChip
             role="tab"
-            label={BRANCH_NAMES[branch]}
+            label={t(BRANCH_NAMES[branch])}
             selected={branch === value}
             onPress={() => onChange(branch)}
             testID={`${testIDPrefix}-${branch}`}

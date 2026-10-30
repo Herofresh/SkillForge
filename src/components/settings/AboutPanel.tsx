@@ -9,6 +9,7 @@ import {
   PRIVACY_POLICY,
   type Credit,
 } from '@/data/credits';
+import { t } from '@/i18n';
 
 import { HealthNotice } from '../HealthNotice';
 import { DetailSection } from '../node/DetailSection';
@@ -20,13 +21,13 @@ function CreditLink({ credit, testID }: { credit: Credit; testID?: string }) {
     <Pressable
       onPress={() => void Linking.openURL(credit.url).catch(() => undefined)}
       accessibilityRole="link"
-      accessibilityLabel={`${credit.name}: ${credit.note}`}
-      accessibilityHint="Opens the website"
+      accessibilityLabel={`${t(credit.name)}: ${t(credit.note)}`}
+      accessibilityHint={t('Opens the website')}
       style={styles.link}
       testID={testID}>
-      <PixelText tone="rune">{credit.name}</PixelText>
+      <PixelText tone="rune">{t(credit.name)}</PixelText>
       <PixelText variant="small" tone="textMuted">
-        {credit.note}
+        {t(credit.note)}
       </PixelText>
     </Pressable>
   );
@@ -36,18 +37,21 @@ function CreditLink({ credit, testID }: { credit: Credit; testID?: string }) {
 export function AboutPanel() {
   const version = Constants.expoConfig?.version ?? 'dev';
   return (
-    <DetailSection title="About" icon="rune" testID="settings-about">
+    <DetailSection title={t('About')} icon="rune" testID="settings-about">
       <PixelText>
-        {`SkillForge ${version}. A calisthenics skill tree: the app suggests, you decide.`}
+        {t('SkillForge {version}. A calisthenics skill tree: the app suggests, you decide.', {
+          version,
+        })}
       </PixelText>
       <HealthNotice testID="about-health-notice" />
       <CreditLink credit={PRIVACY_POLICY} testID="about-privacy-policy" />
       <PixelText variant="small" tone="textMuted">
-        The progressions are community-sourced from the sources below and not yet reviewed by a
-        coach.
+        {t(
+          'The progressions are community-sourced from the sources below and not yet reviewed by a coach.',
+        )}
       </PixelText>
       <PixelText variant="label" tone="gold" accessibilityRole="header">
-        Sources
+        {t('Sources')}
       </PixelText>
       <View style={styles.list}>
         {CONTENT_SOURCES.map((credit) => (
@@ -55,10 +59,10 @@ export function AboutPanel() {
         ))}
       </View>
       <PixelText variant="small" tone="textMuted" testID="about-not-affiliated">
-        {NOT_AFFILIATED_NOTE}
+        {t(NOT_AFFILIATED_NOTE)}
       </PixelText>
       <PixelText variant="label" tone="gold" accessibilityRole="header">
-        Fonts
+        {t('Fonts')}
       </PixelText>
       <View style={styles.list}>
         {FONT_CREDITS.map((credit) => (

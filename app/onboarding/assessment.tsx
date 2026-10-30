@@ -9,6 +9,7 @@ import { Spacing } from '@/components/theme';
 import { PixelFrame, PixelText, PixelTextInput } from '@/components/ui';
 import { assessmentAnchors, searchNodes } from '@/domain/assessment';
 import type { ExerciseNode } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -32,11 +33,11 @@ export default function AssessmentStep() {
         key={`${prefix}-${node.id}`}
         node={node}
         icon={passed ? 'check' : 'sword'}
-        status={passed ? 'Tested out' : 'I can do this'}
+        status={passed ? t('Tested out') : t('I can do this')}
         onPress={() =>
           router.push({ pathname: '/onboarding/trial/[nodeId]', params: { nodeId: node.id } })
         }
-        accessibilityHint="Opens the Trial for this skill"
+        accessibilityHint={t('Opens the Trial for this skill')}
         onInfo={() => setInfoNode(node)}
         testID={`${prefix}-${node.id}`}
       />
@@ -47,19 +48,21 @@ export default function AssessmentStep() {
     <OnboardingScaffold
       step="assessment"
       icon="sword"
-      title="Prove your might"
-      subtitle="Optional. Already strong? Log a Trial for what you can do today and start further up the tree."
+      title={t('Prove your might')}
+      subtitle={t(
+        'Optional. Already strong? Log a Trial for what you can do today and start further up the tree.',
+      )}
       onBack={() => router.back()}
-      next={{ label: 'Continue', onPress: () => router.push('/onboarding/summary') }}
+      next={{ label: t('Continue'), onPress: () => router.push('/onboarding/summary') }}
       testID="onboarding-assessment">
       <View style={styles.section}>
         <PixelText variant="label" tone="rune" accessibilityRole="header">
-          On your path
+          {t('On your path')}
         </PixelText>
         {anchors.length === 0 ? (
           <PixelFrame>
             <PixelText tone="textMuted">
-              Pick goals to see milestones here, or search for any skill below.
+              {t('Pick goals to see milestones here, or search for any skill below.')}
             </PixelText>
           </PixelFrame>
         ) : (
@@ -68,15 +71,17 @@ export default function AssessmentStep() {
       </View>
       <View style={styles.section}>
         <PixelTextInput
-          label="Search any skill"
+          label={t('Search any skill')}
           value={query}
           onChangeText={setQuery}
-          placeholder="e.g. planche, pistol"
+          placeholder={t('e.g. planche, pistol')}
           returnKeyType="search"
           testID="assessment-search"
         />
         {query.trim().length > 0 && results.length === 0 && (
-          <PixelText tone="textMuted">No skill matches “{query.trim()}”.</PixelText>
+          <PixelText tone="textMuted">
+            {t('No skill matches “{query}”.', { query: query.trim() })}
+          </PixelText>
         )}
         {results.map((node) => row(node, 'search'))}
       </View>

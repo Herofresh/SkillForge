@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ONBOARDING_STEPS, onboardingStepNumber, type OnboardingStep } from '@/domain/onboarding';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { Border, Colors, Spacing } from '../theme';
@@ -62,15 +63,15 @@ export function OnboardingScaffold({
         style={styles.progress}
         accessible
         accessibilityRole="progressbar"
-        accessibilityLabel="Setup"
+        accessibilityLabel={t('Setup')}
         accessibilityValue={{
           min: 1,
           max: total,
           now: number,
-          text: `Step ${number} of ${total}`,
+          text: t('Step {n} of {total}', { n: number, total }),
         }}>
         <PixelText variant="label" tone="rune">
-          Step {number} / {total}
+          {t('Step {n} / {total}', { n: number, total })}
         </PixelText>
         <View style={styles.bar}>
           <SegmentedBar fraction={number / total} segments={total} color={Colors.rune} height={8} />
@@ -80,10 +81,10 @@ export function OnboardingScaffold({
         <Screen insetBottom={false} testID={testID}>
           {replaying && (
             <PixelButton
-              label="Back to the app"
+              label={t('Back to the app')}
               variant="secondary"
               onPress={leaveReplay}
-              accessibilityHint="Leaves the intro. What you already saved on its steps stays."
+              accessibilityHint={t('Leaves the intro. What you already saved on its steps stays.')}
               testID="onboarding-leave"
             />
           )}
@@ -105,7 +106,7 @@ export function OnboardingScaffold({
           ]}>
           {onBack && (
             <PixelButton
-              label="Back"
+              label={t('Back')}
               variant="secondary"
               onPress={onBack}
               testID="onboarding-back"

@@ -9,6 +9,7 @@ import { stackHeaderOptions } from '@/components/stackHeader';
 import { EmptyState, PixelButton, PixelModal, PixelText, Screen } from '@/components/ui';
 import { formatIssue } from '@/data/validate';
 import { overlayEntries, type OverlayEntry } from '@/domain/overlayEdit';
+import { t } from '@/i18n';
 import type { ValidationIssue } from '@/domain/types';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -38,13 +39,15 @@ export default function ProgressionsScreen() {
 
   return (
     <>
-      <Stack.Screen options={stackHeaderOptions('My progressions')} />
+      <Stack.Screen options={stackHeaderOptions(t('My progressions'))} />
       <Screen testID="progressions-screen">
         {overlayUnreadable.length > 0 && (
           <IssueNotes
-            title="Your saved changes couldn't be read"
+            title={t("Your saved changes couldn't be read")}
             messages={[
-              'The built-in tree is used. The saved changes stay on this device, but your next change to the tree or an import replaces them.',
+              t(
+                'The built-in tree is used. The saved changes stay on this device, but your next change to the tree or an import replaces them.',
+              ),
               ...overlayUnreadable.map(formatIssue),
             ]}
             testID="overlay-unreadable"
@@ -52,24 +55,26 @@ export default function ProgressionsScreen() {
         )}
         {overlayIssues.length > 0 && (
           <IssueNotes
-            title="Your changes don't fit this version"
+            title={t("Your changes don't fit this version")}
             messages={[
-              'The built-in tree is used until you fix or reset them. Your changes are kept.',
+              t('The built-in tree is used until you fix or reset them. Your changes are kept.'),
               ...overlayIssues.map(formatIssue),
             ]}
             testID="overlay-stale"
           />
         )}
         <DetailSection
-          title="Your changes"
+          title={t('Your changes')}
           icon="quill"
           variant="arcane"
           testID="progressions-list">
           {entries.length === 0 ? (
             <EmptyState
               icon="quill"
-              title="No changes yet"
-              message="Open a skill and choose Edit progression, or add your own exercise from the tree."
+              title={t('No changes yet')}
+              message={t(
+                'Open a skill and choose Edit progression, or add your own exercise from the tree.',
+              )}
             />
           ) : (
             entries.map((entry) => (
@@ -86,7 +91,11 @@ export default function ProgressionsScreen() {
                         })
                 }
                 actionLabel={
-                  entry.kind === 'hidden' ? 'Show' : entry.kind === 'added' ? 'Delete' : 'Reset'
+                  entry.kind === 'hidden'
+                    ? t('Show')
+                    : entry.kind === 'added'
+                      ? t('Delete')
+                      : t('Reset')
                 }
                 onAction={() => (entry.kind === 'hidden' ? reset(entry) : setResetting(entry))}
               />
@@ -94,7 +103,7 @@ export default function ProgressionsScreen() {
           )}
           <IssueNotes
             messages={issues.map(formatIssue)}
-            title="Not changed: the tree would break"
+            title={t('Not changed: the tree would break')}
             testID="progressions-issues"
           />
         </DetailSection>
@@ -103,17 +112,23 @@ export default function ProgressionsScreen() {
 
         <PixelModal
           visible={resetting !== undefined}
-          title={resetting?.kind === 'added' ? `Delete ${resetting.name}?` : 'Reset to default?'}
+          title={
+            resetting?.kind === 'added'
+              ? t('Delete {name}?', { name: resetting.name })
+              : t('Reset to default?')
+          }
           onClose={() => setResetting(undefined)}
-          closeLabel="Keep it"
+          closeLabel={t('Keep it')}
           testID="entry-reset-dialog">
           <PixelText>
             {resetting?.kind === 'added'
-              ? 'Your exercise leaves the tree. Its logged sets stay in your history but no longer count.'
-              : `${resetting?.name ?? ''} goes back to the built-in version.`}
+              ? t(
+                  'Your exercise leaves the tree. Its logged sets stay in your history but no longer count.',
+                )
+              : t('{name} goes back to the built-in version.', { name: resetting?.name ?? '' })}
           </PixelText>
           <PixelButton
-            label={resetting?.kind === 'added' ? 'Delete' : 'Reset'}
+            label={resetting?.kind === 'added' ? t('Delete') : t('Reset')}
             variant="danger"
             onPress={() => resetting && reset(resetting)}
             testID="entry-reset-confirm"

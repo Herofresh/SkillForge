@@ -4,6 +4,7 @@ import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { formatCountdown } from '@/domain/format';
 import { restCue, type SeenReading } from '@/domain/setTimer';
 import { restSecondsLeft, type ActiveSession } from '@/domain/train';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { buzz } from '../timer/vibration';
@@ -44,7 +45,7 @@ export function RestPanel({ session, onSkip, compact = false, style }: Props) {
   const countdown = (
     <PixelText
       variant="display"
-      accessibilityLabel={`Rest: ${seconds} seconds left`}
+      accessibilityLabel={t('Rest: {n} seconds left', { n: seconds })}
       testID="rest-countdown">
       {formatCountdown(seconds)}
     </PixelText>
@@ -57,9 +58,14 @@ export function RestPanel({ session, onSkip, compact = false, style }: Props) {
             <PixelIcon name="potion" />
             {countdown}
             <PixelText variant="label" tone="rune" style={styles.label}>
-              Rest
+              {t('Rest')}
             </PixelText>
-            <PixelButton label="Skip" variant="secondary" onPress={onSkip} testID="skip-rest" />
+            <PixelButton
+              label={t('Skip')}
+              variant="secondary"
+              onPress={onSkip}
+              testID="skip-rest"
+            />
           </View>
         </PixelFrame>
       </View>
@@ -70,11 +76,11 @@ export function RestPanel({ session, onSkip, compact = false, style }: Props) {
       <View style={styles.row}>
         <PixelIcon name="potion" />
         <PixelText variant="label" tone="rune" style={styles.label}>
-          Rest
+          {t('Rest')}
         </PixelText>
         {countdown}
       </View>
-      <PixelButton label="Skip rest" variant="secondary" onPress={onSkip} testID="skip-rest" />
+      <PixelButton label={t('Skip rest')} variant="secondary" onPress={onSkip} testID="skip-rest" />
     </PixelFrame>
   );
 }

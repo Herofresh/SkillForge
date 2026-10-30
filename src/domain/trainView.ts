@@ -3,6 +3,8 @@
  * show, built from the session model (`train.ts`), the tree and a `SessionResult`. Pure, so screens
  * only render; the wording comes from `format.ts`.
  */
+import { k, t } from '@/i18n';
+
 import type { ChallengeStep } from './challenges';
 import {
   formatClock,
@@ -38,18 +40,18 @@ import type {
 } from './types';
 
 export const BLOCK_LABELS: Readonly<Record<SessionBlockKind, string>> = {
-  warm_up: 'Warm-up',
-  skill: 'Skill',
-  strength: 'Strength',
-  core: 'Core',
-  cool_down: 'Cool-down',
-  added: 'Added by you',
+  warm_up: k('Warm-up'),
+  skill: k('Skill'),
+  strength: k('Strength'),
+  core: k('Core'),
+  cool_down: k('Cool-down'),
+  added: k('Added by you'),
 };
 
 export const OUTCOME_LABELS: Readonly<Record<Outcome, string>> = {
-  success: 'Success',
-  partial: 'Partial',
-  failed: 'Failed',
+  success: k('Success'),
+  partial: k('Partial'),
+  failed: k('Failed'),
 };
 
 const nameOf = (lookup: NodeLookup, id: string): string => lookup.get(id)?.name ?? id;
@@ -146,7 +148,11 @@ export function blockViews(
     const last = blocks[blocks.length - 1];
     if (last && last.kind === exercise.block) last.exercises.push(view);
     else
-      blocks.push({ kind: exercise.block, label: BLOCK_LABELS[exercise.block], exercises: [view] });
+      blocks.push({
+        kind: exercise.block,
+        label: t(BLOCK_LABELS[exercise.block]),
+        exercises: [view],
+      });
   }
   return blocks;
 }
@@ -323,7 +329,7 @@ export function summaryView(
       nodeId: exercise.nodeId,
       name: nameOf(lookup, exercise.nodeId),
       outcome: exercise.outcome,
-      outcomeLabel: OUTCOME_LABELS[exercise.outcome],
+      outcomeLabel: t(OUTCOME_LABELS[exercise.outcome]),
       xp: exercise.xp,
       ...(xpShareNote(exercise.xpShare) !== undefined
         ? { xpNote: xpShareNote(exercise.xpShare) }

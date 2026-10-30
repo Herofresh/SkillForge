@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
+import { t } from '@/i18n';
+
 import { Colors, Spacing } from './theme';
 import { EmptyState } from './ui';
 
@@ -18,9 +20,9 @@ export function RootErrorScreen({ onRetry }: Props) {
     <View style={styles.container} testID="root-error">
       <EmptyState
         icon="potion"
-        title="Something went wrong"
-        message="This screen hit an error. Your data is safe on this device."
-        action={{ label: 'Try again', onPress: onRetry, testID: 'root-error-retry' }}
+        title={t('Something went wrong')}
+        message={t('This screen hit an error. Your data is safe on this device.')}
+        action={{ label: t('Try again'), onPress: onRetry, testID: 'root-error-retry' }}
       />
     </View>
   );

@@ -2,6 +2,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { t } from '@/i18n';
 import { startApp } from '@/store/bootstrap';
 
 import { Colors, Spacing } from './theme';
@@ -50,10 +51,10 @@ export function DataGate({ fontsReady, children }: Props) {
     <View style={styles.container}>
       <EmptyState
         icon="potion"
-        title="Could not open your data"
+        title={t('Could not open your data')}
         message={status.kind === 'error' ? status.message : ''}>
         <PixelText variant="small" tone="textMuted" align="center">
-          Nothing was deleted. Restart the app to try again.
+          {t('Nothing was deleted. Restart the app to try again.')}
         </PixelText>
       </EmptyState>
     </View>

@@ -12,6 +12,7 @@
  * Pure TypeScript: no React/Expo/DB (ADR-009). Files and the database live in `src/store/` and `src/db/`.
  */
 import { formatIssue } from '@/data/validate';
+import { t } from '@/i18n';
 
 import {
   applyOverlay,
@@ -400,16 +401,24 @@ export function parseBackup(text: string, baseNodes: readonly ExerciseNode[]): B
   try {
     parsed = JSON.parse(text);
   } catch (error) {
-    return rejected(`The file is not valid JSON (${(error as Error).message}).`);
+    return rejected(
+      t('The file is not valid JSON ({error}).', { error: (error as Error).message }),
+    );
   }
-  if (!isRecord(parsed)) return rejected('The file is not a SkillForge backup (no JSON object).');
+  if (!isRecord(parsed)) {
+    return rejected(t('The file is not a SkillForge backup (no JSON object).'));
+  }
   if (parsed.format === OVERLAY_FORMAT) {
     return rejected(
-      'The file is a progression overlay, not a backup. Import it in the node editor instead.',
+      t('The file is a progression overlay, not a backup. Import it in the node editor instead.'),
     );
   }
   if (parsed.format !== BACKUP_FORMAT) {
-    return rejected(`The file is not a SkillForge backup ('format' is not '${BACKUP_FORMAT}').`);
+    return rejected(
+      t("The file is not a SkillForge backup ('format' is not '{format}').", {
+        format: BACKUP_FORMAT,
+      }),
+    );
   }
   const version = parsed.schemaVersion;
   if (typeof version !== 'number' || !Number.isSafeInteger(version) || version < 1) {
@@ -419,8 +428,10 @@ export function parseBackup(text: string, baseNodes: readonly ExerciseNode[]): B
   }
   if (version > BACKUP_SCHEMA_VERSION) {
     return rejected(
-      `The backup was made by a newer SkillForge (backup version ${version}; this app reads up to ` +
-        `${BACKUP_SCHEMA_VERSION}). Update the app, then import it again. Nothing was changed.`,
+      t(
+        'The backup was made by a newer SkillForge (backup version {version}; this app reads up to {supported}). Update the app, then import it again. Nothing was changed.',
+        { version, supported: BACKUP_SCHEMA_VERSION },
+      ),
     );
   }
 

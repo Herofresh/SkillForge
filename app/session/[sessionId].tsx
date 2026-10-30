@@ -15,6 +15,7 @@ import { sessionClassTierUps, wornClass } from '@/domain/classes';
 import { sessionAccessoryUnlocks } from '@/domain/companion';
 import { formatShortDate } from '@/domain/format';
 import { summaryView } from '@/domain/trainView';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -49,8 +50,12 @@ export default function PastSessionScreen() {
   if (!session || !view) {
     return (
       <Screen centered>
-        <Stack.Screen options={stackHeaderOptions('Session')} />
-        <EmptyState icon="scroll" title="Session not found" message="It is not in your log." />
+        <Stack.Screen options={stackHeaderOptions(t('Session'))} />
+        <EmptyState
+          icon="scroll"
+          title={t('Session not found')}
+          message={t('It is not in your log.')}
+        />
       </Screen>
     );
   }
@@ -63,7 +68,7 @@ export default function PastSessionScreen() {
           view={view}
           celebrate={false}
           playKey={session.id}
-          subtitle={`Session of ${date}`}
+          subtitle={t('Session of {date}', { date })}
           onOpenNode={(nodeId) => router.push({ pathname: '/node/[nodeId]', params: { nodeId } })}
         />
         <ClassUnlockPanel
@@ -87,7 +92,7 @@ export default function PastSessionScreen() {
         {view.warnings.length > 0 && (
           <PixelFrame variant="stone" contentStyle={styles.gap} testID="past-session-notes">
             <PixelText variant="label" tone="ember" accessibilityRole="header">
-              Safeguard notes
+              {t('Safeguard notes')}
             </PixelText>
             {view.warnings.map((warning) => (
               <PixelText key={`${warning.code}-${warning.nodeId ?? ''}`} variant="small">

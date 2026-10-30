@@ -11,6 +11,7 @@ import { PixelFrame, PixelText } from '@/components/ui';
 import { nodesInBranch } from '@/domain/branch';
 import { MAX_GOALS, MIN_GOALS } from '@/domain/onboarding';
 import { BRANCHES, type Branch, type ExerciseNode } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -35,24 +36,27 @@ export default function GoalsStep() {
     <OnboardingScaffold
       step="goals"
       icon="star"
-      title="Choose your quests"
-      subtitle={`Pick ${MIN_GOALS} to ${MAX_GOALS} skills to work towards. Workouts lead you there.`}
+      title={t('Choose your quests')}
+      subtitle={t('Pick {min} to {max} skills to work towards. Workouts lead you there.', {
+        min: MIN_GOALS,
+        max: MAX_GOALS,
+      })}
       onBack={() => router.back()}
-      skip={{ label: 'Later', onPress: goNext }}
-      next={{ label: 'Next', onPress: goNext, disabled: goals.length < MIN_GOALS }}
+      skip={{ label: t('Later'), onPress: goNext }}
+      next={{ label: t('Next'), onPress: goNext, disabled: goals.length < MIN_GOALS }}
       testID="onboarding-goals">
       <PixelFrame variant="gold" contentStyle={styles.summary}>
         <PixelText variant="label" tone="gold" testID="goal-count">
-          Goals {goals.length} / {MAX_GOALS}
+          {t('Goals {n} / {max}', { n: goals.length, max: MAX_GOALS })}
         </PixelText>
         <PixelText variant="small">
           {goals.length === 0
-            ? 'No goals yet. Tap a skill below to pick it.'
+            ? t('No goals yet. Tap a skill below to pick it.')
             : goals.map((id) => nodeById.get(id)?.name ?? id).join(' · ')}
         </PixelText>
         {full && (
           <PixelText variant="small" tone="ember" accessibilityLiveRegion="polite">
-            {`${MAX_GOALS} goals is the limit. Remove one to pick another.`}
+            {t('{max} goals is the limit. Remove one to pick another.', { max: MAX_GOALS })}
           </PixelText>
         )}
       </PixelFrame>
@@ -66,10 +70,10 @@ export default function GoalsStep() {
               node={node}
               icon={picked ? 'star' : node.legendary ? 'flame' : 'rune'}
               selected={picked}
-              status={picked ? 'Goal' : undefined}
+              status={picked ? t('Goal') : undefined}
               role="checkbox"
               onPress={() => toggle(node.id)}
-              accessibilityHint={picked ? 'Removes this goal' : 'Picks this skill as a goal'}
+              accessibilityHint={picked ? t('Removes this goal') : t('Picks this skill as a goal')}
               onInfo={() => setInfoNode(node)}
               testID={`goal-${node.id}`}
             />

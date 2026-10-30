@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import type { BattleBlock } from '@/domain/battleView';
 import type { ActiveSession } from '@/domain/train';
+import { k, t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { SetTimerPanel } from '../timer/SetTimerPanel';
@@ -24,8 +25,9 @@ type Props = {
   onResetTimer: () => void;
 };
 
-const TAP_HELP =
-  'Tap a monster to beat its set at the target; tap it again for one rep fewer. Long press to enter an exact number or edit a set. Holds: tap to start the timer, tap again to stop.';
+const TAP_HELP = k(
+  'Tap a monster to beat its set at the target; tap it again for one rep fewer. Long press to enter an exact number or edit a set. Holds: tap to start the timer, tap again to stop.',
+);
 
 /**
  * The Battle view of the live session (PLAN 7.9, ADR-071): every exercise as a card with its sets as
@@ -47,7 +49,7 @@ export function BattleBoard({
   return (
     <View style={styles.gap} testID="battle-board">
       <PixelText variant="small" tone="textMuted">
-        {pendingNote ?? TAP_HELP}
+        {pendingNote ?? t(TAP_HELP)}
       </PixelText>
       {blocks.map((block, index) => (
         <View key={`${block.kind}-${index}`} style={styles.gap}>

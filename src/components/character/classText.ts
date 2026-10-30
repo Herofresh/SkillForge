@@ -4,7 +4,9 @@
  */
 import { formatOgLevel } from '@/domain/format';
 import type { RequirementPart } from '@/domain/classes';
+import { rankLabel } from '@/domain/rankLadder';
 import { ATTRIBUTES, type ClassRule } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { ATTRIBUTE_LABELS } from '../node/AttributeChips';
 
@@ -12,19 +14,19 @@ import { ATTRIBUTE_LABELS } from '../node/AttributeChips';
 export function requirementText(rule: ClassRule): string {
   switch (rule.kind) {
     case 'start':
-      return 'Every hero starts here';
+      return t('Every hero starts here');
     case 'stats': {
       const parts = ATTRIBUTES.filter((attribute) => rule.points[attribute] !== undefined).map(
-        (attribute) => `${ATTRIBUTE_LABELS[attribute]} ${rule.points[attribute]}`,
+        (attribute) => `${t(ATTRIBUTE_LABELS[attribute])} ${rule.points[attribute]}`,
       );
-      return parts.length <= 2
-        ? parts.join(' and ')
-        : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+      return parts.length === 1
+        ? parts[0]
+        : t('{a} and {b}', { a: parts.slice(0, -1).join(', '), b: parts[parts.length - 1] });
     }
     case 'sessions':
-      return `${rule.count} sessions logged`;
+      return t('{n} sessions logged', { n: rule.count });
     case 'rank':
-      return `Rank ${rule.rank}`;
+      return t('Rank {rank}', { rank: rankLabel(rule.rank) });
   }
 }
 
@@ -35,10 +37,15 @@ export function requirementText(rule: ClassRule): string {
 export function partText(part: RequirementPart): string {
   switch (part.kind) {
     case 'attribute':
-      return `${ATTRIBUTE_LABELS[part.attribute]} ${part.current} / ${part.target}`;
+      return `${t(ATTRIBUTE_LABELS[part.attribute])} ${part.current} / ${part.target}`;
     case 'sessions':
-      return `${part.current} / ${part.target} sessions`;
+      return t('{current} / {target} sessions', { current: part.current, target: part.target });
     case 'rank':
-      return `You are ${part.currentRank} · branch median ${formatOgLevel(part.current)} · ${part.rank} at ${formatOgLevel(part.target)}`;
+      return t('You are {currentRank} · branch median {median} · {rank} at {level}', {
+        currentRank: rankLabel(part.currentRank),
+        median: formatOgLevel(part.current),
+        rank: rankLabel(part.rank),
+        level: formatOgLevel(part.target),
+      });
   }
 }

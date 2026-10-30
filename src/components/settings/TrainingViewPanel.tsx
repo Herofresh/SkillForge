@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import type { TrainingView } from '@/domain/battleView';
+import { k, t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { DetailSection } from '../node/DetailSection';
@@ -10,13 +11,15 @@ import { PixelChip, PixelText } from '../ui';
 const VIEWS: readonly { view: TrainingView; label: string; text: string }[] = [
   {
     view: 'classic',
-    label: 'Classic',
-    text: 'One exercise at a time with a stepper; its sets are monsters that take the hits.',
+    label: k('Classic'),
+    text: k('One exercise at a time with a stepper; its sets are monsters that take the hits.'),
   },
   {
     view: 'battle',
-    label: 'Battle',
-    text: 'Every exercise at once, each set a monster: tap to beat it, tap again for one rep fewer, long press for an exact number.',
+    label: k('Battle'),
+    text: k(
+      'Every exercise at once, each set a monster: tap to beat it, tap again for one rep fewer, long press for an exact number.',
+    ),
   },
 ];
 
@@ -26,14 +29,14 @@ export function TrainingViewPanel() {
   const setTrainingView = useAppStore((state) => state.setTrainingView);
   const chosen = VIEWS.find((entry) => entry.view === trainingView) ?? VIEWS[0];
   return (
-    <DetailSection title="Training view" icon="sword" testID="settings-training-view">
+    <DetailSection title={t('Training view')} icon="sword" testID="settings-training-view">
       <View style={styles.row} accessibilityRole="tablist">
         {VIEWS.map(({ view, label }) => (
           <PixelChip
             key={view}
             role="tab"
-            label={label}
-            accessibilityLabel={`${label} training view`}
+            label={t(label)}
+            accessibilityLabel={t('{label} training view', { label: t(label) })}
             selected={view === trainingView}
             onPress={() => setTrainingView(view)}
             testID={`training-view-${view}`}
@@ -41,7 +44,7 @@ export function TrainingViewPanel() {
         ))}
       </View>
       <PixelText variant="small" tone="textMuted" testID="training-view-text">
-        {chosen.text}
+        {t(chosen.text)}
       </PixelText>
     </DetailSection>
   );

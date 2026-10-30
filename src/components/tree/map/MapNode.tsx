@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { tierForOgLevel } from '@/domain/tier';
 import type { MapNodePlacement } from '@/domain/treeMap';
 import type { TreeTile } from '@/domain/treeView';
+import { t } from '@/i18n';
 
 import { Colors, PIXEL, Spacing, TierColors, TileFrames } from '../../theme';
 import { PixelFrame, PixelIcon, PixelText } from '../../ui';
@@ -39,7 +40,7 @@ export const MapNode = memo(function MapNode({ tile, place, onOpen, custom, onIn
   const silhouette = state === 'legendary';
   const status = TRAINED_TILE_STATES.includes(state)
     ? level.capped
-      ? `LV ${level.level} · Trial` // stuck at level 5 until the Trial (FB-4)
+      ? t('LV {level} · Trial', { level: level.level }) // stuck at level 5 until the Trial (FB-4)
       : `LV ${level.level}` // the state icon (sword, shield, star) says the rest
     : tileStateLabel(tile);
   return (
@@ -49,7 +50,7 @@ export const MapNode = memo(function MapNode({ tile, place, onOpen, custom, onIn
       accessibilityRole="button"
       accessibilityLabel={tileAccessibilityLabel(tile, custom)}
       accessibilityHint={
-        onInfo ? 'Opens the skill. Long press shows what the exercise is.' : 'Opens the skill'
+        onInfo ? t('Opens the skill. Long press shows what the exercise is.') : t('Opens the skill')
       }
       testID={`map-node-${node.id}`}
       style={[

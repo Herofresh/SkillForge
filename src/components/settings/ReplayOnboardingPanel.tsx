@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { DetailSection } from '../node/DetailSection';
@@ -13,28 +14,31 @@ export function ReplayOnboardingPanel() {
   const replayOnboarding = useAppStore((state) => state.replayOnboarding);
   const [confirming, setConfirming] = useState(false);
   return (
-    <DetailSection title="Intro" icon="flame" testID="settings-intro">
+    <DetailSection title={t('Intro')} icon="flame" testID="settings-intro">
       <PixelText variant="small" tone="textMuted">
-        Walk through the first-run steps again: hero, equipment, goals and the optional Trials.
+        {t(
+          'Walk through the first-run steps again: hero, equipment, goals and the optional Trials.',
+        )}
       </PixelText>
       <PixelButton
-        label="Replay onboarding"
+        label={t('Replay onboarding')}
         variant="secondary"
         onPress={() => setConfirming(true)}
         testID="replay-onboarding"
       />
       <PixelModal
         visible={confirming}
-        title="Replay the intro?"
+        title={t('Replay the intro?')}
         onClose={() => setConfirming(false)}
-        closeLabel="Cancel"
+        closeLabel={t('Cancel')}
         testID="replay-dialog">
         <PixelText>
-          Your data stays. Only the intro runs again, starting from your current hero name,
-          equipment and goals. A Trial you log there is saved like any other session.
+          {t(
+            'Your data stays. Only the intro runs again, starting from your current hero name, equipment and goals. A Trial you log there is saved like any other session.',
+          )}
         </PixelText>
         <PixelButton
-          label="Replay intro"
+          label={t('Replay intro')}
           onPress={() => {
             setConfirming(false);
             replayOnboarding();

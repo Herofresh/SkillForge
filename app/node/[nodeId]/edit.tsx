@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { NodeEditorBody } from '@/components/editor/NodeEditorBody';
 import { stackHeaderOptions } from '@/components/stackHeader';
 import { EmptyState, Screen } from '@/components/ui';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -20,16 +21,20 @@ export default function EditNodeScreen() {
   if (!initial) {
     return (
       <Screen centered>
-        <Stack.Screen options={stackHeaderOptions('Edit')} />
-        <EmptyState icon="potion" title="Unknown skill" message={`No skill '${nodeId}' here.`} />
+        <Stack.Screen options={stackHeaderOptions(t('Edit'))} />
+        <EmptyState
+          icon="potion"
+          title={t('Unknown skill')}
+          message={t("No skill '{nodeId}' here.", { nodeId })}
+        />
       </Screen>
     );
   }
   return (
     <NodeEditorBody
       initial={initial}
-      title={`Edit ${initial.name}`}
-      saveLabel="Save changes"
+      title={t('Edit {name}', { name: initial.name })}
+      saveLabel={t('Save changes')}
       onSaved={() => router.back()}
       onCancel={() => router.back()}
     />

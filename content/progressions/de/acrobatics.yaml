@@ -1,0 +1,132 @@
+# German texts for content/progressions/acrobatics.yaml (FB-8): same ids, same cues in the same order.
+branch: acrobatics
+nodes:
+  - id: tuck_rock
+    name: "Schaukeln im Päckchen"
+    description: "Du sitzt als enges Päckchen, schaukelst nach hinten auf die Schulterblätter und wieder nach vorne auf die Füße. Die Rollform hinter jeder Rolle und jeder Fallübung."
+    cues:
+      - "Sitze als enges Päckchen, Knie zur Brust, Kinn eingezogen."
+      - "Schaukle nach hinten auf die Schulterblätter und wieder nach vorne auf die Füße."
+      - "Hände neben den Ohren, Handflächen nach oben (\"Pizza-Hände\"), bereit für die Rolle rückwärts; Kopf nie am Boden."
+
+  - id: back_breakfall
+    name: "Fallschule rückwärts (Ushiro Ukemi)"
+    description: "Ein Judo-Fall nach hinten: Du setzt dich tief ab, rollst mit rundem Rücken nach hinten und schlägst mit beiden Armen auf den Boden, um den Aufprall zu verteilen. Lehrt dich, rückwärts zu fallen, ohne den Kopf anzuschlagen."
+    cues:
+      - "Kinn zur Brust, Blick auf deinen Gürtel; der Kopf berührt nie den Boden."
+      - "Setze die Hüften nah an den Fersen ab und rolle mit rundem Rücken nach hinten."
+      - "Schlage mit beiden ganzen Armen in etwa 45 Grad vom Körper auf den Boden, Handflächen nach unten."
+      - "Baue vom Liegen über Sitzen und Hocken bis zum Stehen auf; bleib tief, bis es leicht ist."
+      - "Übe auf weichem Untergrund (Rasen, Matte oder Teppich), nicht auf hartem Boden."
+
+  - id: forward_roll
+    name: "Rolle vorwärts"
+    description: "Aus der Hocke mit den Händen am Boden ziehst du das Kinn ein und rollst vorwärts über den hinteren Teil der Schultern wieder in die Hocke. Der klassische Purzelbaum."
+    cues:
+      - "Hocke, Hände schulterbreit am Boden, Hüften hoch."
+      - "Ziehe das Kinn zur Brust und rolle über Hinterkopf und Schultern, nie über den Scheitel."
+      - "Bleib ein enges Päckchen und greife nach vorne, um aufzustehen, ohne dich hinter dir vom Boden abzudrücken."
+      - "Übe auf weichem Untergrund (Rasen, Matte oder Teppich), nicht auf hartem Boden."
+
+  - id: side_breakfall
+    name: "Fallschule seitwärts (Yoko Ukemi)"
+    description: "Ein Judo-Fall zur Seite: Ein Bein schwingt quer, du setzt dich ab und landest auf der Seite, während ein Arm auf den Boden schlägt. Lehrt dich, sicher seitwärts zu fallen."
+    cues:
+      - "Wechsle die Seiten; zähle jeden Fall als eine Wiederholung."
+      - "Schwinge ein Bein quer vor den Körper und setze dich nah an der Ferse des Standbeins ab."
+      - "Lande auf der Seite, nicht auf dem Rücken; schlage mit dem ganzen Arm der Fallseite in etwa 45 Grad ab."
+      - "Kinn eingezogen, Kopf vom Boden weg; Beine auseinander, nie gekreuzt."
+      - "Übe auf weichem Untergrund (Rasen, Matte oder Teppich), nicht auf hartem Boden."
+
+  - id: forward_shoulder_roll
+    name: "Schulterrolle vorwärts (Zenpo Kaiten Ukemi)"
+    description: "Eine Judo-Rolle vorwärts, die diagonal über einen Arm und eine Schulter zur gegenüberliegenden Hüfte läuft, sodass der Kopf nie den Boden berührt. Sie verwandelt einen Sturz nach vorne in eine Rolle zurück auf die Füße."
+    cues:
+      - "Wechsle die Seiten; zähle jede Rolle als eine Wiederholung."
+      - "Rolle diagonal über den Arm und die Schulterrückseite zur gegenüberliegenden Hüfte; der Kopf bleibt vom Boden weg."
+      - "Kinn rein, Blick zur fernen Schulter; halte den führenden Arm rund wie ein Rad."
+      - "Starte aus dem Knien, dann aus dem Stand, dann aus dem Gehen; schlage zum Abschluss mit dem freien Arm ab."
+      - "Übe auf weichem Untergrund (Rasen, Matte oder Teppich), nicht auf hartem Boden."
+    prerequisite_notes:
+      side_breakfall: "Die Rolle endet in der Fallschule seitwärts."
+
+  - id: backward_shoulder_roll
+    name: "Schulterrolle rückwärts"
+    description: "Eine Rolle rückwärts über eine Schulter statt über den Kopf, die auf den Knien oder Füßen endet. Eine sanftere Art, rückwärts zu rollen, die den Nacken frei hält."
+    cues:
+      - "Wechsle die Seiten; zähle jede Rolle als eine Wiederholung."
+      - "Setze dich nach hinten, drehe den Kopf weg und rolle über die Rückseite einer Schulter, nicht über den Nacken."
+      - "Stecke den Kopf unter den anderen Arm; wandere mit Knien oder Füßen herum, um abzuschließen."
+      - "Übe auf weichem Untergrund (Rasen, Matte oder Teppich), nicht auf hartem Boden."
+
+  - id: bunny_hop_cartwheel
+    name: "Hasensprung-Rad"
+    description: "Du stehst seitlich zu einer Linie, setzt beide Hände darauf und hüpfst mit beiden Füßen zusammen auf die andere Seite. Ein kleines, niedriges Rad, das lehrt, Gewicht auf die Hände zu bringen."
+    cues:
+      - "Stelle dich seitlich zu einer Linie, setze beide Hände darauf und hüpfe mit beiden Füßen auf die andere Seite."
+      - "Arme gestreckt, Gewicht auf den Händen; Finger seitlich zur Linie gedreht."
+      - "Hebe die Hüften mit jedem Hüpfer etwas höher; Reihenfolge Fuß, Hand, Hand, Fuß, Fuß."
+    prerequisite_notes:
+      wall_plank: "Du trägst dein Gewicht bequem auf gestreckten Armen mit den Hüften über den Schultern."
+
+  - id: backward_roll
+    name: "Rolle rückwärts"
+    description: "Aus der Hocke rollst du mit den Händen neben den Ohren rückwärts über den Rücken, drückst dich über die Hände ab und landest auf den Füßen. Der Purzelbaum rückwärts."
+    cues:
+      - "Hände neben den Ohren, Handflächen nach oben, als hieltest du ein Pizzablech; Kinn eingezogen."
+      - "Schaukle nach hinten; Hände und Hinterkopf berühren den Boden gleichzeitig."
+      - "Drücke kräftig über die Hände, damit der Nacken kein Gewicht trägt, und lande auf den Füßen, nicht auf den Knien."
+      - "Lerne sie zuerst eine schiefe Ebene hinunter; stoppe, wenn du Druck im Nacken spürst."
+      - "Übe auf weichem Untergrund (Rasen, Matte oder Teppich), nicht auf hartem Boden."
+    prerequisite_notes:
+      push_up: "Die Arme müssen den Körper über den Kopf drücken, weg vom Nacken."
+
+  - id: cartwheel
+    name: "Rad"
+    description: "Aus dem Stand drehst du dich seitlich auf eine Hand, dann auf die andere, die Beine gehen weit gegrätscht über Kopf, und du landest einen Fuß nach dem anderen auf einer Linie. Eine radartige Drehung durch den seitlichen Handstand."
+    cues:
+      - "Starte seitlich zu einer Linie, Arme oben neben den Ohren, ein Bein in Bewegungsrichtung gehoben."
+      - "Ausfallschritt hinein und nach unten; setze Hand, Hand auf die Linie, Finger seitlich gedreht."
+      - "Beine weit gegrätscht durch die Senkrechte; lande Fuß, Fuß nah an den Händen, Arme oben."
+    prerequisite_notes:
+      wall_handstand: "Der Aufschwung in den Handstand an der Wand kommt vor dem Rad (GymnasticsHQ)."
+
+  - id: quarter_turn_cartwheel
+    name: "Rad mit Vierteldrehung (vorwärts-rückwärts)"
+    description: "Ein Rad, das mit Blick entlang der Linie startet und auf der zweiten Hand eine Vierteldrehung macht, sodass du mit Blick zurück landest, woher du kamst. Die Brücke vom Rad zum Rondat."
+    cues:
+      - "Starte mit Blick entlang der Linie, nicht seitlich."
+      - "Erste Hand wie beim Rad; drehe die zweite Hand ein, sodass ihre Finger nach hinten zeigen."
+      - "Lande mit Blick dorthin, wo du gestartet bist, meist im Ausfallschritt."
+
+  - id: one_handed_cartwheel
+    name: "Einarmiges Rad"
+    description: "Ein Rad auf nur einer Hand, der freie Arm schwingt zur Seite hinaus. Die Beine gehen über Kopf, während nur eine Hand am Boden ist."
+    cues:
+      - "Setze eine Hand, Finger seitlich; der freie Arm schwingt vorne hinunter und zur Seite hinaus."
+      - "Die Beine schwingen gestreckt über Kopf mit festem Rumpf."
+      - "Der erste Fuß landet nah an der Hand; richte die Brust schnell auf."
+      - "Zwischenschritt: Lege die zweite Hand auf die erste, während du hinübergehst."
+
+  - id: round_off
+    name: "Rondat"
+    description: "Wie ein Rad, aber die Beine schließen über den Händen und du landest auf beiden Füßen zugleich, mit Blick zurück, woher du kamst. Der Einstieg in die meisten Bodenturn-Bahnen."
+    cues:
+      - "Schritt hinein mit den Armen neben den Ohren, tiefer Ausfallschritt und weit nach vorne greifen."
+      - "Die zweite Hand dreht nach hinten; der Kopf bleibt zwischen den Armen."
+      - "Schließe die Beine nach der Senkrechten und drücke kräftig aus den Schultern."
+      - "Lande auf beiden Füßen mit Blick zurück, in leichter Hollow-Position, nicht im Pike."
+    prerequisite_notes:
+      quarter_turn_cartwheel: "Ein sauberes, gerades Rad vorwärts-rückwärts mit korrekter Handposition (NRG)."
+      wall_handstand: "Ein kräftiger, gerader Aufschwung in den Handstand (NRG)."
+      hollow_hold: "Gute Körperspannung und ein Abgang in Hollow-Position."
+
+  - id: aerial_cartwheel
+    name: "Aerial"
+    description: "Ein Rad ohne Hände: Ein kräftiger Abdruck wirft den Körper seitlich durch die Luft, und du landest einen Fuß nach dem anderen. Ein fortgeschrittener akrobatischer Skill."
+    cues:
+      - "Lerne ihn zuerst mit Trainer oder Hilfestellung und auf einer weichen Matte, idealerweise von einer Erhöhung herab."
+      - "Übe Needle Kicks und schnelle, enge Räder, bevor du die Hände wegnimmst."
+      - "Stoße kräftig mit dem hinteren Bein ab und hebe die Brust; die Beine machen die Arbeit, nicht die Arme."
+    prerequisite_notes:
+      round_off: "Lehrt den Abdruck aus den Beinen."

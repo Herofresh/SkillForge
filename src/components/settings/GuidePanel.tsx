@@ -1,6 +1,8 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
+import { t } from '@/i18n';
+
 import { GuideButton } from '../guide/GuideButton';
 import { DetailSection } from '../node/DetailSection';
 import { Spacing } from '../theme';
@@ -13,20 +15,21 @@ import { PixelButton, PixelText } from '../ui';
 export function GuidePanel() {
   const router = useRouter();
   return (
-    <DetailSection title="How SkillForge works" icon="info" testID="settings-guide">
+    <DetailSection title={t('How SkillForge works')} icon="info" testID="settings-guide">
       <PixelText variant="small" tone="textMuted">
-        XP, levels, ranks, classes, the companion and the rest, explained. Look for the “i” next to
-        each of them in the app too.
+        {t(
+          'XP, levels, ranks, classes, the companion and the rest, explained. Look for the “i” next to each of them in the app too.',
+        )}
       </PixelText>
       <PixelButton
-        label="Open the guide"
+        label={t('Open the guide')}
         icon="scroll"
         variant="secondary"
         onPress={() => router.push('/guide')}
         testID="open-guide"
       />
       <View style={styles.row}>
-        <PixelText style={styles.flex}>Home-screen widgets</PixelText>
+        <PixelText style={styles.flex}>{t('Home-screen widgets')}</PixelText>
         <GuideButton topic="widgets" />
       </View>
     </DetailSection>

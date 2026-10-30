@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { hasTendonWarning } from '@/domain/safeguards';
 import type { SafeguardWarning } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { PixelText } from '../ui';
@@ -17,7 +18,7 @@ export function SafeguardGuideNote({ warnings }: { warnings: readonly SafeguardW
   return (
     <View style={styles.row}>
       <PixelText variant="small" tone="textMuted" style={styles.flex}>
-        Why these warnings?
+        {t('Why these warnings?')}
       </PixelText>
       <GuideButton topic="safeguards" testID="guide-safeguards-warnings" />
     </View>

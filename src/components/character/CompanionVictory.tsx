@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { t } from '@/i18n';
+
 import { Colors, PIXEL, Spacing } from '../theme';
 import { PixelFrame, PixelText } from '../ui';
 
@@ -22,10 +24,10 @@ export function CompanionVictory({ testID = 'summary-companion' }: { testID?: st
         </View>
         <View style={styles.text}>
           <PixelText variant="title" tone="gold">
-            Victory!
+            {t('Victory!')}
           </PixelText>
           <PixelText variant="small" tone="textMuted">
-            Your companion cheers for this session.
+            {t('Your companion cheers for this session.')}
           </PixelText>
         </View>
       </View>

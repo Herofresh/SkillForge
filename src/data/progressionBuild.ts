@@ -11,6 +11,7 @@ import type { Branch, ExerciseNode, Metric, Trial, ValidationIssue } from '@/dom
 import { parseBranchFile } from './progressionFormat';
 import { BRANCH_NAMES } from './skills/branches';
 import { validateNodes } from './validate';
+import type { NodeTranslations } from './progressionTranslations';
 
 /** Repo-relative, POSIX-style paths. */
 export const PROGRESSIONS_DIR = 'content/progressions';
@@ -31,6 +32,8 @@ export interface BuildResult {
   /** Sorted by branch (in `BRANCHES` order), then chainOrder. */
   nodes: ExerciseNode[];
   issues: ValidationIssue[];
+  /** The content translations by locale (`buildTranslations`); absent when only the matrix was built. */
+  translations?: NodeTranslations;
 }
 
 /** Parses every branch file, checks each against its file name, then validates the whole set. */

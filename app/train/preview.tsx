@@ -12,6 +12,7 @@ import { TrainWarningList } from '@/components/train/TrainWarningList';
 import { EmptyState, PixelButton, PixelFrame, PixelText, Screen } from '@/components/ui';
 import { allAcknowledged, planMinutes } from '@/domain/train';
 import { blockViews } from '@/domain/trainView';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 type Sheet =
@@ -52,14 +53,18 @@ export default function PlanPreviewScreen() {
   if (!plan) {
     return (
       <Screen centered>
-        <Stack.Screen options={stackHeaderOptions('Your plan')} />
-        <EmptyState icon="scroll" title="No plan" message="Plan a session on the Train tab." />
+        <Stack.Screen options={stackHeaderOptions(t('Your plan'))} />
+        <EmptyState
+          icon="scroll"
+          title={t('No plan')}
+          message={t('Plan a session on the Train tab.')}
+        />
       </Screen>
     );
   }
 
   const profileName =
-    profiles.find((profile) => profile.id === plan.equipmentProfileId)?.name ?? 'Equipment';
+    profiles.find((profile) => profile.id === plan.equipmentProfileId)?.name ?? t('Equipment');
   const acknowledged = allAcknowledged(warnings, plan.acknowledged);
   const empty = plan.exercises.length === 0;
   const start = () => {
@@ -69,20 +74,27 @@ export default function PlanPreviewScreen() {
 
   return (
     <>
-      <Stack.Screen options={stackHeaderOptions('Your plan')} />
+      <Stack.Screen options={stackHeaderOptions(t('Your plan'))} />
       <Screen testID="plan-preview">
         <PixelFrame variant="raised" contentStyle={styles.gap}>
           <PixelText variant="label" tone="rune">
-            {`${profileName} · ${plan.minutes} min`}
+            {t('{profile} · {minutes} min', { profile: profileName, minutes: plan.minutes })}
           </PixelText>
           <View style={styles.header}>
             <PixelText variant="title" accessibilityRole="header" style={styles.action}>
-              Today&apos;s quest
+              {t("Today's quest")}
             </PixelText>
             <GuideButton topic="generator" />
           </View>
           <PixelText variant="small" tone="textMuted" testID="plan-estimate">
-            {`${plan.exercises.length} exercises · about ${planMinutes(plan.exercises, plan.restPace)} min`}
+            {plan.exercises.length === 1
+              ? t('1 exercise · about {minutes} min', {
+                  minutes: planMinutes(plan.exercises, plan.restPace),
+                })
+              : t('{n} exercises · about {minutes} min', {
+                  n: plan.exercises.length,
+                  minutes: planMinutes(plan.exercises, plan.restPace),
+                })}
           </PixelText>
         </PixelFrame>
 
@@ -96,7 +108,7 @@ export default function PlanPreviewScreen() {
         {plan.notes.length > 0 && (
           <PixelFrame variant="parchment" contentStyle={styles.gap} testID="plan-notes">
             <PixelText variant="label" tone="textOnParchment" accessibilityRole="header">
-              Notes
+              {t('Notes')}
             </PixelText>
             {plan.notes.map((note) => (
               <PixelText key={note} variant="small" tone="textOnParchment">
@@ -119,20 +131,20 @@ export default function PlanPreviewScreen() {
                 testID={`plan-${exercise.key}`}>
                 <View style={styles.actions}>
                   <PixelButton
-                    label="Swap"
+                    label={t('Swap')}
                     variant="secondary"
                     onPress={() =>
                       setSheet({ kind: 'swap', key: exercise.key, name: exercise.name })
                     }
-                    accessibilityLabel={`Swap ${exercise.name}`}
+                    accessibilityLabel={t('Swap {name}', { name: exercise.name })}
                     testID={`swap-${exercise.key}`}
                     style={styles.action}
                   />
                   <PixelButton
-                    label="Remove"
+                    label={t('Remove')}
                     variant="secondary"
                     onPress={() => remove(exercise.key)}
-                    accessibilityLabel={`Remove ${exercise.name}`}
+                    accessibilityLabel={t('Remove {name}', { name: exercise.name })}
                     testID={`remove-${exercise.key}`}
                     style={styles.action}
                   />
@@ -143,11 +155,15 @@ export default function PlanPreviewScreen() {
         ))}
 
         {empty && (
-          <EmptyState icon="scroll" title="Empty plan" message="Add an exercise to start." />
+          <EmptyState
+            icon="scroll"
+            title={t('Empty plan')}
+            message={t('Add an exercise to start.')}
+          />
         )}
 
         <PixelButton
-          label="Add exercise"
+          label={t('Add exercise')}
           icon="rune"
           variant="secondary"
           onPress={() => setSheet({ kind: 'add' })}
@@ -155,11 +171,11 @@ export default function PlanPreviewScreen() {
         />
         {!acknowledged && (
           <PixelText variant="small" tone="textMuted">
-            Read and acknowledge the notes above to start. It is your call.
+            {t('Read and acknowledge the notes above to start. It is your call.')}
           </PixelText>
         )}
         <PixelButton
-          label="Start session"
+          label={t('Start session')}
           icon="sword"
           onPress={start}
           disabled={!acknowledged || empty}
@@ -168,23 +184,25 @@ export default function PlanPreviewScreen() {
       </Screen>
       {sheet?.kind === 'swap' && (
         <NodeOptionSheet
-          title="Swap exercise"
-          intro={`Exercises of the same movement as ${sheet.name} that your equipment allows.`}
+          title={t('Swap exercise')}
+          intro={t('Exercises of the same movement as {name} that your equipment allows.', {
+            name: sheet.name,
+          })}
           options={() => swapOptions(sheet.key)}
           onPick={(nodeId) => {
             swap(sheet.key, nodeId);
             setSheet(undefined);
           }}
           onClose={() => setSheet(undefined)}
-          empty="No other exercise of this movement fits your equipment yet."
+          empty={t('No other exercise of this movement fits your equipment yet.')}
           testID="swap-sheet"
         />
       )}
       {infoNode && <ExerciseInfoSheet node={infoNode} onClose={() => setSheet(undefined)} />}
       {sheet?.kind === 'add' && (
         <NodeOptionSheet
-          title="Add exercise"
-          intro="Suggestions from your open skills, or search any skill by name."
+          title={t('Add exercise')}
+          intro={t('Suggestions from your open skills, or search any skill by name.')}
           options={(query) => addOptions(query)}
           onPick={(nodeId) => {
             add(nodeId);
@@ -192,7 +210,7 @@ export default function PlanPreviewScreen() {
           }}
           onClose={() => setSheet(undefined)}
           searchable
-          empty="Nothing found that your equipment allows."
+          empty={t('Nothing found that your equipment allows.')}
           testID="add-sheet"
         />
       )}

@@ -1,0 +1,87 @@
+# German texts for content/progressions/front_lever.yaml (FB-8): same ids, same cues in the same order.
+branch: front_lever
+nodes:
+  - id: tuck_front_lever
+    name: "Tuck Front Lever"
+    description: "Du hängst mit gestreckten Armen unter einer Stange, der Rücken zeigt zum Boden, der Körper ist waagerecht und die Knie sind zur Brust gezogen. Das erste Halten des Front Lever."
+    cues:
+      - "Halte die Arme durchgestreckt; zieh die Stange nach unten Richtung Hüfte."
+      - "Zieh die Schulterblätter nach unten und leicht nach hinten."
+      - "Knie an die Brust, Rücken rund, Hüfte auf Schulterhöhe."
+    prerequisite_notes:
+      pull_up: "Etwa 8-15 saubere Klimmzüge, bevor du am Front Lever arbeitest."
+      hollow_hold: "30 s Hollow Body Hold sind die übliche Hürde vor dem Front Lever."
+
+  - id: tuck_front_lever_raise
+    name: "Tuck Front Lever Raise"
+    description: "Aus dem Hang mit gestreckten Armen hebst du den eingerollten Körper in den Tuck Front Lever und senkst ihn wieder ab, ohne die Arme zu beugen. Eine bewegte Übung für die Zugkraft des Lever."
+    cues:
+      - "Starte im Dead Hang mit angezogenen Knien."
+      - "Halte die Arme gestreckt und drück die Stange Richtung Hüfte, um den Körper zu heben."
+      - "Halte kurz waagerecht an, dann senke langsam ab; nicht schwingen."
+    prerequisite_notes:
+      tuck_front_lever: "Zuerst kommt ein stabiler Tuck Front Lever."
+
+  - id: advanced_tuck_front_lever
+    name: "Advanced Tuck Front Lever"
+    description: "Ein Tuck Front Lever mit geöffneter Hüfte und flachem Rücken, die Oberschenkel etwa im rechten Winkel zum Körper. Die längere Form macht das waagerechte Halten schwerer."
+    cues:
+      - "Öffne die Hüfte, bis die Oberschenkel etwa 90 Grad zum Körper stehen."
+      - "Mach den Rücken flach; kein Rundrücken wie im Tuck."
+      - "Halte die Hüfte auf Schulterhöhe, Arme durchgestreckt."
+
+  - id: tuck_ice_cream_maker
+    name: "Tuck Ice Cream Maker"
+    description: "Oben im Klimmzug streckst du die Arme und kippst dabei nach hinten in den Tuck Front Lever, dann ziehst du dich wieder nach oben. Verbindet das Ziehen mit gebeugten Armen mit der Lever-Position."
+    cues:
+      - "Starte oben im Klimmzug mit angezogenen Knien."
+      - "Drück die Stange weg und lehn dich zurück, bis die Arme gestreckt sind und der Körper waagerecht ist."
+      - "Zieh dich auf demselben Weg wieder nach oben, dann senke dich in den Hang ab."
+
+  - id: one_leg_front_lever
+    name: "Einbeiniger Front Lever"
+    description: "Ein Front Lever mit einem Bein gestreckt in Verlängerung des Körpers, das andere bleibt angezogen. Liegt zwischen Advanced Tuck und Straddle."
+    cues:
+      - "Streck ein Bein in Verlängerung des Körpers aus, das andere bleibt angezogen."
+      - "Spann den Po an; die Hüfte darf nicht abknicken oder durchhängen."
+      - "Wechsle das gestreckte Bein zwischen den Sätzen."
+
+  - id: straddle_front_lever
+    name: "Straddle Front Lever"
+    description: "Ein Front Lever mit beiden Beinen gestreckt und weit gegrätscht, der Körper waagerecht unter der Stange. Die gegrätschten Beine verkürzen den Hebel im Vergleich zur vollen Version."
+    cues:
+      - "Halte die Beine gestreckt und weit gegrätscht; je weiter, desto leichter."
+      - "Halte den Körper in einer Linie von den Schultern bis zur Hüfte, parallel zum Boden."
+      - "Arme durchgestreckt, Schultern nach unten gezogen."
+
+  - id: half_lay_front_lever
+    name: "Half-Lay Front Lever"
+    description: "Ein Front Lever mit offener Hüfte und geschlossenen Beinen, die Knie gebeugt, sodass die Unterschenkel nach unten hängen. Länger als der Straddle und kürzer als der volle Lever."
+    cues:
+      - "Beine geschlossen, Knie gebeugt, Hüfte ganz geöffnet in Verlängerung des Körpers."
+      - "Halte den Körper waagerecht; spann den Po an, damit die Hüfte nicht abknickt."
+      - "Arme durchgestreckt, Schultern nach unten gezogen."
+
+  - id: front_lever
+    name: "Front Lever"
+    description: "Du hängst mit gestreckten Armen unter einer Stange oder Ringen, der ganze Körper ist fest und waagerecht, das Gesicht zeigt nach oben, die Beine sind geschlossen. Ein ikonischer Streckarm-Zug-Skill."
+    cues:
+      - "Beine geschlossen und gestreckt, Zehen gestreckt."
+      - "Halte den ganzen Körper waagerecht und fest, mit leichtem Hollow."
+      - "Arme durchgestreckt; zieh die Stange Richtung Hüfte."
+
+  - id: front_lever_to_inverted
+    name: "Front Lever zum Inverted Hang"
+    description: "Aus dem Front Lever ziehst du den gestreckten Körper mit gestreckten Armen nach oben, bis du kopfüber hängst, und senkst ihn dann zurück in den Lever. Ein dynamischer Front-Lever-Skill."
+    cues:
+      - "Starte im vollen Front Lever, Körper gestreckt und Arme durchgestreckt."
+      - "Drück die Stange Richtung Hüfte, um den Körper nach oben in den Inverted Hang zu drehen."
+      - "Senke kontrolliert zurück in den Lever und halte ihn kurz."
+
+  - id: hanging_pull_to_inverted
+    name: "Zug vom Hang in den Inverted Hang"
+    description: "Aus dem Dead Hang ziehst du den gestreckten Körper mit gestreckten Armen durch den Front Lever bis in den Inverted Hang und senkst ihn wieder ab. Der schwerste Front-Lever-Zug im Baum."
+    cues:
+      - "Starte aus einem ruhigen Dead Hang, Körper gestreckt, kein Schwung."
+      - "Halte die Arme durchgestreckt und den Körper fest, während er den Front Lever passiert."
+      - "Senke auf demselben Weg langsam ab."
