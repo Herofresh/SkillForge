@@ -1,0 +1,91 @@
+# German texts for content/progressions/core.yaml (FB-8): same ids, same cues in the same order.
+branch: core
+nodes:
+  - id: hollow_hold
+    name: "Hollow Body Hold"
+    description: "Du liegst auf dem Rücken, drückst den unteren Rücken in den Boden und hältst Arme und Beine gestreckt knapp darüber, der Körper leicht gebogen wie eine flache Banane. Die Grundform für die meisten Calisthenics-Skills."
+    cues:
+      - "Drücke den unteren Rücken die ganze Zeit in den Boden."
+      - "Arme über dem Kopf, Beine gestreckt, beides knapp über dem Boden."
+      - "Leichter: Zieh die Knie an oder nimm die Arme an die Seiten."
+
+  - id: side_plank
+    name: "Seitstütz"
+    description: "Du liegst auf der Seite und hebst die Hüfte, bis der Körper eine gerade Linie bildet, gestützt auf dem Unterarm und der Außenkante des unteren Fußes. Trainiert die seitliche Rumpfmuskulatur."
+    cues:
+      - "Ellbogen unter der Schulter, Körper in einer geraden Linie von Kopf bis Fuß."
+      - "Hebe die Hüfte; lass sie nicht absinken und knicke nicht nach hinten ein."
+      - "Trainiere beide Seiten. Leichter: Stütz dich auf dem unteren Knie ab."
+
+  - id: foot_supported_l_sit
+    name: "L-Sit mit Fußstütze"
+    description: "Du sitzt zwischen Parallettes, Barren oder mit den Händen am Boden, drückst dich auf gestreckten Armen hoch und hebst die Hüfte, während die Fersen am Boden bleiben. Der erste Schritt zum L-Sit."
+    cues:
+      - "Arme durchgestreckt, Schultern von den Ohren weg nach unten drücken."
+      - "Die Fersen bleiben am Boden und tragen nur so viel Gewicht wie nötig."
+      - "Hebe die Hüfte vom Boden und halte die Brust oben."
+    prerequisite_notes:
+      support_hold: "Halte zuerst ein Stützhalten mit gestreckten Armen für 3 x 30 s."
+
+  - id: tuck_l_sit
+    name: "Tuck L-Sit"
+    description: "Auf gestreckten Armen gestützt, die Hüfte angehoben und die Knie zur Brust gezogen, die Füße in der Luft. Ein L-Sit mit angewinkelten Beinen."
+    cues:
+      - "Arme durchgestreckt, Schultern nach unten gedrückt."
+      - "Zieh die Knie zur Brust, Füße vom Boden weg."
+      - "Halte die Hüfte auf Höhe der Hände oder leicht davor."
+
+  - id: hanging_knee_raise
+    name: "Knieheben im Hang"
+    description: "Du hängst an der Stange und ziehst die Knie Richtung Brust, indem du das Becken einrollst, dann lässt du sie langsam wieder ab. Trainiert Bauch und Hüftbeuger."
+    cues:
+      - "Starte aus einem ruhigen Dead Hang; kein Schwingen."
+      - "Rolle das Becken ein und bring die Knie zur Brust."
+      - "Lass die Beine langsam und kontrolliert ab."
+    prerequisite_notes:
+      dead_hang: "Hänge zuerst 3 x 30 s an der Stange."
+
+  - id: l_sit
+    name: "L-Sit"
+    description: "Auf gestreckten Armen gestützt, die Beine gerade nach vorn gestreckt und parallel zum Boden, sodass der Körper ein L bildet. Ein klassisches Halten für Rumpf und Kompression."
+    cues:
+      - "Beine gestreckt und geschlossen, parallel zum Boden."
+      - "Knie durchstrecken und Zehen strecken."
+      - "Arme durchgestreckt, Schultern nach unten, Brust oben."
+
+  - id: toes_to_bar
+    name: "Toes-to-Bar"
+    description: "Du hängst an der Stange und hebst die Beine so gestreckt wie möglich, bis die Zehen die Stange berühren, dann lässt du sie wieder ab. Eine schwere Rumpfübung im Hang."
+    cues:
+      - "Starte aus einem ruhigen Dead Hang, Beine geschlossen."
+      - "Halte die Beine so gestreckt wie möglich und berühre die Stange mit den Zehen."
+      - "Lass langsam ab; schwinge nicht in die nächste Wiederholung."
+    prerequisite_notes:
+      hollow_hold: "Ein stabiler Hollow Body stoppt das Schwingen."
+
+  - id: straddle_l_sit
+    name: "Straddle L-Sit"
+    description: "Wie der L-Sit, aber mit gestreckten, weit gegrätschten Beinen und den Händen am Boden dazwischen. Braucht mehr Kompression und Hüftbeweglichkeit als der L-Sit."
+    cues:
+      - "Beine gestreckt und weit gegrätscht, Hände am Boden zwischen den Beinen."
+      - "Lehn die Schultern nach vorn über die Hände, um die Hüfte anzuheben."
+      - "Zieh die Beine hoch; die Fersen dürfen den Boden nicht berühren."
+
+  - id: v_sit
+    name: "V-Sit"
+    description: "Auf gestreckten Armen gestützt, die Beine deutlich über die Waagerechte angehoben, sodass der Körper ein V bildet. Ein großer Schritt über den L-Sit hinaus."
+    cues:
+      - "Beine gestreckt und etwa 45 Grad über die Waagerechte angehoben."
+      - "Drück den Boden weg und lass die Schultern hinter die Hände wandern."
+      - "Knie durchgestreckt halten; sinken die Beine ab, geh zurück in den Straddle L-Sit."
+
+  - id: manna
+    name: "Manna"
+    description: "Auf gestreckten Armen gestützt, die Hände hinter der Hüfte, die Hüfte hoch angehoben und die gestreckten Beine zum Gesicht hochgeklappt. Ein Elite-Halten für Kompression und Schulterbeweglichkeit."
+    cues:
+      - "Hände hinter der Hüfte, Arme durchgestreckt."
+      - "Drück die Schultern nach hinten in die Extension und hebe die Hüfte hoch."
+      - "Beine gestreckt und zum Gesicht hochgeklappt."
+    prerequisite_notes:
+      german_hang: "Braucht viel Schulterextension; German Hang 30-60 s bequem halten."
+      pike_fold: "Braucht einen tiefen Pike, um die Beine bis zum Gesicht zu klappen."

@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { Border, Colors, FontFamily, HeaderTitleStyle } from '@/components/theme';
 import { PixelIcon, type IconName } from '@/components/ui';
 import { nodesAwaitingTrial } from '@/domain/progression';
+import { k, t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 type TabDef = {
@@ -16,10 +17,10 @@ type TabDef = {
 const DOT_SIZE = 10;
 
 const TABS: readonly TabDef[] = [
-  { name: 'tree', title: 'Tree', icon: 'tree' },
-  { name: 'train', title: 'Train', icon: 'bar' },
-  { name: 'character', title: 'Character', icon: 'helmet' },
-  { name: 'settings', title: 'Settings', icon: 'gear' },
+  { name: 'tree', title: k('Tree'), icon: 'tree' },
+  { name: 'train', title: k('Train'), icon: 'bar' },
+  { name: 'character', title: k('Character'), icon: 'helmet' },
+  { name: 'settings', title: k('Settings'), icon: 'gear' },
 ];
 
 /** Tab and header background: stone with an ink + gold pixel rule on the inner edge. */
@@ -62,13 +63,16 @@ export default function TabLayout() {
           key={name}
           name={name}
           options={{
-            title,
+            title: t(title),
             tabBarIcon: ({ color }) => <PixelIcon name={icon} tint={color} />,
             ...(name === 'tree' && awaiting > 0
               ? {
                   tabBarBadge: '',
                   tabBarBadgeStyle: styles.dot,
-                  tabBarAccessibilityLabel: `${title}, ${awaiting} ${awaiting === 1 ? 'skill needs its' : 'skills need their'} Trial`,
+                  tabBarAccessibilityLabel:
+                    awaiting === 1
+                      ? t('{title}, 1 skill needs its Trial', { title: t(title) })
+                      : t('{title}, {n} skills need their Trial', { title: t(title), n: awaiting }),
                 }
               : {}),
           }}

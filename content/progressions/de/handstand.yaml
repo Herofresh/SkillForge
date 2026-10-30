@@ -1,0 +1,100 @@
+# German texts for content/progressions/handstand.yaml (FB-8): same ids, same cues in the same order.
+branch: handstand
+nodes:
+  - id: wall_plank
+    name: "Wand-Plank"
+    description: "Mit den Händen am Boden und den Füßen an der Wand bildet der Körper ein L, die Hüfte über den Schultern. Eine erste Kopfüber-Position auf dem Weg zum Handstand."
+    cues:
+      - "Starte in der Liegestützposition mit den Füßen an der Wand."
+      - "Geh mit den Füßen die Wand hoch, bis der Körper ein L bildet (Hüfte über den Schultern)."
+      - "Drück dich lang aus den Schultern; Arme gestreckt, Kopf zwischen den Armen."
+
+  - id: wall_handstand
+    name: "Wandhandstand (Rücken zur Wand)"
+    description: "Ein Handstand, in den du mit dem Rücken zur Wand aufschwingst, sodass die Fersen zum Ausgleich an der Wand liegen. Baut Kraft und Sicherheit auf, dein Gewicht kopfüber zu halten."
+    cues:
+      - "Schwing mit dem Rücken zur Wand auf, die Hände eine Handbreit von ihr entfernt."
+      - "Arme durchgestreckt, drück dich lang aus den Schultern."
+      - "Rippen rein, Po angespannt; berühre die Wand möglichst nur mit den Fersen."
+    prerequisite_notes:
+      pike_push_up: "Baut die Schulterkraft auf, um das Körpergewicht über Kopf zu halten."
+
+  - id: chest_to_wall_handstand
+    name: "Wandhandstand (Brust zur Wand)"
+    description: "Ein Handstand mit dem Gesicht zur Wand: Du gehst mit den Füßen die Wand hoch, bis Brust und Zehen zu ihr zeigen, die Hände nah an der Wand. Lehrt die gerade, gestapelte Handstandlinie."
+    cues:
+      - "Geh mit den Füßen die Wand hoch, bis Brust und Zehen zu ihr zeigen, Hände nah an der Wand."
+      - "Gerade Linie von den Handgelenken bis zu den Zehen; Rippen rein, kein Bananenrücken."
+      - "Schieb die Schultern hoch an die Ohren, Finger aktiv zum Ausbalancieren."
+
+  - id: chest_to_wall_shoulder_taps
+    name: "Shoulder Taps (Brust zur Wand)"
+    description: "Im Wandhandstand mit der Brust zur Wand verlagerst du das Gewicht auf eine Hand, hebst die andere und tippst damit die Schulter an, dann wechselst du die Seite. Lehrt die Gewichtsverlagerung für das freie Balancieren."
+    cues:
+      - "Geh hoch in den Wandhandstand mit der Brust zur Wand, Körper gerade, Hände nah an der Wand."
+      - "Verlagere das Gewicht auf eine Hand, bevor du die andere hebst; halte die Hüfte ruhig."
+      - "Tipp die Schulter leicht an, setz die Hand zurück, dann wechsle."
+
+  - id: frog_stand
+    name: "Krähe (Frog Stand)"
+    description: "In der Hocke mit den Händen am Boden legst du die Knie auf die gebeugten Ellbogen und kippst nach vorne, bis die Füße abheben und du auf den Händen balancierst. Auch als Crow bekannt."
+    cues:
+      - "Hände schulterbreit, die Knie liegen auf der Rückseite der gebeugten Ellbogen."
+      - "Lehn dich langsam nach vorne, bis die Füße abheben."
+      - "Schau leicht nach vorne, nicht direkt nach unten."
+
+  - id: freestanding_handstand
+    name: "Freier Handstand"
+    description: "Du balancierst kopfüber auf den Händen ohne Wand, der Körper gerade und über den Handgelenken gestapelt. Der zentrale Balance-Skill der Calisthenics."
+    cues:
+      - "Schwing sanft auf und finde die Linie aus Handgelenken, Schultern, Hüfte und Füßen."
+      - "Balanciere mit den Fingern (drücken gegen das Überkippen, lockern gegen das Zurückfallen)."
+      - "Lerne zuerst, sicher auszusteigen (Rad heraus oder abtreten)."
+    prerequisite_notes:
+      chest_to_wall_handstand: "Zuerst etwa 3 x 20-30 s mit der Brust zur Wand (GMB)."
+
+  - id: ring_shoulder_stand
+    name: "Schulterstand an den Ringen"
+    description: "Du balancierst kopfüber an den Ringen mit gebeugten Armen, die Schultern tief neben den Ringen und der Körper gerade darüber. Ein erstes Kopfüber-Halten an den Ringen, vor dem Ringhandstand."
+    cues:
+      - "Ringe tief; roll dich aus dem Tuck hoch, Arme gebeugt und Ellbogen eng."
+      - "Halte die Ringe an den Körper gedrückt und die Schultern nah an ihnen."
+      - "Streck die Beine gerade nach oben und komm so herunter, wie du hochgekommen bist."
+    prerequisite_notes:
+      support_hold: "Zuerst ein stabiles Stützhalten an den Ringen."
+
+  - id: wall_straddle_press_eccentric
+    name: "Negativ-Straddle-Press an der Wand"
+    description: "Aus dem Handstand mit den Fersen an der Wand öffnest du die Beine weit und senkst sie langsam zum Boden. Die absenkende Hälfte eines Straddle Press."
+    cues:
+      - "Öffne aus dem Handstand mit den Fersen an der Wand die Beine weit."
+      - "Senke die Beine langsam zum Boden, die Schultern nach vorne über die Hände gelehnt."
+      - "Die Arme bleiben gestreckt; zähle die Sekunden beim Ablassen."
+    prerequisite_notes:
+      l_sit: "Kompressionskraft hilft, das Ablassen zu kontrollieren."
+
+  - id: straddle_press_to_handstand
+    name: "Straddle Press in den Handstand"
+    description: "Aus dem weiten Grätschstand mit den Händen am Boden hebst du die Hüfte über die Schultern und die Beine nach oben in den Handstand, ohne zu springen. Ein Kraft- und Kompressions-Skill."
+    cues:
+      - "Starte im weiten Grätschstand, Hände am Boden nah an den Füßen."
+      - "Verlagere die Schultern nach vorne über die Hände, bis die Füße abheben."
+      - "Heb die Hüfte über die Schultern, dann schließe die Beine."
+
+  - id: elevated_straddle_press
+    name: "Straddle Press erhöht"
+    description: "Ein Straddle Press in den Handstand, der mit den Füßen auf einer Erhöhung beginnt, sodass die Hüfte höher startet. Der Schritt zwischen dem Negativ an der Wand und dem Press vom Boden."
+    cues:
+      - "Füße breit auf der Erhöhung, Hände am Boden davor."
+      - "Lehn die Schultern über die Hände, bis die Füße abheben."
+      - "Heb die Hüfte über die Schultern, dann schließe die Beine."
+
+  - id: one_arm_handstand
+    name: "Einarmiger Handstand"
+    description: "Du balancierst kopfüber auf einem einzigen gestreckten Arm. Ein Elite-Balance-Skill, der auf Jahren Handstandtraining aufbaut."
+    cues:
+      - "Verlagere das Gewicht auf eine Hand, während der Körper in einer geraden Linie bleibt."
+      - "Öffne die Beine anfangs zur Grätsche für die Balance."
+      - "Balanciere über die Finger und die Schulter des Stützarms."
+    prerequisite_notes:
+      freestanding_handstand: "Zuerst etwa 60 s freier Handstand (GMB)."

@@ -1,0 +1,89 @@
+# German texts for content/progressions/h_pull.yaml (FB-8): same ids, same cues in the same order.
+branch: h_pull
+nodes:
+  - id: band_row
+    name: "Rudern mit Band"
+    description: "Rudern mit einem Widerstandsband, das vor dir auf Brusthöhe befestigt ist: Du ziehst das Band zu den unteren Rippen und lässt es wieder zurück. Es trainiert den oberen Rücken, ganz ohne Stange."
+    cues:
+      - "Befestige das Band auf Brusthöhe (Türanker oder Stange); geh zurück, bis es gespannt ist."
+      - "Ziehe die Hände zu den unteren Rippen, Ellbogen eng am Körper."
+      - "Ziehe die Schulterblätter zusammen, dann kehre langsam zurück."
+
+  - id: incline_row
+    name: "Schräges Rudern"
+    description: "Du hältst Ringe oder eine niedrige Stange, die Füße am Boden und der Körper schräg nach hinten gelehnt, und ziehst die Brust zu den Händen hoch. Je aufrechter du stehst, desto leichter ist es."
+    cues:
+      - "Füße am Boden, Körper gerade und nach hinten gelehnt; je aufrechter, desto leichter."
+      - "Ziehe die Brust zu den Händen, Ellbogen etwa 45 Grad vom Körper weg."
+      - "Ziehe oben die Schulterblätter zusammen, senke dich kontrolliert ab."
+
+  - id: horizontal_row
+    name: "Horizontales Rudern"
+    description: "Unter einer Stange oder Ringen hängend, Körper gerade und fast parallel zum Boden, Fersen am Boden, ziehst du die Brust zu den Händen hoch. Auch Inverted Row oder Australian Row genannt."
+    cues:
+      - "Körper waagerecht, Fersen am Boden (oder auf einer Box), Arme gestreckt."
+      - "Halte eine gerade Linie von Kopf bis Fersen; lass die Hüfte nicht durchhängen."
+      - "Ziehe die Brust zu den Händen, dann senke dich ganz zu gestreckten Armen ab."
+
+  - id: wide_row
+    name: "Breites Rudern"
+    description: "Horizontales Rudern mit den Händen deutlich breiter als die Schultern; du ziehst die Brust zur Stange oder zu den Ringen hoch. Der breite Griff verlagert mehr Arbeit auf den oberen Rücken."
+    cues:
+      - "Hände etwa doppelt schulterbreit, Körper gerade von Kopf bis Fersen."
+      - "Ziehe die Brust zwischen die Hände hoch, Ellbogen zeigen nach außen."
+      - "Senke dich ganz zu gestreckten Armen ab."
+
+  - id: archer_row
+    name: "Archer-Rudern"
+    description: "Rudern mit breiten Händen; du ziehst zu einer Hand, während der andere Arm seitlich gestreckt bleibt. Es belastet jeweils einen Arm, ein Schritt Richtung einarmiges Rudern."
+    cues:
+      - "Hände breit; ziehe zu einer Hand, während der andere Arm seitlich gestreckt bleibt."
+      - "Der gebeugte Arm macht die Arbeit; der gestreckte Arm hilft nur ein wenig."
+      - "Der Körper bleibt gerade und verdreht sich nicht."
+
+  - id: tuck_front_lever_row
+    name: "Tuck Front Lever Row"
+    description: "Aus dem Tuck Front Lever, Knie angezogen und Körper waagerecht unter der Stange, ziehst du die Stange zur unteren Brust und senkst dich zurück zu gestreckten Armen. Rudern in der Front-Lever-Position."
+    cues:
+      - "Starte im Tuck Front Lever, Arme gestreckt, Rücken flach."
+      - "Ziehe Stange oder Ringe zur unteren Brust und halte den Körper dabei waagerecht."
+      - "Senke dich zurück zu gestreckten Armen, ohne die Hüfte sinken zu lassen."
+    prerequisite_notes:
+      archer_row: "Archer-Rudern (3 x 8 pro Seite) baut die Zugkraft für Lever Rows auf."
+      tuck_front_lever: "Halte den Tuck Front Lever (3 x 30 s), bevor du darin ruderst."
+
+  - id: advanced_tuck_front_lever_row
+    name: "Advanced Tuck Front Lever Row"
+    description: "Rudern im Advanced Tuck Front Lever, Rücken flach und Hüfte geöffnet; du ziehst die Stange zur unteren Brust und senkst dich zurück zu gestreckten Armen. Der nächste Schritt nach der Tuck Front Lever Row."
+    cues:
+      - "Starte im Advanced Tuck Front Lever, Rücken flach, Arme gestreckt."
+      - "Ziehe die Stange zur unteren Brust, während der Körper waagerecht bleibt."
+      - "Senke dich zurück zu gestreckten Armen, ohne die Hüfte sinken zu lassen."
+    prerequisite_notes:
+      advanced_tuck_front_lever: "Halte den Advanced Tuck Front Lever (3 x 30 s), bevor du darin ruderst."
+
+  - id: straddle_one_arm_row
+    name: "Einarmiges Straddle-Rudern"
+    description: "Rudern mit nur einer Hand am Ring oder an der Stange, die Füße breit am Boden gespreizt für die Balance. Du ziehst die Brust zur Hand, ohne dass sich der Körper aufdreht."
+    cues:
+      - "Füße weit auseinander für die Balance, eine Hand am Ring oder an der Stange."
+      - "Halte Hüfte und Schultern parallel; drehe dich nicht auf."
+      - "Ziehe die Brust zur Hand, dann senke dich kontrolliert zum gestreckten Arm ab."
+
+  - id: one_arm_row
+    name: "Einarmiges Rudern"
+    description: "Rudern auf einem Arm mit geschlossenen Füßen; du ziehst die Brust zur Hand, während der Körper parallel bleibt, statt sich aufzudrehen. Das Ende des Wegs zum einarmigen Rudern."
+    cues:
+      - "Füße zusammen, eine Hand am Ring oder an der Stange, Körper gerade."
+      - "Halte Hüfte und Schultern parallel; der freie Arm darf zur Seite greifen für die Balance."
+      - "Ziehe die Brust zur Hand, dann senke dich kontrolliert zum gestreckten Arm ab."
+
+  - id: straddle_front_lever_row
+    name: "Straddle Front Lever Row"
+    description: "Rudern im Straddle Front Lever, Beine gestreckt und gegrätscht; du ziehst die Stange zum Körper und senkst dich zurück zu gestreckten Armen, ohne die Höhe zu verlieren. Eine fortgeschrittene Lever Row."
+    cues:
+      - "Starte im Straddle Front Lever, Beine gestreckt und gegrätscht."
+      - "Ziehe die Stange Richtung Hüfte, während der Körper waagerecht bleibt."
+      - "Senke dich zurück zu gestreckten Armen, ohne die Hüfte sinken zu lassen."
+    prerequisite_notes:
+      straddle_front_lever: "Halte den Straddle Front Lever (3 x 15 s), bevor du darin ruderst."

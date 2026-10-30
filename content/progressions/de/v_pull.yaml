@@ -1,0 +1,84 @@
+# German texts for content/progressions/v_pull.yaml (FB-8): same ids, same cues in the same order.
+branch: v_pull
+nodes:
+  - id: dead_hang
+    name: "Dead Hang"
+    description: "Einfach an einer Stange oder an Ringen hängen, mit gestreckten Armen und den Füßen in der Luft. Es stärkt den Griff und gewöhnt die Schultern daran, dein Gewicht über Kopf zu tragen."
+    cues:
+      - "Voller Griff, der Daumen umschließt die Stange."
+      - "Arme gestreckt; halte die Schultern leicht aktiv, nicht ganz hochgezogen."
+      - "Rippen runter, Beine zusammen, kein Schwingen."
+
+  - id: scapular_pull
+    name: "Schulterblatt-Zug"
+    description: "Aus dem Dead Hang bleiben die Arme gestreckt, während die Schulterblätter nach unten ziehen und den Körper ein paar Zentimeter anheben. Das lehrt den ersten Teil jedes Klimmzugs."
+    cues:
+      - "Hänge mit gestreckten Armen, dann ziehe die Schultern nach unten, weg von den Ohren."
+      - "Die Arme bleiben die ganze Zeit gestreckt; nur die Schulterblätter bewegen sich."
+      - "Halte oben kurz, dann senke dich langsam zurück in den vollen Hang."
+
+  - id: jump_pull_up
+    name: "Sprung-Klimmzug"
+    description: "Ein Klimmzug, bei dem ein Sprung vom Boden oder von einer Box hilft, das Kinn über die Stange zu bringen, gefolgt von einem langsamen Ablassen. Die Beine helfen nur so viel wie nötig."
+    cues:
+      - "Springe, um das Kinn über die Stange zu bringen; nutze die Beine nur so viel wie nötig."
+      - "Lass dich langsam in den vollen Hang ab."
+      - "Ein Klimmzug mit Band-Unterstützung ist ein guter Ersatz."
+
+  - id: pull_up_negative
+    name: "Negativ-Klimmzug"
+    description: "Nur die Abwärtshälfte eines Klimmzugs: Starte mit dem Kinn über der Stange und lass dich langsam in den vollen Hang ab. Das baut Klimmzug-Kraft auf, bevor du dich ganz hochziehen kannst."
+    cues:
+      - "Starte mit dem Kinn über der Stange (hochspringen oder hochsteigen)."
+      - "Senke dich langsam und gleichmäßig ab, bis die Arme ganz gestreckt sind."
+      - "Halte den Körper fest; lass dich im letzten Stück nicht fallen."
+
+  - id: pull_up
+    name: "Klimmzug"
+    description: "Hängend an einer Stange oder an Ringen ziehst du den Körper hoch, bis das Kinn über der Stange ist, und senkst dich wieder zu gestreckten Armen ab. Der Grundtest für Zugkraft im Oberkörper."
+    cues:
+      - "Starte aus dem Dead Hang, Arme ganz gestreckt."
+      - "Ziehe, bis das Kinn deutlich über der Stange ist."
+      - "Kein Kipping; halte die Beine ruhig und den Körper leicht im Hollow Body."
+
+  - id: l_pull_up
+    name: "L-Sit-Klimmzug"
+    description: "Ein Klimmzug mit gestreckt nach vorn gehaltenen Beinen in einem L, Hüfte im rechten Winkel. Jede Wiederholung bekommt so ein Rumpf-Halten dazu."
+    cues:
+      - "Hänge mit gestreckten Beinen nach vorn, Zehen gestreckt, Hüfte im 90-Grad-Winkel."
+      - "Ziehe, bis das Kinn über der Stange ist, ohne die Beine sinken zu lassen."
+      - "Senke dich zu gestreckten Armen ab und halte dabei das L."
+    prerequisite_notes:
+      l_sit: "Ein L-Sit-Halten hilft, die Beine oben zu halten."
+
+  - id: chest_to_bar_pull_up
+    name: "Chest-to-Bar-Klimmzug"
+    description: "Ein höherer, explosiverer Klimmzug, bei dem die Brust die Stange berührt, statt dass nur das Kinn darüber kommt. Er baut die Zughöhe auf, die der Muscle-up braucht."
+    cues:
+      - "Ziehe kräftig und schnell, bis die Brust die Stange berührt."
+      - "Treibe die Ellbogen nach unten und hinten; lehne dich oben leicht zurück."
+      - "Senke dich kontrolliert in den vollen Hang ab."
+
+  - id: archer_pull_up
+    name: "Archer-Klimmzug"
+    description: "Ein Klimmzug mit breitem Griff, bei dem du zu einer Hand ziehst, während der andere Arm fast gestreckt an der Stange entlang bleibt. Ein Arm macht den Großteil der Arbeit, ein Schritt Richtung einarmiger Chin-up."
+    cues:
+      - "Breiter Griff; ziehe zu einer Hand, während der andere Arm fast gestreckt bleibt."
+      - "Zähle die Wiederholungen pro Seite und wechsle die Seiten ab."
+      - "Senke dich langsam ab; lass die arbeitende Schulter nicht hochziehen."
+
+  - id: one_arm_chin_up_negative
+    name: "Einarmiger Negativ-Chin-up"
+    description: "Bring das Kinn mit beiden Händen über die Stange, lass mit einer los und senke dich langsam am anderen Arm ab, Handfläche zu dir. Es ist die Abwärtshälfte des einarmigen Chin-ups."
+    cues:
+      - "Bring das Kinn mit beiden Armen über die Stange, dann lass mit einer Hand los."
+      - "Senke dich langsam ab, Handfläche zu dir; arbeite gegen die Drehung."
+      - "Beende den Satz, sobald du die untere Hälfte nicht mehr kontrollieren kannst."
+
+  - id: one_arm_chin_up
+    name: "Einarmiger Chin-up"
+    description: "Du ziehst deinen ganzen Körper mit einem Arm hoch, bis das Kinn über der Stange ist, Handfläche zu dir, die andere Hand frei. Eine der schwersten Zugleistungen in Calisthenics."
+    cues:
+      - "Handfläche zu dir; starte aus dem vollen Hang mit der anderen Hand frei."
+      - "Ziehe das Kinn über die Stange, ohne dich von ihr wegzudrehen."
+      - "Halte die freie Hand weg vom arbeitenden Arm und von der Stange."

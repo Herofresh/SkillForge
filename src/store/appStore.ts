@@ -132,6 +132,15 @@ import {
   toggleGoal,
 } from '@/domain/onboarding';
 import {
+  DEFAULT_LANGUAGE_CHOICE,
+  DEFAULT_LOCALE,
+  parseLanguageChoice,
+  resolveLocale,
+  setLocale,
+  type LanguageChoice,
+  type Locale,
+} from '@/i18n';
+import {
   customNodeId,
   draftIssues,
   finalizeDraft,
@@ -238,6 +247,8 @@ export const TREE_MODE_SETTING = 'tree_view_mode';
 
 /** Setting key: how the live session is trained, Classic or Battle (PLAN 7.9, `parseTrainingView`). */
 export const TRAINING_VIEW_SETTING = 'training_view';
+/** The language choice (`LanguageChoice`: system | en | de), PLAN 7.8 FB-8, ADR-080. */
+export const LANGUAGE_SETTING = 'language';
 
 /** Setting key: write finished sessions to Health Connect (PLAN 7.10, `parseHealthConnectEnabled`). */
 export const HEALTH_CONNECT_SETTING = 'health_connect';
@@ -331,6 +342,8 @@ export interface AppStoreDeps {
   accessories?: readonly AccessoryDefinition[];
   /** Health Connect (PLAN 7.10); without it the status is `unsupported` and nothing is written. */
   health?: HealthConnectAccess;
+  /** The device language tag ("de_AT"); without it "system" resolves to English (FB-8). */
+  deviceLocaleTag?: () => string | null | undefined;
 }
 
 export interface EquipmentProfileChanges {
@@ -408,6 +421,9 @@ export interface AppState {
   treeMode: TreeMode;
   /** How the live session is trained (PLAN 7.9): one exercise at a time, or every set as a foe. */
   trainingView: TrainingView;
+  /** The language setting and the locale it resolves to (FB-8, ADR-080). */
+  language: LanguageChoice;
+  locale: Locale;
   /** Whether finished sessions are written to Health Connect (PLAN 7.10, setting `health_connect`). */
   healthConnectEnabled: boolean;
   /** Writing the last finished session to Health Connect, for its summary; in memory only. */
@@ -494,6 +510,8 @@ export interface AppState {
   setTreeMode(mode: TreeMode): void;
   /** Switches the live session between Classic and Battle and remembers it (setting `training_view`). */
   setTrainingView(view: TrainingView): void;
+  /** Stores the language choice, switches the texts and reloads (derived texts follow). */
+  setLanguage(choice: LanguageChoice): void;
   /** Whether Health Connect can be used on this phone (PLAN 7.10). */
   healthConnectStatus(): Promise<HealthConnectStatus>;
   /**
@@ -892,6 +910,8 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       equipmentProfiles: [],
       treeMode: DEFAULT_TREE_MODE,
       trainingView: DEFAULT_TRAINING_VIEW,
+      language: DEFAULT_LANGUAGE_CHOICE,
+      locale: DEFAULT_LOCALE,
       healthConnectEnabled: false,
       classes: EMPTY_CLASS_SETTINGS,
       challengePins: [],
@@ -911,7 +931,12 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           userActions,
           engineChallenges(challengePins),
         );
+        const language = parseLanguageChoice(getSetting(db, LANGUAGE_SETTING));
+        const locale = resolveLocale(language, deps.deviceLocaleTag?.());
+        setLocale(locale);
         commitEngine(engine, {
+          language,
+          locale,
           onboardingCompletedAt: parseOnboardingCompletedAt(
             getSetting(db, ONBOARDING_COMPLETED_SETTING),
           ),
@@ -1048,6 +1073,12 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       setTrainingView(view) {
         setSetting(db, TRAINING_VIEW_SETTING, view);
         set({ trainingView: view });
+      },
+
+      setLanguage(choice) {
+        setSetting(db, LANGUAGE_SETTING, choice);
+        // loadAll reads the setting back, sets the locale and re-derives everything in it.
+        get().loadAll();
       },
 
       async healthConnectStatus() {

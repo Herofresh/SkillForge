@@ -9,6 +9,7 @@ import { BackupPanel } from '@/components/settings/BackupPanel';
 import { DeleteDataPanel } from '@/components/settings/DeleteDataPanel';
 import { GuidePanel } from '@/components/settings/GuidePanel';
 import { HealthConnectPanel } from '@/components/settings/HealthConnectPanel';
+import { LanguagePanel } from '@/components/settings/LanguagePanel';
 import { ProgressionsPanel } from '@/components/settings/ProgressionsPanel';
 import { ReplayOnboardingPanel } from '@/components/settings/ReplayOnboardingPanel';
 import { TrainingViewPanel } from '@/components/settings/TrainingViewPanel';
@@ -46,6 +47,7 @@ export default function SettingsScreen() {
       </View>
 
       <TrainingViewPanel />
+      <LanguagePanel />
       <HealthConnectPanel />
       <ProgressionsPanel />
       <BackupPanel />

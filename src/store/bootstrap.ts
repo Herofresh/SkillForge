@@ -3,6 +3,8 @@
  * history. `DataGate` calls it before any screen that reads data renders. Errors are thrown to the
  * caller (which shows them); nothing here deletes or resets data.
  */
+import { I18nManager } from 'react-native';
+
 import { ALL_NODES } from '@/data/skills';
 import { migrateDatabase } from '@/db/migrate';
 import { openAppDatabase } from '@/db/openAppDatabase';
@@ -29,6 +31,7 @@ async function boot(): Promise<AppStore> {
     baseNodes: ALL_NODES,
     files: deviceBackupFiles,
     health: deviceHealthConnect,
+    deviceLocaleTag: () => I18nManager.getConstants().localeIdentifier,
   });
   store.getState().loadAll();
   setAppStore(store);

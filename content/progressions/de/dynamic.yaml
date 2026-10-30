@@ -1,0 +1,96 @@
+# German texts for content/progressions/dynamic.yaml (FB-8): same ids, same cues in the same order.
+branch: dynamic
+nodes:
+  - id: kipping_swing
+    name: "Kip Swing"
+    description: "Du hängst mit gestreckten Armen an der Stange und schwingst zwischen einer gebogenen (Arch) und einer hohlen (Hollow) Körperposition. Der kontrollierte Schwung ist der Motor des Kipping Muscle-ups."
+    cues:
+      - "Schieb aus dem Dead Hang die Brust nach vorn in den Arch, dann zieh dich zurück in den Hollow."
+      - "Arme bleiben gestreckt; der Schwung kommt aus Schultern und Hüfte, nicht aus den Beinen."
+      - "Halte den Schwung klein und kontrolliert, bevor du ihn größer machst."
+
+  - id: muscle_up_negative
+    name: "Negativ-Muscle-up"
+    description: "Nur die Abwärtshälfte eines Muscle-ups: Aus dem Stütz oben auf der Stange lässt du dich durch den Dip ab, dann langsam durch die Transition in den Hang. Lehrt den Weg über die Stange."
+    cues:
+      - "Starte im Stütz oben über der Stange (hochspringen oder eine Box nutzen)."
+      - "Lass dich durch den Dip ab, dann langsam durch die Transition in den Hang."
+      - "Halte die Stange den ganzen Weg nach unten nah am Körper."
+    prerequisite_notes:
+      chest_to_bar_pull_up: "Etwa 10 strikte Klimmzüge und 5 explosive Chest-to-Bar-Klimmzüge."
+      straight_bar_dip: "Etwa 10-15 Dips. Das obere Ende eines Bar Muscle-ups ist ein tiefer Dip an der geraden Stange, darum nutzt diese Voraussetzung den Straight-Bar-Dip (der auch zu Hause geht); Dips am Barren bauen dieselbe Basis auf."
+
+  - id: kipping_muscle_up
+    name: "Kipping Muscle-up"
+    description: "Ein Muscle-up an der Stange, der den Kip Swing als Schwung nutzt: Du ziehst die Stange Richtung Hüfte, bringst die Brust darüber und drückst dich oben auf gestreckte Arme aus."
+    cues:
+      - "Nutze den Kip Swing, dann zieh die Stange Richtung Hüfte, nicht zum Kinn."
+      - "Bring die Brust schnell über die Stange und drück dich auf gestreckte Arme aus."
+      - "Beide Arme gehen zusammen rüber; kein Chicken Wing (ein Arm nach dem anderen)."
+
+  - id: ring_muscle_up
+    name: "Muscle-up an den Ringen"
+    description: "An den Ringen mit False Grip ziehst du dich hoch, drehst die Handgelenke über die Ringe und drückst dich in den Stütz mit gestreckten Armen aus. Der klassische Muscle-up an den Ringen."
+    cues:
+      - "Setz den False Grip, das Handgelenk über dem Ring."
+      - "Zieh die Ringe zur unteren Brust, dann lehn dich nach vorn darüber."
+      - "Dreh durch in einen tiefen Dip und drück dich auf gestreckte Arme aus."
+    prerequisite_notes:
+      ring_dip: "Ring-Dips machen das Ausdrücken nach der Transition deutlich leichter."
+      kipping_muscle_up: "Ein Bar Muscle-up lehrt zuerst die Transition."
+
+  - id: elbow_lever
+    name: "Elbow Lever"
+    description: "Du balancierst den Körper waagerecht auf den Händen, die gebeugten Ellbogen als Stütze in die Hüfte gedrückt. Ein Balance-Skill, der meist auf den Frog Stand folgt."
+    cues:
+      - "Hände eng zusammen, Finger nach außen oder nach hinten gedreht; Ellbogen in die Hüfte."
+      - "Lehn dich nach vorn, bis die Beine schweben, Körper gerade und parallel zum Boden."
+      - "Spann den Po an und lass die Ellbogen nicht auseinanderrutschen."
+    prerequisite_notes:
+      wrist_prep: "Die Handgelenke tragen den ganzen Körper in gebeugter Position."
+
+  - id: tuck_human_flag
+    name: "Tuck Human Flag"
+    description: "Du hältst dich mit beiden gestreckten Armen an einer senkrechten Stange, die obere Hand zieht, die untere drückt, der Körper seitlich in der Luft mit angezogenen Knien. Der erste Schritt zur Human Flag."
+    cues:
+      - "Obere Hand zieht, untere Hand drückt; beide Arme bleiben gestreckt."
+      - "Stapel die Schultern übereinander und zieh die Knie zur Brust."
+      - "Halte die Hüfte oben auf Höhe der Hände."
+    prerequisite_notes:
+      pull_up: "Etwa 10 strikte Klimmzüge."
+      parallel_bar_dip: "Etwa 10 Dips."
+      side_plank: "Ein Seitstütz von 60-90 s."
+
+  - id: advanced_tuck_human_flag
+    name: "Advanced Tuck Human Flag"
+    description: "Eine Human Flag mit geöffneter Hüfte und flachem Rücken, die Knie noch gebeugt, der Körper seitlich an einer senkrechten Stange in der Luft. Liegt zwischen Tuck und Straddle Flag."
+    cues:
+      - "Öffne aus dem Tuck die Hüfte, sodass der Rücken flach ist und die Oberschenkel wegzeigen."
+      - "Obere Hand zieht, untere Hand drückt; beide Arme bleiben gestreckt."
+      - "Halte den Körper parallel zum Boden."
+
+  - id: straddle_human_flag
+    name: "Straddle Human Flag"
+    description: "Eine Human Flag mit gestreckten, weit gegrätschten Beinen, der Körper seitlich und waagerecht an einer senkrechten Stange. Der Schritt vor der vollen Flag."
+    cues:
+      - "Öffne aus dem Tuck die Beine weit in die Grätsche."
+      - "Der Körper bleibt parallel zum Boden; lass die Hüfte nicht absinken."
+      - "Drück weiter kräftig mit dem unteren Arm."
+
+  - id: human_flag
+    name: "Human Flag"
+    description: "Du hältst den ganzen Körper gerade und seitlich, parallel zum Boden, mit gestreckten Armen an einer senkrechten Stange. Ein berühmter Kraft- und Show-Skill."
+    cues:
+      - "Beine geschlossen, Körper in einer geraden Linie parallel zum Boden."
+      - "Oberer Arm zieht, unterer Arm drückt, beide durchgestreckt."
+      - "Spann Beine und Po an, damit die Hüfte nicht absinkt."
+
+  - id: strict_bar_muscle_up
+    name: "Strikter Bar Muscle-up"
+    description: "Ein Muscle-up an der Stange ohne Schwung: Aus dem ruhigen Dead Hang ziehst du explosiv, drehst die Handgelenke über die Stange und drückst dich oben in den Stütz. Braucht deutlich mehr Kraft als die Kipping-Version."
+    cues:
+      - "Starte aus einem ruhigen Dead Hang; kein Schwung, kein Kip."
+      - "Zieh explosiv tief Richtung Hüfte, dann dreh die Handgelenke über die Stange."
+      - "Drück dich mit beiden Armen zusammen in den Stütz mit gestreckten Armen aus."
+    prerequisite_notes:
+      chest_to_bar_pull_up: "Starke, explosive Chest-to-Bar-Klimmzüge."

@@ -1,0 +1,146 @@
+# German texts for content/progressions/flexibility.yaml (FB-8): same ids, same cues in the same order.
+branch: flexibility
+nodes:
+  - id: wrist_prep
+    name: "Handgelenk-Vorbereitung"
+    description: "Eine kurze Routine im Vierfüßlerstand, die die Handgelenke durch mehrere Handpositionen bewegt: Finger nach vorne, zur Seite und nach hinten. Sie wärmt die Handgelenke vor Handstand- und Planche-Arbeit auf."
+    cues:
+      - "Wippe im Vierfüßlerstand sanft durch jede Position (Finger nach vorne, zur Seite, nach hinten)."
+      - "Handflächen- und Handrückenpositionen, dann Faust- und Fingerspitzenstütz."
+      - "Drücke nie in stechenden Schmerz; das Ziel ist warm, nicht überdehnt."
+
+  - id: butterfly_stretch
+    name: "Schmetterling"
+    description: "Du sitzt aufrecht, die Fußsohlen aneinander, die Knie fallen nach außen, und lässt die Innenseiten der Oberschenkel öffnen. Im Yoga heißt die Pose Baddha Konasana (gebundener Winkel); sie öffnet Leisten und Hüften."
+    cues:
+      - "Sitze aufrecht auf den Sitzbeinhöckern; lege ein Kissen unter die Hüften, wenn der Rücken rund wird."
+      - "Halte die Knöchel, nicht die Zehen, und ziehe die Fersen so weit heran, wie es angenehm ist."
+      - "Lass die Knie durch Entspannen sinken; drücke sie sanft mit den Ellbogen nach unten, nie wippen."
+
+  - id: shoulder_dislocate
+    name: "Schulterkreisen mit Band"
+    description: "Du hältst ein Band breit mit gestreckten Armen und führst es in einem Bogen von vor den Hüften über den Kopf nach hinten und zurück. Eine Mobilitätsübung für die Schultern; dabei wird nichts ausgekugelt."
+    cues:
+      - "Halte das Band breit mit gestreckten Armen vor den Hüften."
+      - "Führe es in einem fließenden Bogen über den Kopf nach hinten und wieder zurück."
+      - "Halte die Ellbogen durchgestreckt; greife breiter, wenn du sie beugen musst."
+
+  - id: pike_fold
+    name: "Pike-Vorbeuge"
+    description: "Du sitzt mit gestreckten, geschlossenen Beinen und beugst den Oberkörper aus der Hüfte nach vorne zu den Beinen. Dehnt die hintere Oberschenkelmuskulatur für L-Sit, Kompression und Press-Arbeit."
+    cues:
+      - "Sitze mit gestreckten, geschlossenen Beinen, die Knie durchgedrückt."
+      - "Beuge dich aus der Hüfte nach vorne, nicht durch Runden des oberen Rückens."
+      - "Entspanne dich hinein und atme; greife zu den Zehen oder darüber hinaus."
+
+  - id: half_split
+    name: "Halber Spagat"
+    description: "Du kniest auf einem Knie, das vordere Bein gestreckt nach vorne mit der Ferse am Boden, und klappst den Oberkörper aus der Hüfte über das vordere Bein. Im Yoga Ardha Hanumanasana; dehnt die hintere Oberschenkelmuskulatur auf dem Weg zum Längsspagat."
+    cues:
+      - "Hinteres Knie unter der Hüfte, vordere Ferse am Boden, vordere Zehen zeigen nach oben."
+      - "Klappe aus der Hüfte mit langem, geradem Rücken; strecke die Brust zu den Zehen."
+      - "Halte jede Seite; lege Blöcke oder Bücher unter die Hände, wenn der Boden zu weit weg ist."
+
+  - id: pigeon_pose
+    name: "Taube"
+    description: "Das vordere Bein liegt quer vor dir angewinkelt mit dem Schienbein am Boden, das hintere Bein lang nach hinten gestreckt, und die Hüften sinken zum Boden. Ein tiefer Hüftöffner aus dem Yoga (Kapota heißt Taube) und der erste Schritt zur Königstaube."
+    cues:
+      - "Halte die Hüften gerade nach vorne; polstere unter der vorderen Hüfte, wenn sie hoch schwebt."
+      - "Ziehe den vorderen Fuß an (Flex), um das Knie zu schützen; lass bei Knieschmerzen sofort nach."
+      - "Bleib aufrecht auf den Händen oder wandere mit ihnen nach vorne und lege dich über das vordere Bein."
+
+  - id: table_bridge
+    name: "Tischbrücke"
+    description: "Du sitzt mit den Händen hinter dir und gebeugten Knien und drückst die Hüften hoch, bis der Körper flach wie eine Tischplatte ist. Eine sanfte Brücke, die Schultern und Hüften öffnet."
+    cues:
+      - "Sitze mit den Händen hinter dir, Finger zeigen zu den Füßen, Knie gebeugt."
+      - "Drücke die Hüften hoch, bis der Körper flach wie eine Tischplatte ist."
+      - "Knie über den Knöcheln, Schultern über den Handgelenken, Kopf in Verlängerung."
+
+  - id: frog_stretch
+    name: "Frosch"
+    description: "Auf Händen oder Unterarmen und Knien gleiten die Knie weit auseinander, die Schienbeine parallel und die Füße nach außen gedreht, und die Hüften sinken dazwischen zurück. Eine belastete Dehnung für die Oberschenkel-Innenseiten und den Querspagat."
+    cues:
+      - "Knie auf Höhe der Hüften, Knöchel auf Höhe der Knie; polstere unter den Knien."
+      - "Wippe mit den Hüften langsam vor und zurück, dann halte dort, wo die Dehnung spürbar wird."
+      - "Halte den Rücken gerade; nimm die Knie nur ein kleines Stück auf einmal breiter."
+
+  - id: couch_stretch
+    name: "Couch Stretch"
+    description: "Du kniest im Ausfallschritt, das hintere Knie nah an einer Wand oder Couch, das hintere Schienbein daran hoch, und richtest die Brust auf, bis Hüft- und Oberschenkelvorderseite gedehnt sind. Eine starke Hüftbeuger- und Quadrizeps-Dehnung vor Längsspagat und Königstaube."
+    cues:
+      - "Starte im tiefen Ausfallschritt mit den Händen am Boden, das hintere Knie etwas von der Wand entfernt."
+      - "Spanne den Po an und kippe das Becken ein, bevor du die Brust aufrichtest."
+      - "Rücke das Knie erst näher an die Wand, wenn aufrecht leicht fällt; es darf nicht wehtun."
+    prerequisite_notes:
+      pigeon_pose: "Offene Hüften machen die aufrechte Position leichter erreichbar."
+
+  - id: half_lotus
+    name: "Halber Lotus"
+    description: "Du sitzt im Schneidersitz, ein Fuß ruht hoch auf dem gegenüberliegenden Oberschenkel mit der Sohle nach oben, das andere Bein bleibt untergeschlagen. Im Yoga Ardha Padmasana; der Schritt vor dem vollen Lotus."
+    cues:
+      - "Drehe zuerst den ganzen Oberschenkel aus der Hüfte nach außen, dann hebe den Fuß mit den Händen."
+      - "Erzwinge es nie aus dem Knie; stoppe bei jedem Zwicken im Knie."
+      - "Sitze auf einem Kissen, damit die Knie unter die Hüften sinken können."
+    prerequisite_notes:
+      pigeon_pose: "Der Lotus braucht viel Außenrotation in der Hüfte; die Taube trainiert sie."
+
+  - id: full_bridge
+    name: "Brücke"
+    description: "Du liegst auf dem Rücken und drückst dich auf Händen und Füßen hoch, bis Arme und Beine gestreckt sind und der Körper einen Bogen bildet. Im Yoga auch Rad (Urdhva Dhanurasana) genannt; öffnet Schultern und Wirbelsäule."
+    cues:
+      - "Liege auf dem Rücken, Hände neben den Ohren, Finger zeigen zu den Füßen."
+      - "Drücke dich hoch, bis Arme und Beine gestreckt sind."
+      - "Schiebe die Schultern über die Hände; beuge nicht nur den unteren Rücken."
+    prerequisite_notes:
+      shoulder_dislocate: "Offene Schultern machen es viel leichter, die Arme zu strecken."
+
+  - id: pancake
+    name: "Pancake"
+    description: "Du sitzt mit gestreckten, weit gegrätschten Beinen und beugst den Oberkörper aus der Hüfte nach vorne zum Boden zwischen den Beinen. Im Yoga Upavistha Konasana; dehnt Oberschenkel-Innenseiten und hintere Oberschenkel zugleich."
+    cues:
+      - "Sitze auf einem Kissen, wenn das Becken nach hinten kippt; Knie und Zehen zeigen nach oben."
+      - "Kippe das Becken nach vorne und führe mit der Brust, nicht mit dem Kopf."
+      - "Drücke die Fersen beim Beugen in den Boden, dann entspanne tiefer hinein."
+
+  - id: front_split
+    name: "Längsspagat"
+    description: "Ein Bein gestreckt nach vorne, das andere gestreckt nach hinten, die Hüften gerade und zum Boden sinkend. Im Yoga Hanumanasana; Blöcke unter den Händen oder Hüften stützen den Weg nach unten."
+    cues:
+      - "Richte die Hüften gerade nach vorne aus; das hintere Knie zeigt nach unten, nicht nach außen."
+      - "Gleite langsam nach unten und nimm mit Händen oder Blöcken neben den Hüften Gewicht ab."
+      - "Halte bei starker, aber ruhiger Dehnung; ganz am Boden kommt über Monate."
+
+  - id: lotus
+    name: "Lotus"
+    description: "Du sitzt im Schneidersitz, jeder Fuß ruht hoch auf dem gegenüberliegenden Oberschenkel, die Sohlen nach oben. Der klassische Meditationssitz im Yoga (Padmasana); er braucht sehr offene Hüften."
+    cues:
+      - "Lege den ersten Fuß in den halben Lotus, dann drehe den zweiten Oberschenkel aus der Hüfte nach außen."
+      - "Hebe den zweiten Fuß mit den Händen hinüber; hebele ihn nie mit dem Knie hinein."
+      - "Wechsle zwischen den Sätzen, welches Bein oben liegt."
+      - "Stoppe bei jedem Zwicken im Knie; ein erzwungener Lotus kann das Knie verletzen."
+
+  - id: one_leg_wheel
+    name: "Einbeinige Brücke"
+    description: "Aus der vollen Brücke hebt sich ein Bein und zeigt gerade nach oben, während die Arme und das andere Bein den Bogen halten. Im Yoga Eka Pada Urdhva Dhanurasana (einbeiniges Rad); der nächste Brücken-Schritt auf der BWF-Tabelle."
+    cues:
+      - "Verlagere das Gewicht über den Standfuß und die Hände, bevor du das Bein hebst."
+      - "Halte die Schultern über die Hände geschoben, während das Bein steigt."
+      - "Senke das Bein langsam; wechsle die Beine zwischen den Sätzen."
+
+  - id: middle_split
+    name: "Querspagat"
+    description: "Beide Beine gestreckt zur Seite, die Hüften sinken dazwischen zum Boden. Auch Seit- oder Grätschspagat genannt (im Yoga Samakonasana)."
+    cues:
+      - "Kippe das Becken nach vorne und halte Knie und Zehen nach oben oder vorne gerichtet."
+      - "Nimm Gewicht auf Hände oder Unterarme und schiebe die Füße ein kleines Stück auf einmal auseinander."
+      - "Stoppe bei jedem Schmerz im Hüftgelenk oder an der Knieinnenseite."
+
+  - id: king_pigeon
+    name: "Königstaube"
+    description: "Aus der Taube beugt sich das hintere Knie, beide Hände greifen über den Kopf nach hinten zum hinteren Fuß, die Brust ist in einer tiefen Rückbeuge gehoben. Im Yoga Eka Pada Rajakapotasana, der König der Tauben-Posen."
+    cues:
+      - "Starte mit einem Gurt oder Band um den hinteren Fuß und wandere mit den Händen daran hinunter."
+      - "Hebe die Brust und verlängere die Wirbelsäule, bevor du nach hinten beugst."
+      - "Die Ellbogen zeigen nach oben; komme langsam so heraus, wie du hineingegangen bist."
+      - "Vorderer Fuß angezogen wie in der Taube, um das Knie zu schützen; lass bei Knieschmerzen sofort nach."
