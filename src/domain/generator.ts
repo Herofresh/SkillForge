@@ -85,7 +85,7 @@ import type {
   WorkoutRequest,
 } from './types';
 import { WORKOUT_BLOCK_KINDS } from './types';
-import { classifyOutcome } from './xp';
+import { classifyOutcome, MIN_WORKING_SETS } from './xp';
 
 // --- Scoring (ADR-024) ------------------------------------------------------------------------
 
@@ -110,12 +110,9 @@ export const OG_LEVEL_POINTS = 1;
 export const PATTERN_REST_HOURS = 48;
 /** Low-fatigue patterns that can be practised daily; they never trigger the 48 h skip. */
 export const RECOVERY_EXEMPT_PATTERNS: readonly Pattern[] = ['balance', 'mobility'];
-/**
- * Sets of one node in one session count as working sets (pattern recency, last performance,
- * stagnation) from this many on; the one-set warm-up items do not. Also the fewest sets a trimmed
- * working exercise keeps.
- */
-export const MIN_WORKING_SETS = 2;
+// `MIN_WORKING_SETS` (working sets from this many on; the fewest sets a trimmed exercise keeps)
+// lives in `xp.ts`, which shares it with the XP share rule (ADR-078); re-exported here.
+export { MIN_WORKING_SETS };
 
 // --- Slots ------------------------------------------------------------------------------------
 

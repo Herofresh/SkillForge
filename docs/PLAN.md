@@ -337,9 +337,10 @@
   or gesture handle. Not in a release build yet. FB-4 … FB-7 are decided, not done (see 7.8).
 - **Second feedback round** (2026-10-30, FB-8 … FB-15 under 7.8): FB-15 fixed ([PR #86](https://github.com/Herofresh/SkillForge/pull/86)),
   FB-12 fixed (ADR-076, [PR #87](https://github.com/Herofresh/SkillForge/pull/87)), FB-9/10/11 done (goal reached: celebration and the next
-  goal to pick, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)); FB-8 (German), FB-13 (Mobility points) and FB-14 (more items)
-  need user decisions. None of the round is in a release build yet: next is a 1.3.0 bundle for the
-  closed track.
+  goal to pick, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)), FB-13 done (warm-up and cool-down work earns half XP,
+  attributes count skills from level 2; ADR-078, [PR #89](https://github.com/Herofresh/SkillForge/pull/89)). User decisions 2026-10-30: FB-8 German
+  for everything including the skill content (next, as 1.4.0), FB-14 more items (OK, next). None
+  of the round is in a release build yet: 1.3.0 after FB-14, German as 1.4.0.
 - **1.2.0, versionCode 12** (2026-10-17): 7.10 Health Connect. Built so the user can upload it to the
   closed track as a **draft** first: the Health apps declaration only asks about Health Connect data
   types once Play has seen a bundle with the permission (checked by the user: the form showed no
@@ -385,6 +386,16 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-13 XP share (task 7.8, ADR-078, [PR #89](https://github.com/Herofresh/SkillForge/pull/89)):** `xpShareKind` / `XP_SHARE` / `LIGHT_WORK_XP_SHARE`
+  / `ACCESSORY_MOBILITY_MAX_SHARE` and `MIN_WORKING_SETS` (moved from `generator.ts`, re-exported
+  there) in `xp.ts`; `applySessionWith` in `recompute.ts` counts the session's mobility sets
+  (`nodeAttributes` from `character.ts`) and stores `ExerciseResult.xpShare`; `ATTRIBUTE_MIN_LEVEL`
+  in `character.ts`; `xpShareNote` in `format.ts` → `SummaryView.exercises[].xpNote` → the summary
+  row. Guide facts `lightWorkXpShare`, `attributeMinLevel`. Derived state: existing histories
+  recompute with it on the next load (levels of warm-up / cool-down nodes drop; nothing stored
+  changes). Tests: `xp.test.ts`, `recompute.test.ts` ("XP share"), `character.test.ts`,
+  `trainView.test.ts`. The measurement script was throwaway (20 generated sessions, see the
+  FB-13 item); not checked on a device.
 - **FB-9/10/11 goal reached (task 7.8, ADR-077, [PR #88](https://github.com/Herofresh/SkillForge/pull/88)):** `src/domain/goalReached.ts`
   (`goalsReachedIn`, `nextGoalOptions`), `replaceGoal` in `onboarding.ts` and the store;
   `src/components/character/GoalReachedPanel.tsx` (burst + question, one frame per reached goal,
@@ -1883,18 +1894,23 @@ from the GitHub releases' 1–7, ADR-068).
     Trial ("once every set reaches 12 reps, or right away in a Challenging session"), and a Trial
     cut for time gets a plan note. Standard keeps the readiness rule (ADR-024): a Trial before the
     range top would mostly fail. Backlog: a swapped-in or added exercise ignores the training type.
-  - [ ] FB-13 (balance, user 2026-10-30): "Mobility Punkte: bekommt viel zu viele Punkte, obwohl
+  - [x] FB-13 (balance, user 2026-10-30, ADR-078, [PR #89](https://github.com/Herofresh/SkillForge/pull/89)): "Mobility Punkte: bekommt viel zu viele Punkte, obwohl
     kein Fokus drauf war (immer im Aufwärmen, eventuell Teil-Punkte geben)". Found: the Mobility
     attribute (`computeAttributes`) adds `difficultyMult × level` for *every* node with XP, and
     all 28 flexibility + mobility nodes feed it; the warm-up prep (2 nodes, every session) and the
     cool-down (in nearly every Standard session, rotating through many og 0–1 nodes that level up
     in one session) touch many nodes, so breadth, not XP, inflates it. Warm-up sets earn full XP
     (`exerciseXp` has no role factor); `session_sets` stores no block role (warm-up vs. working).
-    **Needs a user decision** (formula change, ADR): options are (a) warm-up and cool-down sets
-    earn a share (e.g. 0.5) of XP and the attribute counts only nodes at level ≥ 2, inferred from
-    "fewer than 2 sets of the node in the session" so old history recomputes the same way; (b) store
-    the block role per set (migration, backup v4) and weight by it; (c) only drop the warm-up prep
-    from the attribute. Proposal: (a).
+    **User decision 2026-10-30: option (a).** Done: `xpShareKind` in `xp.ts`: fewer than 2 sets of
+    a node = `warm_up`, a mobility node's sets in a session that is mostly other work =
+    `cool_down`, both ½ XP (`LIGHT_WORK_XP_SHARE`); Trials and mobility-focused sessions (Recovery)
+    full. `nodeContribution` counts a node from level 2 (`ATTRIBUTE_MIN_LEVEL`). Inferred from the
+    logged sets, so old history recomputes the same way (no schema change). Measured with 20
+    generated 45-minute sessions performed as prescribed: Mobility 52 → 35 points, Balance 24 →
+    18, push / pull / legs unchanged (80 / 84 / 63). The summary says "Warm-up: half XP" /
+    "Cool-down: half XP"; the guide's XP and Attributes entries explain it. Side effect: a
+    flexibility goal trained in a Standard session's cool-down also earns half (its Trial counts
+    in full, and a Recovery session pays in full).
   - [ ] FB-14 (content, user 2026-10-30): "Item-Freischaltung: zu wenige Items, Freischaltung zu
     langsam (evtl. 10–20 sinnvolle Optionen hinzufügen)". Found: 46 items in 5 slots (hands has
     4), 28 tied to class tiers (14 at tier III), the level items at 5 / 10 / 20 / 35 / 50 / 75 and

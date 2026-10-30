@@ -45,6 +45,60 @@ export const STREAK_BONUS_MAX = 0.25;
  */
 export const CLASS_CHALLENGE_BONUS_XP = 50;
 
+/**
+ * Sets of one node in one session count as working sets (pattern recency, last performance,
+ * stagnation; full XP) from this many on; the one-set warm-up items do not. Also the fewest sets a
+ * trimmed working exercise keeps (generator).
+ */
+export const MIN_WORKING_SETS = 2;
+/**
+ * How an exercise's XP is shared by the kind of work it was (PLAN 7.8 FB-13, ADR-078):
+ * `warm_up` = fewer than `MIN_WORKING_SETS` sets of the node (the warm-up prep and ramp sets);
+ * `cool_down` = mobility work next to a session's main work (the cool-down, mobility extras);
+ * `full` = working sets, Trials, and mobility work in a mobility-focused session (Recovery).
+ */
+export const XP_SHARE_KINDS = ['full', 'warm_up', 'cool_down'] as const;
+export type XpShareKind = (typeof XP_SHARE_KINDS)[number];
+export const LIGHT_WORK_XP_SHARE = 0.5;
+export const XP_SHARE: Readonly<Record<XpShareKind, number>> = {
+  full: 1,
+  warm_up: LIGHT_WORK_XP_SHARE,
+  cool_down: LIGHT_WORK_XP_SHARE,
+};
+/**
+ * Mobility sets below this share of a session's sets are accessory work (`cool_down`); from it on
+ * the session is about mobility (a Recovery session, a stretching routine) and pays in full.
+ */
+export const ACCESSORY_MOBILITY_MAX_SHARE = 0.5;
+
+/** The session-wide counts `xpShareKind` needs: every set, and the ones of mobility nodes. */
+export interface SessionWorkCounts {
+  totalSets: number;
+  mobilitySets: number;
+}
+
+/**
+ * The share kind of `sets` (all sets of one node in one session): a Trial is always `full`; fewer
+ * than `MIN_WORKING_SETS` sets are `warm_up`; a mobility node's sets in a session that is mostly
+ * other work are `cool_down`; else `full`.
+ */
+export function xpShareKind(
+  sets: readonly LoggedSet[],
+  trainsMobility: boolean,
+  counts: SessionWorkCounts,
+): XpShareKind {
+  if (sets.some((set) => set.isTrial)) return 'full';
+  if (sets.length < MIN_WORKING_SETS) return 'warm_up';
+  if (
+    trainsMobility &&
+    counts.totalSets > 0 &&
+    counts.mobilitySets / counts.totalSets < ACCESSORY_MOBILITY_MAX_SHARE
+  ) {
+    return 'cool_down';
+  }
+  return 'full';
+}
+
 const repsOf = (performance: SetPerformance): number => performance.reps ?? 1;
 
 /** Normalized volume of one set (see the unit constants above). Negative input counts as 0. */
@@ -111,11 +165,18 @@ export interface ExerciseXp {
   xp: number;
 }
 
-/** XP of one exercise: `units × difficultyMult(ogLevel) × outcomeMult`. A failed attempt still earns XP. */
-export function exerciseXp(sets: readonly LoggedSet[], ogLevel: number): ExerciseXp {
+/**
+ * XP of one exercise: `units × difficultyMult(ogLevel) × outcomeMult × XP_SHARE[share]`. A failed
+ * attempt still earns XP; warm-up and cool-down work earns its share (ADR-078).
+ */
+export function exerciseXp(
+  sets: readonly LoggedSet[],
+  ogLevel: number,
+  share: XpShareKind = 'full',
+): ExerciseXp {
   const outcome = classifyOutcome(sets);
   const units = sets.reduce((sum, set) => sum + setUnits(set.metric, set.actual), 0);
-  const xp = Math.round(units * difficultyMult(ogLevel) * OUTCOME_MULT[outcome]);
+  const xp = Math.round(units * difficultyMult(ogLevel) * OUTCOME_MULT[outcome] * XP_SHARE[share]);
   return { outcome, units, xp };
 }
 

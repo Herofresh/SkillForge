@@ -18,6 +18,7 @@ import { BRANCH_NAMES } from '@/data/skills/branches';
 import { MS_PER_HOUR } from '@/lib/time';
 
 import {
+  ATTRIBUTE_MIN_LEVEL,
   CHARACTER_MAX_LEVEL,
   CHARACTER_XP_BASE,
   CHARACTER_XP_GROWTH,
@@ -48,6 +49,7 @@ import {
   DIFFICULTY_PER_OG_LEVEL,
   ECCENTRIC_SECONDS_PER_UNIT,
   HOLD_SECONDS_PER_UNIT,
+  LIGHT_WORK_XP_SHARE,
   OUTCOME_MULT,
   PARTIAL_MIN_RATIO,
   STREAK_BONUS_MAX,
@@ -101,6 +103,8 @@ export interface GuideFacts {
   partialMult: number;
   failedMult: number;
   completionBonusRatio: number;
+  /** Share of XP warm-up and cool-down work earns (ADR-078). */
+  lightWorkXpShare: number;
   characterXpBase: number;
   characterXpGrowth: number;
   characterMaxLevel: number;
@@ -110,6 +114,8 @@ export interface GuideFacts {
   straightArmBudgetS: number;
   straightArmRestHours: number;
   attributeCount: number;
+  /** A skill counts for its attributes from this level on (ADR-078). */
+  attributeMinLevel: number;
   pushPullMaxGap: number;
   rankBranchCount: number;
   ranks: { rank: RankTitle; min: number }[];
@@ -197,6 +203,7 @@ export function guideFacts(): GuideFacts {
     partialMult: OUTCOME_MULT.partial,
     failedMult: OUTCOME_MULT.failed,
     completionBonusRatio: COMPLETION_BONUS_RATIO,
+    lightWorkXpShare: LIGHT_WORK_XP_SHARE,
     characterXpBase: CHARACTER_XP_BASE,
     characterXpGrowth: CHARACTER_XP_GROWTH,
     characterMaxLevel: CHARACTER_MAX_LEVEL,
@@ -206,6 +213,7 @@ export function guideFacts(): GuideFacts {
     straightArmBudgetS: STRAIGHT_ARM_SESSION_BUDGET_S,
     straightArmRestHours: STRAIGHT_ARM_REST_HOURS,
     attributeCount: ATTRIBUTES.length,
+    attributeMinLevel: ATTRIBUTE_MIN_LEVEL,
     pushPullMaxGap: PUSH_PULL_MAX_GAP,
     rankBranchCount: RANK_BRANCHES.length,
     // Lowest rank first, the way the guide lists them.
@@ -259,6 +267,9 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         `A session where you skip no set adds +${percent(facts.completionBonusRatio)} %, and your ` +
           'streak adds its bonus on top (see Streak). The XP goes to the skills you trained and ' +
           'to your character.',
+        `Warm-up sets (a single set of a skill) and mobility work next to your main work (the ` +
+          `cool-down) pay ${percent(facts.lightWorkXpShare)} % of their XP, so they don’t outgrow ` +
+          'what you actually train. A session that is mostly mobility, like Recovery, pays in full.',
         `Your first character level-up takes ${n(facts.characterXpBase)} XP; each one after ` +
           `that takes ${percent(facts.characterXpGrowth - 1)} % more.`,
       ],
@@ -309,8 +320,10 @@ export function buildGuide(facts: GuideFacts): GuideEntry[] {
         'builds. Every skill you train adds to the attributes it works, more for harder skills ' +
         'and higher levels. The radar shows their balance.',
       more: [
-        `A skill adds (${difficulty}) times its level. Until its Trial is ` +
-          `passed, its level counts at most ${n(facts.proficientLevel)}.`,
+        `A skill adds (${difficulty}) times its level, from level ` +
+          `${n(facts.attributeMinLevel)} on: a skill touched once in a warm-up or cool-down ` +
+          `adds nothing yet. Until its Trial is passed, its level counts at most ` +
+          `${n(facts.proficientLevel)}.`,
         'Straight-arm skills also train the core: planche counts as push and core, front ' +
           'lever as pull and core.',
         'The radar is scaled to your strongest attribute, so it shows the shape of your ' +

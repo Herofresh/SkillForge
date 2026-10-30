@@ -247,6 +247,39 @@ describe('Train view models', () => {
     });
   });
 
+  it('notes the XP share of warm-up and cool-down work (PLAN 7.8 FB-13)', () => {
+    const result: SessionResult = {
+      sessionId: 's',
+      exercises: [
+        {
+          nodeId: 'pull_up',
+          outcome: 'success',
+          units: 8,
+          xp: 4,
+          xpShare: 'warm_up',
+          trialAttempted: false,
+          trialPassed: false,
+        },
+        {
+          nodeId: 'squat',
+          outcome: 'success',
+          units: 24,
+          xp: 24,
+          trialAttempted: false,
+          trialPassed: false,
+        },
+      ],
+      xp: { exerciseXp: 28, completionBonus: 3, streakBonus: 0, challengeBonus: 0, total: 31 },
+      streak: 1,
+      levelUps: [],
+      unlocked: [],
+      warnings: [],
+    };
+    const [pullUp, squat] = summaryView(result, NODES).exercises;
+    expect(pullUp.xpNote).toBe('Warm-up: half XP');
+    expect(squat.xpNote).toBeUndefined();
+  });
+
   it('marks exercises stuck at level 5 until their Trial (PLAN 7.8 FB-4)', () => {
     const pullUp = NODES[0];
     const capped = addNodeXp(

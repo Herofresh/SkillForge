@@ -1,11 +1,12 @@
 import { makeNode, makeSession } from '@/data/testFixtures';
 import { ALL_NODES } from '@/data/skills';
 import {
+  ATTRIBUTE_MIN_LEVEL,
   attributePeakOgLevels,
   CHARACTER_LEVEL_THRESHOLDS,
+  CHARACTER_MAX_LEVEL,
   characterLevel,
   characterLevelProgress,
-  CHARACTER_MAX_LEVEL,
   computeAttributes,
   computeCharacter,
   hasPushPullImbalance,
@@ -99,6 +100,12 @@ describe('attribute points', () => {
     expect(nodeContribution(planche, undefined)).toBe(0);
     expect(nodeContribution(planche, selfUnlock(emptyProgress(planche.id), 0))).toBe(0);
     expect(nodeContribution(planche, trainedTo(planche.id, 3))).toBe(difficultyMult(5) * 3);
+  });
+
+  it('counts a node only from level 2: one warm-up or cool-down touch adds nothing (ADR-078)', () => {
+    expect(ATTRIBUTE_MIN_LEVEL).toBe(2);
+    expect(nodeContribution(pushUp, trainedTo('push_up', 1))).toBe(0);
+    expect(nodeContribution(pushUp, trainedTo('push_up', 2))).toBe(difficultyMult(1) * 2);
   });
 
   it('lets harder and more-trained nodes contribute more', () => {

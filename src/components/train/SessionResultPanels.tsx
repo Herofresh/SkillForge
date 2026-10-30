@@ -156,7 +156,7 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
             key={exercise.nodeId}
             onPress={() => onOpenNode(exercise.nodeId)}
             accessibilityRole="link"
-            accessibilityLabel={`${exercise.name}: ${exercise.outcomeLabel}, ${exercise.xp} XP${exercise.time !== undefined ? `, time ${exercise.time}` : ''}`}
+            accessibilityLabel={`${exercise.name}: ${exercise.outcomeLabel}, ${exercise.xp} XP${exercise.xpNote !== undefined ? ` (${exercise.xpNote})` : ''}${exercise.time !== undefined ? `, time ${exercise.time}` : ''}`}
             style={styles.exercise}>
             <View style={styles.exerciseText}>
               <PixelText tone="textOnParchment">{exercise.name}</PixelText>
@@ -167,6 +167,7 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
                     : exercise.trialAttempted
                       ? ' · Trial not passed yet'
                       : '') +
+                  (exercise.xpNote !== undefined ? ` · ${exercise.xpNote}` : '') +
                   (exercise.time !== undefined ? ` · ${exercise.time}` : '')}
               </PixelText>
             </View>

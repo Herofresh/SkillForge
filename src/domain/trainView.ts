@@ -10,6 +10,7 @@ import {
   formatPrescription,
   formatRest,
   trialPlannedNote,
+  xpShareNote,
 } from './format';
 import { awaitingTrial, bankedXp, type ProgressMap } from './progression';
 import type { SessionResult } from './recompute';
@@ -263,6 +264,8 @@ export interface SummaryView {
     outcome: Outcome;
     outcomeLabel: string;
     xp: number;
+    /** "Warm-up: half XP" / "Cool-down: half XP" (ADR-078); unset for full XP. */
+    xpNote?: string;
     trialAttempted: boolean;
     trialPassed: boolean;
     /** The exercise's timed sets added up ("2:15"); unset when no set was timed. */
@@ -322,6 +325,9 @@ export function summaryView(
       outcome: exercise.outcome,
       outcomeLabel: OUTCOME_LABELS[exercise.outcome],
       xp: exercise.xp,
+      ...(xpShareNote(exercise.xpShare) !== undefined
+        ? { xpNote: xpShareNote(exercise.xpShare) }
+        : {}),
       trialAttempted: exercise.trialAttempted,
       trialPassed: exercise.trialPassed,
       ...exerciseTime(exercise.nodeId),

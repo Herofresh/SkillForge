@@ -13,6 +13,7 @@ import {
 } from '@/domain/recompute';
 import { MIN_WEEKS_AT_LEVEL, STRAIGHT_ARM_REST_HOURS } from '@/domain/safeguards';
 import type { LoggedSession, UserAction } from '@/domain/types';
+import { exerciseXp } from '@/domain/xp';
 import { MS_PER_DAY, MS_PER_HOUR, MS_PER_WEEK } from '@/lib/time';
 
 const [deadHang, negative, pullUp] = makeChain();
@@ -365,5 +366,66 @@ describe('a passed Trial counts for the earlier skills (PLAN 7.8 FB-7)', () => {
     const { state } = recompute(nodes, [failed]);
     expect(state.progress.pull_up_negative).toBeUndefined();
     expect(state.progress.dead_hang).toBeUndefined();
+  });
+});
+
+describe('XP share of warm-up and cool-down work (PLAN 7.8 FB-13, ADR-078)', () => {
+  const mobility = makeNode({
+    id: 'cat_cow',
+    name: 'Cat-cow',
+    branch: 'mobility',
+    ogLevel: 0,
+    patterns: ['mobility'],
+    workingRange: { min: 8, max: 12 },
+    trial: { sets: 3, target: 12 },
+  });
+  const all = [...nodes, mobility];
+
+  it('pays a single warm-up set half, working sets in full', () => {
+    const session = makeSession('w', 0, [
+      { nodeId: 'dead_hang', count: 1 },
+      { nodeId: 'pull_up_negative', count: 3 },
+    ]);
+    const [result] = recompute(all, [session]).results;
+    const byId = Object.fromEntries(result.exercises.map((e) => [e.nodeId, e]));
+    expect(byId.dead_hang).toMatchObject({ xp: 4, xpShare: 'warm_up' }); // 8 units × 1 × 0.5
+    expect(byId.pull_up_negative).toMatchObject({ xpShare: 'full' });
+    expect(byId.pull_up_negative.xp).toBe(exerciseXp(session.sets.slice(1), negative.ogLevel).xp);
+  });
+
+  it('pays mobility work next to main work half, a mobility-focused session in full', () => {
+    const standard = makeSession('s', 0, [
+      { nodeId: 'dead_hang', count: 3 },
+      { nodeId: 'pull_up_negative', count: 3 },
+      { nodeId: 'cat_cow', count: 2 },
+    ]);
+    const recovery = makeSession('r', MS_PER_DAY, [
+      { nodeId: 'dead_hang', count: 2 },
+      { nodeId: 'cat_cow', count: 3 },
+    ]);
+    const { results } = recompute(all, [standard, recovery]);
+    const inStandard = results[0].exercises.find((e) => e.nodeId === 'cat_cow');
+    const inRecovery = results[1].exercises.find((e) => e.nodeId === 'cat_cow');
+    expect(inStandard).toMatchObject({ xp: 8, xpShare: 'cool_down' }); // 16 units × 0.5
+    expect(inRecovery).toMatchObject({ xp: 24, xpShare: 'full' });
+  });
+
+  it('never shares a Trial', () => {
+    const trial = makeSession('t', 0, [
+      { nodeId: 'dead_hang', count: 3 },
+      {
+        nodeId: 'cat_cow',
+        count: 3,
+        prescribed: { value: 12 },
+        actual: { value: 12 },
+        isTrial: true,
+      },
+    ]);
+    const [result] = recompute(all, [trial]).results;
+    expect(result.exercises.find((e) => e.nodeId === 'cat_cow')).toMatchObject({
+      xp: 36,
+      xpShare: 'full',
+      trialPassed: true,
+    });
   });
 });
