@@ -193,7 +193,7 @@ describe('issues in the editor', () => {
     expect(section('trains must list at least one attribute')).toBe('trains');
     expect(section('og_level 1 is lower than ...')).toBe('position');
     expect(section('is a built-in straight-arm skill and stays in the x branch')).toBe('position');
-    expect(section('name must not be empty')).toBe('name');
+    expect(section('name is missing: give the exercise a short name')).toBe('name');
     expect(section(DESCRIPTION_MISSING_MESSAGE)).toBe('description');
     expect(section('description is 301 characters; keep it under 300')).toBe('description');
     expect(section('something new')).toBe('other');
@@ -202,13 +202,13 @@ describe('issues in the editor', () => {
   it('groups issue texts by section', () => {
     const grouped = issuesBySection(
       [
-        { nodeId: 'x', message: 'name must not be empty' },
+        { nodeId: 'x', message: 'name is missing: give the exercise a short name' },
         { nodeId: 'x', message: 'has an empty equipment option' },
       ],
       'x',
       [],
     );
-    expect(grouped.name).toEqual(['name must not be empty']);
+    expect(grouped.name).toEqual(['name is missing: give the exercise a short name']);
     expect(grouped.equipment).toEqual(['has an empty equipment option']);
     expect(grouped.other).toEqual([]);
   });

@@ -335,6 +335,9 @@
 - **FB-3** fixed ([PR #81](https://github.com/Herofresh/SkillForge/pull/81)): `Screen` pads its end by the navigation bar (`insetBottom`, default on;
   off on the tab screens and in onboarding), so stack screens no longer end under the 3-button bar
   or gesture handle. Not in a release build yet. FB-4 … FB-7 are decided, not done (see 7.8).
+- **Second feedback round** (2026-10-30, FB-8 … FB-15 under 7.8): FB-15 fixed ([PR #86](https://github.com/Herofresh/SkillForge/pull/86));
+  FB-12 and FB-9/10/11 are next; FB-8 (German), FB-13 (Mobility points) and FB-14 (more items)
+  need user decisions.
 - **1.2.0, versionCode 12** (2026-10-17): 7.10 Health Connect. Built so the user can upload it to the
   closed track as a **draft** first: the Health apps declaration only asks about Health Connect data
   types once Play has seen a bundle with the permission (checked by the user: the form showed no
@@ -380,6 +383,12 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-15 custom exercise without a name (task 7.8, [PR #86](https://github.com/Herofresh/SkillForge/pull/86)):** `nodeDraftIssues` /
+  `nodeDraftWarnings` in `appStore.ts` map the provisional `user_` id back to the draft's id
+  (`asDraft`), so `editorIssueText` doesn't prefix it. Wording change in `validate.ts`. Tests:
+  `src/store/nodeEditor.test.ts`, `src/components/editor.test.tsx`. The second feedback round
+  (FB-8 … FB-14) is triaged under 7.8: FB-12 and FB-9/10/11 are next for an agent; FB-8, FB-13 and
+  FB-14 wait for the user's decision (see each item).
 - **FB-7 Trial chain (task 7.8, ADR-075, [PR #85](https://github.com/Herofresh/SkillForge/pull/85)):** `trialChain` in `progression.ts`;
   `applySessionWith` in `recompute.ts` passes every hard prerequisite of a Trial passed in the session
   (`passTrial`, at the Trial's time), lists them in `SessionResult.trialsImplied` and the level-ups.
@@ -1812,6 +1821,68 @@ from the GitHub releases' 1–7, ADR-068).
   - [x] FB-7 (rule change, user 2026-10-22, ADR-075, [PR #85](https://github.com/Herofresh/SkillForge/pull/85)): a passed Trial also counts for the earlier skills it
     depends on. Decided: every hard prerequisite, transitively, counts as Trial passed (unlocked,
     at least level 5, Proficient), like a test-out; no extra XP. Needs an ADR (extends ADR-023).
+  - Second round (user's "Skillforge Ideen" list, 2026-10-30; its first item is FB-3, already
+    fixed). Triage by an agent, see the handoff notes for the findings:
+  - [ ] FB-8 (idea, user 2026-10-30): "Vielleicht auf Deutsch anbieten (neue Übersetzung dazu,
+    System-Sprache verwenden oder einstellen)". Not started: there is no i18n layer (every text is
+    an English literal in `src/` and `app/`, ~400 labels plus the guide, the notices and the
+    onboarding copy), and the 155 nodes' names, descriptions and cues live in the YAML (~185 KB).
+    **Needs a user decision** on scope: UI only (a dictionary + `expo-localization`, system language
+    with a Settings override; one or two PRs) or the skill content too (a `de:` field per text in
+    the YAML, a translation pass over all 155 nodes; several PRs). German would also need the
+    Play listing and the privacy page in German.
+  - [ ] FB-9 (UX, user 2026-10-30): "Wenn ein Ziel erreicht ist, dann fragen, ob man zum nächsten
+    in der Schwierigkeit springen soll". Today nothing notices a reached goal except the check on
+    the Character tab's goal card (`goalProgress`); the generator keeps weighting a Proficient
+    goal. Planned with FB-10 and FB-11 as one feature: the summary (and the Trial outcome) says
+    which goal was reached, and offers the next goal(s).
+  - [ ] FB-10 (UX, user 2026-10-30): "Goals erreichen mehr feiern": a GOAL REACHED! burst and
+    panel on the summary / Trial outcome, like QUEST COMPLETE and LEVEL UP (ADR-038 rules).
+  - [ ] FB-11 (UX, user 2026-10-30): "Nächste Ziel-Optionen: Wenn es nach Abschluss mehrere
+    Optionen gibt, soll man auswählen können unter den optimalen (wieder mit Info-i für Details)":
+    the skills whose hard prerequisites include the reached goal, easiest first, same branch
+    first; each as a `NodeRow` with the "i" (`ExerciseInfoSheet`) and "Set as goal", plus "Keep my
+    goals". Also from the Character tab's reached-goal card.
+  - [ ] FB-12 (bug/UX, user 2026-10-30): "Prüfungen werden übersprungen: wurde gefeedbacked,
+    überprüfen, ob es einen Fehler gibt". Found: no dropped data; the Trials are never *planned*.
+    (1) A Standard plan prescribes the Trial only when the weakest of the last working sets hit the
+    range top (`standardPrescription`); a skill capped at level 5 ("Trial needed", FB-4) keeps
+    getting plain working sets, which earn nothing, until that happens; only Challenging uses the
+    cap (`generator.test.ts` pins Standard to no Trial). (2) The warm-up prep nodes (`wrist_prep`,
+    `shoulder_dislocate`, 1 set every session) reach the cap after ~17 sessions and then show
+    "Trial needed" forever: they never have working sets, so their Trial is never due, and they
+    are never candidates. (3) Battle shows no Trial marker (Classic shows the shield + "Trial").
+    (4) A Trial that doesn't fit the time (`tryAddBlock` → `reduced`) or the cool-down share turns
+    into working sets without a note. Fix: a capped node's Trial is due in Standard too (when
+    the safeguards and the six-week clock allow), the warm-up prep's Trial is prescribed in the
+    warm-up itself once capped, Battle marks Trials, and a Trial cut for time says so.
+  - [ ] FB-13 (balance, user 2026-10-30): "Mobility Punkte: bekommt viel zu viele Punkte, obwohl
+    kein Fokus drauf war (immer im Aufwärmen, eventuell Teil-Punkte geben)". Found: the Mobility
+    attribute (`computeAttributes`) adds `difficultyMult × level` for *every* node with XP, and
+    all 28 flexibility + mobility nodes feed it; the warm-up prep (2 nodes, every session) and the
+    cool-down (in nearly every Standard session, rotating through many og 0–1 nodes that level up
+    in one session) touch many nodes, so breadth, not XP, inflates it. Warm-up sets earn full XP
+    (`exerciseXp` has no role factor); `session_sets` stores no block role (warm-up vs. working).
+    **Needs a user decision** (formula change, ADR): options are (a) warm-up and cool-down sets
+    earn a share (e.g. 0.5) of XP and the attribute counts only nodes at level ≥ 2, inferred from
+    "fewer than 2 sets of the node in the session" so old history recomputes the same way; (b) store
+    the block role per set (migration, backup v4) and weight by it; (c) only drop the warm-up prep
+    from the attribute. Proposal: (a).
+  - [ ] FB-14 (content, user 2026-10-30): "Item-Freischaltung: zu wenige Items, Freischaltung zu
+    langsam (evtl. 10–20 sinnvolle Optionen hinzufügen)". Found: 46 items in 5 slots (hands has
+    4), 28 tied to class tiers (14 at tier III), the level items at 5 / 10 / 20 / 35 / 50 / 75 and
+    sessions at 50 / 100; a new hero earns ~6 items in the first weeks, then nothing from ~20 to
+    ~50 sessions. Items are letter grids in `src/data/companion/art.ts` (no image assets, both
+    bodies and every pose from one grid; `npm run companion:sheet` to review). ADR-059 makes the
+    shown list the spec, so a longer list **needs the user's OK**; proposal: 12–15 items on the
+    existing rule kinds filling the gaps (sessions 5 / 10 / 25 / 200, streak 3 / 14 / 60, Trials
+    3 / 5 / 10, level 15 / 30, Apprentice-rank hands and aura items).
+  - [x] FB-15 (bug, user 2026-10-30, [PR #86](https://github.com/Herofresh/SkillForge/pull/86)): "Eigene Übung hinzufügen: wenn kein
+    Name angegeben wird, erscheint eine sehr technische Fehlermeldung". The live validator gave
+    the new draft its provisional id (`user_exercise`), so the editor took the issue for one about
+    another node and showed "user_exercise: name must not be empty". Fixed: issues and warnings
+    about the provisionally named draft are shown as the draft's own, and the validator says
+    "name is missing: give the exercise a short name".
 - [x] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent; [PR #75](https://github.com/Herofresh/SkillForge/pull/75), checked in Expo Go, rest-bar fix [PR #77](https://github.com/Herofresh/SkillForge/pull/77)):
   every set of an exercise is a monster of its branch that takes the hit when the set is logged.
   Two views, picked in Settings → Training view (default Classic): **Classic** keeps the

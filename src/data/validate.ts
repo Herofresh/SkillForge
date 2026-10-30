@@ -116,7 +116,7 @@ function checkIdentity(node: ExerciseNode, report: Report): void {
   if (node.source === 'core' && hasUserPrefix) {
     report(node, `ids starting with '${USER_ID_PREFIX}' are reserved for user nodes`);
   }
-  if (node.name.trim() === '') report(node, 'name must not be empty');
+  if (node.name.trim() === '') report(node, 'name is missing: give the exercise a short name');
   if (node.patterns.length === 0) report(node, 'needs at least one pattern');
   checkTrains(node, report);
 }
