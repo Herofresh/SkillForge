@@ -41,7 +41,7 @@ describe('validateNodes', () => {
 
     it('rejects an empty name and missing patterns', () => {
       expect(messages([makeNode({ id: 'a', name: ' ', patterns: [] })])).toEqual([
-        'a: name must not be empty',
+        'a: name is missing: give the exercise a short name',
         'a: needs at least one pattern',
       ]);
     });

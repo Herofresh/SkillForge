@@ -100,7 +100,11 @@ describe('NodeEditorBody', () => {
       />,
     );
     // No name yet: the validator's issue shows under the name field and Save is off.
-    expect(screen.getByTestId('editor-issues-name')).toHaveTextContent(/name must not be empty/);
+    expect(screen.getByTestId('editor-issues-name')).toHaveTextContent(
+      /name is missing: give the exercise a short name/,
+    );
+    // Not prefixed with the provisional id the validator saw (FB-15).
+    expect(screen.getByTestId('editor-issues-name')).not.toHaveTextContent(/user_/);
     expect(screen.getByTestId('editor-save')).toBeDisabled();
     await user.type(screen.getByTestId('editor-name'), 'Towel hang');
     expect(screen.queryByTestId('editor-issues-name')).toBeNull();

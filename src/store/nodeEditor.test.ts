@@ -4,6 +4,7 @@ import { getOverlay, saveOverlay } from '@/db/overlayRepository';
 import {
   addPrerequisite,
   DESCRIPTION_MISSING_MESSAGE,
+  editorIssueText,
   setDescription,
   setName,
   stepOgLevel,
@@ -67,6 +68,21 @@ describe('node editor (PLAN 4.7)', () => {
     ).toBe(true);
     // A second one with the same name gets its own id.
     expect(addTowelHang(store)).toBe('user_towel_hang_2');
+  });
+
+  it('shows a nameless new draft its own issue, not one about its provisional id (FB-15)', () => {
+    const state = storeFor(test).getState();
+    const draft = setDescription(state.newNodeDraft('v_pull', 'dead_hang'), 'A hang on a towel.');
+    expect(state.nodeDraftIssues(draft)).toEqual([
+      {
+        file: expect.any(String),
+        nodeId: '',
+        message: 'name is missing: give the exercise a short name',
+      },
+    ]);
+    expect(editorIssueText(state.nodeDraftIssues(draft)[0], draft.id, state.nodes)).toBe(
+      'name is missing: give the exercise a short name',
+    );
   });
 
   it('asks a custom node for a description and stores it trimmed (PLAN 6.2)', () => {

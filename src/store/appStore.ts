@@ -856,6 +856,13 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
     const withDraftId = (draft: ExerciseNode): ExerciseNode =>
       draft.id === NEW_NODE_ID ? { ...draft, id: customNodeId(draft.name, knownIds()) } : draft;
 
+    /** `issue` with the draft's own id when it is about the (provisionally named) draft. */
+    const asDraft = <T extends { nodeId?: string }>(
+      issue: T,
+      nodeId: string,
+      draftId: string,
+    ): T => (issue.nodeId === nodeId && nodeId !== draftId ? { ...issue, nodeId: draftId } : issue);
+
     /** Parses shared overlay text and previews the merge. */
     const readSharedOverlay = (text: string): OverlayTextPreview => {
       const parsed = importOverlay(text);
@@ -1350,18 +1357,25 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       },
 
       nodeDraftIssues(draft) {
-        const overlay = withNode(get().overlay, baseNodes, withDraftId(finalizeDraft(draft)));
-        return [...draftIssues(draft), ...applyOverlay(baseNodes, overlay).issues];
+        const node = withDraftId(finalizeDraft(draft));
+        const overlay = withNode(get().overlay, baseNodes, node);
+        // A new draft's issues name the draft (its id is only given on save), so the editor shows
+        // them as its own and not prefixed with the provisional id (FB-15).
+        return [
+          ...draftIssues(draft),
+          ...applyOverlay(baseNodes, overlay).issues.map((issue) =>
+            asDraft(issue, node.id, draft.id),
+          ),
+        ];
       },
 
       nodeDraftWarnings(draft) {
         const node = withDraftId(finalizeDraft(draft));
         const overlay = withNode(get().overlay, baseNodes, node);
-        // Only the advice about this node; a new draft's warnings name the draft (its id is only
-        // given on save).
+        // Only the advice about this node; a new draft's warnings name the draft (see above).
         const { warnings } = applyOverlay(baseNodes, overlay);
         return warningsForNode(warnings, node.id).map((warning) =>
-          warning.nodeId === node.id ? { ...warning, nodeId: draft.id } : warning,
+          asDraft(warning, node.id, draft.id),
         );
       },
 
