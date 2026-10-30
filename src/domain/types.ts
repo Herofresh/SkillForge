@@ -136,6 +136,19 @@ export interface ValidationIssue {
   message: string;
 }
 
+/** The texts of one built-in node in another language (PLAN 7.8 FB-8, ADR-080). */
+export interface NodeTranslation {
+  name: string;
+  description: string;
+  /** Same count and order as the node's English cues. */
+  cues?: string[];
+  /** Notes on the node's prerequisites, by the prerequisite's node id. */
+  prerequisiteNotes?: Readonly<Record<string, string>>;
+}
+
+/** A locale's translations by node id (`localizeNodes`). */
+export type LocaleTranslations = Readonly<Record<string, NodeTranslation>>;
+
 /** One exercise in the skill tree. */
 export interface ExerciseNode {
   /** Stable snake_case id. Never rename (saved progress references it). User nodes start `user_`. */

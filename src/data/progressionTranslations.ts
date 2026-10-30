@@ -58,7 +58,8 @@ export function parseTranslationFile(
   if (branch === undefined) issues.push({ file, message: `unknown branch '${raw.branch}'` });
 
   raw.nodes.forEach((entry: unknown, index: number) => {
-    const nodeId = isRecord(entry) && typeof entry.id === 'string' ? entry.id : `node #${index + 1}`;
+    const nodeId =
+      isRecord(entry) && typeof entry.id === 'string' ? entry.id : `node #${index + 1}`;
     const fail = (message: string) => issues.push({ file, nodeId, message });
     if (!isRecord(entry) || typeof entry.id !== 'string') {
       fail("must be a group of fields starting with 'id:'");
@@ -72,7 +73,9 @@ export function parseTranslationFile(
     const name = nonEmptyText(entry.name, 'name', fail);
     const description = nonEmptyText(entry.description, 'description', fail);
     if (description !== undefined && description.length > MAX_DESCRIPTION_LENGTH) {
-      fail(`description is ${description.length} characters; keep it under ${MAX_DESCRIPTION_LENGTH}`);
+      fail(
+        `description is ${description.length} characters; keep it under ${MAX_DESCRIPTION_LENGTH}`,
+      );
     }
     let cues: string[] | undefined;
     if (entry.cues !== undefined) {
@@ -81,7 +84,9 @@ export function parseTranslationFile(
         cues = entry.cues.flatMap((cue: unknown, cueIndex: number) => {
           const text = nonEmptyText(cue, `cue #${cueIndex + 1}`, fail);
           if (text !== undefined && text.length > MAX_CUE_LENGTH) {
-            fail(`cue #${cueIndex + 1} is ${text.length} characters; keep it under ${MAX_CUE_LENGTH}`);
+            fail(
+              `cue #${cueIndex + 1} is ${text.length} characters; keep it under ${MAX_CUE_LENGTH}`,
+            );
           }
           return text === undefined ? [] : [text];
         });
@@ -111,7 +116,11 @@ export function parseTranslationFile(
   return { branch, nodes, issues };
 }
 
-function nonEmptyText(value: unknown, what: string, fail: (message: string) => void): string | undefined {
+function nonEmptyText(
+  value: unknown,
+  what: string,
+  fail: (message: string) => void,
+): string | undefined {
   if (typeof value !== 'string' || value.trim() === '') {
     fail(`${what} must be a non-empty text`);
     return undefined;
@@ -148,7 +157,10 @@ export function buildTranslations(
       const parsed = parseTranslationFile(file.text, path);
       issues.push(...parsed.issues);
       if (parsed.branch !== undefined && parsed.branch !== branch) {
-        issues.push({ file: path, message: `says 'branch: ${parsed.branch}' but the file name differs` });
+        issues.push({
+          file: path,
+          message: `says 'branch: ${parsed.branch}' but the file name differs`,
+        });
         continue;
       }
       const expected = nodes.filter((node) => node.branch === branch);
@@ -170,12 +182,17 @@ export function buildTranslations(
           );
         }
         for (const id of Object.keys(translation.prerequisiteNotes ?? {})) {
-          if (!node.prerequisites.some((prereq) => prereq.nodeId === id && prereq.note !== undefined)) {
+          if (
+            !node.prerequisites.some((prereq) => prereq.nodeId === id && prereq.note !== undefined)
+          ) {
             fail(`has a note for '${id}', which is not a prerequisite with a note`);
           }
         }
         for (const prereq of node.prerequisites) {
-          if (prereq.note !== undefined && translation.prerequisiteNotes?.[prereq.nodeId] === undefined) {
+          if (
+            prereq.note !== undefined &&
+            translation.prerequisiteNotes?.[prereq.nodeId] === undefined
+          ) {
             fail(`is missing the note for its prerequisite '${prereq.nodeId}'`);
           }
         }

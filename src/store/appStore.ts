@@ -131,6 +131,9 @@ import {
   replaceGoal,
   toggleGoal,
 } from '@/domain/onboarding';
+import { NODE_TRANSLATIONS } from '@/data/skills';
+import type { NodeTranslations } from '@/data/progressionTranslations';
+import { localizeNodes } from '@/domain/localize';
 import {
   DEFAULT_LANGUAGE_CHOICE,
   DEFAULT_LOCALE,
@@ -344,6 +347,8 @@ export interface AppStoreDeps {
   health?: HealthConnectAccess;
   /** The device language tag ("de_AT"); without it "system" resolves to English (FB-8). */
   deviceLocaleTag?: () => string | null | undefined;
+  /** The built-in nodes' translations (`NODE_TRANSLATIONS` by default; `{}` keeps English). */
+  translations?: NodeTranslations;
 }
 
 export interface EquipmentProfileChanges {
@@ -692,7 +697,10 @@ function requireName(name: string): string {
 }
 
 export function createAppStore(deps: AppStoreDeps): AppStore {
-  const { db, baseNodes } = deps;
+  const { db } = deps;
+  const translations = deps.translations ?? NODE_TRANSLATIONS;
+  /** The built-in tree in the current language (`localizeNodes`); set again by every `loadAll`. */
+  let baseNodes = deps.baseNodes;
   const classDefinitions = deps.classes ?? HERO_CLASSES;
   const accessoryDefinitions = deps.accessories ?? ACCESSORIES;
   const now = deps.now ?? Date.now;
@@ -896,8 +904,8 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
 
     return {
       loaded: false,
-      baseNodes,
-      nodes: baseNodes,
+      baseNodes: deps.baseNodes,
+      nodes: deps.baseNodes,
       overlay: EMPTY_OVERLAY,
       overlayIssues: [],
       overlayUnreadable: [],
@@ -919,6 +927,11 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
       dataResets: 0,
 
       loadAll() {
+        // The language first: the built-in tree is localized before the overlay goes on top.
+        const language = parseLanguageChoice(getSetting(db, LANGUAGE_SETTING));
+        const locale = resolveLocale(language, deps.deviceLocaleTag?.());
+        setLocale(locale);
+        baseNodes = localizeNodes(deps.baseNodes, translations[locale]);
         const stored = getOverlay(db);
         const overlay = stored?.overlay ?? EMPTY_OVERLAY;
         const { nodes, issues: overlayIssues } = applyOverlay(baseNodes, overlay);
@@ -931,9 +944,6 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
           userActions,
           engineChallenges(challengePins),
         );
-        const language = parseLanguageChoice(getSetting(db, LANGUAGE_SETTING));
-        const locale = resolveLocale(language, deps.deviceLocaleTag?.());
-        setLocale(locale);
         commitEngine(engine, {
           language,
           locale,
