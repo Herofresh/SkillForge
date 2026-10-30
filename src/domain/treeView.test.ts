@@ -6,11 +6,13 @@ import {
   branchColumn,
   branchSummary,
   defaultBranch,
+  MAX_TREE_SEARCH_RESULTS,
+  NODE_HISTORY_LIMIT,
   nodeDetail,
   nodeHistory,
   prerequisiteViews,
+  searchTree,
   tileState,
-  NODE_HISTORY_LIMIT,
 } from './treeView';
 import type { LoggedSession, NodeProgress } from './types';
 
@@ -134,6 +136,21 @@ describe('prerequisiteViews', () => {
     });
     expect(views[1]).toMatchObject({ met: false, alternatives: [] });
     expect(views[1].satisfiedBy).toBeUndefined();
+  });
+});
+
+describe('searchTree (PLAN 7.8 FB-17)', () => {
+  it('finds skills of every branch by name, names starting with the text first', () => {
+    const ids = searchTree(ALL_NODES, 'dip').map((node) => node.id);
+    expect(ids).toContain('parallel_bar_dip');
+    expect(ids).toContain('straight_bar_dip');
+    expect(new Set(searchTree(ALL_NODES, 'row').map((node) => node.branch)).size).toBeGreaterThan(
+      1,
+    );
+    expect(searchTree(ALL_NODES, 'Dip')[0].name.toLowerCase().startsWith('dip')).toBe(true);
+    expect(searchTree(ALL_NODES, '')).toEqual([]);
+    expect(searchTree(ALL_NODES, 'p', 3)).toHaveLength(3);
+    expect(searchTree(ALL_NODES, 'p').length).toBeLessThanOrEqual(MAX_TREE_SEARCH_RESULTS);
   });
 });
 

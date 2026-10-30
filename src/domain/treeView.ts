@@ -8,6 +8,7 @@
  * - A locked legendary node is shown as a silhouette (`legendary` tile state).
  * - Prerequisites list the alternatives that also satisfy them (ADR-019) and which node met them.
  */
+import { searchNodes } from './assessment';
 import { compareCodeUnits } from '@/lib/compare';
 
 import { nodesInBranch } from './branch';
@@ -167,6 +168,21 @@ export interface BranchSummary {
   /** Proficient or mastered. */
   proficient: number;
   goals: number;
+}
+
+/** The most results the Tree tab's search shows (FB-17). */
+export const MAX_TREE_SEARCH_RESULTS = 30;
+
+/**
+ * Skills anywhere in the tree whose name (or id) contains `query`, names starting with it first,
+ * then easiest first (`searchNodes`): the Tree tab's search across branches (PLAN 7.8 FB-17).
+ */
+export function searchTree(
+  nodes: readonly ExerciseNode[],
+  query: string,
+  limit: number = MAX_TREE_SEARCH_RESULTS,
+): ExerciseNode[] {
+  return searchNodes(nodes, query, limit);
 }
 
 export function branchSummary(tiles: readonly TreeTile[]): BranchSummary {

@@ -3,18 +3,25 @@ import { useCallback, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View, type ListRenderItem } from 'react-native';
 
 import { BranchTabs } from '@/components/BranchTabs';
+import { NodeRow } from '@/components/NodeRow';
 import { ExerciseInfoSheet } from '@/components/node/ExerciseInfoSheet';
 import { Colors, Spacing } from '@/components/theme';
 import { TreeLegend } from '@/components/tree/TreeLegend';
 import { NodeTile } from '@/components/tree/NodeTile';
 import { TreeMap } from '@/components/tree/map/TreeMap';
 import { TreeModeTabs } from '@/components/tree/TreeModeTabs';
-import { PixelButton, PixelFrame, PixelText } from '@/components/ui';
+import { PixelButton, PixelFrame, PixelText, PixelTextInput } from '@/components/ui';
 import { BRANCH_NAMES } from '@/data/skills/branches';
 import { customizedNodeIds } from '@/domain/overlayEdit';
 import { mapFocus, mapLayout, mapTiles } from '@/domain/treeMap';
-import { branchColumn, branchSummary, defaultBranch, type TreeTile } from '@/domain/treeView';
-import type { Branch } from '@/domain/types';
+import {
+  branchColumn,
+  branchSummary,
+  defaultBranch,
+  searchTree,
+  type TreeTile,
+} from '@/domain/treeView';
+import type { Branch, ExerciseNode } from '@/domain/types';
 import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -40,6 +47,13 @@ export default function TreeScreen() {
   const customized = useMemo(() => customizedNodeIds(overlay), [overlay]);
   const [branch, setBranch] = useState<Branch>(() => defaultBranch(nodes, goals));
   const [legendOpen, setLegendOpen] = useState(false);
+  /** The search text (FB-17): while it has one, the column shows matching skills of every branch. */
+  const [query, setQuery] = useState('');
+  const searching = query.trim().length > 0;
+  const results = useMemo(
+    () => (searching ? searchTree(nodes, query) : []),
+    [nodes, query, searching],
+  );
   /** The node whose info sheet is open (PLAN 6.2): from a tile's "i" or a long press. */
   const [infoId, setInfoId] = useState<string | undefined>();
   const infoNode = infoId === undefined ? undefined : nodes.find((node) => node.id === infoId);
@@ -54,15 +68,27 @@ export default function TreeScreen() {
     [router],
   );
   const openInfo = useCallback((nodeId: string) => setInfoId(nodeId), []);
-  const renderTile = useCallback<ListRenderItem<TreeTile>>(
-    ({ item }) => (
-      <NodeTile
-        tile={item}
-        onOpen={openNode}
-        onInfo={openInfo}
-        custom={customized.has(item.node.id)}
-      />
-    ),
+  const renderItem = useCallback<ListRenderItem<TreeTile | ExerciseNode>>(
+    ({ item }) =>
+      'node' in item ? (
+        <NodeTile
+          tile={item}
+          onOpen={openNode}
+          onInfo={openInfo}
+          custom={customized.has(item.node.id)}
+        />
+      ) : (
+        <View style={styles.result}>
+          <NodeRow
+            node={item}
+            status={t(BRANCH_NAMES[item.branch])}
+            onPress={() => openNode(item.id)}
+            onInfo={() => openInfo(item.id)}
+            accessibilityHint={t('Opens the skill')}
+            testID={`tree-result-${item.id}`}
+          />
+        </View>
+      ),
     [openNode, openInfo, customized],
   );
   const infoSheet = infoNode && (
@@ -81,19 +107,40 @@ export default function TreeScreen() {
       <PixelText variant="label" tone="rune">
         {t('Skill Tree')}
       </PixelText>
-      <PixelText variant="title" accessibilityRole="header" testID="tree-branch-title">
-        {t(BRANCH_NAMES[branch])}
-      </PixelText>
-      <PixelText variant="small" tone="textMuted" testID="tree-branch-summary">
-        {t('{open} of {total} open · {proficient} proficient', {
-          open: summary.open,
-          total: summary.total,
-          proficient: summary.proficient,
-        }) +
-          (summary.goals > 0
-            ? ` · ${summary.goals === 1 ? t('1 goal') : t('{n} goals', { n: summary.goals })}`
-            : '')}
-      </PixelText>
+      <PixelTextInput
+        label={t('Search')}
+        accessibilityLabel={t('Search the whole tree by skill name')}
+        value={query}
+        onChangeText={setQuery}
+        placeholder={t('Skill name, e.g. dip')}
+        autoCorrect={false}
+        testID="tree-search"
+      />
+      {searching ? (
+        <PixelText variant="small" tone="textMuted" testID="tree-search-summary">
+          {results.length === 0
+            ? t('No skill matches {query}.', { query: query.trim() })
+            : results.length === 1
+              ? t('1 skill matches, from every branch')
+              : t('{n} skills match, from every branch', { n: results.length })}
+        </PixelText>
+      ) : (
+        <>
+          <PixelText variant="title" accessibilityRole="header" testID="tree-branch-title">
+            {t(BRANCH_NAMES[branch])}
+          </PixelText>
+          <PixelText variant="small" tone="textMuted" testID="tree-branch-summary">
+            {t('{open} of {total} open · {proficient} proficient', {
+              open: summary.open,
+              total: summary.total,
+              proficient: summary.proficient,
+            }) +
+              (summary.goals > 0
+                ? ` · ${summary.goals === 1 ? t('1 goal') : t('{n} goals', { n: summary.goals })}`
+                : '')}
+          </PixelText>
+        </>
+      )}
       <View style={styles.headerButtons}>
         <PixelButton
           label={t('Legend')}
@@ -132,11 +179,12 @@ export default function TreeScreen() {
         <TreeModeTabs value={treeMode} onChange={setTreeMode} />
         <BranchTabs value={branch} onChange={setBranch} />
       </View>
-      <FlatList
-        data={tiles}
-        keyExtractor={(tile) => tile.node.id}
-        renderItem={renderTile}
+      <FlatList<TreeTile | ExerciseNode>
+        data={searching ? results : tiles}
+        keyExtractor={(item) => ('node' in item ? item.node.id : `result-${item.id}`)}
+        renderItem={renderItem}
         ListHeaderComponent={header}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.list}
         initialNumToRender={6}
         windowSize={7}
@@ -194,6 +242,9 @@ const styles = StyleSheet.create({
   },
   header: {
     gap: Spacing.xs,
+  },
+  result: {
+    marginTop: Spacing.sm,
   },
   headerButtons: {
     marginTop: Spacing.sm,

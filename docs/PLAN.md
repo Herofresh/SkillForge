@@ -343,7 +343,8 @@
   texts, Settings → Language; ADR-080, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)), to ship as **1.4.0** after a device check of the
   German build. 1.3.0 (vc13) is built and waits for the user's upload.
 - **1.4.0, versionCode 14** (2026-10-30, [PR #94](https://github.com/Herofresh/SkillForge/pull/94)): German (FB-8, ADR-080: the whole UI, the 155
-  skills' texts, Settings → Language) and the quick swap (FB-16, ADR-081, [PR #96](https://github.com/Herofresh/SkillForge/pull/96)) on top of 1.3.0. Release notes in English and German in
+  skills' texts, Settings → Language), the quick swap (FB-16, ADR-081, [PR #96](https://github.com/Herofresh/SkillForge/pull/96)) and the tree
+  search (FB-17, [PR #97](https://github.com/Herofresh/SkillForge/pull/97)) on top of 1.3.0. Release notes in English and German in
   `docs/play/listing.md`; the German store listing and privacy page are in ([PR #93](https://github.com/Herofresh/SkillForge/pull/93)). Built
   after the merge with `npm run build:aab` → `builds/SkillForge-1.4.0-vc14-<merge commit>.aab`.
   It supersedes the 1.3.0 bundle if that hasn't been uploaded yet (same content plus German). Not
@@ -404,6 +405,11 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-17 tree search (task 7.8, [PR #97](https://github.com/Herofresh/SkillForge/pull/97)):** `searchTree` / `MAX_TREE_SEARCH_RESULTS` in `treeView.ts`
+  (over `searchNodes`); the Tree tab's one FlatList takes tiles or result nodes (`'node' in item`),
+  the header holds the field (`tree-search`) and the result summary (`tree-search-summary`); rows
+  `tree-result-<id>`. Tests: `treeView.test.ts`, `src/components/treeSearch.test.tsx`. Not checked
+  on a device (the keyboard over the list: `keyboardShouldPersistTaps` is set).
 - **FB-16 quick swap (task 7.8, ADR-081, [PR #96](https://github.com/Herofresh/SkillForge/pull/96)):** `swapSessionExercise` in `train.ts`; store
   `swapOptions(key, query?)` (session or plan; a query searches via `addOptions`) and
   `swapTrainingExercise`; `SwapButton` + `ExerciseCard.onSwap`; `BattleBoard.onSwap`; the `swap`
@@ -1983,6 +1989,17 @@ from the GitHub releases' 1–7, ADR-068).
     the swap sheet, now searchable (same movement first, any doable skill by name). In the session
     an untouched exercise is replaced in place; one with logged sets keeps them, is skipped for the
     rest, and the new exercise follows it (`swapSessionExercise`). Ships in 1.4.0.
+  - [x] FB-17 (UX, user request 2026-10-30, [PR #97](https://github.com/Herofresh/SkillForge/pull/97)): "a search for exercises in the tree while in
+    columns view". Done: a search field in the Columns header; while it has text the column shows
+    the matching skills of every branch (`searchTree`: name or id, names starting with the text
+    first, then easiest; up to 30) as rows with their branch, the "i" and a tap to open the skill;
+    clearing it brings the branch column back. Ships in 1.4.0.
+  - [x] FB-18 (UX, user request 2026-10-30, same PR): "if you search row (anywhere, also when adding
+    exercises) you should see exercises like incline row and stuff containing row". Found: the
+    search already matched anywhere in the name, but every list stopped at 8 results, and "row"
+    names eleven skills. Done: `MAX_SEARCH_RESULTS` / `MAX_ADD_OPTIONS` 8 → 30 (the lists scroll),
+    and an English word finds a skill by its id whatever the display language ("incline row" →
+    `incline_row` under German names).
 - [x] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent; [PR #75](https://github.com/Herofresh/SkillForge/pull/75), checked in Expo Go, rest-bar fix [PR #77](https://github.com/Herofresh/SkillForge/pull/77)):
   every set of an exercise is a monster of its branch that takes the hit when the set is logged.
   Two views, picked in Settings → Training view (default Classic): **Classic** keeps the
