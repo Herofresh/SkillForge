@@ -3,6 +3,8 @@
  * reached and what each locked one needs. Pure view model over the one rank rule in `character.ts`
  * (`RANK_MIN_MEDIAN_OG_LEVEL`, `RANK_BRANCHES`, `rankMedianOgLevel`): no threshold is copied here.
  */
+import { k, t } from '@/i18n';
+
 import {
   RANK_BRANCHES,
   RANK_MIN_MEDIAN_OG_LEVEL,
@@ -11,6 +13,18 @@ import {
 } from './character';
 import { formatOgLevel } from './format';
 import type { Branch, RankTitle } from './types';
+
+/** The rank titles as shown: the English title is the key (`t(RANK_LABELS[rank])`). */
+export const RANK_LABELS: Readonly<Record<RankTitle, string>> = {
+  Novice: k('Novice'),
+  Apprentice: k('Apprentice'),
+  Adept: k('Adept'),
+  Master: k('Master'),
+  Legend: k('Legend'),
+};
+
+/** The translated title of a rank. */
+export const rankLabel = (rank: RankTitle): string => t(RANK_LABELS[rank]);
 
 /** `current` is the hero's rank, `next` the one right above it; both of the others explain themselves. */
 export type RankStepStatus = 'reached' | 'current' | 'next' | 'locked';
@@ -103,8 +117,8 @@ function statusOf(index: number, currentIndex: number): RankStepStatus {
 /** What a rank needs, e.g. "Branch median OG 6"; the lowest rank (median 0) is where everyone starts. */
 export function rankRequirement(step: Pick<RankLadderStep, 'minMedianOgLevel'>): string {
   return step.minMedianOgLevel <= 0
-    ? 'Where every hero starts'
-    : `Branch median ${formatOgLevel(step.minMedianOgLevel)}`;
+    ? t('Where every hero starts')
+    : t('Branch median {level}', { level: formatOgLevel(step.minMedianOgLevel) });
 }
 
 /**
@@ -117,8 +131,10 @@ export function rankProgressText(
 ): string {
   if (step.status === 'reached' || step.status === 'current') return '';
   const atLevel = Math.min(step.branchesAtLevel, branchesForRank);
-  return (
-    `${atLevel} of ${branchesForRank} branches at ${formatOgLevel(step.minMedianOgLevel)} or ` +
-    `higher · ${step.branchesToGo} to go`
-  );
+  return t('{atLevel} of {total} branches at {level} or higher · {toGo} to go', {
+    atLevel,
+    total: branchesForRank,
+    level: formatOgLevel(step.minMedianOgLevel),
+    toGo: step.branchesToGo,
+  });
 }

@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { BRANCH_NAMES } from '@/data/skills/branches';
 import type { NextGoalOption } from '@/domain/goalReached';
 import type { ExerciseNode } from '@/domain/types';
+import { k, t } from '@/i18n';
 
 import { ExerciseInfoSheet } from '../node/ExerciseInfoSheet';
 import { NodeRow } from '../NodeRow';
@@ -23,15 +24,18 @@ type Props = {
   testID: string;
 };
 
-export const END_OF_PATH_TEXT =
-  'That was the end of this path. Pick a new goal in the Tree whenever you like.';
+export const END_OF_PATH_TEXT = k(
+  'That was the end of this path. Pick a new goal in the Tree whenever you like.',
+);
 
 /** "Still needs Dead hang and Hollow body hold" for an option that is not open yet. */
 export function stillNeedsText(names: readonly string[]): string {
   if (names.length === 0) return '';
   const list =
-    names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
-  return `Still needs ${list}`;
+    names.length === 1
+      ? names[0]
+      : t('{a} and {b}', { a: names.slice(0, -1).join(', '), b: names[names.length - 1] });
+  return t('Still needs {list}', { list });
 }
 
 /**
@@ -46,15 +50,20 @@ export function NextGoalPicker({ goalName, options, onPick, onKeep, onOpenNode, 
   if (options.length === 0) {
     return (
       <View style={styles.gap}>
-        <PixelText testID={`${testID}-end`}>{END_OF_PATH_TEXT}</PixelText>
-        <PixelButton label="OK" variant="secondary" onPress={onKeep} testID={`${testID}-keep`} />
+        <PixelText testID={`${testID}-end`}>{t(END_OF_PATH_TEXT)}</PixelText>
+        <PixelButton
+          label={t('OK')}
+          variant="secondary"
+          onPress={onKeep}
+          testID={`${testID}-keep`}
+        />
       </View>
     );
   }
   return (
     <View style={styles.gap}>
       <PixelText variant="label" tone="rune" accessibilityRole="header">
-        {options.length === 1 ? 'Jump to the next goal?' : 'Jump to one of the next goals?'}
+        {options.length === 1 ? t('Jump to the next goal?') : t('Jump to one of the next goals?')}
       </PixelText>
       {options.map((option) => (
         <NodeRow
@@ -65,24 +74,27 @@ export function NextGoalPicker({ goalName, options, onPick, onKeep, onOpenNode, 
           role="checkbox"
           onPress={() => setPicked(option.node.id)}
           onInfo={() => setInfoNode(option.node)}
-          {...(option.sameBranch ? {} : { status: BRANCH_NAMES[option.node.branch] })}
+          {...(option.sameBranch ? {} : { status: t(BRANCH_NAMES[option.node.branch]) })}
           testID={`${testID}-${option.node.id}`}>
           <PixelText variant="small" tone={option.stillNeeds.length > 0 ? 'ember' : 'textMuted'}>
             {option.stillNeeds.length > 0
-              ? `Builds on ${goalName}. ${stillNeedsText(option.stillNeeds)}.`
-              : `Builds on ${goalName}. Open to train now.`}
+              ? t('Builds on {goal}. {needs}.', {
+                  goal: goalName,
+                  needs: stillNeedsText(option.stillNeeds),
+                })
+              : t('Builds on {goal}. Open to train now.', { goal: goalName })}
           </PixelText>
         </NodeRow>
       ))}
       <PixelButton
-        label="Make it my goal"
+        label={t('Make it my goal')}
         icon="star"
         onPress={() => picked !== undefined && onPick(picked)}
         disabled={picked === undefined}
         testID={`${testID}-pick`}
       />
       <PixelButton
-        label="Keep my goals"
+        label={t('Keep my goals')}
         variant="secondary"
         onPress={onKeep}
         testID={`${testID}-keep`}

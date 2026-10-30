@@ -14,6 +14,7 @@ import {
 } from '@/data/companion';
 import { COMPANION_BODIES, type CompanionLookChoice } from '@/domain/companion';
 import type { CompanionSlot } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { Colors, PIXEL, Spacing } from '../theme';
 import { PixelChip, PixelModal, PixelText } from '../ui';
@@ -53,10 +54,10 @@ function ColorRow({
         {options.map((option) => (
           <PixelChip
             key={option.id}
-            label={option.name}
+            label={t(option.name)}
             selected={option.id === selected}
             onPress={() => onSelect(option.id)}
-            accessibilityLabel={`${label}: ${option.name}`}
+            accessibilityLabel={`${label}: ${t(option.name)}`}
             testID={`${testID}-${option.id}`}
           />
         ))}
@@ -89,7 +90,7 @@ export function CompanionSheet({
       ),
   );
   return (
-    <PixelModal visible title="Customize" onClose={onClose} testID={testID}>
+    <PixelModal visible title={t('Customize')} onClose={onClose} testID={testID}>
       <ScrollView nestedScrollEnabled style={styles.scroll} contentContainerStyle={styles.list}>
         <View style={styles.preview}>
           <View style={styles.stage}>
@@ -97,21 +98,21 @@ export function CompanionSheet({
           </View>
           <View style={styles.flex}>
             <PixelText variant="label" tone="textMuted">
-              Weapon
+              {t('Weapon')}
             </PixelText>
             <PixelText variant="body" testID={`${testID}-weapon`}>
-              {view.weaponName}
+              {t(view.weaponName)}
             </PixelText>
             <PixelText variant="small" tone="textMuted">
-              Comes with the class you wear. Wear another class to change it.
+              {t('Comes with the class you wear. Wear another class to change it.')}
             </PixelText>
           </View>
         </View>
         <PixelText variant="small" tone="textMuted">
-          Training earns gear for your companion. What you earn stays yours.
+          {t('Training earns gear for your companion. What you earn stays yours.')}
         </PixelText>
         <ColorRow
-          label="Body"
+          label={t('Body')}
           options={COMPANION_BODIES.map((id) => BODY_SHAPES[id])}
           selected={companionBody(view.look).shape.id}
           onSelect={(id) => {
@@ -121,28 +122,28 @@ export function CompanionSheet({
           testID={`${testID}-body`}
         />
         <ColorRow
-          label="Hair style"
+          label={t('Hair style')}
           options={HAIR_STYLES}
           selected={companionBody(view.look).hair.id}
           onSelect={(hairStyle) => onLook({ hairStyle })}
           testID={`${testID}-hairstyle`}
         />
         <ColorRow
-          label="Skin"
+          label={t('Skin')}
           options={COMPANION_TINTS}
           selected={view.look.skin ?? DEFAULT_TINT_ID}
           onSelect={(skin) => onLook({ skin })}
           testID={`${testID}-skin`}
         />
         <ColorRow
-          label="Hair"
+          label={t('Hair')}
           options={COMPANION_HAIRS}
           selected={view.look.hair ?? DEFAULT_HAIR_ID}
           onSelect={(hair) => onLook({ hair })}
           testID={`${testID}-hair`}
         />
         <ColorRow
-          label="Outfit"
+          label={t('Outfit')}
           options={COMPANION_DYES}
           selected={view.look.outfit ?? DEFAULT_DYE_ID}
           onSelect={(outfit) => onLook({ outfit })}

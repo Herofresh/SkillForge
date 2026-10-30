@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { BRANCH_NAMES } from '@/data/skills/branches';
 import { PROFICIENT_LEVEL } from '@/domain/progression';
 import type { PrerequisiteView } from '@/domain/treeView';
+import { t } from '@/i18n';
 
 import { Border, Colors, Spacing, TOUCH_TARGET } from '../theme';
 import { PixelFrame, PixelIcon, PixelText } from '../ui';
@@ -13,7 +14,7 @@ const HIT_SLOP = (TOUCH_TARGET - CHIP_HEIGHT) / 2;
 
 /** "proficient" for a level-5 gate, else "level 3" (what the prerequisite asks for). */
 export function requiredLevelText(minLevel: number): string {
-  return minLevel >= PROFICIENT_LEVEL ? 'proficient' : `level ${minLevel}`;
+  return minLevel >= PROFICIENT_LEVEL ? t('proficient') : t('level {n}', { n: minLevel });
 }
 
 type Props = {
@@ -29,9 +30,12 @@ type Props = {
 export function PrereqChip({ link, onPress, testID }: Props) {
   const { node, met, crossBranch, prerequisite } = link;
   const label = [
-    `Needs ${node.name} ${requiredLevelText(prerequisite.minLevel)}`,
-    crossBranch ? `from ${BRANCH_NAMES[node.branch]}` : undefined,
-    met ? 'met' : 'not met',
+    t('Needs {name} {requirement}', {
+      name: node.name,
+      requirement: requiredLevelText(prerequisite.minLevel),
+    }),
+    crossBranch ? t('from {branch}', { branch: t(BRANCH_NAMES[node.branch]) }) : undefined,
+    met ? t('met') : t('not met'),
   ]
     .filter(Boolean)
     .join(', ');

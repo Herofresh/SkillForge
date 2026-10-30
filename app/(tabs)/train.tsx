@@ -6,6 +6,7 @@ import { Spacing } from '@/components/theme';
 import { PixelButton, PixelChip, PixelFrame, PixelIcon, PixelText, Screen } from '@/components/ui';
 import { DEFAULT_SESSION_MINUTES, SESSION_MINUTES, sessionCounts } from '@/domain/train';
 import type { TrainingType } from '@/domain/types';
+import { k, t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -19,15 +20,15 @@ export default function TrainScreen() {
     <Screen insetBottom={false} testID="train-screen">
       <PixelFrame variant="raised" contentStyle={styles.gap}>
         <PixelText variant="label" tone="rune">
-          Training Grounds
+          {t('Training Grounds')}
         </PixelText>
         <PixelText variant="title" accessibilityRole="header">
-          {activeSession ? 'Session in progress' : 'Train now'}
+          {activeSession ? t('Session in progress') : t('Train now')}
         </PixelText>
         <PixelText variant="small" tone="textMuted">
           {activeSession
-            ? 'Your sets are saved as you go. Pick up where you left off.'
-            : 'Pick your equipment and time; the grimoire suggests a session for your goals.'}
+            ? t('Your sets are saved as you go. Pick up where you left off.')
+            : t('Pick your equipment and time; the grimoire suggests a session for your goals.')}
         </PixelText>
       </PixelFrame>
       {activeSession ? <ResumePanel /> : <SetupPanel />}
@@ -45,11 +46,14 @@ function ResumePanel() {
       <View style={styles.row}>
         <PixelIcon name="flame" />
         <PixelText variant="heading">
-          {`${counts.setsLogged} of ${counts.setsPlanned} sets logged`}
+          {t('{logged} of {planned} sets logged', {
+            logged: counts.setsLogged,
+            planned: counts.setsPlanned,
+          })}
         </PixelText>
       </View>
       <PixelButton
-        label="Resume session"
+        label={t('Resume session')}
         icon="sword"
         onPress={() => router.push('/train/session')}
         testID="resume-session"
@@ -61,18 +65,20 @@ function ResumePanel() {
 const TRAINING_TYPE_OPTIONS: readonly { type: TrainingType; label: string; text: string }[] = [
   {
     type: 'standard',
-    label: 'Standard',
-    text: 'Skills, strength and core for your goals, with a short cool-down.',
+    label: k('Standard'),
+    text: k('Skills, strength and core for your goals, with a short cool-down.'),
   },
   {
     type: 'recovery',
-    label: 'Recovery',
-    text: 'Mobility, a cool-down and light skill practice. No hard strength, no straight-arm work.',
+    label: k('Recovery'),
+    text: k(
+      'Mobility, a cool-down and light skill practice. No hard strength, no straight-arm work.',
+    ),
   },
   {
     type: 'challenging',
-    label: 'Challenging',
-    text: 'More sets, the harder end of each range, and a Trial if one is due.',
+    label: k('Challenging'),
+    text: k('More sets, the harder end of each range, and a Trial if one is due.'),
   },
 ];
 
@@ -100,7 +106,7 @@ function SetupPanel() {
         <View style={styles.row}>
           <PixelIcon name="bar" />
           <PixelText variant="label" tone="rune" accessibilityRole="header">
-            Equipment
+            {t('Equipment')}
           </PixelText>
         </View>
         <View style={styles.chips} accessibilityRole="tablist">
@@ -117,7 +123,7 @@ function SetupPanel() {
         </View>
         {profiles.length === 0 && (
           <PixelText variant="small" tone="textMuted">
-            No equipment profile yet: add one in Settings.
+            {t('No equipment profile yet: add one in Settings.')}
           </PixelText>
         )}
       </PixelFrame>
@@ -125,14 +131,14 @@ function SetupPanel() {
         <View style={styles.row}>
           <PixelIcon name="potion" />
           <PixelText variant="label" tone="rune" accessibilityRole="header">
-            Time
+            {t('Time')}
           </PixelText>
         </View>
         <View style={styles.chips} accessibilityRole="tablist">
           {SESSION_MINUTES.map((option) => (
             <PixelChip
               key={option}
-              label={`${option} min`}
+              label={t('{n} min', { n: option })}
               role="tab"
               selected={option === minutes}
               onPress={() => setMinutes(option)}
@@ -145,14 +151,14 @@ function SetupPanel() {
         <View style={styles.row}>
           <PixelIcon name="flame" />
           <PixelText variant="label" tone="rune" accessibilityRole="header">
-            Training
+            {t('Training type')}
           </PixelText>
         </View>
         <View style={styles.chips} accessibilityRole="tablist">
           {TRAINING_TYPE_OPTIONS.map((option) => (
             <PixelChip
               key={option.type}
-              label={option.label}
+              label={t(option.label)}
               role="tab"
               selected={option.type === trainingType}
               onPress={() => setTrainingType(option.type)}
@@ -161,15 +167,15 @@ function SetupPanel() {
           ))}
         </View>
         <PixelText variant="small" tone="textMuted" testID="training-type-text">
-          {typeOption.text}
+          {t(typeOption.text)}
         </PixelText>
       </PixelFrame>
       <PixelButton
-        label="Plan my session"
+        label={t('Plan my session')}
         icon="scroll"
         onPress={trainNow}
         disabled={!chosen}
-        accessibilityHint="Suggests a session you can change before starting"
+        accessibilityHint={t('Suggests a session you can change before starting')}
         testID="train-now"
       />
     </>

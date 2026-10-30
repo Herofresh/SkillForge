@@ -11,6 +11,7 @@
 import { HERO_CLASS_BY_ID, HERO_CLASSES } from '@/data/classes';
 import { ACCESSORIES, ACCESSORY_BY_ID } from '@/data/companion/accessories';
 import { CLASS_WEAPONS, weaponFor } from '@/data/companion/weapons';
+import { t } from '@/i18n';
 import { isSameLocalDay } from '@/lib/time';
 
 import { computeCharacter } from './character';
@@ -158,19 +159,19 @@ export function widgetView(snapshot: WidgetSnapshot | undefined, now: number): W
     kind: 'hero',
     deepLink: WIDGET_DEEP_LINK,
     trainedToday,
-    status: trainedToday ? 'Trained today' : 'Not yet today',
+    status: trainedToday ? t('Trained today') : t('Not yet today'),
     streak: activeStreak(snapshot, now),
     level: snapshot.level,
     rank: snapshot.rank,
     topAttributes: snapshot.topAttributes,
     ...(snapshot.companion
-      ? { companion: { ...snapshot.companion, mood, moodTitle: MOOD_TITLES[mood] } }
+      ? { companion: { ...snapshot.companion, mood, moodTitle: t(MOOD_TITLES[mood]) } }
       : {}),
     ...(heroClass && snapshot.heroClass
       ? {
           heroClass: {
             id: heroClass.id,
-            title: classTitle(heroClass, snapshot.heroClass.tier),
+            title: t(classTitle(heroClass, snapshot.heroClass.tier)),
           },
         }
       : {}),

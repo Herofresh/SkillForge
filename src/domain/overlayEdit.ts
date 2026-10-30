@@ -10,6 +10,8 @@
  * - Import merges: the shared overlay's entries win per node, hidden lists are joined, and the
  *   rest of the user's own changes stay.
  */
+import { k, t } from '@/i18n';
+
 import { nodeAttributes } from './character';
 import { applyOverlay } from './overlay';
 import type { ExerciseNode, NodeEdit, ProgressionOverlay, ValidationIssue } from './types';
@@ -44,29 +46,32 @@ export const EDITABLE_NODE_FIELDS = [
 ] as const satisfies readonly (keyof NodeEdit)[];
 export type EditableNodeField = (typeof EDITABLE_NODE_FIELDS)[number];
 
-/** Plain-language names of the fields, for the import preview ("changes: Trial, cues"). */
+/**
+ * Plain-language names of the fields, for the import preview ("changes: Trial, cues"). English
+ * (`k`); `describeOverlayEntry` translates them.
+ */
 export const NODE_FIELD_LABELS: Readonly<Record<EditableNodeField, string>> = {
-  name: 'name',
-  description: 'description',
-  branch: 'branch',
-  chainOrder: 'position',
-  ogLevel: 'tier',
-  metric: 'metric',
-  workingRange: 'working range',
-  trial: 'Trial',
-  prerequisites: 'prerequisites',
-  straightArm: 'straight-arm flag',
-  isSkill: 'skill flag',
-  patterns: 'patterns',
-  trains: 'trained attributes',
-  equipment: 'equipment',
-  alternatives: 'alternatives',
-  regressionId: 'regression',
-  legendary: 'legendary flag',
-  cues: 'cues',
-  sourceUrls: 'sources',
-  verify: 'verify note',
-  review: 'review',
+  name: k('name'),
+  description: k('description'),
+  branch: k('branch'),
+  chainOrder: k('position'),
+  ogLevel: k('tier'),
+  metric: k('metric'),
+  workingRange: k('working range'),
+  trial: k('Trial'),
+  prerequisites: k('prerequisites'),
+  straightArm: k('straight-arm flag'),
+  isSkill: k('skill flag'),
+  patterns: k('patterns'),
+  trains: k('trained attributes'),
+  equipment: k('equipment'),
+  alternatives: k('alternatives'),
+  regressionId: k('regression'),
+  legendary: k('legendary flag'),
+  cues: k('cues'),
+  sourceUrls: k('sources'),
+  verify: k('verify note'),
+  review: k('review'),
 };
 
 const sameValue = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
@@ -207,11 +212,11 @@ export function overlayEntries(
 export function describeOverlayEntry(entry: OverlayEntry): string {
   switch (entry.kind) {
     case 'added':
-      return 'Your own exercise';
+      return t('Your own exercise');
     case 'edited':
-      return `Changed: ${entry.fields.join(', ')}`;
+      return t('Changed: {fields}', { fields: entry.fields.map((field) => t(field)).join(', ') });
     case 'hidden':
-      return 'Hidden from the tree';
+      return t('Hidden from the tree');
   }
 }
 

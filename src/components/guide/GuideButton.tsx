@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { guideEntry, type GuideTopic } from '@/domain/guide';
+import { t } from '@/i18n';
 
 import { InfoButton } from '../node/InfoButton';
 
@@ -24,7 +25,7 @@ export function GuideButton({ topic, testID = `guide-${topic}` }: Props) {
       <InfoButton
         name={guideEntry(topic).title}
         onPress={() => setOpen(true)}
-        hint="Explains how it works"
+        hint={t('Explains how it works')}
         testID={testID}
       />
       {open && (

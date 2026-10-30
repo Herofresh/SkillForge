@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
+import { t } from '@/i18n';
+
 import { Spacing } from '../theme';
 
 import { PixelFrame } from './PixelFrame';
@@ -19,7 +21,7 @@ export function LevelBadge({ level, size = 'md', testID }: Props) {
       testID={testID}
       accessible
       accessibilityRole="text"
-      accessibilityLabel={`Level ${level}`}
+      accessibilityLabel={t('Level {level}', { level })}
       style={styles.wrapper}>
       <PixelFrame variant="gold" padding={size === 'lg' ? Spacing.sm : Spacing.xs}>
         <View style={styles.content}>

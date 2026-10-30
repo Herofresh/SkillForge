@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { guideEntry, type GuideTopic } from '@/domain/guide';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { PixelButton, PixelIcon, PixelModal, PixelText } from '../ui';
@@ -34,10 +35,10 @@ export function GuideSheet({ topic, onClose, testID = 'guide-sheet' }: Props) {
         </View>
       </View>
       <PixelButton
-        label="More in the guide"
+        label={t('More in the guide')}
         icon="scroll"
         onPress={openPage}
-        accessibilityHint="Opens this topic in How SkillForge works"
+        accessibilityHint={t('Opens this topic in How SkillForge works')}
         testID={`${testID}-more`}
       />
     </PixelModal>

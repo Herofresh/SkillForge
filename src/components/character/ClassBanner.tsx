@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { tierNumeral, type ClassRow } from '@/domain/classes';
+import { t } from '@/i18n';
 
 import { Colors, PIXEL, Spacing } from '../theme';
 import { PixelFrame, PixelText } from '../ui';
@@ -18,12 +19,16 @@ type Props = {
 
 /** "Warrior · tier II of III", or "Starting class" for a class with one tier. */
 export function classTierLine(row: Pick<ClassRow, 'name' | 'tier' | 'tierCount'>): string {
-  if (row.tierCount <= 1) return 'Starting class';
-  return `${row.name} · tier ${tierNumeral(row.tier)} of ${tierNumeral(row.tierCount)}`;
+  if (row.tierCount <= 1) return t('Starting class');
+  return t('{name} · tier {tier} of {count}', {
+    name: t(row.name),
+    tier: tierNumeral(row.tier),
+    count: tierNumeral(row.tierCount),
+  });
 }
 
 /** The small gold "NEW" tag (also used in the class sheet). */
-export function NewBadge({ label = 'NEW', testID }: { label?: string; testID?: string }) {
+export function NewBadge({ label = t('NEW'), testID }: { label?: string; testID?: string }) {
   return (
     <PixelFrame
       frame={{ lines: [Colors.ink, Colors.goldLight], fill: Colors.gold }}
@@ -44,34 +49,41 @@ export function NewBadge({ label = 'NEW', testID }: { label?: string; testID?: s
  */
 export function ClassBanner({ row, newCount, onPress, testID }: Props) {
   const line = classTierLine(row);
+  const title = t(row.title);
   const label =
-    `Class: ${row.title}. ${line}.` +
-    (newCount > 0 ? ` ${newCount} new ${newCount === 1 ? 'class tier' : 'class tiers'}.` : '');
+    `${t('Class: {title}', { title })}. ${line}.` +
+    (newCount > 0
+      ? ` ${newCount === 1 ? t('1 new class tier') : t('{n} new class tiers', { n: newCount })}.`
+      : '');
   return (
     <Pressable
       testID={testID}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityHint="Shows every class, what each needs, and lets you pick the one to wear">
+      accessibilityHint={t(
+        'Shows every class, what each needs, and lets you pick the one to wear',
+      )}>
       {() => (
         <View style={styles.row}>
           <ClassEmblem classId={row.classId} tier={row.tier} />
           <View style={styles.text}>
             <PixelText variant="label" tone="textMuted">
-              Class
+              {t('Class')}
             </PixelText>
             <PixelText variant="title" color={classColor(row.classId)} testID={`${testID}-title`}>
-              {row.title}
+              {title}
             </PixelText>
             <PixelText variant="small" tone="textMuted">
               {line}
             </PixelText>
             <PixelText variant="label" tone="rune">
-              See all classes
+              {t('See all classes')}
             </PixelText>
           </View>
-          {newCount > 0 && <NewBadge label={`${newCount} NEW`} testID={`${testID}-new`} />}
+          {newCount > 0 && (
+            <NewBadge label={t('{n} NEW', { n: newCount })} testID={`${testID}-new`} />
+          )}
         </View>
       )}
     </Pressable>

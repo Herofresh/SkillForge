@@ -4,6 +4,7 @@ import { formatLevelProgress, formatOgLevel, spokenOgLevel } from '@/domain/form
 import { PROFICIENT_LEVEL } from '@/domain/progression';
 import { tierForOgLevel } from '@/domain/tier';
 import type { TreeTile } from '@/domain/treeView';
+import { t } from '@/i18n';
 
 import { Spacing, TileFrames } from '../theme';
 import {
@@ -45,7 +46,7 @@ export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
   return (
     <PixelFrame frame={TileFrames[state]} contentStyle={styles.content} testID="detail-header">
       <View style={styles.row}>
-        <PixelIcon name={look.icon} size={48} label={look.label} />
+        <PixelIcon name={look.icon} size={48} label={t(look.label)} />
         <View style={styles.text}>
           <PixelText variant="title" accessibilityRole="header">
             {node.name}
@@ -61,7 +62,7 @@ export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
             {node.straightArm && (
               <View style={styles.meta}>
                 <PixelText variant="label" tone="ember">
-                  Straight-arm
+                  {t('Straight-arm')}
                 </PixelText>
                 <GuideButton topic="safeguards" />
               </View>
@@ -71,22 +72,22 @@ export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
       </View>
       <View style={styles.meta}>
         <PixelText variant="label" tone={look.tone} testID="detail-state">
-          {look.label}
+          {t(look.label)}
         </PixelText>
         {isGoal && <GoalMarker testID="detail-goal-marker" />}
         {custom && <CustomBadge kind={custom} testID="detail-custom" />}
       </View>
       <PixelText variant="small" tone="textMuted">
-        {look.description}
+        {t(look.description)}
       </PixelText>
       {unlockedByUser && (
         <PixelText variant="small" tone="rune" testID="detail-self-unlocked">
-          You unlocked this yourself. Its prerequisites are still listed below.
+          {t('You unlocked this yourself. Its prerequisites are still listed below.')}
         </PixelText>
       )}
       {unlockBurstKey !== undefined ? (
         <LevelUpBurst
-          title={BURST_TITLES.unlocked}
+          title={t(BURST_TITLES.unlocked)}
           subtitle={node.name}
           playKey={unlockBurstKey}
           testID="detail-unlock-burst"
@@ -94,7 +95,7 @@ export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
       ) : (
         levelUpKey !== undefined && (
           <LevelUpBurst
-            title={BURST_TITLES.levelUp}
+            title={t(BURST_TITLES.levelUp)}
             subtitle={`${node.name} · LV ${levelUpKey}`}
             playKey={levelUpKey}
             testID="detail-levelup-burst"
@@ -105,7 +106,7 @@ export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
         <LevelBadge level={level.level} testID="detail-level" />
         <View style={styles.bar}>
           <XPBar
-            label="Node XP"
+            label={t('Node XP')}
             fraction={level.fraction}
             valueText={formatLevelProgress(level)}
             testID="detail-xp"
@@ -115,8 +116,10 @@ export function NodeHeader({ tile, unlockBurstKey, custom }: Props) {
       </View>
       {level.capped && (
         <PixelText variant="small" tone="gold">
-          {`Level ${PROFICIENT_LEVEL} is the cap until you pass the Trial.` +
-            (level.banked > 0 ? ` ${level.banked} XP is banked and counts once you pass it.` : '')}
+          {t('Level {level} is the cap until you pass the Trial.', { level: PROFICIENT_LEVEL }) +
+            (level.banked > 0
+              ? ` ${t('{xp} XP is banked and counts once you pass it.', { xp: level.banked })}`
+              : '')}
         </PixelText>
       )}
     </PixelFrame>

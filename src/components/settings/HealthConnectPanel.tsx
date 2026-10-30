@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 
+import { k, t } from '@/i18n';
 import type { HealthConnectEnableResult, HealthConnectStatus } from '@/store/appStore';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -12,19 +13,22 @@ import { PixelButton, PixelText } from '../ui';
 const HEALTH_CONNECT_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata';
 
-const WHAT_IS_WRITTEN =
-  'Adds every workout you finish to Health Connect as a calisthenics session, with a note of what you did (“Pull-up: 5, 5, 4 reps”). SkillForge reads nothing from it.';
+const WHAT_IS_WRITTEN = k(
+  'Adds every workout you finish to Health Connect as a calisthenics session, with a note of what you did (“Pull-up: 5, 5, 4 reps”). SkillForge reads nothing from it.',
+);
 
 const STATUS_TEXT: Readonly<Record<Exclude<HealthConnectStatus, 'available'>, string>> = {
-  not_installed:
+  not_installed: k(
     'Health Connect isn’t on this phone yet. Install it from Google Play, then come back.',
-  needs_update: 'Health Connect needs an update from Google Play first.',
-  unsupported: 'Health Connect isn’t available in this version of the app.',
+  ),
+  needs_update: k('Health Connect needs an update from Google Play first.'),
+  unsupported: k('Health Connect isn’t available in this version of the app.'),
 };
 
 const ENABLE_TEXT: Readonly<Record<Exclude<HealthConnectEnableResult, 'enabled'>, string>> = {
-  denied:
+  denied: k(
     'SkillForge wasn’t allowed to write exercise. Turn it on again to choose, or allow it in Health Connect.',
+  ),
   ...STATUS_TEXT,
 };
 
@@ -57,10 +61,10 @@ export function HealthConnectPanel() {
     setBusy(true);
     try {
       const result = await enable();
-      setNote(result === 'enabled' ? undefined : ENABLE_TEXT[result]);
+      setNote(result === 'enabled' ? undefined : t(ENABLE_TEXT[result]));
       if (result !== 'enabled' && result !== 'denied') setStatus(result);
     } catch {
-      setNote('Health Connect didn’t respond. Try again.');
+      setNote(t('Health Connect didn’t respond. Try again.'));
     } finally {
       setBusy(false);
     }
@@ -69,16 +73,16 @@ export function HealthConnectPanel() {
   return (
     <DetailSection title="Health Connect" icon="heart" testID="settings-health-connect">
       <PixelText variant="small" tone="textMuted">
-        {WHAT_IS_WRITTEN}
+        {t(WHAT_IS_WRITTEN)}
       </PixelText>
       {enabled && (
         <PixelText tone="success" testID="health-connect-on">
-          On: finished workouts are added to Health Connect.
+          {t('On: finished workouts are added to Health Connect.')}
         </PixelText>
       )}
       {status !== undefined && status !== 'available' && (
         <PixelText variant="small" testID="health-connect-status">
-          {STATUS_TEXT[status]}
+          {t(STATUS_TEXT[status])}
         </PixelText>
       )}
       {note !== undefined && (
@@ -89,7 +93,7 @@ export function HealthConnectPanel() {
       <View style={styles.gap}>
         {(status === 'not_installed' || status === 'needs_update') && (
           <PixelButton
-            label={status === 'needs_update' ? 'Update Health Connect' : 'Get Health Connect'}
+            label={status === 'needs_update' ? t('Update Health Connect') : t('Get Health Connect')}
             variant="secondary"
             onPress={() => void Linking.openURL(HEALTH_CONNECT_STORE_URL).catch(() => undefined)}
             testID="health-connect-install"
@@ -98,14 +102,14 @@ export function HealthConnectPanel() {
         {enabled ? (
           <>
             <PixelButton
-              label="Open Health Connect"
+              label={t('Open Health Connect')}
               variant="secondary"
               onPress={openSettings}
-              accessibilityHint="Permissions and the workouts SkillForge added"
+              accessibilityHint={t('Permissions and the workouts SkillForge added')}
               testID="health-connect-open"
             />
             <PixelButton
-              label="Stop adding workouts"
+              label={t('Stop adding workouts')}
               variant="secondary"
               onPress={disable}
               testID="health-connect-off"
@@ -114,11 +118,11 @@ export function HealthConnectPanel() {
         ) : (
           status === 'available' && (
             <PixelButton
-              label="Add workouts to Health Connect"
+              label={t('Add workouts to Health Connect')}
               icon="heart"
               onPress={() => void turnOn()}
               disabled={busy}
-              accessibilityHint="Asks Android for permission to write exercise"
+              accessibilityHint={t('Asks Android for permission to write exercise')}
               testID="health-connect-on-button"
             />
           )

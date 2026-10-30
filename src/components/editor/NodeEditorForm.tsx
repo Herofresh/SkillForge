@@ -48,6 +48,7 @@ import {
   type ExerciseNode,
   type ValidationIssue,
 } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { ATTRIBUTE_LABELS } from '../node/AttributeChips';
 import { DetailSection } from '../node/DetailSection';
@@ -112,25 +113,25 @@ export function NodeEditorForm({
   return (
     <View style={styles.form}>
       {custom && (
-        <DetailSection title="Exercise" icon="quill" variant="arcane" testID="editor-identity">
+        <DetailSection title={t('Exercise')} icon="quill" variant="arcane" testID="editor-identity">
           <PixelTextInput
-            label="Name"
+            label={t('Name')}
             value={draft.name}
             onChangeText={(name) => onChange(setName(draft, name))}
             maxLength={MAX_NODE_NAME_LENGTH}
             autoCapitalize="sentences"
-            placeholder="e.g. Towel hang"
+            placeholder={t('e.g. Towel hang')}
             testID="editor-name"
           />
           <IssueNotes messages={grouped.name} testID="editor-issues-name" />
           <PixelText variant="label" tone="textMuted">
-            Measured in
+            {t('Measured in')}
           </PixelText>
           <View style={styles.chips}>
             {METRICS.map((metric) => (
               <PixelChip
                 key={metric}
-                label={METRIC_LABELS[metric]}
+                label={t(METRIC_LABELS[metric])}
                 selected={draft.metric === metric}
                 role="tab"
                 onPress={() => onChange(setMetric(draft, metric))}
@@ -139,18 +140,20 @@ export function NodeEditorForm({
             ))}
           </View>
           <PixelText variant="label" tone="textMuted">
-            Comes after
+            {t('Comes after')}
           </PixelText>
-          <PixelText testID="editor-position">{above ? above.name : 'Top of the branch'}</PixelText>
+          <PixelText testID="editor-position">
+            {above ? above.name : t('Top of the branch')}
+          </PixelText>
           <PixelButton
-            label="Change position"
+            label={t('Change position')}
             icon="chain"
             variant="secondary"
             onPress={() => setSheet('position')}
             testID="editor-change-position"
           />
           <NumberStepper
-            label="Tier"
+            label={t('Tier')}
             valueText={formatOgLevel(draft.ogLevel)}
             onDecrement={() => onChange(stepOgLevel(draft, -1))}
             onIncrement={() => onChange(stepOgLevel(draft, 1))}
@@ -161,12 +164,13 @@ export function NodeEditorForm({
             variant="small"
             tone="textMuted"
             accessibilityLabel={spokenOgLevel(draft.ogLevel)}>
-            Tier on the Overcoming Gravity scale; it sets the band (Beginner to Elite) and the XP.
-            It shouldn’t be below the exercise above it.
+            {t(
+              'Tier on the Overcoming Gravity scale; it sets the band (Beginner to Elite) and the XP. It shouldn’t be below the exercise above it.',
+            )}
           </PixelText>
           {!STRAIGHT_ARM_BRANCHES.includes(draft.branch) && (
             <PixelChip
-              label="Straight-arm (tendon safeguards)"
+              label={t('Straight-arm (tendon safeguards)')}
               selected={draft.straightArm}
               onPress={() => onChange(toggleStraightArm(draft))}
               testID="editor-straight-arm"
@@ -177,29 +181,31 @@ export function NodeEditorForm({
         </DetailSection>
       )}
 
-      <DetailSection title="Description" icon="info" testID="editor-description">
+      <DetailSection title={t('Description')} icon="info" testID="editor-description">
         <PixelText variant="small" tone="textMuted">
-          What the exercise is and what it looks like, in 1–3 sentences. The cues go below.
+          {t('What the exercise is and what it looks like, in 1–3 sentences. The cues go below.')}
         </PixelText>
         <PixelTextInput
-          label="Description"
+          label={t('Description')}
           value={draft.description}
           onChangeText={(description) => onChange(setDescription(draft, description))}
           maxLength={MAX_DESCRIPTION_LENGTH}
           multiline
           autoCapitalize="sentences"
-          placeholder="e.g. Hanging from a towel thrown over the bar, arms straight."
+          placeholder={t('e.g. Hanging from a towel thrown over the bar, arms straight.')}
           testID="editor-description-input"
         />
         <IssueNotes messages={grouped.description} testID="editor-issues-description" />
       </DetailSection>
 
-      <DetailSection title="Standards" icon="shield" testID="editor-standards">
+      <DetailSection title={t('Standards')} icon="shield" testID="editor-standards">
         <PixelText variant="small" tone="textMuted">
-          {`Working range ${formatWorkingRange(draft.metric, draft.workingRange)}. Pass the Trial to become proficient.`}
+          {t('Working range {range}. Pass the Trial to become proficient.', {
+            range: formatWorkingRange(draft.metric, draft.workingRange),
+          })}
         </PixelText>
         <NumberStepper
-          label="Range min"
+          label={t('Range min')}
           valueText={formatWorkingRange(draft.metric, {
             min: draft.workingRange.min,
             max: draft.workingRange.min,
@@ -209,7 +215,7 @@ export function NodeEditorForm({
           testID="editor-range-min"
         />
         <NumberStepper
-          label="Range max"
+          label={t('Range max')}
           valueText={formatWorkingRange(draft.metric, {
             min: draft.workingRange.max,
             max: draft.workingRange.max,
@@ -219,22 +225,22 @@ export function NodeEditorForm({
           testID="editor-range-max"
         />
         <NumberStepper
-          label="Trial sets"
+          label={t('Trial sets')}
           valueText={String(draft.trial.sets)}
           onDecrement={() => onChange(stepTrial(draft, 'sets', -1))}
           onIncrement={() => onChange(stepTrial(draft, 'sets', 1))}
           testID="editor-trial-sets"
         />
         <NumberStepper
-          label="Trial target"
-          valueText={`${draft.trial.target} ${METRIC_UNITS[draft.metric]}`}
+          label={t('Trial target')}
+          valueText={`${draft.trial.target} ${t(METRIC_UNITS[draft.metric])}`}
           onDecrement={() => onChange(stepTrial(draft, 'target', -1))}
           onIncrement={() => onChange(stepTrial(draft, 'target', 1))}
           testID="editor-trial-target"
         />
         {METRICS_WITH_TRIAL_REPS.includes(draft.metric) && (
           <NumberStepper
-            label={draft.metric === 'eccentric_s' ? 'Lowerings' : 'Reps per set'}
+            label={draft.metric === 'eccentric_s' ? t('Lowerings') : t('Reps per set')}
             valueText={String(draft.trial.reps ?? 1)}
             onDecrement={() => onChange(stepTrial(draft, 'reps', -1))}
             onIncrement={() => onChange(stepTrial(draft, 'reps', 1))}
@@ -244,10 +250,10 @@ export function NodeEditorForm({
         <IssueNotes messages={grouped.standards} testID="editor-issues-standards" />
       </DetailSection>
 
-      <DetailSection title="Prerequisites" icon="chain" testID="editor-prerequisites">
+      <DetailSection title={t('Prerequisites')} icon="chain" testID="editor-prerequisites">
         {draft.prerequisites.length === 0 ? (
           <PixelText variant="small" tone="textMuted">
-            None: it is open from the start.
+            {t('None: it is open from the start.')}
           </PixelText>
         ) : (
           draft.prerequisites.map((prereq) => (
@@ -259,13 +265,13 @@ export function NodeEditorForm({
               testID={`editor-prereq-${prereq.nodeId}`}>
               <PixelText variant="heading">{names.get(prereq.nodeId) ?? prereq.nodeId}</PixelText>
               <PixelChip
-                label="Required (locks until met)"
+                label={t('Required (locks until met)')}
                 selected={prereq.kind === 'hard'}
                 onPress={() => onChange(togglePrerequisiteKind(draft, prereq.nodeId))}
                 testID={`editor-prereq-kind-${prereq.nodeId}`}
               />
               <NumberStepper
-                label="Level"
+                label={t('Level')}
                 valueText={`LV ${prereq.minLevel}`}
                 onDecrement={() => onChange(stepPrerequisiteLevel(draft, prereq.nodeId, -1))}
                 onIncrement={() => onChange(stepPrerequisiteLevel(draft, prereq.nodeId, 1))}
@@ -273,18 +279,20 @@ export function NodeEditorForm({
                 testID={`editor-prereq-level-${prereq.nodeId}`}
               />
               <PixelButton
-                label="Remove"
+                label={t('Remove')}
                 icon="cross"
                 variant="secondary"
                 onPress={() => onChange(removePrerequisite(draft, prereq.nodeId))}
-                accessibilityLabel={`Remove prerequisite ${names.get(prereq.nodeId) ?? prereq.nodeId}`}
+                accessibilityLabel={t('Remove prerequisite {name}', {
+                  name: names.get(prereq.nodeId) ?? prereq.nodeId,
+                })}
                 testID={`editor-prereq-remove-${prereq.nodeId}`}
               />
             </PixelFrame>
           ))
         )}
         <PixelButton
-          label="Add prerequisite"
+          label={t('Add prerequisite')}
           icon="chain"
           variant="secondary"
           onPress={() => setSheet('prerequisite')}
@@ -293,9 +301,9 @@ export function NodeEditorForm({
         <IssueNotes messages={grouped.prerequisites} testID="editor-issues-prerequisites" />
       </DetailSection>
 
-      <DetailSection title="Equipment" icon="bar" testID="editor-equipment">
+      <DetailSection title={t('Equipment')} icon="bar" testID="editor-equipment">
         <PixelText variant="small" tone="textMuted">
-          Each option is one way to do it; it needs all the tags of that option.
+          {t('Each option is one way to do it; it needs all the tags of that option.')}
         </PixelText>
         {draft.equipment.map((option, index) => (
           <PixelFrame
@@ -305,13 +313,13 @@ export function NodeEditorForm({
             contentStyle={styles.item}
             testID={`editor-equipment-${index}`}>
             <PixelText variant="label" tone="textMuted">
-              {`Option ${index + 1}`}
+              {t('Option {n}', { n: index + 1 })}
             </PixelText>
             <View style={styles.chips}>
               {EQUIPMENT_TAGS.map((tag) => (
                 <PixelChip
                   key={tag}
-                  label={EQUIPMENT_TAG_LABELS[tag]}
+                  label={t(EQUIPMENT_TAG_LABELS[tag])}
                   selected={option.includes(tag)}
                   onPress={() => onChange(toggleEquipmentTag(draft, index, tag))}
                   testID={`editor-equipment-${index}-${tag}`}
@@ -320,7 +328,7 @@ export function NodeEditorForm({
             </View>
             {draft.equipment.length > 1 && (
               <PixelButton
-                label="Remove option"
+                label={t('Remove option')}
                 icon="cross"
                 variant="secondary"
                 onPress={() => onChange(removeEquipmentOption(draft, index))}
@@ -330,7 +338,7 @@ export function NodeEditorForm({
           </PixelFrame>
         ))}
         <PixelButton
-          label="Add option"
+          label={t('Add option')}
           icon="bar"
           variant="secondary"
           onPress={() => onChange(addEquipmentOption(draft))}
@@ -341,22 +349,22 @@ export function NodeEditorForm({
 
       <CueEditor draft={draft} onChange={onChange} />
 
-      <DetailSection title="Trains" icon="heart" testID="editor-trains">
+      <DetailSection title={t('Trains')} icon="heart" testID="editor-trains">
         <PixelText variant="small" tone="textMuted">
-          The attributes it builds on your character sheet.
+          {t('The attributes it builds on your character sheet.')}
         </PixelText>
         <View style={styles.chips}>
           <PixelChip
-            label="Auto"
+            label={t('Auto')}
             selected={draft.trains === undefined}
             onPress={() => onChange(clearTrains(draft))}
-            accessibilityLabel="Auto: from the movement pattern"
+            accessibilityLabel={t('Auto: from the movement pattern')}
             testID="editor-trains-auto"
           />
           {ATTRIBUTES.map((attribute) => (
             <PixelChip
               key={attribute}
-              label={ATTRIBUTE_LABELS[attribute]}
+              label={t(ATTRIBUTE_LABELS[attribute])}
               selected={nodeAttributes(draft).includes(attribute)}
               onPress={() => onChange(toggleTrains(draft, attribute, nodeAttributes(draft)))}
               testID={`editor-trains-${attribute}`}
@@ -371,8 +379,8 @@ export function NodeEditorForm({
 
       {sheet === 'prerequisite' && (
         <NodeOptionSheet
-          title="Add prerequisite"
-          intro="What must be learned first. Search, or pick from this branch."
+          title={t('Add prerequisite')}
+          intro={t('What must be learned first. Search, or pick from this branch.')}
           options={(query) => prerequisiteOptions(nodes, draft, query)}
           onPick={(nodeId) => {
             onChange(addPrerequisite(draft, nodeId));
@@ -380,7 +388,7 @@ export function NodeEditorForm({
           }}
           onClose={() => setSheet(undefined)}
           searchable
-          empty="No exercise matches."
+          empty={t('No exercise matches.')}
           testID="prerequisite-sheet"
         />
       )}
@@ -413,7 +421,7 @@ function CueEditor({
     setText('');
   };
   return (
-    <DetailSection title="Cues" icon="scroll" testID="editor-cues">
+    <DetailSection title={t('Cues')} icon="scroll" testID="editor-cues">
       {draft.cues.map((cue, index) => (
         <PixelFrame
           key={`${index}-${cue}`}
@@ -422,27 +430,27 @@ function CueEditor({
           contentStyle={styles.item}>
           <PixelText tone="textOnParchment">{`• ${cue}`}</PixelText>
           <PixelButton
-            label="Remove"
+            label={t('Remove')}
             icon="cross"
             variant="secondary"
             onPress={() => onChange(removeCue(draft, index))}
-            accessibilityLabel={`Remove cue ${cue}`}
+            accessibilityLabel={t('Remove cue {cue}', { cue })}
             testID={`editor-cue-remove-${index}`}
           />
         </PixelFrame>
       ))}
       <PixelTextInput
-        label="New cue"
+        label={t('New cue')}
         value={text}
         onChangeText={setText}
         maxLength={MAX_CUE_LENGTH}
-        placeholder="e.g. Shoulders down and back"
+        placeholder={t('e.g. Shoulders down and back')}
         returnKeyType="done"
         onSubmitEditing={add}
         testID="editor-cue-input"
       />
       <PixelButton
-        label="Add cue"
+        label={t('Add cue')}
         icon="scroll"
         variant="secondary"
         onPress={add}

@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet } from 'react-native';
 
 import type { ExerciseFoes } from '@/domain/battleView';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { AddFoeToken, MonsterToken } from './MonsterToken';
@@ -20,7 +21,10 @@ type Props = {
  * many. With `onTap` the row is the Battle view's logger and ends in a "+" ghost for an extra set.
  */
 export function FoeRow({ foes, onTap, onLongPress, disabled = false, testID }: Props) {
-  const tapHint = foes.metric === 'hold_s' ? 'Starts or stops the hold' : 'Logs the target';
+  const tapHint =
+    foes.metric === 'hold_s'
+      ? t('Starts or stops the hold; long press to enter the result')
+      : t('Logs the target; long press to enter the result');
   return (
     <ScrollView
       horizontal
@@ -36,10 +40,10 @@ export function FoeRow({ foes, onTap, onLongPress, disabled = false, testID }: P
           onLongPress={onLongPress && (() => onLongPress(foe.slot))}
           accessibilityHint={
             foe.actual === undefined
-              ? `${tapHint}; long press to enter the result`
+              ? tapHint
               : foes.metric === 'hold_s'
-                ? 'Edits the set'
-                : 'One rep fewer, below zero it is removed; long press to edit'
+                ? t('Edits the set')
+                : t('One rep fewer, below zero it is removed; long press to edit')
           }
           disabled={disabled}
           testID={`${testID}-foe-${foe.slot}`}
@@ -49,7 +53,7 @@ export function FoeRow({ foes, onTap, onLongPress, disabled = false, testID }: P
         <AddFoeToken
           onPress={() => onTap(foes.foes.length)}
           disabled={disabled}
-          accessibilityLabel={`Extra set of ${foes.exercise.name}`}
+          accessibilityLabel={t('Extra set of {name}', { name: foes.exercise.name })}
           testID={`${testID}-add`}
         />
       )}

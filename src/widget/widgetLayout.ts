@@ -19,6 +19,7 @@ import type { IconName } from '@/components/ui/icons';
 import { HERO_CLASS_BY_ID } from '@/data/classes';
 import { companionStill } from '@/data/companion';
 import type { WidgetView } from '@/domain/widget';
+import { k, t } from '@/i18n';
 import { trimPixelRows } from '@/lib/pixelGrid';
 
 // --- Fonts ---------------------------------------------------------------------------------------
@@ -346,8 +347,8 @@ function statsRow(view: HeroView, sizes: WidgetSizes): WidgetNode {
       icon('flame', sizes.icon),
       row(
         [
-          stat(view.streak, 'Streak', Colors.ember, sizes),
-          stat(view.level, 'Level', Colors.goldLight, sizes),
+          stat(view.streak, t('Streak'), Colors.ember, sizes),
+          stat(view.level, t('Level'), Colors.goldLight, sizes),
         ],
         { gap: sizes.gap * 2, align: 'start' },
       ),
@@ -395,12 +396,12 @@ function attributesColumn(
   align: WidgetAlign,
 ): WidgetNode {
   const shown = view.topAttributes.slice(0, count);
-  if (shown.length === 0) return text('No stats yet', 'caps', sizes.label, Colors.textMuted);
+  if (shown.length === 0) return text(t('No stats yet'), 'caps', sizes.label, Colors.textMuted);
   return column(
     shown.map((entry) =>
       row(
         [
-          text(ATTRIBUTE_LABELS[entry.attribute], 'caps', sizes.label, Colors.textMuted),
+          text(t(ATTRIBUTE_LABELS[entry.attribute]), 'caps', sizes.label, Colors.textMuted),
           text(String(entry.value), 'pixel', sizes.attribute, AttributeColors[entry.attribute]),
         ],
         { gap: Math.round(sizes.gap / 2) },
@@ -537,7 +538,7 @@ function emptyCandidates(): Candidate[] {
       sizeClass: 'wide',
       extras: 0,
       build: (s) =>
-        row([icon('sword', s.icon), column([title(s), hint(s, EMPTY_HINT)])], {
+        row([icon('sword', s.icon), column([title(s), hint(s, t(EMPTY_HINT))])], {
           gap: s.gap,
           justify: 'center',
         }),
@@ -547,14 +548,18 @@ function emptyCandidates(): Candidate[] {
       extras: 0,
       build: (s) =>
         column(
-          [icon('sword', s.icon), title(s), ...splitLine(EMPTY_HINT).map((part) => hint(s, part))],
+          [
+            icon('sword', s.icon),
+            title(s),
+            ...splitLine(t(EMPTY_HINT)).map((part) => hint(s, part)),
+          ],
           { gap: s.gap, align: 'center', justify: 'center' },
         ),
     },
   ];
 }
 
-const EMPTY_HINT = 'Open the app to begin';
+const EMPTY_HINT = k('Open the app to begin');
 
 // --- Choosing ------------------------------------------------------------------------------------
 

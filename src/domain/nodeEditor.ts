@@ -8,6 +8,7 @@
  * only keep numbers on the metric's step and above zero, so a stepper never produces noise.
  */
 import { MAX_DESCRIPTION_LENGTH } from '@/data/validate';
+import { k, t } from '@/i18n';
 import { deepEqual } from '@/lib/deepEqual';
 
 import { searchNodes } from './assessment';
@@ -185,9 +186,13 @@ export function setDescription(draft: ExerciseNode, description: string): Exerci
   return { ...draft, description: description.slice(0, MAX_DESCRIPTION_LENGTH) };
 }
 
-/** What the editor tells the user when a user node has no description yet. */
-export const DESCRIPTION_MISSING_MESSAGE =
-  'description is missing: say in 1–3 sentences what the exercise is and what it looks like';
+/**
+ * What the editor tells the user when a user node has no description yet. Stored English like the
+ * validator's messages (`SECTION_PATTERNS` route by the wording); `editorIssueText` translates it.
+ */
+export const DESCRIPTION_MISSING_MESSAGE = k(
+  'description is missing: say in 1–3 sentences what the exercise is and what it looks like',
+);
 
 /**
  * The editor's own rules on top of `applyOverlay` (ADR-049): a user node needs a description to
@@ -394,16 +399,19 @@ export function issueSection(issue: ValidationIssue): EditorSection {
 
 /**
  * An issue as the editor shows it: just the message when it is about the draft, else prefixed
- * with the name of the node it is about (a cycle is reported on the node that closes it).
+ * with the name of the node it is about (a cycle is reported on the node that closes it). The
+ * message is translated when the dictionary has it (the editor's own messages); the validator's
+ * messages stay English.
  */
 export function editorIssueText(
   issue: ValidationIssue,
   draftId: string,
   nodes: readonly ExerciseNode[],
 ): string {
-  if (issue.nodeId === undefined || issue.nodeId === draftId) return issue.message;
+  const message = t(issue.message);
+  if (issue.nodeId === undefined || issue.nodeId === draftId) return message;
   const name = nodes.find((node) => node.id === issue.nodeId)?.name ?? issue.nodeId;
-  return `${name}: ${issue.message}`;
+  return `${name}: ${message}`;
 }
 
 /** The editor's issues as text (`editorIssueText`), grouped by the section that shows them. */

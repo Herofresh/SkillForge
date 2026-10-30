@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import type { GuideEntry } from '@/domain/guide';
+import { t } from '@/i18n';
 
 import { Spacing, TOUCH_TARGET } from '../theme';
 import { PixelFrame, PixelIcon, PixelText } from '../ui';
@@ -17,7 +18,7 @@ export function GuideRow({ entry, onPress }: { entry: GuideEntry; onPress: () =>
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={entry.title}
-      accessibilityHint="Opens this topic"
+      accessibilityHint={t('Opens this topic')}
       testID={`guide-row-${entry.id}`}
       style={styles.target}>
       {({ pressed }) => (
@@ -58,7 +59,7 @@ export function GuideArticle({ entry }: { entry: GuideEntry }) {
           <View style={styles.heading}>
             <PixelIcon name="scroll" />
             <PixelText variant="label" tone="textOnParchment" accessibilityRole="header">
-              In detail
+              {t('In detail')}
             </PixelText>
           </View>
           {entry.more.map((paragraph) => (

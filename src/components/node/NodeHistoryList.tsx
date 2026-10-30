@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { formatPerformance, formatShortDate } from '@/domain/format';
 import type { NodeSessionLog } from '@/domain/treeView';
 import type { Metric } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { Colors, PIXEL, Spacing, TOUCH_TARGET } from '../theme';
 import { PixelIcon, PixelText } from '../ui';
@@ -22,7 +23,7 @@ export function NodeHistoryList({ history, metric, onOpenSession }: Props) {
   if (history.length === 0) {
     return (
       <PixelText tone="textMuted" testID="history-empty">
-        No sets logged yet. Train it or attempt its Trial to start the story.
+        {t('No sets logged yet. Train it or attempt its Trial to start the story.')}
       </PixelText>
     );
   }
@@ -36,8 +37,12 @@ export function NodeHistoryList({ history, metric, onOpenSession }: Props) {
             key={entry.sessionId}
             onPress={() => onOpenSession(entry.sessionId)}
             accessibilityRole="button"
-            accessibilityLabel={`${date}${entry.isTrial ? ', Trial' : ''}: ${sets}`}
-            accessibilityHint="Opens the session summary"
+            accessibilityLabel={
+              entry.isTrial
+                ? t('{date}, Trial: {sets}', { date, sets })
+                : t('{date}: {sets}', { date, sets })
+            }
+            accessibilityHint={t('Opens the session summary')}
             style={[styles.row, index > 0 && styles.divider]}
             testID={`history-${index}`}>
             <View style={styles.text}>
@@ -47,7 +52,7 @@ export function NodeHistoryList({ history, metric, onOpenSession }: Props) {
                 </PixelText>
                 {entry.isTrial && (
                   <PixelText variant="label" tone="rune">
-                    Trial
+                    {t('Trial')}
                   </PixelText>
                 )}
               </View>

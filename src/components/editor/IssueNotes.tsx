@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
+import { k, t } from '@/i18n';
+
 import { Spacing } from '../theme';
 import { PixelFrame, PixelIcon, PixelText } from '../ui';
 
@@ -12,7 +14,7 @@ type Props = {
   testID?: string;
 };
 
-const ADVICE_TITLE = 'Worth a look (you can still save)';
+const ADVICE_TITLE = k('Worth a look (you can still save)');
 
 /**
  * Validator issues shown inline (PLAN 4.7): a danger frame with an alert, one line per problem.
@@ -30,7 +32,7 @@ export function IssueNotes({ messages, title, advice = false, testID }: Props) {
       <View style={styles.row} accessibilityLiveRegion="polite">
         <PixelIcon name={advice ? 'scroll' : 'alert'} />
         <PixelText variant="label" tone={advice ? 'gold' : 'danger'} style={styles.flex}>
-          {title ?? (advice ? ADVICE_TITLE : 'Fix this to save')}
+          {title ?? (advice ? t(ADVICE_TITLE) : t('Fix this to save'))}
         </PixelText>
       </View>
       {messages.map((message, index) => (

@@ -33,6 +33,7 @@ import {
   type IconName,
 } from '@/components/ui';
 import { characterSheet, type CharacterSheet } from '@/domain/characterView';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -143,8 +144,8 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
     router.push({ pathname: '/node/[nodeId]', params: { nodeId } });
   const xpText =
     sheet.level.xpForLevel === 0
-      ? 'MAX'
-      : `${sheet.level.xpIntoLevel} / ${sheet.level.xpForLevel} XP`;
+      ? t('MAX')
+      : t('{into} / {total} XP', { into: sheet.level.xpIntoLevel, total: sheet.level.xpForLevel });
 
   return (
     <Screen insetBottom={false} testID="character-screen">
@@ -152,25 +153,25 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
         <View style={styles.hero}>
           <View style={styles.flex}>
             <PixelText variant="label" tone="textMuted">
-              Hero
+              {t('Hero')}
             </PixelText>
             <PixelText variant="display" testID="hero-name">
-              {sheet.heroName ?? 'Nameless hero'}
+              {sheet.heroName ?? t('Nameless hero')}
             </PixelText>
           </View>
           <LevelBadge level={sheet.level.level} size="lg" testID="character-level" />
         </View>
         {levelUpKey !== undefined && (
           <LevelUpBurst
-            title={BURST_TITLES.levelUp}
-            subtitle={`Level ${levelUpKey}`}
+            title={t(BURST_TITLES.levelUp)}
+            subtitle={t('Level {n}', { n: levelUpKey })}
             playKey={levelUpKey}
           />
         )}
         <View style={styles.row}>
           <View style={styles.flex}>
             <XPBar
-              label={`To level ${sheet.level.level + 1}`}
+              label={t('To level {n}', { n: sheet.level.level + 1 })}
               fraction={sheet.level.fraction}
               valueText={xpText}
               testID="character-xp"
@@ -179,7 +180,7 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
           <GuideButton topic="xp" />
         </View>
         <PixelText variant="small" tone="textMuted" testID="character-total-xp">
-          {`${sheet.totalXp} XP earned in total`}
+          {t('{xp} XP earned in total', { xp: sheet.totalXp })}
         </PixelText>
       </PixelFrame>
 
@@ -232,20 +233,20 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
       <PixelFrame contentStyle={styles.gap} testID="character-attributes">
         <View style={styles.row}>
           <PixelText variant="label" tone="rune" accessibilityRole="header" style={styles.flex}>
-            Attributes
+            {t('Attributes')}
           </PixelText>
           <GuideButton topic="attributes" />
         </View>
         <AttributeRadar axes={sheet.radar} testID="attribute-radar" />
         {sheet.radar.every((axis) => axis.value === 0) && (
           <PixelText variant="small" tone="textMuted">
-            Train or pass a Trial to grow your attributes. The radar shows their balance.
+            {t('Train or pass a Trial to grow your attributes. The radar shows their balance.')}
           </PixelText>
         )}
         {sheet.radar.map((axis) => (
           <StatBar
             key={axis.attribute}
-            label={ATTRIBUTE_LABELS[axis.attribute]}
+            label={t(ATTRIBUTE_LABELS[axis.attribute])}
             value={axis.value}
             max={largest}
             color={AttributeColors[axis.attribute]}
@@ -256,7 +257,7 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
 
       {sheet.balance && (
         <WarningBanner
-          title="Push and pull out of balance"
+          title={t('Push and pull out of balance')}
           message={sheet.balance.message}
           severity="info"
           acknowledged={balanceAcknowledged}
@@ -267,17 +268,17 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
 
       <PixelFrame variant="raised" contentStyle={styles.row}>
         <View style={[styles.stats, styles.flex]}>
-          <Stat icon="flame" label="Streak" value={sheet.streak} testID="stat-streak" />
+          <Stat icon="flame" label={t('Streak')} value={sheet.streak} testID="stat-streak" />
           <Stat
             icon="scroll"
-            label="Sessions"
+            label={t('Sessions')}
             value={sheet.totals.sessions}
             testID="stat-sessions"
           />
-          <Stat icon="bar" label="Sets" value={sheet.totals.sets} testID="stat-sets" />
+          <Stat icon="bar" label={t('Sets')} value={sheet.totals.sets} testID="stat-sets" />
           <Stat
             icon="shield"
-            label="Trials"
+            label={t('Trials')}
             value={sheet.totals.trialsPassed}
             testID="stat-trials"
           />
@@ -287,15 +288,15 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
 
       <View style={styles.gap}>
         <PixelText variant="label" tone="rune" accessibilityRole="header">
-          Goals
+          {t('Goals')}
         </PixelText>
         {sheet.goals.length === 0 ? (
           <EmptyState
             icon="star"
-            title="No goals yet"
-            message="Pick up to five in the Tree."
+            title={t('No goals yet')}
+            message={t('Pick up to five in the Tree.')}
             action={{
-              label: 'Open the Tree',
+              label: t('Open the Tree'),
               icon: 'tree',
               variant: 'secondary',
               onPress: () => router.navigate('/tree'),
@@ -318,14 +319,18 @@ function CharacterBody({ sheet, now }: { sheet: CharacterSheet; now: number }) {
 
       <View style={styles.gap}>
         <PixelText variant="label" tone="rune" accessibilityRole="header">
-          Recent sessions
+          {t('Recent sessions')}
         </PixelText>
         {sheet.recent.length === 0 ? (
           <EmptyState
             icon="scroll"
-            title="No sessions yet"
-            message="Your quest log starts with the first one."
-            action={{ label: 'Train now', icon: 'sword', onPress: () => router.navigate('/train') }}
+            title={t('No sessions yet')}
+            message={t('Your quest log starts with the first one.')}
+            action={{
+              label: t('Train now'),
+              icon: 'sword',
+              onPress: () => router.navigate('/train'),
+            }}
             testID="recent-empty"
           />
         ) : (

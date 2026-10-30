@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
+import { t } from '@/i18n';
+
 import { Spacing, TOUCH_TARGET } from '../theme';
 
 import { PixelButton } from './PixelButton';
@@ -39,7 +41,7 @@ export function NumberStepper({
         variant="secondary"
         onPress={onDecrement}
         disabled={decrementDisabled}
-        accessibilityLabel={`Less for ${label}`}
+        accessibilityLabel={t('Less for {label}', { label })}
         testID={testID && `${testID}-minus`}
         style={styles.button}
       />
@@ -56,7 +58,7 @@ export function NumberStepper({
         label="+"
         variant="secondary"
         onPress={onIncrement}
-        accessibilityLabel={`More for ${label}`}
+        accessibilityLabel={t('More for {label}', { label })}
         testID={testID && `${testID}-plus`}
         style={styles.button}
       />

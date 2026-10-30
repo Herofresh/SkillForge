@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import type { Attribute } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { ATTRIBUTE_LABELS } from '../attributeLabels';
 import { AttributeColors, Colors, Spacing } from '../theme';
@@ -17,12 +18,16 @@ export function AttributeChips({ attributes }: Props) {
   if (attributes.length === 0) {
     return (
       <PixelText variant="small" tone="textMuted">
-        Skill work: it builds no attribute on its own.
+        {t('Skill work: it builds no attribute on its own.')}
       </PixelText>
     );
   }
+  const spoken = attributes.map((attribute) => t(ATTRIBUTE_LABELS[attribute])).join(', ');
   return (
-    <View style={styles.row} accessible accessibilityLabel={`Trains ${attributes.join(', ')}`}>
+    <View
+      style={styles.row}
+      accessible
+      accessibilityLabel={t('Trains {attributes}', { attributes: spoken })}>
       {attributes.map((attribute) => (
         <PixelFrame
           key={attribute}
@@ -34,7 +39,7 @@ export function AttributeChips({ attributes }: Props) {
             color={AttributeColors[attribute]}
             style={styles.text}
             testID={`attribute-${attribute}`}>
-            {ATTRIBUTE_LABELS[attribute]}
+            {t(ATTRIBUTE_LABELS[attribute])}
           </PixelText>
         </PixelFrame>
       ))}

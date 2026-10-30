@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import type { GoalProgressView } from '@/domain/characterView';
+import { t } from '@/i18n';
 
 import { Colors, Spacing, TOUCH_TARGET } from '../theme';
 import { PixelButton, PixelIcon, PixelText, SegmentedBar, TierChip } from '../ui';
@@ -22,13 +23,16 @@ const PATH_SEGMENTS = 8;
  */
 export function GoalProgressCard({ goal, onOpen, onPickNext, testID }: Props) {
   const reached = goal.next === undefined;
-  const steps = `${goal.stepsDone} of ${goal.stepsTotal} path skills proficient`;
+  const steps = t('{done} of {total} path skills proficient', {
+    done: goal.stepsDone,
+    total: goal.stepsTotal,
+  });
   return (
     <View style={styles.card} testID={testID}>
       <Pressable
         onPress={() => onOpen(goal.nodeId)}
         accessibilityRole="button"
-        accessibilityLabel={`Goal ${goal.name}: ${steps}`}
+        accessibilityLabel={t('Goal {name}: {steps}', { name: goal.name, steps })}
         style={styles.header}>
         <PixelIcon name={reached ? 'check' : 'star'} />
         <PixelText variant="heading" style={styles.flex}>
@@ -39,7 +43,7 @@ export function GoalProgressCard({ goal, onOpen, onPickNext, testID }: Props) {
       <View
         accessible
         accessibilityRole="progressbar"
-        accessibilityLabel={`${goal.name} path`}
+        accessibilityLabel={t('{name} path', { name: goal.name })}
         accessibilityValue={{ min: 0, max: goal.stepsTotal, now: goal.stepsDone, text: steps }}>
         <SegmentedBar
           fraction={goal.fraction}
@@ -55,20 +59,20 @@ export function GoalProgressCard({ goal, onOpen, onPickNext, testID }: Props) {
         <Pressable
           onPress={() => goal.next && onOpen(goal.next.nodeId)}
           accessibilityRole="link"
-          accessibilityLabel={`Next step: ${goal.next.name}`}
+          accessibilityLabel={t('Next step: {name}', { name: goal.next.name })}
           style={styles.next}>
           <PixelIcon name="sword" />
-          <PixelText tone="rune">{`Next: ${goal.next.name}`}</PixelText>
+          <PixelText tone="rune">{t('Next: {name}', { name: goal.next.name })}</PixelText>
         </Pressable>
       )}
       {reached && (
         <PixelText variant="label" tone="success">
-          Goal reached
+          {t('Goal reached')}
         </PixelText>
       )}
       {reached && onPickNext && (
         <PixelButton
-          label="Pick the next goal"
+          label={t('Pick the next goal')}
           icon="star"
           variant="secondary"
           onPress={() => onPickNext(goal.nodeId)}

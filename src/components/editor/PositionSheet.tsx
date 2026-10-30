@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet } from 'react-native';
 
 import type { ExerciseNode } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { NodeRow } from '../NodeRow';
 import { Spacing } from '../theme';
@@ -21,16 +22,16 @@ export function PositionSheet({ chain, afterId, onPick, onClose }: Props) {
   return (
     <PixelModal
       visible
-      title="Comes after"
+      title={t('Comes after')}
       onClose={onClose}
-      closeLabel="Cancel"
+      closeLabel={t('Cancel')}
       testID="position-sheet">
       <PixelText variant="small" tone="textMuted">
-        Pick the exercise it follows in the column. Its tier is kept between its neighbours.
+        {t('Pick the exercise it follows in the column. Its tier is kept between its neighbours.')}
       </PixelText>
       <ScrollView nestedScrollEnabled style={styles.scroll} contentContainerStyle={styles.list}>
         <PixelButton
-          label="At the top of the branch"
+          label={t('At the top of the branch')}
           variant={afterId === undefined ? 'primary' : 'secondary'}
           onPress={() => onPick(undefined)}
           testID="position-top"

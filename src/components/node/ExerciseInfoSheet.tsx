@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { animationFor } from '@/data/animations';
 import { formatDescription } from '@/domain/format';
 import type { ExerciseNode } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { PixelAnimation, PixelButton, PixelFrame, PixelIcon, PixelModal, PixelText } from '../ui';
@@ -47,7 +48,7 @@ export function ExerciseInfoSheet({
             <View style={styles.heading}>
               <PixelIcon name="scroll" />
               <PixelText variant="label" tone="textOnParchment" accessibilityRole="header">
-                Cues
+                {t('Cues')}
               </PixelText>
             </View>
             {node.cues.map((cue) => (
@@ -60,10 +61,10 @@ export function ExerciseInfoSheet({
       </ScrollView>
       {onOpenDetail && (
         <PixelButton
-          label="Open skill"
+          label={t('Open skill')}
           icon="sword"
           onPress={onOpenDetail}
-          accessibilityHint="Shows the skill's level, Trial and history"
+          accessibilityHint={t("Shows the skill's level, Trial and history")}
           testID={`${testID}-open`}
         />
       )}

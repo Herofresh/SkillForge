@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { HERO_CLASS_BY_ID } from '@/data/classes';
 import { classChallenge, pinAt, type ChallengePin, type ChallengeStep } from '@/domain/challenges';
 import { classTitle } from '@/domain/classes';
+import { t } from '@/i18n';
 
 import { Colors, Spacing } from '../theme';
 import { BURST_TITLES, LevelUpBurst, PixelFrame, PixelText, SegmentedBar } from '../ui';
@@ -34,28 +35,28 @@ export function ChallengeProgressPanel({ step, pins, bonus, celebrate, playKey }
   const heroClass = pin ? HERO_CLASS_BY_ID.get(pin.classId) : undefined;
   const challenge = heroClass && pin ? classChallenge(heroClass, pin.tier) : undefined;
   if (!step || !pin || !heroClass || !challenge) return null;
-  const title = classTitle(heroClass, pin.tier);
-  const goal = `${challengeGoalText(challenge.goal, step.target)} this week`;
+  const title = t(classTitle(heroClass, pin.tier));
+  const goal = t('{goal} this week', { goal: challengeGoalText(challenge.goal, step.target) });
   const count = challengeCountText(challenge.goal, step.count, step.target);
   const alreadyDone = !step.completed && step.count - step.gained >= step.target;
   const line = step.completed
-    ? `Complete! +${bonus} XP`
+    ? t('Complete! +{xp} XP', { xp: bonus })
     : alreadyDone
-      ? 'Already complete this week'
+      ? t('Already complete this week')
       : step.gained > 0
-        ? `+${step.gained} this session`
-        : 'This session added nothing to it';
+        ? t('+{n} this session', { n: step.gained })
+        : t('This session added nothing to it');
   return (
     <PixelFrame variant="arcane" contentStyle={styles.gap} testID="summary-challenge">
       {celebrate && step.completed ? (
         <LevelUpBurst
-          title={BURST_TITLES.challengeComplete}
+          title={t(BURST_TITLES.challengeComplete)}
           subtitle={`${title} · +${bonus} XP`}
           playKey={`${playKey}-challenge`}
         />
       ) : (
         <PixelText variant="label" tone="arcane" accessibilityRole="header">
-          {`Weekly challenge · ${title}`}
+          {t('Weekly challenge · {title}', { title })}
         </PixelText>
       )}
       <View

@@ -3,6 +3,8 @@
  * for both training views. Classic shows the current exercise's row above its logger; Battle shows
  * every exercise as a row and logs with taps. Pure, built from the session like `liveView`.
  */
+import { k, t } from '@/i18n';
+
 import { formatPerformance } from './format';
 import {
   BRANCH_MONSTERS,
@@ -81,17 +83,19 @@ export interface ExerciseFoes {
 }
 
 const STATE_WORDS: Readonly<Record<FoeState, string>> = {
-  fresh: 'not fought yet',
-  fighting: 'fighting',
-  overkill: 'overkill',
-  defeated: 'defeated',
-  wounded: 'wounded',
-  escaped: 'escaped',
+  fresh: k('not fought yet'),
+  fighting: k('fighting'),
+  overkill: k('overkill'),
+  defeated: k('defeated'),
+  wounded: k('wounded'),
+  escaped: k('escaped'),
 };
 
 /** "Set 2 of 5" for a planned slot (0-based), "Extra set 6" past the plan. */
 export function foeSetLabel(slot: number, plannedSets: number): string {
-  return slot < plannedSets ? `Set ${slot + 1} of ${plannedSets}` : `Extra set ${slot + 1}`;
+  return slot < plannedSets
+    ? t('Set {n} of {total}', { n: slot + 1, total: plannedSets })
+    : t('Extra set {n}', { n: slot + 1 });
 }
 
 /** The foes of `exercise` in `session`. */
@@ -102,7 +106,7 @@ export function exerciseFoes(
   view: ExerciseView,
 ): ExerciseFoes {
   const monster = monsterOf(lookup, exercise.nodeId);
-  const monsterName = MONSTER_NAMES[monster];
+  const monsterName = t(MONSTER_NAMES[monster]);
   const sets = exerciseSets(session, exercise.key);
   const planned = Math.max(exercise.sets, sets.length);
   const fighting = session.timer?.exerciseKey === exercise.key;
@@ -122,7 +126,12 @@ export function exerciseFoes(
         count: foeCount(exercise.metric, set.actual),
         damage: foeDamage(exercise.metric, set.actual),
         extra,
-        spoken: `${setLabel(slot)}, ${monsterName}, ${STATE_WORDS[state]}, ${formatPerformance(exercise.metric, set.actual)}`,
+        spoken: t('{set}, {monster}, {state}, {result}', {
+          set: setLabel(slot),
+          monster: monsterName,
+          state: t(STATE_WORDS[state]),
+          result: formatPerformance(exercise.metric, set.actual),
+        }),
       });
     } else {
       const state: FoeState = fighting && slot === sets.length ? 'fighting' : 'fresh';
@@ -132,7 +141,12 @@ export function exerciseFoes(
         hp: 1,
         count: foeCount(exercise.metric, exercise.target),
         extra,
-        spoken: `${setLabel(slot)}, ${monsterName}, ${STATE_WORDS[state]}, target ${formatPerformance(exercise.metric, exercise.target)}`,
+        spoken: t('{set}, {monster}, {state}, target {target}', {
+          set: setLabel(slot),
+          monster: monsterName,
+          state: t(STATE_WORDS[state]),
+          target: formatPerformance(exercise.metric, exercise.target),
+        }),
       });
     }
   }

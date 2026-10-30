@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { editorIssueText } from '@/domain/nodeEditor';
 import type { CustomizationKind } from '@/domain/overlayEdit';
 import type { ExerciseNode, ValidationIssue } from '@/domain/types';
+import { k, t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { IssueNotes } from '../editor/IssueNotes';
@@ -20,9 +21,11 @@ type Props = {
 type Confirm = 'reset' | 'hide' | 'delete';
 
 const INTRO: Readonly<Record<'added' | 'edited' | 'none', string>> = {
-  added: 'Your own exercise. Change it, add one after it, or delete it.',
-  edited: 'You changed this exercise. Reset it to go back to the built-in standards.',
-  none: 'Make it fit your training: standards, prerequisites, equipment, cues. Or add your own exercise after it.',
+  added: k('Your own exercise. Change it, add one after it, or delete it.'),
+  edited: k('You changed this exercise. Reset it to go back to the built-in standards.'),
+  none: k(
+    'Make it fit your training: standards, prerequisites, equipment, cues. Or add your own exercise after it.',
+  ),
 };
 
 /**
@@ -47,12 +50,12 @@ export function CustomizeSection({ node, customization }: Props) {
   };
 
   return (
-    <DetailSection title="Your tree" icon="quill" variant="arcane" testID="detail-customize">
+    <DetailSection title={t('Your tree')} icon="quill" variant="arcane" testID="detail-customize">
       <PixelText variant="small">
-        {INTRO[customization === 'added' || customization === 'edited' ? customization : 'none']}
+        {t(INTRO[customization === 'added' || customization === 'edited' ? customization : 'none'])}
       </PixelText>
       <PixelButton
-        label="Edit progression"
+        label={t('Edit progression')}
         icon="quill"
         variant="secondary"
         onPress={() =>
@@ -61,7 +64,7 @@ export function CustomizeSection({ node, customization }: Props) {
         testID="edit-progression"
       />
       <PixelButton
-        label="Add exercise after this"
+        label={t('Add exercise after this')}
         icon="rune"
         variant="secondary"
         onPress={() =>
@@ -74,7 +77,7 @@ export function CustomizeSection({ node, customization }: Props) {
       />
       {customization === 'edited' && (
         <PixelButton
-          label="Reset to default"
+          label={t('Reset to default')}
           icon="potion"
           variant="secondary"
           onPress={() => setConfirm('reset')}
@@ -83,7 +86,7 @@ export function CustomizeSection({ node, customization }: Props) {
       )}
       {custom ? (
         <PixelButton
-          label="Delete exercise"
+          label={t('Delete exercise')}
           icon="cross"
           variant="secondary"
           onPress={() => setConfirm('delete')}
@@ -91,7 +94,7 @@ export function CustomizeSection({ node, customization }: Props) {
         />
       ) : (
         <PixelButton
-          label="Hide exercise"
+          label={t('Hide exercise')}
           icon="cross"
           variant="secondary"
           onPress={() => setConfirm('hide')}
@@ -100,19 +103,23 @@ export function CustomizeSection({ node, customization }: Props) {
       )}
       <IssueNotes
         messages={issues.map((issue) => editorIssueText(issue, node.id, nodes))}
-        title="Not changed: the tree would break"
+        title={t('Not changed: the tree would break')}
         testID="customize-issues"
       />
 
       <PixelModal
         visible={confirm === 'reset'}
-        title="Reset to default?"
+        title={t('Reset to default?')}
         onClose={() => setConfirm(undefined)}
-        closeLabel="Keep my changes"
+        closeLabel={t('Keep my changes')}
         testID="reset-dialog">
-        <PixelText>{`${node.name} goes back to the built-in standards, prerequisites, equipment and cues.`}</PixelText>
+        <PixelText>
+          {t('{name} goes back to the built-in standards, prerequisites, equipment and cues.', {
+            name: node.name,
+          })}
+        </PixelText>
         <PixelButton
-          label="Reset"
+          label={t('Reset')}
           variant="danger"
           onPress={() => run(() => resetNode(node.id), false)}
           testID="reset-confirm"
@@ -120,17 +127,17 @@ export function CustomizeSection({ node, customization }: Props) {
       </PixelModal>
       <PixelModal
         visible={confirm === 'hide'}
-        title={`Hide ${node.name}?`}
+        title={t('Hide {name}?', { name: node.name })}
         onClose={() => setConfirm(undefined)}
-        closeLabel="Keep it"
+        closeLabel={t('Keep it')}
         testID="hide-dialog">
         <PixelText>
-          It leaves the tree and your workouts. Skills that need it then need what it needed. Its
-          logged sets stay in your history and count again if you show it (My progressions in
-          Settings).
+          {t(
+            'It leaves the tree and your workouts. Skills that need it then need what it needed. Its logged sets stay in your history and count again if you show it (My progressions in Settings).',
+          )}
         </PixelText>
         <PixelButton
-          label="Hide"
+          label={t('Hide')}
           variant="danger"
           onPress={() => run(() => setNodeHidden(node.id, true), true)}
           testID="hide-confirm"
@@ -138,15 +145,17 @@ export function CustomizeSection({ node, customization }: Props) {
       </PixelModal>
       <PixelModal
         visible={confirm === 'delete'}
-        title={`Delete ${node.name}?`}
+        title={t('Delete {name}?', { name: node.name })}
         onClose={() => setConfirm(undefined)}
-        closeLabel="Keep it"
+        closeLabel={t('Keep it')}
         testID="delete-dialog">
         <PixelText>
-          Your exercise leaves the tree. Its logged sets stay in your history but no longer count.
+          {t(
+            'Your exercise leaves the tree. Its logged sets stay in your history but no longer count.',
+          )}
         </PixelText>
         <PixelButton
-          label="Delete"
+          label={t('Delete')}
           variant="danger"
           onPress={() => run(() => resetNode(node.id), true)}
           testID="delete-confirm"

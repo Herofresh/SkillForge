@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
 import type { ExerciseNode } from '@/domain/types';
+import { t } from '@/i18n';
 
 import { NodeRow } from '../NodeRow';
 import { Spacing } from '../theme';
@@ -34,16 +35,16 @@ export function NodeOptionSheet({
   const [query, setQuery] = useState('');
   const list = options(query);
   return (
-    <PixelModal visible title={title} onClose={onClose} closeLabel="Cancel" testID={testID}>
+    <PixelModal visible title={title} onClose={onClose} closeLabel={t('Cancel')} testID={testID}>
       <PixelText variant="small" tone="textMuted">
         {intro}
       </PixelText>
       {searchable && (
         <PixelTextInput
-          label="Search"
+          label={t('Search')}
           value={query}
           onChangeText={setQuery}
-          placeholder="e.g. dip"
+          placeholder={t('e.g. dip')}
           testID={`${testID}-search`}
         />
       )}

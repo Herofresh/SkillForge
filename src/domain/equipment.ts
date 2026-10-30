@@ -3,6 +3,8 @@
  * database on first run; the user can edit or delete them afterwards (the app suggests, the user
  * decides, ADR-023).
  */
+import { k } from '@/i18n';
+
 import type { EquipmentProfile, EquipmentTag } from './types';
 
 /** Home: floor, wall, pull-up bar, parallettes and bands. */
@@ -22,17 +24,17 @@ export const DEFAULT_EQUIPMENT_PROFILES: readonly EquipmentProfile[] = [
   { id: 'park', name: 'Park', tags: [...PARK_EQUIPMENT] },
 ];
 
-/** Display names of the equipment tags (onboarding, settings). */
+/** Display names of the equipment tags (onboarding, settings): English, shown through `t`. */
 export const EQUIPMENT_TAG_LABELS: Readonly<Record<EquipmentTag, string>> = {
-  floor: 'Floor',
-  wall: 'Wall',
-  bar: 'Pull-up bar',
-  dip_bars: 'Dip bars',
-  parallettes: 'Parallettes',
-  bands: 'Bands',
-  rings: 'Rings',
-  pole: 'Pole',
-  box: 'Box or bench',
+  floor: k('Floor'),
+  wall: k('Wall'),
+  bar: k('Pull-up bar'),
+  dip_bars: k('Dip bars'),
+  parallettes: k('Parallettes'),
+  bands: k('Bands'),
+  rings: k('Rings'),
+  pole: k('Pole'),
+  box: k('Box or bench'),
 };
 
 /** `tags` with `tag` added (at the end) or removed. */

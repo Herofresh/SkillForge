@@ -3,6 +3,8 @@ import { Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } f
 import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { t } from '@/i18n';
+
 import { Colors, Spacing } from '../theme';
 
 import { KeyboardSafeView } from './KeyboardSafeView';
@@ -37,7 +39,7 @@ export function PixelModal({
   visible,
   title,
   onClose,
-  closeLabel = 'Close',
+  closeLabel = t('Close'),
   children,
   testID,
 }: Props) {

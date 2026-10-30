@@ -3,6 +3,7 @@ import { Keyboard, StyleSheet, View } from 'react-native';
 
 import { EQUIPMENT_TAG_LABELS, toggleEquipmentTag } from '@/domain/equipment';
 import { EQUIPMENT_TAGS, type EquipmentProfile, type EquipmentTag } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { Spacing } from '../theme';
@@ -60,9 +61,9 @@ export function EquipmentProfileEditor({ onRename }: Props) {
             {EQUIPMENT_TAGS.map((tag) => (
               <PixelChip
                 key={tag}
-                label={EQUIPMENT_TAG_LABELS[tag]}
+                label={t(EQUIPMENT_TAG_LABELS[tag])}
                 selected={profile.tags.includes(tag)}
-                accessibilityLabel={`${profile.name}: ${EQUIPMENT_TAG_LABELS[tag]}`}
+                accessibilityLabel={`${profile.name}: ${t(EQUIPMENT_TAG_LABELS[tag])}`}
                 onPress={() =>
                   updateProfile(profile.id, { tags: toggleEquipmentTag(profile.tags, tag) })
                 }
@@ -74,9 +75,9 @@ export function EquipmentProfileEditor({ onRename }: Props) {
             <View style={styles.actions}>
               {onRename && (
                 <PixelButton
-                  label="Rename"
+                  label={t('Rename')}
                   variant="secondary"
-                  accessibilityLabel={`Rename ${profile.name}`}
+                  accessibilityLabel={t('Rename {name}', { name: profile.name })}
                   onPress={() => onRename(profile)}
                   testID={`rename-${profile.id}`}
                   style={styles.flex}
@@ -84,9 +85,9 @@ export function EquipmentProfileEditor({ onRename }: Props) {
               )}
               {profiles.length > 1 && (
                 <PixelButton
-                  label={onRename ? 'Remove' : `Remove ${profile.name}`}
+                  label={onRename ? t('Remove') : t('Remove {name}', { name: profile.name })}
                   variant="danger"
-                  accessibilityLabel={`Remove ${profile.name}`}
+                  accessibilityLabel={t('Remove {name}', { name: profile.name })}
                   onPress={() => setRemoving(profile)}
                   testID={`remove-${profile.id}`}
                   style={styles.flex}
@@ -98,16 +99,16 @@ export function EquipmentProfileEditor({ onRename }: Props) {
       ))}
       <PixelFrame variant="raised" contentStyle={styles.card}>
         <PixelTextInput
-          label="Add a place"
+          label={t('Add a place')}
           value={newName}
           onChangeText={setNewName}
-          placeholder="e.g. Gym, Office"
+          placeholder={t('e.g. Gym, Office')}
           returnKeyType="done"
           onSubmitEditing={add}
           testID="new-profile-input"
         />
         <PixelButton
-          label="Add profile"
+          label={t('Add profile')}
           icon="scroll"
           variant="secondary"
           onPress={add}
@@ -117,16 +118,17 @@ export function EquipmentProfileEditor({ onRename }: Props) {
       </PixelFrame>
       <PixelModal
         visible={removing !== undefined}
-        title={`Remove ${removing?.name ?? ''}?`}
+        title={t('Remove {name}?', { name: removing?.name ?? '' })}
         onClose={() => setRemoving(undefined)}
-        closeLabel="Keep it"
+        closeLabel={t('Keep it')}
         testID="remove-dialog">
         <PixelText>
-          The profile and its equipment list are removed. Sessions you logged with it stay in your
-          history.
+          {t(
+            'The profile and its equipment list are removed. Sessions you logged with it stay in your history.',
+          )}
         </PixelText>
         <PixelButton
-          label="Remove"
+          label={t('Remove')}
           variant="danger"
           onPress={() => {
             if (removing) deleteProfile(removing.id);

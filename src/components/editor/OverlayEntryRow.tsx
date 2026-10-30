@@ -5,6 +5,7 @@ import {
   type CustomizationKind,
   type OverlayEntry,
 } from '@/domain/overlayEdit';
+import { t } from '@/i18n';
 
 import { Spacing, TOUCH_TARGET } from '../theme';
 import { PixelButton, PixelFrame, PixelIcon, PixelText, type IconName } from '../ui';
@@ -36,7 +37,7 @@ export function OverlayEntryRow({ entry, onOpen, actionLabel, onAction, replaces
       </PixelText>
       {replacesYours && (
         <PixelText variant="label" tone="ember">
-          Replaces yours
+          {t('Replaces yours')}
         </PixelText>
       )}
     </View>
@@ -53,7 +54,7 @@ export function OverlayEntryRow({ entry, onOpen, actionLabel, onAction, replaces
           style={styles.row}
           accessibilityRole="button"
           accessibilityLabel={`${entry.name}, ${entryDescription(entry)}`}
-          accessibilityHint="Opens the skill">
+          accessibilityHint={t('Opens the skill')}>
           <PixelIcon name={KIND_ICONS[entry.kind]} />
           {text}
         </Pressable>
@@ -68,7 +69,7 @@ export function OverlayEntryRow({ entry, onOpen, actionLabel, onAction, replaces
           label={actionLabel}
           variant="secondary"
           onPress={onAction}
-          accessibilityLabel={`${actionLabel} ${entry.name}`}
+          accessibilityLabel={t('{action} {name}', { action: actionLabel, name: entry.name })}
           testID={`entry-action-${entry.nodeId}`}
         />
       )}

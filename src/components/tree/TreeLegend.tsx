@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { TILE_STATES } from '@/domain/treeView';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { PixelIcon, PixelModal, PixelText } from '../ui';
@@ -16,7 +17,7 @@ type Props = {
 /** What the tile states and chains mean (a sheet from the Tree tab). */
 export function TreeLegend({ visible, onClose }: Props) {
   return (
-    <PixelModal visible={visible} title="Legend" onClose={onClose} testID="tree-legend-sheet">
+    <PixelModal visible={visible} title={t('Legend')} onClose={onClose} testID="tree-legend-sheet">
       {TILE_STATES.map((state) => {
         const look = TILE_LOOKS[state];
         return (
@@ -24,9 +25,9 @@ export function TreeLegend({ visible, onClose }: Props) {
             <PixelIcon name={look.icon} />
             <View style={styles.text}>
               <PixelText variant="label" tone={look.tone}>
-                {look.label}
+                {t(look.label)}
               </PixelText>
-              <PixelText variant="small">{look.description}</PixelText>
+              <PixelText variant="small">{t(look.description)}</PixelText>
             </View>
           </View>
         );
@@ -36,15 +37,17 @@ export function TreeLegend({ visible, onClose }: Props) {
           <ChainLink met />
         </View>
         <PixelText variant="small" style={styles.text}>
-          A chain joins a skill to the one it builds on: gold once that one is proficient. Chips
-          under a tile are prerequisites from elsewhere.
+          {t(
+            'A chain joins a skill to the one it builds on: gold once that one is proficient. Chips under a tile are prerequisites from elsewhere.',
+          )}
         </PixelText>
       </View>
       <View style={styles.row}>
         <PixelIcon name="info" />
         <PixelText variant="small" style={styles.text}>
-          What an exercise is and its cues: tap the i on a tile, or long-press a skill (also on the
-          map).
+          {t(
+            'What an exercise is and its cues: tap the i on a tile, or long-press a skill (also on the map).',
+          )}
         </PixelText>
       </View>
     </PixelModal>

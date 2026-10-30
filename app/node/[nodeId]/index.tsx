@@ -24,11 +24,12 @@ import { MAX_GOALS } from '@/domain/onboarding';
 import { customizationOf } from '@/domain/overlayEdit';
 import { nodeDetail, type NodeDetail } from '@/domain/treeView';
 import type { ReviewStatus } from '@/domain/types';
+import { k, t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 const REVIEW_TEXT: Readonly<Record<ReviewStatus, string>> = {
-  draft: 'Community-sourced progression; not yet reviewed by a coach.',
-  coach_reviewed: 'Reviewed by a coach.',
+  draft: k('Community-sourced progression; not yet reviewed by a coach.'),
+  coach_reviewed: k('Reviewed by a coach.'),
 };
 
 /**
@@ -57,8 +58,12 @@ export default function NodeDetailScreen() {
   if (!detail) {
     return (
       <Screen centered>
-        <Stack.Screen options={stackHeaderOptions('Skill')} />
-        <EmptyState icon="potion" title="Unknown skill" message={`No skill '${nodeId}' here.`} />
+        <Stack.Screen options={stackHeaderOptions(t('Skill'))} />
+        <EmptyState
+          icon="potion"
+          title={t('Unknown skill')}
+          message={t("No skill '{id}' here.", { id: nodeId })}
+        />
       </Screen>
     );
   }
@@ -108,7 +113,7 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
           }
         />
 
-        <DetailSection title="About" icon="info" testID="detail-description">
+        <DetailSection title={t('About')} icon="info" testID="detail-description">
           <View style={styles.animation}>
             <PixelAnimation animation={animation} testID="detail-animation" />
           </View>
@@ -117,74 +122,74 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
           </PixelText>
         </DetailSection>
 
-        <DetailSection title="Actions" icon="sword" variant="raised" testID="detail-actions">
+        <DetailSection title={t('Actions')} icon="sword" variant="raised" testID="detail-actions">
           <PixelButton
-            label={isGoal ? 'Remove goal' : 'Set as goal'}
+            label={isGoal ? t('Remove goal') : t('Set as goal')}
             icon="star"
             variant={isGoal ? 'secondary' : 'primary'}
             onPress={onToggleGoal}
             accessibilityHint={
-              isGoal ? 'Workouts stop leading here' : 'Workouts lead you towards this skill'
+              isGoal ? t('Workouts stop leading here') : t('Workouts lead you towards this skill')
             }
             testID="goal-toggle"
           />
           {goalsFull && (
             <PixelText variant="small" tone="ember" accessibilityLiveRegion="polite">
-              {`${MAX_GOALS} goals is the limit. Remove one to pick another.`}
+              {t('{max} goals is the limit. Remove one to pick another.', { max: MAX_GOALS })}
             </PixelText>
           )}
           {trialPassedAt !== undefined ? (
             <PixelText variant="small" tone="success" testID="trial-passed-note">
-              {`Trial passed on ${formatShortDate(trialPassedAt)}.`}
+              {t('Trial passed on {date}.', { date: formatShortDate(trialPassedAt) })}
             </PixelText>
           ) : (
             <PixelButton
-              label="Attempt Trial"
+              label={t('Attempt Trial')}
               icon="sword"
               variant="secondary"
               onPress={() =>
                 router.push({ pathname: '/node/[nodeId]/trial', params: { nodeId: node.id } })
               }
-              accessibilityHint="Log a Trial: pass it to become proficient"
+              accessibilityHint={t('Log a Trial: pass it to become proficient')}
               testID="attempt-trial"
             />
           )}
           {locked && (
             <PixelButton
-              label="Unlock anyway"
+              label={t('Unlock anyway')}
               icon="lock"
               variant="secondary"
               onPress={() => setUnlocking(true)}
-              accessibilityHint="Opens it for training although its prerequisites are not met"
+              accessibilityHint={t('Opens it for training although its prerequisites are not met')}
               testID="unlock-anyway"
             />
           )}
         </DetailSection>
 
-        <DetailSection title="Prerequisites" icon="chain" testID="detail-prerequisites">
+        <DetailSection title={t('Prerequisites')} icon="chain" testID="detail-prerequisites">
           <PrerequisiteList prerequisites={prerequisites} onOpen={openNode} />
           {status.warnings.length > 0 && (
             <PixelText variant="small" tone="textMuted">
-              Recommended ones never lock a skill; they are good preparation.
+              {t('Recommended ones never lock a skill; they are good preparation.')}
             </PixelText>
           )}
         </DetailSection>
 
-        <DetailSection title="Trains" icon="bar">
+        <DetailSection title={t('Trains')} icon="bar">
           <AttributeChips attributes={attributes} />
         </DetailSection>
 
-        <DetailSection title="Standards" icon="shield" testID="detail-standards">
+        <DetailSection title={t('Standards')} icon="shield" testID="detail-standards">
           <View style={styles.pair}>
             <PixelText variant="label" tone="textMuted">
-              Working range
+              {t('Working range')}
             </PixelText>
             <PixelText>{formatWorkingRange(node.metric, node.workingRange)}</PixelText>
           </View>
           <View style={styles.trial}>
             <View style={[styles.pair, styles.flex]}>
               <PixelText variant="label" tone="textMuted">
-                Trial standard
+                {t('Trial standard')}
               </PixelText>
               <PixelText>{formatTrial(node.metric, node.trial)}</PixelText>
             </View>
@@ -193,7 +198,7 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
         </DetailSection>
 
         {node.cues.length > 0 && (
-          <DetailSection title="Cues" icon="scroll" variant="parchment">
+          <DetailSection title={t('Cues')} icon="scroll" variant="parchment">
             {node.cues.map((cue) => (
               <PixelText key={cue} tone="textOnParchment">
                 {`• ${cue}`}
@@ -202,16 +207,18 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
           </DetailSection>
         )}
 
-        <DetailSection title="History" icon="scroll" testID="detail-history">
+        <DetailSection title={t('History')} icon="scroll" testID="detail-history">
           <NodeHistoryList history={history} metric={node.metric} onOpenSession={openSession} />
         </DetailSection>
 
         <CustomizeSection node={node} customization={customization} />
 
-        <DetailSection title="Review" icon="rune" testID="detail-review">
-          <PixelText variant="small">{REVIEW_TEXT[node.review.status]}</PixelText>
+        <DetailSection title={t('Review')} icon="rune" testID="detail-review">
+          <PixelText variant="small">{t(REVIEW_TEXT[node.review.status])}</PixelText>
           {node.review.notes !== undefined && (
-            <PixelText variant="small">{`Coach notes: ${node.review.notes}`}</PixelText>
+            <PixelText variant="small">
+              {t('Coach notes: {notes}', { notes: node.review.notes })}
+            </PixelText>
           )}
           {SHOW_RESEARCH_NOTES && node.verify !== undefined && (
             <PixelText variant="small" tone="textMuted">
@@ -220,7 +227,7 @@ function NodeDetailBody({ detail }: { detail: NodeDetail }) {
           )}
           {node.source === 'user' && (
             <PixelText variant="small" tone="rune">
-              Your own skill (from your changes to the tree).
+              {t('Your own skill (from your changes to the tree).')}
             </PixelText>
           )}
         </DetailSection>

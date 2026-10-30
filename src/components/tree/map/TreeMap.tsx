@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { boundsOf, type MapFocus, type MapLayout, type MapState } from '@/domain/treeMap';
+import { t } from '@/i18n';
 import {
   clampPan,
   fitBox,
@@ -214,7 +215,7 @@ export function TreeMap({
           style={styles.viewport}
           onLayout={onLayout}
           testID="tree-map"
-          accessibilityLabel="Skill tree map. Use Switch to list for the branch columns.">
+          accessibilityLabel={t('Skill tree map. Use Switch to list for the branch columns.')}>
           <Animated.View
             style={[styles.content, { width: layout.width, height: layout.height }, cameraStyle]}>
             <MapCanvas layout={layout} metEdges={state.metEdges} />
@@ -236,12 +237,12 @@ export function TreeMap({
       </GestureDetector>
       <View style={styles.controls} pointerEvents="box-none">
         <PixelButton
-          label="List"
+          label={t('List')}
           icon="scroll"
           variant="secondary"
           onPress={onSwitchToList}
-          accessibilityLabel="Switch to list"
-          accessibilityHint="Shows the tree as branch columns"
+          accessibilityLabel={t('Switch to list')}
+          accessibilityHint={t('Shows the tree as branch columns')}
           testID="map-switch-to-list"
         />
         <View style={styles.spacer} pointerEvents="none" />
@@ -249,22 +250,22 @@ export function TreeMap({
           label="−"
           variant="secondary"
           onPress={() => zoomBy(1 / BUTTON_ZOOM_STEP)}
-          accessibilityLabel="Zoom out"
+          accessibilityLabel={t('Zoom out')}
           testID="map-zoom-out"
         />
         <PixelButton
           label="+"
           variant="secondary"
           onPress={() => zoomBy(BUTTON_ZOOM_STEP)}
-          accessibilityLabel="Zoom in"
+          accessibilityLabel={t('Zoom in')}
           testID="map-zoom-in"
         />
         <PixelButton
-          label={focus.kind === 'goals' ? 'Goals' : 'Focus'}
+          label={focus.kind === 'goals' ? t('Goals') : t('Focus')}
           icon="star"
           onPress={() => screen && moveTo(focusView(screen), true)}
           accessibilityLabel={
-            focus.kind === 'goals' ? 'Focus goals' : 'Focus on what you can train'
+            focus.kind === 'goals' ? t('Focus goals') : t('Focus on what you can train')
           }
           testID="map-focus"
         />

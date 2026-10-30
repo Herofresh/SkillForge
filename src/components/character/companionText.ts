@@ -5,35 +5,46 @@
 import { HERO_CLASS_BY_ID } from '@/data/classes';
 import { tierNumeral } from '@/domain/classes';
 import type { RuleProgress } from '@/domain/companion';
+import { rankLabel } from '@/domain/rankLadder';
 import { RANK_TITLES, type CompanionRule, type CompanionSlot } from '@/domain/types';
+import { k, t } from '@/i18n';
 
+/** Shown through `t(SLOT_LABELS[slot])`. */
 export const SLOT_LABELS: Readonly<Record<CompanionSlot, string>> = {
-  head: 'Head',
-  cloak: 'Cloak & back',
-  body: 'Body',
-  hands: 'Hands & arms',
-  aura: 'Aura & emblem',
+  head: k('Head'),
+  cloak: k('Cloak & back'),
+  body: k('Body'),
+  hands: k('Hands & arms'),
+  aura: k('Aura & emblem'),
 };
 
-const className = (classId: string) => HERO_CLASS_BY_ID.get(classId)?.name ?? classId;
+const className = (classId: string) => {
+  const name = HERO_CLASS_BY_ID.get(classId)?.name;
+  return name === undefined ? classId : t(name);
+};
 
 /** What earns an accessory, e.g. "Rank Adept", "Warrior class, tier III", "50 sessions". */
 export function companionRuleText(rule: CompanionRule): string {
   switch (rule.kind) {
     case 'sessions':
-      return `${rule.count} sessions logged`;
+      return t('{n} sessions logged', { n: rule.count });
     case 'level':
-      return `Character level ${rule.level}`;
+      return t('Character level {level}', { level: rule.level });
     case 'rank':
-      return `Rank ${rule.rank}`;
+      return t('Rank {rank}', { rank: rankLabel(rule.rank) });
     case 'class':
-      return `${className(rule.classId)} class, tier ${tierNumeral(rule.tier)}`;
+      return t('{name} class, tier {tier}', {
+        name: className(rule.classId),
+        tier: tierNumeral(rule.tier),
+      });
     case 'streak':
-      return `A streak of ${rule.count} sessions`;
+      return t('A streak of {n} sessions', { n: rule.count });
     case 'trials':
-      return rule.count === 1 ? 'Pass your first Trial' : `Pass ${rule.count} Trials`;
+      return rule.count === 1
+        ? t('Pass your first Trial')
+        : t('Pass {n} Trials', { n: rule.count });
     case 'eliteTrial':
-      return 'Pass the Trial of an elite (legendary) skill';
+      return t('Pass the Trial of an elite (legendary) skill');
   }
 }
 
@@ -41,20 +52,32 @@ export function companionRuleText(rule: CompanionRule): string {
 export function companionProgressText(rule: CompanionRule, progress: RuleProgress): string {
   switch (rule.kind) {
     case 'sessions':
-      return `${progress.current} / ${progress.target} sessions`;
+      return t('{current} / {target} sessions', {
+        current: progress.current,
+        target: progress.target,
+      });
     case 'level':
-      return `Level ${progress.current} / ${progress.target}`;
+      return t('Level {current} / {target}', {
+        current: progress.current,
+        target: progress.target,
+      });
     case 'rank':
-      return `${RANK_TITLES[progress.current]} now`;
+      return t('{rank} now', { rank: rankLabel(RANK_TITLES[progress.current]) });
     case 'class':
       return progress.current === 0
-        ? 'Not unlocked yet'
-        : `Tier ${tierNumeral(progress.current)} now`;
+        ? t('Not unlocked yet')
+        : t('Tier {tier} now', { tier: tierNumeral(progress.current) });
     case 'streak':
-      return `Best streak ${progress.current} / ${progress.target}`;
+      return t('Best streak {current} / {target}', {
+        current: progress.current,
+        target: progress.target,
+      });
     case 'trials':
-      return `${progress.current} / ${progress.target} Trials`;
+      return t('{current} / {target} Trials', {
+        current: progress.current,
+        target: progress.target,
+      });
     case 'eliteTrial':
-      return 'Not yet';
+      return t('Not yet');
   }
 }

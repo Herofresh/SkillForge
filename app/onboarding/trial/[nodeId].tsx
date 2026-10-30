@@ -14,6 +14,7 @@ import {
 import { useTrialAttempt } from '@/components/trial/useTrialAttempt';
 import { EmptyState, Screen } from '@/components/ui';
 import type { ExerciseNode } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -26,7 +27,11 @@ export default function TrialScreen() {
   if (!node) {
     return (
       <Screen centered>
-        <EmptyState icon="potion" title="Unknown skill" message={`No skill '${nodeId}' here.`} />
+        <EmptyState
+          icon="potion"
+          title={t('Unknown skill')}
+          message={t("No skill '{id}' here.", { id: nodeId })}
+        />
       </Screen>
     );
   }
@@ -44,9 +49,9 @@ function TrialForm({ node }: { node: ExerciseNode }) {
       <OnboardingScaffold
         step="assessment"
         icon={passed ? 'star' : 'scroll'}
-        title={passed ? 'Trial passed' : 'Trial logged'}
+        title={passed ? t('Trial passed') : t('Trial logged')}
         subtitle={node.name}
-        next={{ label: 'Done', onPress: () => router.back() }}
+        next={{ label: t('Done'), onPress: () => router.back() }}
         testID="trial-result">
         <TrialOutcome node={node} outcome={attempt.outcome} standard={attempt.standard} />
       </OnboardingScaffold>
@@ -57,10 +62,12 @@ function TrialForm({ node }: { node: ExerciseNode }) {
     <OnboardingScaffold
       step="assessment"
       icon="sword"
-      title="The Trial"
-      subtitle={`Enter what you can do today. The standard is ${attempt.standard}.`}
+      title={t('The Trial')}
+      subtitle={t('Enter what you can do today. The standard is {standard}.', {
+        standard: attempt.standard,
+      })}
       onBack={() => router.back()}
-      next={{ label: 'Log Trial', onPress: attempt.log, disabled: !attempt.allAcknowledged }}
+      next={{ label: t('Log Trial'), onPress: attempt.log, disabled: !attempt.allAcknowledged }}
       testID="trial-form">
       <NodeRow node={node} icon="sword" onInfo={() => setInfoOpen(true)} testID="trial-node" />
       {infoOpen && <ExerciseInfoSheet node={node} onClose={() => setInfoOpen(false)} />}
@@ -80,7 +87,7 @@ function TrialForm({ node }: { node: ExerciseNode }) {
         onPauseTimer={attempt.pauseTimer}
         onResumeTimer={attempt.resumeTimer}
         onResetTimer={attempt.resetTimer}
-        pendingNote={attempt.allAcknowledged ? undefined : ACKNOWLEDGE_TO_LOG_NOTE}
+        pendingNote={attempt.allAcknowledged ? undefined : t(ACKNOWLEDGE_TO_LOG_NOTE)}
       />
     </OnboardingScaffold>
   );

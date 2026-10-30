@@ -11,6 +11,7 @@
  * (`pausedMs`), never a ticking counter, so it survives backgrounding and an app kill, paused or
  * not: every reading is computed from the clock at `now` (PLAN 5.8, ADR-044). Pure.
  */
+import { t } from '@/i18n';
 import { MS_PER_SECOND } from '@/lib/time';
 
 import { formatClock } from './format';
@@ -186,7 +187,7 @@ export function formatTimerClock(reading: TimerReading): string {
     case 'get_ready':
       return String(reading.seconds);
     case 'overtime':
-      return `+${reading.seconds} s`;
+      return t('+{n} s', { n: reading.seconds });
     case 'holding':
     case 'running':
       return formatClock(reading.seconds);
@@ -195,35 +196,42 @@ export function formatTimerClock(reading: TimerReading): string {
 
 /** The caption over the clock, e.g. "Get ready", "Hold", "Target reached", "Paused", "Held", "Time". */
 export function timerCaption(reading: TimerReading): string {
-  if (!reading.running) return reading.mode === 'hold' ? 'Held' : 'Time';
-  if (reading.paused) return 'Paused';
+  if (!reading.running) return reading.mode === 'hold' ? t('Held') : t('Time');
+  if (reading.paused) return t('Paused');
   switch (reading.phase) {
     case 'get_ready':
-      return 'Get ready';
+      return t('Get ready');
     case 'holding':
-      return 'Hold';
+      return t('Hold');
     case 'overtime':
-      return 'Target reached';
+      return t('Target reached');
     case 'running':
-      return 'Time';
+      return t('Time');
   }
 }
 
-const seconds = (n: number): string => `${n} ${n === 1 ? 'second' : 'seconds'}`;
+const seconds = (n: number): string => (n === 1 ? t('1 second') : t('{n} seconds', { n }));
 
 /** The timer for screen readers, e.g. "Hold: 27 seconds left" or "Target reached: 7 seconds over". */
 export function spokenTimer(reading: TimerReading): string {
-  if (!reading.running) return `${timerCaption(reading)}: ${seconds(reading.durationSec)}`;
-  if (reading.paused) return `Paused, ${spokenTimer({ ...reading, paused: false })}`;
+  if (!reading.running) {
+    return t('{caption}: {time}', {
+      caption: timerCaption(reading),
+      time: seconds(reading.durationSec),
+    });
+  }
+  if (reading.paused) {
+    return t('Paused, {reading}', { reading: spokenTimer({ ...reading, paused: false }) });
+  }
   switch (reading.phase) {
     case 'get_ready':
-      return `Get ready: ${seconds(reading.seconds)}`;
+      return t('Get ready: {time}', { time: seconds(reading.seconds) });
     case 'holding':
-      return `Hold: ${seconds(reading.seconds)} left`;
+      return t('Hold: {time} left', { time: seconds(reading.seconds) });
     case 'overtime':
-      return `Target reached: ${seconds(reading.seconds)} over`;
+      return t('Target reached: {time} over', { time: seconds(reading.seconds) });
     case 'running':
-      return `Time: ${seconds(reading.seconds)}`;
+      return t('Time: {time}', { time: seconds(reading.seconds) });
   }
 }
 

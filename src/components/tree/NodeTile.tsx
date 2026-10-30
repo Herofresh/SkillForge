@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { formatLevelProgress, formatOgLevel, TRIAL_NEEDED_LABEL } from '@/domain/format';
 import { tierForOgLevel } from '@/domain/tier';
 import type { TreeTile } from '@/domain/treeView';
+import { t } from '@/i18n';
 
 import { Border, Colors, Spacing, TileFrames, TOUCH_TARGET } from '../theme';
 import { PixelFrame, PixelIcon, PixelText, TierChip, XPBar } from '../ui';
@@ -37,7 +38,7 @@ export function GoalMarker({ testID }: { testID?: string }) {
         <View style={styles.markerRow}>
           <PixelIcon name="star" />
           <PixelText variant="label" tone="gold">
-            Goal
+            {t('Goal')}
           </PixelText>
         </View>
       </PixelFrame>
@@ -69,7 +70,7 @@ export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false, o
         onLongPress={onInfo && (() => onInfo(node.id))}
         accessibilityRole="button"
         accessibilityLabel={label}
-        accessibilityHint="Opens the skill"
+        accessibilityHint={t('Opens the skill')}
         testID={`tile-${node.id}`}>
         {({ pressed }) => (
           <PixelFrame frame={TileFrames[state]} pressed={pressed} padding={Spacing.sm}>
@@ -86,14 +87,14 @@ export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false, o
                   </PixelText>
                   {node.straightArm && (
                     <PixelText variant="label" tone="ember">
-                      Straight-arm
+                      {t('Straight-arm')}
                     </PixelText>
                   )}
                   {custom && (
                     <View style={styles.customTag} testID={`tile-custom-${node.id}`}>
                       <PixelIcon name="quill" />
                       <PixelText variant="label" tone="arcane">
-                        Custom
+                        {t('Custom')}
                       </PixelText>
                     </View>
                   )}
@@ -111,7 +112,7 @@ export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false, o
             <View style={styles.status}>
               {trained ? (
                 <XPBar
-                  label={`LV ${level.level} · ${look.label}`}
+                  label={t('LV {level} · {state}', { level: level.level, state: t(look.label) })}
                   valueText={formatLevelProgress(level)}
                   fraction={level.fraction}
                   testID={`tile-state-${node.id}`}
@@ -126,7 +127,7 @@ export const NodeTile = memo(function NodeTile({ tile, onOpen, custom = false, o
               <View style={styles.trialNeeded} testID={`tile-trial-needed-${node.id}`}>
                 <PixelIcon name="shield" />
                 <PixelText variant="label" tone="ember">
-                  {TRIAL_NEEDED_LABEL}
+                  {t(TRIAL_NEEDED_LABEL)}
                 </PixelText>
               </View>
             )}

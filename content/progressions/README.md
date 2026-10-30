@@ -162,6 +162,33 @@ prerequisites, what it trains, equipment, sources, ⚠ open questions, review st
 **Coach notes** column. Please also check the **Trains** column. It's generated from these files, so don't edit it directly: write your notes on a copy or
 printout, or as comments on the pull request, and a contributor copies them into `review.notes`.
 
+## Translations
+
+The app shows the exercises in the user's language (English is the source). Each language has its
+own folder with one file per branch, `content/progressions/<language>/<branch>.yaml`, holding only
+the texts a reader sees:
+
+```yaml
+branch: v_pull
+nodes:
+  - id: pull_up                      # the same id as in v_pull.yaml, never translated
+    name: "Klimmzug"
+    description: "An einer Stange hängend ziehst du dich hoch, bis das Kinn über der Stange ist."
+    cues:                            # exactly as many as the English node, in the same order
+      - "Starte aus dem Dead Hang."
+      - "Zieh, bis das Kinn über der Stange ist."
+    prerequisite_notes:              # only for prerequisites that have a `note:` in English
+      hollow_hold: "Hilft, die Körperlinie zu halten."
+```
+
+Rules: every node of the branch has an entry and nothing else does; `cues` has the same count as
+the English node; `description` stays under 300 characters and a cue under 120; notes only for
+prerequisites that carry one. `npm run progressions:build` checks all of this and generates
+`src/data/skills/translations.generated.ts`; the app swaps the texts in when it loads. Numbers,
+standards and the structure never live in a translation file: change them in the English file.
+Languages today: German (`de/`). Adding a language: a new folder, and its code in
+`TRANSLATED_LOCALES` (`src/data/progressionTranslations.ts`) and `LOCALES` (`src/i18n/locale.ts`).
+
 ## Users' own progressions
 
 People can also add, change or hide exercises inside the app without touching these files (a "user

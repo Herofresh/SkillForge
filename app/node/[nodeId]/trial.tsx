@@ -11,6 +11,7 @@ import {
 import { useTrialAttempt } from '@/components/trial/useTrialAttempt';
 import { EmptyState, PixelButton, PixelText, Screen } from '@/components/ui';
 import type { ExerciseNode } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -24,8 +25,12 @@ export default function NodeTrialScreen() {
   if (!node) {
     return (
       <Screen centered>
-        <Stack.Screen options={stackHeaderOptions('The Trial')} />
-        <EmptyState icon="potion" title="Unknown skill" message={`No skill '${nodeId}' here.`} />
+        <Stack.Screen options={stackHeaderOptions(t('The Trial'))} />
+        <EmptyState
+          icon="potion"
+          title={t('Unknown skill')}
+          message={t("No skill '{id}' here.", { id: nodeId })}
+        />
       </Screen>
     );
   }
@@ -37,7 +42,7 @@ function NodeTrialForm({ node }: { node: ExerciseNode }) {
   const attempt = useTrialAttempt(node);
   return (
     <>
-      <Stack.Screen options={stackHeaderOptions('The Trial')} />
+      <Stack.Screen options={stackHeaderOptions(t('The Trial'))} />
       {attempt.outcome ? (
         <Screen testID="node-trial-result">
           <TrialOutcome
@@ -49,7 +54,7 @@ function NodeTrialForm({ node }: { node: ExerciseNode }) {
             }
           />
           <PixelButton
-            label="Back to the skill"
+            label={t('Back to the skill')}
             onPress={() => router.back()}
             testID="trial-done"
           />
@@ -58,7 +63,9 @@ function NodeTrialForm({ node }: { node: ExerciseNode }) {
         <Screen testID="node-trial-form">
           <NodeRow node={node} icon="sword" />
           <PixelText tone="textMuted">
-            {`Enter what you did today. The standard is ${attempt.standard}.`}
+            {t('Enter what you did today. The standard is {standard}.', {
+              standard: attempt.standard,
+            })}
           </PixelText>
           <SafeguardWarningList
             warnings={attempt.warnings}
@@ -76,10 +83,10 @@ function NodeTrialForm({ node }: { node: ExerciseNode }) {
             onPauseTimer={attempt.pauseTimer}
             onResumeTimer={attempt.resumeTimer}
             onResetTimer={attempt.resetTimer}
-            pendingNote={attempt.allAcknowledged ? undefined : ACKNOWLEDGE_TO_LOG_NOTE}
+            pendingNote={attempt.allAcknowledged ? undefined : t(ACKNOWLEDGE_TO_LOG_NOTE)}
           />
           <PixelButton
-            label="Log Trial"
+            label={t('Log Trial')}
             icon="sword"
             onPress={attempt.log}
             disabled={!attempt.allAcknowledged}

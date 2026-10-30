@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { COMPANION_ANIMATIONS } from '@/data/companion';
+import { t } from '@/i18n';
 import { FRAME_MS } from '@/lib/figureAnimation';
 
 import { Colors, PIXEL, Spacing } from '../theme';
@@ -41,7 +42,7 @@ export function CompanionCard({ view, onCustomize, testID = 'companion' }: Props
     <PixelFrame contentStyle={styles.gap} testID={testID}>
       <View style={styles.row}>
         <PixelText variant="label" tone="rune" accessibilityRole="header" style={styles.flex}>
-          Companion
+          {t('Companion')}
         </PixelText>
         <GuideButton topic="companion" />
       </View>
@@ -49,8 +50,11 @@ export function CompanionCard({ view, onCustomize, testID = 'companion' }: Props
         <Pressable
           onPress={() => setWaving(true)}
           accessibilityRole="button"
-          accessibilityLabel={`Your companion, ${view.title.toLowerCase()}. ${view.line}`}
-          accessibilityHint="Your companion waves at you"
+          accessibilityLabel={t('Your companion, {mood}. {line}', {
+            mood: t(view.title).toLowerCase(),
+            line: view.line,
+          })}
+          accessibilityHint={t('Your companion waves at you')}
           testID={`${testID}-sprite`}
           style={styles.stage}>
           <CompanionSprite
@@ -62,26 +66,28 @@ export function CompanionCard({ view, onCustomize, testID = 'companion' }: Props
         </Pressable>
         <View style={styles.text}>
           <PixelText variant="title" tone="gold" testID={`${testID}-mood`}>
-            {view.title}
+            {t(view.title)}
           </PixelText>
           <PixelText variant="small" testID={`${testID}-line`}>
             {view.line}
           </PixelText>
           <PixelText variant="label" tone="textMuted" testID={`${testID}-weapon`}>
-            {view.weaponName}
+            {t(view.weaponName)}
           </PixelText>
         </View>
       </View>
       <View style={styles.row}>
         <PixelButton
-          label="Customize"
+          label={t('Customize')}
           icon="helmet"
           variant="secondary"
           onPress={onCustomize}
           style={styles.flex}
           testID={`${testID}-customize`}
         />
-        {view.newCount > 0 && <NewBadge label={`${view.newCount} NEW`} testID={`${testID}-new`} />}
+        {view.newCount > 0 && (
+          <NewBadge label={t('{n} NEW', { n: view.newCount })} testID={`${testID}-new`} />
+        )}
       </View>
     </PixelFrame>
   );

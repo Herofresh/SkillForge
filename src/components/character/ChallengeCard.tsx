@@ -4,6 +4,7 @@ import { HERO_CLASS_BY_ID } from '@/data/classes';
 import type { ChallengeView } from '@/domain/challenges';
 import { classTitle } from '@/domain/classes';
 import { CLASS_CHALLENGE_BONUS_XP } from '@/domain/xp';
+import { t } from '@/i18n';
 
 import { Colors, Spacing } from '../theme';
 import { PixelIcon, PixelText, SegmentedBar } from '../ui';
@@ -28,18 +29,20 @@ const MAX_SEGMENTS = 10;
  */
 export function ChallengeCard({ challenge, testID = 'character-challenge' }: Props) {
   const heroClass = HERO_CLASS_BY_ID.get(challenge.classId);
-  const title = heroClass ? classTitle(heroClass, challenge.tier) : challenge.classId;
+  const title = heroClass ? t(classTitle(heroClass, challenge.tier)) : challenge.classId;
   const goal = challengeGoalText(challenge.goal, challenge.target);
   const count = challengeCountText(challenge.goal, challenge.count, challenge.target);
   const next = challenge.nextClassId ? HERO_CLASS_BY_ID.get(challenge.nextClassId) : undefined;
   const status = challenge.completed
-    ? `Complete: +${CLASS_CHALLENGE_BONUS_XP} XP earned`
-    : `+${CLASS_CHALLENGE_BONUS_XP} XP when done`;
+    ? t('Complete: +{xp} XP earned', { xp: CLASS_CHALLENGE_BONUS_XP })
+    : t('+{xp} XP when done', { xp: CLASS_CHALLENGE_BONUS_XP });
   const label = [
-    `Weekly challenge of the ${title}: ${goal} this week`,
+    t('Weekly challenge of the {title}: {goal} this week', { title, goal }),
     count,
     status,
-    challenge.completedWeeks > 0 ? `${challenge.completedWeeks} completed in total` : undefined,
+    challenge.completedWeeks > 0
+      ? t('{n} completed in total', { n: challenge.completedWeeks })
+      : undefined,
   ]
     .filter(Boolean)
     .join('. ');
@@ -49,13 +52,13 @@ export function ChallengeCard({ challenge, testID = 'character-challenge' }: Pro
         <PixelIcon name="scroll" />
         <View style={styles.text}>
           <PixelText variant="label" tone="textMuted">
-            {`Weekly challenge · ${title}`}
+            {t('Weekly challenge · {title}', { title })}
           </PixelText>
           <PixelText variant="heading" testID={`${testID}-goal`}>
-            {`${goal} this week`}
+            {t('{goal} this week', { goal })}
           </PixelText>
         </View>
-        {challenge.completed && <NewBadge label="COMPLETE" testID={`${testID}-complete`} />}
+        {challenge.completed && <NewBadge label={t('COMPLETE')} testID={`${testID}-complete`} />}
       </View>
       <SegmentedBar
         fraction={challenge.fraction}
@@ -75,22 +78,22 @@ export function ChallengeCard({ challenge, testID = 'character-challenge' }: Pro
         <View style={styles.row} testID={`${testID}-badges`}>
           <PixelIcon name="star" />
           <PixelText variant="small" tone="gold">
-            {`Challenge badges: ${challenge.completedWeeks}`}
+            {t('Challenge badges: {n}', { n: challenge.completedWeeks })}
           </PixelText>
         </View>
       )}
       {next && (
         <PixelText variant="small" tone="textMuted" testID={`${testID}-next`}>
-          {`Fixed for this week. The ${next.name} challenge starts on Monday.`}
+          {t('Fixed for this week. The {name} challenge starts on Monday.', { name: t(next.name) })}
         </PixelText>
       )}
       {!challenge.pinned && (
         <PixelText variant="small" tone="textMuted">
-          Your first session this week fixes the challenge for the week.
+          {t('Your first session this week fixes the challenge for the week.')}
         </PixelText>
       )}
       <PixelText variant="small" tone="textMuted">
-        {CHALLENGE_FINE_PRINT}
+        {t(CHALLENGE_FINE_PRINT)}
       </PixelText>
     </View>
   );

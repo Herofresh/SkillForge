@@ -140,6 +140,7 @@ import {
   parseLanguageChoice,
   resolveLocale,
   setLocale,
+  t,
   type LanguageChoice,
   type Locale,
 } from '@/i18n';
@@ -1460,7 +1461,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         const { fileName, text } = get().exportOverlay();
         await files.share(fileName, text, {
           mimeType: OVERLAY_MIME_TYPE,
-          dialogTitle: 'Share your SkillForge progressions',
+          dialogTitle: t('Share your SkillForge progressions'),
         });
       },
 

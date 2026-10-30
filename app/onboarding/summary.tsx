@@ -7,12 +7,13 @@ import { Spacing } from '@/components/theme';
 import { LevelBadge, LevelUpBurst, PixelFrame, PixelIcon, PixelText, XPBar } from '@/components/ui';
 import { characterLevelProgress } from '@/domain/character';
 import { onboardingSummary } from '@/domain/onboarding';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /** Step 5: "Your journey begins": the hero, goals and tested-out skills, then into the tabs. */
 export default function SummaryStep() {
   const router = useRouter();
-  const heroName = useAppStore((state) => state.profile?.heroName) ?? 'Hero';
+  const heroName = useAppStore((state) => state.profile?.heroName) ?? t('Hero');
   const nodes = useAppStore((state) => state.nodes);
   const engine = useAppStore((state) => state.engine);
   const goalIds = useAppStore((state) => state.goals);
@@ -28,35 +29,38 @@ export default function SummaryStep() {
     <OnboardingScaffold
       step="summary"
       icon="flame"
-      title="Your journey begins"
-      subtitle="The forge is lit. Your first workout waits on the Train tab."
+      title={t('Your journey begins')}
+      subtitle={t('The forge is lit. Your first workout waits on the Train tab.')}
       onBack={() => router.back()}
       // The layout sees the completed flag and hands over to the tabs.
-      next={{ label: 'Begin', onPress: completeOnboarding }}
+      next={{ label: t('Begin'), onPress: completeOnboarding }}
       testID="onboarding-summary">
       <PixelFrame variant="rune" contentStyle={styles.hero}>
-        <LevelUpBurst title={heroName} subtitle={summary.character.rank.toUpperCase()} />
+        <LevelUpBurst title={heroName} subtitle={t(summary.character.rank).toUpperCase()} />
         <View style={styles.levelRow}>
           <LevelBadge level={level.level} size="lg" />
           <View style={styles.flex}>
             <XPBar
-              label="Hero XP"
+              label={t('Hero XP')}
               fraction={level.fraction}
               valueText={`${level.xpIntoLevel} / ${level.xpForLevel} XP`}
             />
           </View>
         </View>
       </PixelFrame>
-      <Section icon="star" title="Quests" empty="No goals yet. Pick some from the tree any time.">
+      <Section
+        icon="star"
+        title={t('Quests')}
+        empty={t('No goals yet. Pick some from the tree any time.')}>
         {summary.goals.map((node) => node.name)}
       </Section>
       <Section
         icon="check"
-        title="Tested out"
-        empty="Nothing tested out. Every skill starts fresh.">
+        title={t('Tested out')}
+        empty={t('Nothing tested out. Every skill starts fresh.')}>
         {summary.testedOut.map((node) => node.name)}
       </Section>
-      <Section icon="bar" title="Training grounds" empty="No equipment profiles.">
+      <Section icon="bar" title={t('Training grounds')} empty={t('No equipment profiles.')}>
         {profiles.map((profile) => profile.name)}
       </Section>
     </OnboardingScaffold>

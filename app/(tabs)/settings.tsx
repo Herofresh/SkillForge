@@ -17,6 +17,7 @@ import { Spacing } from '@/components/theme';
 import { PixelButton, PixelModal, PixelText, PixelTextInput, Screen } from '@/components/ui';
 import { HERO_NAME_MAX_LENGTH, normalizeHeroName } from '@/domain/onboarding';
 import type { EquipmentProfile } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -38,10 +39,10 @@ export default function SettingsScreen() {
 
       <View style={styles.gap} testID="settings-equipment">
         <PixelText variant="label" tone="rune" accessibilityRole="header">
-          Equipment profiles
+          {t('Equipment profiles')}
         </PixelText>
         <PixelText variant="small" tone="textMuted">
-          Workouts only use the equipment of the place you pick on the Train tab.
+          {t('Workouts only use the equipment of the place you pick on the Train tab.')}
         </PixelText>
         <EquipmentProfileEditor onRename={setRenaming} />
       </View>
@@ -82,9 +83,9 @@ function HeroNamePanel() {
     if (changed) setHeroName(name);
   };
   return (
-    <DetailSection title="Hero" icon="helmet" testID="settings-hero">
+    <DetailSection title={t('Hero')} icon="helmet" testID="settings-hero">
       <PixelTextInput
-        label="Hero name"
+        label={t('Hero name')}
         value={name}
         onChangeText={setName}
         maxLength={HERO_NAME_MAX_LENGTH}
@@ -94,7 +95,7 @@ function HeroNamePanel() {
         testID="settings-hero-name"
       />
       <PixelButton
-        label="Save name"
+        label={t('Save name')}
         variant="secondary"
         onPress={save}
         disabled={!changed}
@@ -117,12 +118,12 @@ function RenameSheet({ profile, onClose }: { profile: EquipmentProfile; onClose:
   return (
     <PixelModal
       visible
-      title="Rename profile"
+      title={t('Rename profile')}
       onClose={onClose}
-      closeLabel="Cancel"
+      closeLabel={t('Cancel')}
       testID="rename-sheet">
       <PixelTextInput
-        label="Name"
+        label={t('Name')}
         value={name}
         onChangeText={setName}
         autoFocus
@@ -130,7 +131,7 @@ function RenameSheet({ profile, onClose }: { profile: EquipmentProfile; onClose:
         onSubmitEditing={save}
         testID="rename-input"
       />
-      <PixelButton label="Save" onPress={save} disabled={!valid} testID="rename-save" />
+      <PixelButton label={t('Save')} onPress={save} disabled={!valid} testID="rename-save" />
     </PixelModal>
   );
 }

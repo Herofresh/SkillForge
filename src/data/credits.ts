@@ -1,7 +1,9 @@
 /**
  * Credits shown in Settings → About (PLAN 4.6): where the progression content comes from
- * (docs/research/progressions.md) and the licences of the bundled fonts (ADR-030). Content only.
+ * (docs/research/progressions.md) and the licences of the bundled fonts (ADR-030). Content only;
+ * the notes are marked with `k` and translated where they are shown.
  */
+import { k } from '@/i18n';
 
 export interface Credit {
   name: string;
@@ -13,44 +15,45 @@ export interface Credit {
 export const CONTENT_SOURCES: readonly Credit[] = [
   {
     name: 'Overcoming Gravity (Steven Low)',
-    note: 'Tier levels (OG2 charts), progressions and tendon safety guidance.',
+    note: k('Tier levels (OG2 charts), progressions and tendon safety guidance.'),
     url: 'https://stevenlow.org/overcoming-gravity/',
   },
   {
     name: 'r/bodyweightfitness',
-    note: 'The Recommended Routine and its progression charts.',
+    note: k('The Recommended Routine and its progression charts.'),
     url: 'https://redditbwf.github.io/wiki/recommended_routine.html',
   },
   {
     name: 'GMB Fitness',
-    note: 'Handstand and skill progressions.',
+    note: k('Handstand and skill progressions.'),
     url: 'https://gmb.io/handstand/',
   },
   {
     name: 'Antranik',
-    note: 'Beginner routines and steady-state skill training.',
+    note: k('Beginner routines and steady-state skill training.'),
     url: 'https://antranik.org/',
   },
 ];
 
 /** Shown under the content sources (ADR-065). */
-export const NOT_AFFILIATED_NOTE =
-  'SkillForge is an independent project, not affiliated with or endorsed by the sources listed.';
+export const NOT_AFFILIATED_NOTE = k(
+  'SkillForge is an independent project, not affiliated with or endorsed by the sources listed.',
+);
 
 /**
  * The privacy policy (PLAN 7.4, ADR-067): site/privacy/ published to GitHub Pages. Play Console's
  * store listing links the same URL.
  */
 export const PRIVACY_POLICY: Credit = {
-  name: 'Privacy policy',
-  note: 'What SkillForge stores (everything on this phone) and what it never sends.',
+  name: k('Privacy policy'),
+  note: k('What SkillForge stores (everything on this phone) and what it never sends.'),
   url: 'https://herofresh.github.io/SkillForge/privacy/',
 };
 
 /** The SIL Open Font License 1.1 that all bundled fonts use. */
 export const OFL_CREDIT: Credit = {
   name: 'SIL Open Font License 1.1',
-  note: 'The licence of all three fonts.',
+  note: k('The licence of all three fonts.'),
   url: 'https://openfontlicense.org/',
 };
 

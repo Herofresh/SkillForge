@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { draftChanged } from '@/domain/nodeEditor';
 import type { ExerciseNode } from '@/domain/types';
+import { t } from '@/i18n';
 import { useAppStore } from '@/store/useAppStore';
 
 import { stackHeaderOptions } from '../stackHeader';
@@ -79,8 +80,12 @@ export function NodeEditorBody({ initial, title, saveLabel, onSaved, onCancel }:
       <Screen avoidKeyboard testID="node-editor">
         <PixelText variant="small" tone="textMuted">
           {custom
-            ? 'Your own exercise. It is checked like the built-in tree: no loops, every prerequisite must exist.'
-            : 'Your changes are kept on top of the built-in tree; "Reset to default" on the skill brings it back.'}
+            ? t(
+                'Your own exercise. It is checked like the built-in tree: no loops, every prerequisite must exist.',
+              )
+            : t(
+                'Your changes are kept on top of the built-in tree; "Reset to default" on the skill brings it back.',
+              )}
         </PixelText>
         <NodeEditorForm
           draft={draft}
@@ -97,10 +102,12 @@ export function NodeEditorBody({ initial, title, saveLabel, onSaved, onCancel }:
             accessibilityLiveRegion="polite"
             testID="editor-status">
             {issues.length > 0
-              ? `${issues.length} ${issues.length === 1 ? 'problem' : 'problems'} to fix before saving.`
+              ? issues.length === 1
+                ? t('1 problem to fix before saving.')
+                : t('{n} problems to fix before saving.', { n: issues.length })
               : touched
-                ? 'The tree stays valid with these changes.'
-                : 'No changes yet.'}
+                ? t('The tree stays valid with these changes.')
+                : t('No changes yet.')}
           </PixelText>
           <PixelButton
             label={saveLabel}
@@ -110,7 +117,7 @@ export function NodeEditorBody({ initial, title, saveLabel, onSaved, onCancel }:
             testID="editor-save"
           />
           <PixelButton
-            label="Cancel"
+            label={t('Cancel')}
             variant="secondary"
             onPress={onCancel}
             testID="editor-cancel"
@@ -119,15 +126,15 @@ export function NodeEditorBody({ initial, title, saveLabel, onSaved, onCancel }:
       </Screen>
       <PixelModal
         visible={pendingLeave !== undefined}
-        title="Discard changes?"
+        title={t('Discard changes?')}
         onClose={() => setPendingLeave(undefined)}
-        closeLabel="Keep editing"
+        closeLabel={t('Keep editing')}
         testID="editor-discard-dialog">
         <PixelText>
-          Your changes to this exercise are not saved. Leave and throw them away?
+          {t('Your changes to this exercise are not saved. Leave and throw them away?')}
         </PixelText>
         <PixelButton
-          label="Discard changes"
+          label={t('Discard changes')}
           variant="danger"
           icon="cross"
           onPress={discard}

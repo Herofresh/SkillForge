@@ -12,6 +12,7 @@ import {
   type CellRun,
   type Point,
 } from '@/lib/radar';
+import { t } from '@/i18n';
 
 import { ATTRIBUTE_LABELS } from '../node/AttributeChips';
 import { AttributeColors, Colors, PIXEL } from '../theme';
@@ -132,7 +133,7 @@ export function AttributeRadar({ axes, testID }: Props) {
   }, [axes, radius, cells, size]);
 
   const summary = axes
-    .map((axis) => `${ATTRIBUTE_LABELS[axis.attribute]} ${axis.value}`)
+    .map((axis) => `${t(ATTRIBUTE_LABELS[axis.attribute])} ${axis.value}`)
     .join(', ');
   const height = size + 2 * (LABEL_HEIGHT + LABEL_GAP);
   const top = LABEL_HEIGHT + LABEL_GAP;
@@ -143,7 +144,7 @@ export function AttributeRadar({ axes, testID }: Props) {
       onLayout={onLayout}
       accessible
       accessibilityRole="image"
-      accessibilityLabel={`Attribute radar: ${summary}`}
+      accessibilityLabel={t('Attribute radar: {summary}', { summary })}
       style={[styles.container, { height }]}>
       {width > 0 && (
         <>
@@ -194,7 +195,7 @@ export function AttributeRadar({ axes, testID }: Props) {
                   },
                 ]}>
                 <PixelText variant="label" color={AttributeColors[axis.attribute]}>
-                  {ATTRIBUTE_LABELS[axis.attribute]}
+                  {t(ATTRIBUTE_LABELS[axis.attribute])}
                 </PixelText>
                 <PixelText variant="label" tone="text">
                   {String(axis.value)}

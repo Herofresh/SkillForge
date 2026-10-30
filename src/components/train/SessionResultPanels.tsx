@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { TRIAL_NEEDED_LABEL, trialAlsoCountsText, trialNeededNote } from '@/domain/format';
 import type { SummaryView } from '@/domain/trainView';
+import { t } from '@/i18n';
 
 import { Spacing, TOUCH_TARGET } from '../theme';
 import { GuideButton } from '../guide/GuideButton';
@@ -42,8 +43,21 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
         <View style={styles.row}>
           <View style={styles.flex}>
             <PixelText variant="small" tone="textMuted" align="center">
-              {`${view.exerciseXp} from exercises · +${view.completionBonus} completion · +${view.streakBonus} streak` +
-                (view.challengeBonus > 0 ? ` · +${view.challengeBonus} challenge` : '')}
+              {view.challengeBonus > 0
+                ? t(
+                    '{exercises} from exercises · +{completion} completion · +{streak} streak · +{challenge} challenge',
+                    {
+                      exercises: view.exerciseXp,
+                      completion: view.completionBonus,
+                      streak: view.streakBonus,
+                      challenge: view.challengeBonus,
+                    },
+                  )
+                : t('{exercises} from exercises · +{completion} completion · +{streak} streak', {
+                    exercises: view.exerciseXp,
+                    completion: view.completionBonus,
+                    streak: view.streakBonus,
+                  })}
             </PixelText>
           </View>
           <GuideButton topic="xp" />
@@ -52,7 +66,7 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
           <View style={styles.time} testID="summary-session-time">
             <PixelIcon name="hourglass" />
             <PixelText variant="label" tone="rune">
-              {`Session time ${view.sessionTime}`}
+              {t('Session time {time}', { time: view.sessionTime })}
             </PixelText>
           </View>
         )}
@@ -62,7 +76,9 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
         <View style={styles.row}>
           <PixelIcon name="flame" />
           <PixelText variant="heading">
-            {`Streak: ${view.streak} ${view.streak === 1 ? 'session' : 'sessions'}`}
+            {view.streak === 1
+              ? t('Streak: 1 session')
+              : t('Streak: {n} sessions', { n: view.streak })}
           </PixelText>
         </View>
       </PixelFrame>
@@ -77,12 +93,16 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
             />
           ) : (
             <PixelText variant="label" tone="rune" accessibilityRole="header">
-              Level ups
+              {t('Level ups')}
             </PixelText>
           )}
           {view.levelUps.map((levelUp) => (
             <PixelText key={levelUp.nodeId}>
-              {`${levelUp.name}: LV ${levelUp.from} → ${levelUp.to}`}
+              {t('{name}: LV {from} → {to}', {
+                name: levelUp.name,
+                from: levelUp.from,
+                to: levelUp.to,
+              })}
             </PixelText>
           ))}
         </PixelFrame>
@@ -98,7 +118,7 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
             />
           ) : (
             <PixelText variant="label" tone="rune" accessibilityRole="header">
-              Unlocked
+              {t('Unlocked')}
             </PixelText>
           )}
           {view.unlocked.map((node) => (
@@ -106,7 +126,7 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
               key={node.nodeId}
               onPress={() => onOpenNode(node.nodeId)}
               accessibilityRole="link"
-              accessibilityLabel={`Open ${node.name}`}
+              accessibilityLabel={t('Open {name}', { name: node.name })}
               style={styles.link}>
               <PixelIcon name="rune" />
               <PixelText tone="rune">{node.name}</PixelText>
@@ -128,7 +148,7 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
           <View style={styles.row}>
             <PixelIcon name="shield" />
             <PixelText variant="label" tone="ember" accessibilityRole="header">
-              {TRIAL_NEEDED_LABEL}
+              {t(TRIAL_NEEDED_LABEL)}
             </PixelText>
           </View>
           {view.awaitingTrial.map((node) => (
@@ -136,7 +156,10 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
               key={node.nodeId}
               onPress={() => onOpenNode(node.nodeId)}
               accessibilityRole="link"
-              accessibilityLabel={`${node.name}: ${trialNeededNote(node.banked)} Opens the skill.`}
+              accessibilityLabel={t('{name}: {note} Opens the skill.', {
+                name: node.name,
+                note: trialNeededNote(node.banked),
+              })}
               style={styles.link}>
               <PixelText style={styles.flex}>
                 <PixelText tone="ember">{node.name}</PixelText>
@@ -149,26 +172,38 @@ export function SessionResultPanels({ view, celebrate, playKey, subtitle, onOpen
 
       <PixelFrame variant="parchment" contentStyle={styles.gap} testID="summary-exercises">
         <PixelText variant="label" tone="textOnParchment" accessibilityRole="header">
-          Exercises
+          {t('Exercises')}
         </PixelText>
         {view.exercises.map((exercise) => (
           <Pressable
             key={exercise.nodeId}
             onPress={() => onOpenNode(exercise.nodeId)}
             accessibilityRole="link"
-            accessibilityLabel={`${exercise.name}: ${exercise.outcomeLabel}, ${exercise.xp} XP${exercise.xpNote !== undefined ? ` (${exercise.xpNote})` : ''}${exercise.time !== undefined ? `, time ${exercise.time}` : ''}`}
+            accessibilityLabel={
+              t('{name}: {outcome}, {xp} XP', {
+                name: exercise.name,
+                outcome: exercise.outcomeLabel,
+                xp: exercise.xp,
+              }) +
+              (exercise.xpNote !== undefined ? ` (${exercise.xpNote})` : '') +
+              (exercise.time !== undefined ? t(', time {time}', { time: exercise.time }) : '')
+            }
             style={styles.exercise}>
             <View style={styles.exerciseText}>
               <PixelText tone="textOnParchment">{exercise.name}</PixelText>
               <PixelText variant="small" tone="textOnParchment">
-                {exercise.outcomeLabel +
-                  (exercise.trialPassed
-                    ? ' · Trial passed'
+                {[
+                  exercise.outcomeLabel,
+                  exercise.trialPassed
+                    ? t('Trial passed')
                     : exercise.trialAttempted
-                      ? ' · Trial not passed yet'
-                      : '') +
-                  (exercise.xpNote !== undefined ? ` · ${exercise.xpNote}` : '') +
-                  (exercise.time !== undefined ? ` · ${exercise.time}` : '')}
+                      ? t('Trial not passed yet')
+                      : undefined,
+                  exercise.xpNote,
+                  exercise.time,
+                ]
+                  .filter((part) => part !== undefined)
+                  .join(' · ')}
               </PixelText>
             </View>
             <PixelText variant="heading" tone="textOnParchment">

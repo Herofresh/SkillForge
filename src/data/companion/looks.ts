@@ -10,6 +10,7 @@
  * iris instead of big round eyes; no blush.
  */
 import type { CompanionLookChoice } from '@/domain/companion';
+import { k } from '@/i18n';
 import type { FinalCell, Tone } from '@/lib/sprite';
 
 /** A ramp, darkest first: outline, shadow, base, light, and an optional specular highlight. */
@@ -23,32 +24,32 @@ export interface LookOption {
 
 /** Skin tones; the first is the default. */
 export const COMPANION_TINTS: readonly LookOption[] = [
-  { id: 'fair', name: 'Fair', ramp: ['#40201a', '#b06c54', '#dea07e', '#f4caa4'] },
-  { id: 'porcelain', name: 'Porcelain', ramp: ['#4a2620', '#bc8270', '#eabfa2', '#fde2ca'] },
-  { id: 'tan', name: 'Tan', ramp: ['#361b10', '#94573a', '#c2845a', '#e2ae86'] },
-  { id: 'olive', name: 'Olive', ramp: ['#30200e', '#835e38', '#b0885a', '#d2ae80'] },
-  { id: 'brown', name: 'Brown', ramp: ['#24120a', '#6c3e26', '#965e3c', '#ba8258'] },
-  { id: 'deep', name: 'Deep', ramp: ['#140806', '#46251a', '#6a4230', '#906048'] },
+  { id: 'fair', name: k('Fair'), ramp: ['#40201a', '#b06c54', '#dea07e', '#f4caa4'] },
+  { id: 'porcelain', name: k('Porcelain'), ramp: ['#4a2620', '#bc8270', '#eabfa2', '#fde2ca'] },
+  { id: 'tan', name: k('Tan'), ramp: ['#361b10', '#94573a', '#c2845a', '#e2ae86'] },
+  { id: 'olive', name: k('Olive'), ramp: ['#30200e', '#835e38', '#b0885a', '#d2ae80'] },
+  { id: 'brown', name: k('Brown'), ramp: ['#24120a', '#6c3e26', '#965e3c', '#ba8258'] },
+  { id: 'deep', name: k('Deep'), ramp: ['#140806', '#46251a', '#6a4230', '#906048'] },
 ];
 
 /** Hair colours; the first is the default. */
 export const COMPANION_HAIRS: readonly LookOption[] = [
-  { id: 'brown', name: 'Brown', ramp: ['#150b07', '#462a1a', '#70472c', '#a2704a'] },
-  { id: 'black', name: 'Black', ramp: ['#08070c', '#1c1926', '#332e46', '#5c5878'] },
-  { id: 'blond', name: 'Blond', ramp: ['#3e280c', '#a07226', '#d8aa46', '#f6e086'] },
-  { id: 'red', name: 'Red', ramp: ['#280806', '#7a2418', '#b44228', '#e47a46'] },
-  { id: 'chestnut', name: 'Chestnut', ramp: ['#1c0c06', '#5a2c14', '#8a4824', '#b8723c'] },
-  { id: 'silver', name: 'Silver', ramp: ['#22242e', '#767a98', '#b0b4cc', '#eef0fa'] },
+  { id: 'brown', name: k('Brown'), ramp: ['#150b07', '#462a1a', '#70472c', '#a2704a'] },
+  { id: 'black', name: k('Black'), ramp: ['#08070c', '#1c1926', '#332e46', '#5c5878'] },
+  { id: 'blond', name: k('Blond'), ramp: ['#3e280c', '#a07226', '#d8aa46', '#f6e086'] },
+  { id: 'red', name: k('Red'), ramp: ['#280806', '#7a2418', '#b44228', '#e47a46'] },
+  { id: 'chestnut', name: k('Chestnut'), ramp: ['#1c0c06', '#5a2c14', '#8a4824', '#b8723c'] },
+  { id: 'silver', name: k('Silver'), ramp: ['#22242e', '#767a98', '#b0b4cc', '#eef0fa'] },
 ];
 
 /** Outfit dyes (shirt, cloaks, headband, plumes, banners); the first is the default. */
 export const COMPANION_DYES: readonly LookOption[] = [
-  { id: 'azure', name: 'Azure', ramp: ['#08122a', '#1c3c74', '#2e60aa', '#5a94d6'] },
-  { id: 'crimson', name: 'Crimson', ramp: ['#22050a', '#6a1420', '#a42834', '#d44e56'] },
-  { id: 'forest', name: 'Forest', ramp: ['#08180c', '#1c4a28', '#2e703e', '#589e5c'] },
-  { id: 'royal', name: 'Royal', ramp: ['#120824', '#3a206c', '#5a369c', '#8862ca'] },
-  { id: 'ember', name: 'Ember', ramp: ['#2a0e04', '#7e360e', '#b4581c', '#e68838'] },
-  { id: 'ash', name: 'Ash', ramp: ['#121218', '#3a3c4a', '#5e6276', '#9094a8'] },
+  { id: 'azure', name: k('Azure'), ramp: ['#08122a', '#1c3c74', '#2e60aa', '#5a94d6'] },
+  { id: 'crimson', name: k('Crimson'), ramp: ['#22050a', '#6a1420', '#a42834', '#d44e56'] },
+  { id: 'forest', name: k('Forest'), ramp: ['#08180c', '#1c4a28', '#2e703e', '#589e5c'] },
+  { id: 'royal', name: k('Royal'), ramp: ['#120824', '#3a206c', '#5a369c', '#8862ca'] },
+  { id: 'ember', name: k('Ember'), ramp: ['#2a0e04', '#7e360e', '#b4581c', '#e68838'] },
+  { id: 'ash', name: k('Ash'), ramp: ['#121218', '#3a3c4a', '#5e6276', '#9094a8'] },
 ];
 
 export const DEFAULT_TINT_ID = COMPANION_TINTS[0].id;

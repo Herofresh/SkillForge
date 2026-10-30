@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet } from 'react-native';
 
+import { t } from '@/i18n';
+
 import { Spacing, TOUCH_TARGET } from '../theme';
 import { PixelFrame, PixelIcon } from '../ui';
 
@@ -20,14 +22,14 @@ type Props = {
 export function InfoButton({
   name,
   onPress,
-  hint = 'Shows what the exercise is and its cues',
+  hint = t('Shows what the exercise is and its cues'),
   testID,
 }: Props) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`About ${name}`}
+      accessibilityLabel={t('About {name}', { name })}
       accessibilityHint={hint}
       style={styles.target}
       testID={testID}>

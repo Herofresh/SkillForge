@@ -5,8 +5,20 @@
  */
 import type { Dictionary } from '../t';
 
+import { CHARACTER_DE } from './character';
 import { COMMON_DE } from './common';
+import { EDITOR_DE } from './editor';
+import { GUIDE_DE } from './guide';
+import { SETTINGS_DE } from './settings';
+import { TRAIN_DE } from './train';
+import { TREE_DE } from './tree';
 
 export const DE: Dictionary = {
   ...COMMON_DE,
+  ...TRAIN_DE,
+  ...TREE_DE,
+  ...CHARACTER_DE,
+  ...SETTINGS_DE,
+  ...EDITOR_DE,
+  ...GUIDE_DE,
 };

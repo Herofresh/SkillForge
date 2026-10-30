@@ -2678,3 +2678,49 @@ Template:
   NEW. The guide's counts and lists are derived from the data. Tier II class recolours (allowed
   by ADR-059) are still open.
 
+## ADR-080: German, for the app and the skill content (PLAN 7.8 FB-8)
+- Date: 2026-10-30 · Status: Accepted (user decision 2026-10-30: German for everything, content
+  included)
+- Context: tester feedback asked for German, following the system language or set by hand. The
+  app had no language layer: about 1 200 English texts as literals in screens, components, domain
+  functions (plan notes, guide, formats) and data files (classes, items), plus 155 exercises with
+  name, description and cues in `content/progressions/*.yaml`. No paid or hosted service may be
+  used (ADR-047 spirit: local, cheap), and the domain layer must stay pure.
+- Decision:
+  - **Mechanism:** `src/i18n/` (pure TypeScript). `t(text, params)` takes the English source text
+    as the key and returns the current locale's dictionary entry, falling back to English, then
+    fills `{name}` placeholders, so a translation can reorder a sentence. `k(text)` marks a text in
+    a data file or module-level constant as translatable (identity at runtime); the display site
+    calls `t(item.name)`. No library, no extraction step, no key names to invent: the English is
+    the key. The dictionary is `src/i18n/de/*.ts`, one file per area. `src/i18n/i18n.test.ts`
+    scans every `t('…')` / `k('…')` literal in `app/` and `src/` and fails on a key without an
+    entry or an entry without a key, so the German can't drift.
+  - **Choosing the language:** `Settings → Language`: System (default), English, Deutsch, each
+    named in its own language. "System" resolves the device tag from React Native's
+    `I18nManager` (`localeIdentifier`, no extra dependency) to a supported locale, else English.
+    The choice is a setting (`language`); the store resolves the locale in `loadAll` before
+    anything is derived, sets the module locale and keeps `language` / `locale` in its state.
+    `LocaleKey` remounts the whole navigator when the locale changes, so every screen, including
+    module-level labels, is rebuilt in the new language (the app returns to its first tab; fine
+    for a change made in Settings).
+  - **Content:** `content/progressions/<locale>/<branch>.yaml` holds only name, description, cues
+    and prerequisite notes per node id. `npm run progressions:build` checks each file against the
+    English nodes (every node, exactly the same cue count, the same length limits, notes only
+    where English has one) and generates `src/data/skills/translations.generated.ts`. The store
+    localizes the built-in tree (`localizeNodes`) before the user's overlay goes on top, so
+    everything downstream (tree, plans, notes, Health Connect notes, backups' node names) sees the
+    German texts, while user-made nodes and user edits of built-in nodes stay as typed (an edit
+    is a diff on the localized base: unchanged fields follow the language, edited ones don't).
+    Ids, standards and structure never live in a translation.
+  - **Wording:** du-form, one term list (Prüfung for Trial, Stufe for tier, never "Tier", Skill,
+    Zweig, Rang titles Novize / Lehrling / Adept / Meister / Legende, Serie for streak); skill
+    names stay English where the German scene uses them (Planche, Front Lever, L-Sit, Muscle-up),
+    basics are translated (Klimmzug, Liegestütz, Kniebeuge).
+- Consequences: every new user-facing text must go through `t` / `k` and get a German entry (the
+  test enforces it); every new node needs its `de/` entry (the build enforces it). Validator and
+  overlay-import issue messages stay English (developer wording the editor's section routing
+  depends on); the Maestro flows keep English (the emulator's locale). The Play listing and the
+  privacy page get German versions separately (store listing: the user in Play Console). A
+  reached-goal name, a class title or an item name in a sentence is translated where the
+  sentence is built, so word order can differ per language.
+

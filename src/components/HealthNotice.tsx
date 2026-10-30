@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { HEALTH_DISCLAIMER, HEALTH_DISCLAIMER_TITLE } from '@/data/notices';
+import { t } from '@/i18n';
 
 import { Spacing } from './theme';
 import { PixelFrame, PixelIcon, PixelText } from './ui';
@@ -16,10 +17,10 @@ export function HealthNotice({ testID = 'health-notice' }: { testID?: string }) 
         <View style={styles.header}>
           <PixelIcon name="shield" />
           <PixelText variant="label" tone="gold" accessibilityRole="header">
-            {HEALTH_DISCLAIMER_TITLE}
+            {t(HEALTH_DISCLAIMER_TITLE)}
           </PixelText>
         </View>
-        <PixelText variant="small">{HEALTH_DISCLAIMER}</PixelText>
+        <PixelText variant="small">{t(HEALTH_DISCLAIMER)}</PixelText>
       </PixelFrame>
     </View>
   );

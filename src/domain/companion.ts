@@ -12,6 +12,7 @@
  * (ADR-008): a restore or an upgrade shows every accessory already earned. Earned accessories
  * are also kept in the `hero_companion` setting, so they stay earned forever.
  */
+import { k, t } from '@/i18n';
 import { localDaysBetween } from '@/lib/time';
 
 import { characterLevel, computeCharacter } from './character';
@@ -52,27 +53,27 @@ export function companionMood(lastSessionAt: number | undefined, now: number): C
   return 'sad';
 }
 
-/** A short title per mood for the Character tab. */
+/** A short title per mood for the Character tab (translated where it is shown: `t(MOOD_TITLES[mood])`). */
 export const MOOD_TITLES: Readonly<Record<CompanionMood, string>> = {
-  happy: 'Fired up',
-  content: 'Rested',
-  waiting: 'Restless',
-  sad: 'Missing you',
+  happy: k('Fired up'),
+  content: k('Rested'),
+  waiting: k('Restless'),
+  sad: k('Missing you'),
 };
 
 /** One friendly line per mood; never guilt, always a way back. */
 export function moodLine(mood: CompanionMood, lastSessionAt: number | undefined): string {
   switch (mood) {
     case 'happy':
-      return 'Fired up after today’s training!';
+      return t('Fired up after today’s training!');
     case 'content':
-      return 'Resting well. Rest days are part of training.';
+      return t('Resting well. Rest days are part of training.');
     case 'waiting':
       return lastSessionAt === undefined
-        ? 'Ready for our first quest together.'
-        : 'Getting restless. Up for a session?';
+        ? t('Ready for our first quest together.')
+        : t('Getting restless. Up for a session?');
     case 'sad':
-      return 'Misses training with you. One session cheers it up.';
+      return t('Misses training with you. One session cheers it up.');
   }
 }
 

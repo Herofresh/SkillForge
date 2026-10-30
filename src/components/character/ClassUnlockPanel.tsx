@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { HERO_CLASS_BY_ID } from '@/data/classes';
 import { classTitle, tierNumeral, type ClassTierUp } from '@/domain/classes';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { BURST_TITLES, LevelUpBurst, PixelButton, PixelFrame, PixelText } from '../ui';
@@ -34,7 +35,7 @@ export function ClassUnlockPanel({ tierUps, wornClassId, celebrate, playKey, onW
   const lines = [...highest].flatMap(([classId, tier]) => {
     const heroClass = HERO_CLASS_BY_ID.get(classId);
     return heroClass
-      ? [{ classId, tier, title: classTitle(heroClass, tier), name: heroClass.name }]
+      ? [{ classId, tier, title: t(classTitle(heroClass, tier)), name: t(heroClass.name) }]
       : [];
   });
   if (lines.length === 0) return null;
@@ -45,10 +46,14 @@ export function ClassUnlockPanel({ tierUps, wornClassId, celebrate, playKey, onW
   return (
     <PixelFrame variant="arcane" contentStyle={styles.gap} testID="summary-classes">
       {celebrate ? (
-        <LevelUpBurst title={burstTitle} subtitle={lines[0].title} playKey={`${playKey}-class`} />
+        <LevelUpBurst
+          title={t(burstTitle)}
+          subtitle={lines[0].title}
+          playKey={`${playKey}-class`}
+        />
       ) : (
         <PixelText variant="label" tone="arcane" accessibilityRole="header">
-          {anyNew ? 'Classes unlocked' : 'Class tiers reached'}
+          {anyNew ? t('Classes unlocked') : t('Class tiers reached')}
         </PixelText>
       )}
       {lines.map((line) => (
@@ -57,7 +62,11 @@ export function ClassUnlockPanel({ tierUps, wornClassId, celebrate, playKey, onW
             style={styles.row}
             accessible
             accessibilityRole="text"
-            accessibilityLabel={`${line.title}: ${line.name} tier ${tierNumeral(line.tier)}`}
+            accessibilityLabel={t('{title}: {name} tier {tier}', {
+              title: line.title,
+              name: line.name,
+              tier: tierNumeral(line.tier),
+            })}
             testID={`summary-class-${line.classId}`}>
             <ClassEmblem classId={line.classId} tier={line.tier} />
             <View style={styles.text}>
@@ -66,14 +75,14 @@ export function ClassUnlockPanel({ tierUps, wornClassId, celebrate, playKey, onW
               </PixelText>
               <PixelText variant="label" tone="textMuted">
                 {line.tier === 1
-                  ? `${line.name} class unlocked`
-                  : `${line.name} · tier ${tierNumeral(line.tier)}`}
+                  ? t('{name} class unlocked', { name: line.name })
+                  : t('{name} · tier {tier}', { name: line.name, tier: tierNumeral(line.tier) })}
               </PixelText>
             </View>
           </View>
           {onWear && line.classId !== wornClassId && (
             <PixelButton
-              label={`Wear ${line.title}`}
+              label={t('Wear {title}', { title: line.title })}
               icon="helmet"
               variant="secondary"
               onPress={() => onWear(line.classId)}

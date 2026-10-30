@@ -7,6 +7,8 @@
  * Both training views use them: Classic shows the current exercise's foes above its logger, Battle
  * (`TRAINING_VIEWS`) shows every exercise as a row of foes and logs with taps (`tapDown`).
  */
+import { k } from '@/i18n';
+
 import type { Branch, Metric, SetPerformance } from './types';
 import { meetsTarget, setUnits } from './xp';
 
@@ -40,13 +42,13 @@ export const BRANCH_MONSTERS: Readonly<Record<Branch, MonsterKind>> = {
 };
 
 export const MONSTER_NAMES: Readonly<Record<MonsterKind, string>> = {
-  imp: 'Imp',
-  bat: 'Bat',
-  skeleton: 'Skeleton',
-  golem: 'Golem',
-  slime: 'Slime',
-  goblin: 'Goblin',
-  wisp: 'Wisp',
+  imp: k('Imp'),
+  bat: k('Bat'),
+  skeleton: k('Skeleton'),
+  golem: k('Golem'),
+  slime: k('Slime'),
+  goblin: k('Goblin'),
+  wisp: k('Wisp'),
 };
 
 /**

@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { formatClock } from '@/domain/format';
 import { elapsedSeconds } from '@/domain/setTimer';
+import { t } from '@/i18n';
 
 import { Spacing } from '../theme';
 import { PixelIcon, PixelText, useNow } from '../ui';
@@ -19,7 +20,7 @@ export function SessionClock({ startedAt }: Props) {
     <View
       style={styles.row}
       accessible
-      accessibilityLabel={`Session time ${formatClock(seconds)}`}
+      accessibilityLabel={t('Session time {time}', { time: formatClock(seconds) })}
       testID="session-clock">
       <PixelIcon name="hourglass" />
       <PixelText variant="label" tone="rune">
