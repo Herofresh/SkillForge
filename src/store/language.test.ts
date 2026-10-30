@@ -40,6 +40,10 @@ describe('language (PLAN 7.8 FB-8, ADR-080)', () => {
     expect(getLocale()).toBe('de');
     expect(nameOf(de, 'pull_up')).toBe(NODE_TRANSLATIONS.de?.pull_up?.name);
     expect(nameOf(de, 'pull_up')).not.toBe('Pull-up');
+    // The base the overlay (and 'My progressions') is read against is localized too.
+    expect(de.getState().baseNodes.find((node) => node.id === 'pull_up')?.name).toBe(
+      NODE_TRANSLATIONS.de?.pull_up?.name,
+    );
   });
 
   it('stores the choice, switches at once and survives a reload', () => {

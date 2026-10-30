@@ -209,7 +209,7 @@ export const TRAIN_DE: Dictionary = {
   'Start hold': 'Halten starten',
   'Start set': 'Satz starten',
   'Counts down from {n} seconds after a short get-ready':
-    'Zählt nach einem kurzen Countdown von {n} Sekunden herunter',
+    'Zählt nach kurzem Bereitmachen von {n} Sekunden herunter',
   'Starts a stopwatch for this set': 'Startet eine Stoppuhr für diesen Satz',
   Stop: 'Stopp',
   Resume: 'Weiter',

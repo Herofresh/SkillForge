@@ -386,7 +386,7 @@ export interface SaveNodeDraftResult {
 export interface AppState {
   /** `loadAll` has run at least once. */
   loaded: boolean;
-  /** The built-in tree (`ALL_NODES`) the overlay applies to. */
+  /** The built-in tree (`ALL_NODES`) the overlay applies to, in the current language (FB-8). */
   baseNodes: readonly ExerciseNode[];
   /** The user's tree: `applyOverlay(baseNodes, overlay).nodes`, or the built-in tree on issues. */
   nodes: readonly ExerciseNode[];
@@ -948,6 +948,7 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         commitEngine(engine, {
           language,
           locale,
+          baseNodes,
           onboardingCompletedAt: parseOnboardingCompletedAt(
             getSetting(db, ONBOARDING_COMPLETED_SETTING),
           ),

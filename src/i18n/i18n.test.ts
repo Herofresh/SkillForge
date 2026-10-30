@@ -91,7 +91,7 @@ describe('the German dictionary', () => {
     expect(unused).toEqual([]);
   });
 
-  it('keeps the placeholders of every key, and is never empty or identical to the key', () => {
+  it('keeps the placeholders of every key, and is never empty', () => {
     const placeholders = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
     for (const [key, value] of Object.entries(DE)) {
       expect({ key, placeholders: placeholders(value) }).toEqual({
