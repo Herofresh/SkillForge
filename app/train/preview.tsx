@@ -128,18 +128,9 @@ export default function PlanPreviewScreen() {
                 key={exercise.key}
                 exercise={exercise}
                 onInfo={() => setSheet({ kind: 'info', nodeId: exercise.nodeId })}
+                onSwap={() => setSheet({ kind: 'swap', key: exercise.key, name: exercise.name })}
                 testID={`plan-${exercise.key}`}>
                 <View style={styles.actions}>
-                  <PixelButton
-                    label={t('Swap')}
-                    variant="secondary"
-                    onPress={() =>
-                      setSheet({ kind: 'swap', key: exercise.key, name: exercise.name })
-                    }
-                    accessibilityLabel={t('Swap {name}', { name: exercise.name })}
-                    testID={`swap-${exercise.key}`}
-                    style={styles.action}
-                  />
                   <PixelButton
                     label={t('Remove')}
                     variant="secondary"
@@ -185,15 +176,17 @@ export default function PlanPreviewScreen() {
       {sheet?.kind === 'swap' && (
         <NodeOptionSheet
           title={t('Swap exercise')}
-          intro={t('Exercises of the same movement as {name} that your equipment allows.', {
-            name: sheet.name,
-          })}
-          options={() => swapOptions(sheet.key)}
+          intro={t(
+            'Exercises of the same movement as {name} that your equipment allows, or search any skill by name.',
+            { name: sheet.name },
+          )}
+          options={(query) => swapOptions(sheet.key, query)}
           onPick={(nodeId) => {
             swap(sheet.key, nodeId);
             setSheet(undefined);
           }}
           onClose={() => setSheet(undefined)}
+          searchable
           empty={t('No other exercise of this movement fits your equipment yet.')}
           testID="swap-sheet"
         />

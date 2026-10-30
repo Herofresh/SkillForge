@@ -188,6 +188,7 @@ src/
                         (treeTile per node + met edges), boundsOf, mapFocus, routeRects
     train.ts            Train session model (ADR-034): SessionPlan / ActiveSession, sessionPlan,
                         swapOptions / addOptions, replace/remove/addExercise, startSession,
+                        swapSessionExercise (FB-16: in place while untouched, else skip + insert after),
                         logSessionSet (pairs alternate; takes the timer's durationSec),
                         markedPerformance, skip, rest, start/stop/clearSetTimer (5.4),
                         pause/resumeSetTimer (5.8), moveExercise / canMoveExercise (pairs

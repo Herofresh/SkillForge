@@ -215,7 +215,8 @@ on the phone: `6.4a-node-detail.png`, `6.4a-info-sheet.png`, `6.4a-styleguide.pn
 **Train (PLAN 4.4, ADR-034)** in `src/components/train/`: `ExerciseCard` (stone card, gold-lined
 `Frames.selected` for the current exercise; sword icon, shield for a Trial, cross when skipped;
 rune TRIAL / ember STRAIGHT-ARM / green DONE caps tags; "Swapped from X", "Replaces X", "Pair"
-lines), `SetLogger` (the kit's `NumberStepper` + primary "Log set" and secondary Partial / Failed),
+lines; a `SwapButton` next to the "i", same raised face, opens the swap sheet, FB-16, ADR-081),
+`SetLogger` (the kit's `NumberStepper` + primary "Log set" and secondary Partial / Failed),
 `RestPanel` (rune frame, potion icon, big display-font countdown, "Skip rest"), `NodeOptionSheet`
 (`PixelModal` with an optional search field and a scrolling list of `NodeRow`s) and
 `TrainWarningList` (`WarningBanner`s acknowledged by key). The session bar is an `XPBar` in rune
@@ -392,14 +393,14 @@ never shows full before 100 %. The fraction itself comes from the domain (e.g. X
 12×12 character grids in `src/components/ui/icons.ts`, rendered by `PixelIcon` as SVG rects (one
 per horizontal run, `src/lib/pixelGrid.ts`). Roles: `#` main, `+` accent, `*` highlight, `o` shade,
 `.` empty; each icon maps roles to theme colors. The set: `sword`, `shield`, `flame`, `star`,
-`lock`, `chain`, `scroll`, `potion`, `bar`, `heart`, `rune`, `alert`, `check`, `cross`, `quill`, `hourglass`, and the tab icons
+`lock`, `chain`, `scroll`, `potion`, `bar`, `heart`, `rune`, `alert`, `check`, `cross`, `quill`, `hourglass`, `info`, `swap`, and the tab icons
 `tree`, `bar` (Train), `helmet` (Character), `gear` (Settings).
 
 Suggested meanings: sword = train/attempt · shield = safeguard · flame = streak · star = mastered /
 goal · lock = locked · chain = prerequisite · scroll = log, info, notes · potion = recovery, errors ·
 bar = equipment / strength · heart = health · rune = skill node / magic · alert = warning ·
 check = done / met · cross = not met · quill = edit / the user's own changes · hourglass = timer,
-time.
+time · info = the exercise info sheet · swap = swap an exercise (FB-16).
 
 Adding an icon: add a grid (exactly 12 rows of 12 characters, ≤ 4 roles, keep one role for icons
 that must tint), map its roles to `Colors`, and `icons.test.ts` checks it. Keep silhouettes readable

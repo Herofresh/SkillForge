@@ -13,6 +13,7 @@ import { recompute } from './recompute';
 import { estimateMinutes } from './sessionTime';
 import {
   acknowledgeWarning,
+  type ActiveSession,
   addExercise,
   addOptions,
   addSessionExercise,
@@ -35,20 +36,20 @@ import {
   removeExercise,
   replaceExercise,
   restSecondsLeft,
+  resumeSetTimer,
   selectExercise,
   sessionCounts,
   sessionPlan,
+  type SessionPlan,
   setOutcome,
   skipExercise,
   skipRest,
   startSession,
-  resumeSetTimer,
   startSetTimer,
   stopSetTimer,
   swapOptions,
+  swapSessionExercise,
   warningKey,
-  type ActiveSession,
-  type SessionPlan,
 } from './train';
 import type { PlannedExercise, WorkoutPlan } from './types';
 
@@ -632,5 +633,54 @@ describe('generator helpers for edited sessions (real tree)', () => {
     });
     const warnings = workoutWarnings(session.exercises, projectedSets(session, NOW), context);
     expect(warnings.map((warning) => warning.code)).toContain('straight_arm_budget');
+  });
+});
+
+describe('swapSessionExercise (PLAN 7.8 FB-16, ADR-081)', () => {
+  const rows = exercise('incline_row', { sets: 2, target: { value: 6 } });
+
+  it('replaces an untouched exercise in place, keeping key, block and rest, and drops its timer', () => {
+    const session = startSetTimer(started(), 'e0', NOW);
+    const before = session.exercises[0];
+    const swapped = swapSessionExercise(session, 'e0', rows);
+    expect(swapped.exercises).toHaveLength(session.exercises.length);
+    expect(swapped.exercises[0]).toMatchObject({
+      key: 'e0',
+      nodeId: 'incline_row',
+      block: before.block,
+      restSec: before.restSec,
+      swappedFrom: before.nodeId,
+    });
+    expect(swapped.timer).toBeUndefined();
+    expect(swapped.currentKey).toBe('e0');
+  });
+
+  it('keeps logged sets: the old exercise is skipped, the new one follows it and becomes current', () => {
+    // Logging a paired set shows the partner next; the user comes back to e0 and swaps it.
+    const logged = selectExercise(logSessionSet(started(), 'e0', { value: 8 }, NOW + 1000), 'e0');
+    const swapped = swapSessionExercise(logged, 'e0', rows);
+    expect(swapped.exercises).toHaveLength(logged.exercises.length + 1);
+    expect(swapped.exercises[0]).toMatchObject({ key: 'e0', skipped: true });
+    expect(exerciseSets(swapped, 'e0')).toHaveLength(1);
+    const added = swapped.exercises[1];
+    expect(added).toMatchObject({
+      nodeId: 'incline_row',
+      block: logged.exercises[0].block,
+      swappedFrom: logged.exercises[0].nodeId,
+      sets: 2,
+    });
+    expect(added.key).toBe(`e${logged.nextKey}`);
+    expect(swapped.nextKey).toBe(logged.nextKey + 1);
+    expect(swapped.currentKey).toBe(added.key);
+    expect(swapped.restEndsAt).toBeUndefined();
+  });
+
+  it('leaves the current exercise alone when another one is swapped, and ignores unknown keys', () => {
+    const session = started();
+    const other = session.exercises[1].key;
+    const swapped = swapSessionExercise(session, other, rows);
+    expect(swapped.currentKey).toBe(session.currentKey);
+    expect(swapped.exercises[1].nodeId).toBe('incline_row');
+    expect(swapSessionExercise(session, 'nope', rows)).toBe(session);
   });
 });

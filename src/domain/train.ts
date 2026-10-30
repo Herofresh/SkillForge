@@ -430,6 +430,42 @@ export function addSessionExercise(
     : { ...next, currentKey: next.exercises[next.exercises.length - 1].key };
 }
 
+/**
+ * Swaps exercise `key` of the live session for `replacement` (prescribed by `prescribeExercise`;
+ * PLAN 7.8 FB-16, ADR-081). With no logged set it is replaced in place (`replaceExercise`: same
+ * key, block, pair and rest). With logged sets the old exercise keeps them and is skipped for the
+ * rest, and the new one is inserted right after it with its full prescription, in the same block,
+ * remembering the node it replaces. A running timer of the old exercise is dropped; the new
+ * exercise is shown when the old one was. Unknown key: `session` itself.
+ */
+export function swapSessionExercise(
+  session: ActiveSession,
+  key: string,
+  replacement: PlannedExercise,
+): ActiveSession {
+  const index = session.exercises.findIndex((entry) => entry.key === key);
+  if (index < 0) return session;
+  const cleared = session.timer?.exerciseKey === key ? clearSetTimer(session) : session;
+  const wasCurrent = cleared.currentKey === key;
+  if (exerciseSets(cleared, key).length === 0) {
+    const replaced = replaceExercise(cleared, key, replacement);
+    return wasCurrent ? { ...replaced, restEndsAt: undefined } : replaced;
+  }
+  const old = cleared.exercises[index];
+  const { substitutedFrom: _dropped, ...fresh } = replacement;
+  const added: SessionExercise = {
+    ...fresh,
+    key: keyOf(cleared.nextKey),
+    block: old.block,
+    swappedFrom: old.swappedFrom ?? old.nodeId,
+  };
+  const exercises = [...cleared.exercises];
+  exercises[index] = { ...old, skipped: true };
+  exercises.splice(index + 1, 0, added);
+  const next: ActiveSession = { ...cleared, exercises, nextKey: cleared.nextKey + 1 };
+  return wasCurrent ? { ...next, currentKey: added.key, restEndsAt: undefined } : next;
+}
+
 /** Shows exercise `key` (the user picked it from the list); another exercise's timer is dropped. */
 export function selectExercise(session: ActiveSession, key: string): ActiveSession {
   if (!session.exercises.some((entry) => entry.key === key)) return session;

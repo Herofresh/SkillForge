@@ -20,6 +20,8 @@ type Props = {
   onLongPress: (key: string, slot: number) => void;
   /** Opens the info sheet of a node. */
   onInfo: (nodeId: string) => void;
+  /** Opens the swap sheet of exercise `key` (FB-16). */
+  onSwap: (key: string, name: string) => void;
   onPauseTimer: () => void;
   onResumeTimer: () => void;
   onResetTimer: () => void;
@@ -42,6 +44,7 @@ export function BattleBoard({
   onTap,
   onLongPress,
   onInfo,
+  onSwap,
   onPauseTimer,
   onResumeTimer,
   onResetTimer,
@@ -65,6 +68,7 @@ export function BattleBoard({
                 exercise={entry.exercise}
                 highlighted={timer !== undefined}
                 onInfo={() => onInfo(entry.exercise.nodeId)}
+                onSwap={() => onSwap(key, entry.exercise.name)}
                 testID={`battle-${key}`}>
                 <FoeRow
                   foes={entry}

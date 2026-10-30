@@ -343,7 +343,7 @@
   texts, Settings → Language; ADR-080, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)), to ship as **1.4.0** after a device check of the
   German build. 1.3.0 (vc13) is built and waits for the user's upload.
 - **1.4.0, versionCode 14** (2026-10-30, [PR #94](https://github.com/Herofresh/SkillForge/pull/94)): German (FB-8, ADR-080: the whole UI, the 155
-  skills' texts, Settings → Language) on top of 1.3.0. Release notes in English and German in
+  skills' texts, Settings → Language) and the quick swap (FB-16, ADR-081, [PR #96](https://github.com/Herofresh/SkillForge/pull/96)) on top of 1.3.0. Release notes in English and German in
   `docs/play/listing.md`; the German store listing and privacy page are in ([PR #93](https://github.com/Herofresh/SkillForge/pull/93)). Built
   after the merge with `npm run build:aab` → `builds/SkillForge-1.4.0-vc14-<merge commit>.aab`.
   It supersedes the 1.3.0 bundle if that hasn't been uploaded yet (same content plus German). Not
@@ -404,6 +404,12 @@
 - None. The `gh` token now has the `workflow` scope, so agents can push `.github/workflows/*`.
 
 ## Handoff notes
+- **FB-16 quick swap (task 7.8, ADR-081, [PR #96](https://github.com/Herofresh/SkillForge/pull/96)):** `swapSessionExercise` in `train.ts`; store
+  `swapOptions(key, query?)` (session or plan; a query searches via `addOptions`) and
+  `swapTrainingExercise`; `SwapButton` + `ExerciseCard.onSwap`; `BattleBoard.onSwap`; the `swap`
+  pixel icon. Tests: `train.test.ts` (domain), `store/train.test.ts`, `liveSession.test.tsx`,
+  `battle.test.tsx`. Not checked on a device. The 1.4.0 bundle must be rebuilt after this merge
+  (same versionCode 14, not uploaded yet).
 - **FB-8 German (task 7.8, ADR-080, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)):** `src/i18n/` (`t`, `k`, `setLocale`, the dictionary
   `de/*.ts` per area, `i18n.test.ts` = completeness check: every `t('…')` / `k('…')` literal needs
   an entry and no entry may be unused; it scans `app/` and `src/`). Store: `LANGUAGE_SETTING`,
@@ -1971,6 +1977,12 @@ from the GitHub releases' 1–7, ADR-068).
     another node and showed "user_exercise: name must not be empty". Fixed: issues and warnings
     about the provisionally named draft are shown as the draft's own, and the validator says
     "name is missing: give the exercise a short name".
+  - [x] FB-16 (UX, user request 2026-10-30, ADR-081, [PR #96](https://github.com/Herofresh/SkillForge/pull/96)): "a quick change button while doing a
+    workout / when it is being planned to change an exercise for another one". Done: a swap icon on
+    every exercise card (plan preview, the Classic session's current card, every Battle card) opens
+    the swap sheet, now searchable (same movement first, any doable skill by name). In the session
+    an untouched exercise is replaced in place; one with logged sets keeps them, is skipped for the
+    rest, and the new exercise follows it (`swapSessionExercise`). Ships in 1.4.0.
 - [x] 7.9 Session monsters and a Battle training view (user request 2026-10-15, ADR-071; agent; [PR #75](https://github.com/Herofresh/SkillForge/pull/75), checked in Expo Go, rest-bar fix [PR #77](https://github.com/Herofresh/SkillForge/pull/77)):
   every set of an exercise is a monster of its branch that takes the hit when the set is logged.
   Two views, picked in Settings → Training view (default Classic): **Classic** keeps the

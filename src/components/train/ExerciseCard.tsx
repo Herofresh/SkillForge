@@ -8,6 +8,7 @@ import { t } from '@/i18n';
 import { InfoButton } from '../node/InfoButton';
 import { Frames, Spacing } from '../theme';
 import { PixelFrame, PixelIcon, PixelText } from '../ui';
+import { SwapButton } from './SwapButton';
 
 type Props = {
   exercise: ExerciseView;
@@ -17,6 +18,8 @@ type Props = {
   children?: ReactNode;
   /** Opens the exercise info sheet (PLAN 6.2): an "i" next to the name. */
   onInfo?: () => void;
+  /** Opens the swap sheet (PLAN 7.8 FB-16): the swap icon next to the "i". */
+  onSwap?: () => void;
   testID?: string;
 };
 
@@ -25,7 +28,14 @@ type Props = {
  * straight-arm, Trial needed (stuck at level 5, PLAN 7.8 FB-4), swapped by the user, replaced for the equipment (ADR-005) and its strength pair,
  * and an "i" for the exercise info sheet (PLAN 6.2) when `onInfo` is set.
  */
-export function ExerciseCard({ exercise, highlighted = false, children, onInfo, testID }: Props) {
+export function ExerciseCard({
+  exercise,
+  highlighted = false,
+  children,
+  onInfo,
+  onSwap,
+  testID,
+}: Props) {
   const tags = exerciseTags(exercise);
   return (
     <PixelFrame
@@ -42,6 +52,9 @@ export function ExerciseCard({ exercise, highlighted = false, children, onInfo, 
         </PixelText>
         {onInfo && (
           <InfoButton name={exercise.name} onPress={onInfo} testID={testID && `${testID}-info`} />
+        )}
+        {onSwap && (
+          <SwapButton name={exercise.name} onPress={onSwap} testID={testID && `${testID}-swap`} />
         )}
       </View>
       <PixelText testID={testID && `${testID}-prescription`}>

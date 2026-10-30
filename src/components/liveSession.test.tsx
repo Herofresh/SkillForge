@@ -113,3 +113,18 @@ describe('Live session: reorder exercises (PLAN 5.9)', () => {
     expect(screen.queryByTestId(`move-up-${first.key}`)).not.toBeOnTheScreen();
   });
 });
+
+describe('Live session: swap the current exercise (PLAN 7.8 FB-16)', () => {
+  it('opens the swap sheet from the card and swaps in the picked option', async () => {
+    const user = userEvent.setup();
+    const [first] = session().exercises;
+    const [option] = store.getState().swapOptions(first.key);
+    await render(<LiveSessionScreen />);
+    await user.press(screen.getByTestId('current-exercise-swap'));
+    expect(screen.getByTestId('swap-sheet')).toBeOnTheScreen();
+    await user.press(screen.getByTestId(`option-${option.id}`));
+    expect(screen.queryByTestId('swap-sheet')).toBeNull();
+    expect(session().exercises[0]).toMatchObject({ key: first.key, nodeId: option.id });
+    expect(screen.getByTestId('current-exercise-swapped')).toBeOnTheScreen();
+  });
+});

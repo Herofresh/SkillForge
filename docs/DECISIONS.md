@@ -2724,3 +2724,24 @@ Template:
   reached-goal name, a class title or an item name in a sentence is translated where the
   sentence is built, so word order can differ per language.
 
+## ADR-081: Swap an exercise with one tap, in the plan and during the session (PLAN 7.8 FB-16)
+- Date: 2026-10-30 · Status: Accepted (user request 2026-10-30; extends ADR-023 and ADR-034)
+- Context: the user asked for a quick "change exercise" button while a workout is planned and
+  while it is being done. The plan preview had a "Swap" text button under each card (same
+  movement only); the live session had skip and add, but no swap: a taken bar or a sore wrist
+  meant skipping and adding by hand.
+- Decision: every exercise card gets a swap icon next to its "i" (`ExerciseCard.onSwap`,
+  `SwapButton`): in the plan preview, on the current card of the Classic session and on every
+  card of the Battle board. It opens the existing option sheet, now searchable: the same-movement
+  suggestions first (`swapOptions`), or any doable skill by name (`addOptions`). In the live
+  session `swapSessionExercise`: an exercise with no logged set is replaced in place (same key,
+  block, pair and rest, `swappedFrom` remembered); an exercise with logged sets keeps them and is
+  skipped for the rest, and the new exercise is inserted right after it with its full
+  prescription in the same block, so nothing done is lost and the summary shows both. A running
+  timer of the swapped exercise is dropped; the new exercise is shown when the old one was. The
+  swap is prescribed like a swap in the preview (`prescribeExercise`, the old rest).
+- Consequences: the preview's text button is gone (the icon replaces it; the Maestro flow uses
+  the card's `-swap` id). Swapping a paired exercise leaves the partner alone (the pair link stays
+  on the old key; a swapped-in exercise after logged sets is unpaired). The advisory warnings
+  (ADR-023) apply to the new exercise as to any user-picked one.
+
