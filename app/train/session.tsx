@@ -90,12 +90,16 @@ function LiveSession({ session }: { session: ActiveSession }) {
   const resetTimer = useAppStore((state) => state.resetTrainingTimer);
   const addOptions = useAppStore((state) => state.addTrainingOptions);
   const addExercise = useAppStore((state) => state.addTrainingExercise);
+  const swapOptions = useAppStore((state) => state.swapOptions);
+  const swapExercise = useAppStore((state) => state.swapTrainingExercise);
   const finish = useAppStore((state) => state.finishTraining);
   const abandon = useAppStore((state) => state.abandonTraining);
   const insets = useSafeAreaInsets();
   const trainingView = useAppStore((state) => state.trainingView);
   const tapFoe = useAppStore((state) => state.tapTrainingFoe);
   const [dialog, setDialog] = useState<Dialog | undefined>();
+  /** The exercise whose swap sheet is open (FB-16). */
+  const [swapping, setSwapping] = useState<{ key: string; name: string } | undefined>();
   /** The `setIndex` of the logged set being edited. */
   const [editing, setEditing] = useState<number | undefined>();
   /** The exercise whose next set is entered with the stepper (Battle's long press). */
@@ -196,6 +200,7 @@ function LiveSession({ session }: { session: ActiveSession }) {
               onTap={onTapFoe}
               onLongPress={onLongPressFoe}
               onInfo={setInfoId}
+              onSwap={(key, name) => setSwapping({ key, name })}
               onPauseTimer={pauseTimer}
               onResumeTimer={resumeTimer}
               onResetTimer={resetTimer}
@@ -205,6 +210,7 @@ function LiveSession({ session }: { session: ActiveSession }) {
               exercise={current.exercise}
               highlighted
               onInfo={() => setInfoId(current.exercise.nodeId)}
+              onSwap={() => setSwapping({ key: current.exercise.key, name: current.exercise.name })}
               testID="current-exercise">
               {currentFoes && (
                 <FoeRow key={current.exercise.key} foes={currentFoes} testID="current-foes" />
@@ -377,6 +383,24 @@ function LiveSession({ session }: { session: ActiveSession }) {
 
       {infoNode && <ExerciseInfoSheet node={infoNode} onClose={() => setInfoId(undefined)} />}
 
+      {swapping && (
+        <NodeOptionSheet
+          title={t('Swap exercise')}
+          intro={t(
+            'Exercises of the same movement as {name} that your equipment allows, or search any skill by name.',
+            { name: swapping.name },
+          )}
+          options={(query) => swapOptions(swapping.key, query)}
+          onPick={(nodeId) => {
+            swapExercise(swapping.key, nodeId);
+            setSwapping(undefined);
+          }}
+          onClose={() => setSwapping(undefined)}
+          searchable
+          empty={t('No other exercise of this movement fits your equipment yet.')}
+          testID="swap-sheet"
+        />
+      )}
       {dialog === 'add' && (
         <NodeOptionSheet
           title={t('Add exercise')}

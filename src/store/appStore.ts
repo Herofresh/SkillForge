@@ -184,6 +184,7 @@ import {
 } from '@/domain/recompute';
 import {
   acknowledgeWarning,
+  type ActiveSession,
   addExercise,
   addOptions,
   addSessionExercise,
@@ -193,6 +194,7 @@ import {
   finishedSession,
   logSessionSet,
   markedPerformance,
+  type MoveDirection,
   moveExercise,
   pauseSetTimer,
   projectedSets,
@@ -201,16 +203,15 @@ import {
   resumeSetTimer,
   selectExercise,
   sessionPlan,
+  type SessionPlan,
+  type SetMark,
   skipExercise,
   skipRest,
   startSession,
   startSetTimer,
   stopSetTimer,
   swapOptions,
-  type ActiveSession,
-  type MoveDirection,
-  type SessionPlan,
-  type SetMark,
+  swapSessionExercise,
 } from '@/domain/train';
 import {
   EQUIPMENT_TAGS,
@@ -601,8 +602,14 @@ export interface AppState {
     seed?: number,
   ): SessionPlan;
   /** Nodes that can replace plan exercise `key` (same pattern, trainable, doable). */
-  swapOptions(key: string): ExerciseNode[];
+  /**
+   * What exercise `key` of the plan preview or the live session can be swapped for: the same
+   * movement (`swapOptions`), or with a `query` any doable skill by name (`addOptions`).
+   */
+  swapOptions(key: string, query?: string): ExerciseNode[];
   swapPlanExercise(key: string, nodeId: string): void;
+  /** Swaps exercise `key` of the live session (`swapSessionExercise`; FB-16), else of the plan. */
+  swapTrainingExercise(key: string, nodeId: string): void;
   removePlanExercise(key: string): void;
   discardPlan(): void;
   /**
@@ -1195,14 +1202,31 @@ export function createAppStore(deps: AppStoreDeps): AppStore {
         return plan;
       },
 
-      swapOptions(key) {
-        const plan = requirePlan();
-        const { nodes, engine } = get();
-        return swapOptions(plan, key, {
+      swapOptions(key, query = '') {
+        const { activeSession, trainPlan, nodes, engine } = get();
+        const plan = activeSession ?? trainPlan;
+        if (!plan) return [];
+        const context = {
           nodes,
           progress: engine.progress,
           equipment: equipmentOf(plan.equipmentProfileId),
-        });
+        };
+        return query.trim().length > 0
+          ? addOptions(plan, context, query)
+          : swapOptions(plan, key, context);
+      },
+
+      swapTrainingExercise(key, nodeId) {
+        const { activeSession } = get();
+        if (!activeSession) {
+          get().swapPlanExercise(key, nodeId);
+          return;
+        }
+        const node = requireNode(nodeId);
+        const current = activeSession.exercises.find((exercise) => exercise.key === key);
+        if (!current) throw new Error(`No exercise '${key}' in the session`);
+        const replacement = prescribeExercise(node, workoutContext(now()), current.restSec);
+        saveSession(swapSessionExercise(activeSession, key, replacement));
       },
 
       swapPlanExercise(key, nodeId) {

@@ -170,3 +170,17 @@ describe('Battle view (PLAN 7.9)', () => {
     expect(screen.getByTestId('edit-set-sheet')).toBeOnTheScreen();
   });
 });
+
+describe('Battle: swap from a card (PLAN 7.8 FB-16)', () => {
+  beforeEach(() => store.getState().setTrainingView('battle'));
+
+  it('has the swap button on every card and swaps the exercise', async () => {
+    const user = userEvent.setup();
+    const [first] = store.getState().activeSession!.exercises;
+    const [option] = store.getState().swapOptions(first.key);
+    await render(<LiveSessionScreen />);
+    await user.press(screen.getByTestId(`battle-${first.key}-swap`));
+    await user.press(screen.getByTestId(`option-${option.id}`));
+    expect(store.getState().activeSession!.exercises[0].nodeId).toBe(option.id);
+  });
+});

@@ -238,6 +238,44 @@ describe('Train flow in the store', () => {
     test.close();
   });
 
+  it('swaps an exercise of the live session, before and after logging a set (FB-16)', async () => {
+    const test = await openTestDatabase();
+    const store = storeFor(test);
+    store.getState().planTraining('home', 30);
+    store.getState().startTraining();
+    const [first, second] = store.getState().activeSession!.exercises;
+    // Options come from the session now, and a search finds any doable skill.
+    const [option] = store.getState().swapOptions(first.key);
+    expect(option).toBeDefined();
+    expect(
+      store
+        .getState()
+        .swapOptions(first.key, 'squat')
+        .map((n) => n.id),
+    ).toContain('squat');
+    store.getState().swapTrainingExercise(first.key, option.id);
+    let session = store.getState().activeSession!;
+    expect(session.exercises[0]).toMatchObject({
+      key: first.key,
+      nodeId: option.id,
+      swappedFrom: first.nodeId,
+    });
+    expect(getActiveSession(test.db)?.exercises[0].nodeId).toBe(option.id);
+
+    store.getState().logTrainingSet(second.key, second.target);
+    const [replacement] = store.getState().swapOptions(second.key);
+    store.getState().swapTrainingExercise(second.key, replacement.id);
+    session = store.getState().activeSession!;
+    const index = session.exercises.findIndex((e) => e.key === second.key);
+    expect(session.exercises[index]).toMatchObject({ key: second.key, skipped: true });
+    expect(session.exercises[index + 1]).toMatchObject({
+      nodeId: replacement.id,
+      swappedFrom: second.nodeId,
+    });
+    expect(session.sets).toHaveLength(1);
+    test.close();
+  });
+
   it('skips, adds, rests and abandons without logging anything', async () => {
     const test = await openTestDatabase();
     const store = storeFor(test);

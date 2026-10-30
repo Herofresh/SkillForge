@@ -55,7 +55,7 @@ name: Train - plan, live session, resume after a restart, summary
     id: 'plan-e0-prescription'
 - takeScreenshot: 4.4-plan-preview
 - tapOn:
-    id: 'swap-e0'
+    id: 'plan-e0-swap'
 - extendedWaitUntil:
     visible:
       id: 'swap-sheet'

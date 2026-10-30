@@ -264,6 +264,24 @@ export const ICONS = {
     ],
     colors: { '#': Colors.success },
   },
+  /** Swap an exercise for another (PLAN 7.8 FB-16): two arrows passing each other. */
+  swap: {
+    rows: [
+      '............',
+      '....#.......',
+      '...##.......',
+      '..########..',
+      '...##.......',
+      '....#.......',
+      '.......#....',
+      '.......##...',
+      '..########..',
+      '.......##...',
+      '.......#....',
+      '............',
+    ],
+    colors: { '#': Colors.rune },
+  },
   cross: {
     rows: [
       '............',

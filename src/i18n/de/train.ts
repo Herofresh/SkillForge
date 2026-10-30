@@ -40,7 +40,6 @@ export const TRAIN_DE: Dictionary = {
   '1 exercise · about {minutes} min': '1 Übung · etwa {minutes} min',
   '{n} exercises · about {minutes} min': '{n} Übungen · etwa {minutes} min',
   Notes: 'Anmerkungen',
-  Swap: 'Tauschen',
   'Swap {name}': '{name} tauschen',
   Remove: 'Entfernen',
   'Remove {name}': '{name} entfernen',
@@ -51,8 +50,9 @@ export const TRAIN_DE: Dictionary = {
     'Lies und bestätige die Hinweise oben, um zu starten. Du entscheidest.',
   'Start session': 'Session starten',
   'Swap exercise': 'Übung tauschen',
-  'Exercises of the same movement as {name} that your equipment allows.':
-    'Übungen mit derselben Bewegung wie {name}, die deine Ausrüstung erlaubt.',
+  'Exercises of the same movement as {name} that your equipment allows, or search any skill by name.':
+    'Übungen mit derselben Bewegung wie {name}, die deine Ausrüstung erlaubt, oder such jeden Skill per Name.',
+  'Shows other exercises to do instead': 'Zeigt andere Übungen, die du stattdessen machen kannst',
   'No other exercise of this movement fits your equipment yet.':
     'Noch keine andere Übung dieser Bewegung passt zu deiner Ausrüstung.',
   'Suggestions from your open skills, or search any skill by name.':
