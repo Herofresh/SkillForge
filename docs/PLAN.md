@@ -342,6 +342,12 @@
   in all; ADR-079, [PR #90](https://github.com/Herofresh/SkillForge/pull/90)). FB-8 German done (the whole UI and the 155 skills'
   texts, Settings → Language; ADR-080, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)), to ship as **1.4.0** after a device check of the
   German build. 1.3.0 (vc13) is built and waits for the user's upload.
+- **1.4.0, versionCode 14** (2026-10-30, [PR #94](https://github.com/Herofresh/SkillForge/pull/94)): German (FB-8, ADR-080: the whole UI, the 155
+  skills' texts, Settings → Language) on top of 1.3.0. Release notes in English and German in
+  `docs/play/listing.md`; the German store listing and privacy page are in ([PR #93](https://github.com/Herofresh/SkillForge/pull/93)). Built
+  after the merge with `npm run build:aab` → `builds/SkillForge-1.4.0-vc14-<merge commit>.aab`.
+  It supersedes the 1.3.0 bundle if that hasn't been uploaded yet (same content plus German). Not
+  checked on a device: the first look at the German release build is the user's.
 - **1.3.0, versionCode 13** (2026-10-30, [PR #91](https://github.com/Herofresh/SkillForge/pull/91)): the feedback rounds since 1.2.0: FB-3
   (navigation bar), FB-4 (Trial needed), FB-5 (training types), FB-6 (Customize grid), FB-7 (Trial
   chain), FB-9/10/11 (goal reached), FB-12 (Trials planned), FB-13 (XP share), FB-14 (14 more
@@ -370,13 +376,12 @@
    and the next-goal picker (FB-9/10/11), a warm-up prep Trial once Wrist prep is at level 5
    (FB-12), the "Warm-up: half XP" note (FB-13). Tell the testers what changed (the release
    notes) and ask whether "Trials get skipped" still happens, and where.
-1. **German (FB-8, [PR #92](https://github.com/Herofresh/SkillForge/pull/92)) to 1.4.0:** the German Play listing (name, short and full
-   description, 1.3.0 release notes; `docs/play/listing.md` → Play Console → Store listing → Add
-   language → Deutsch) and the German privacy page (`site/privacy/de/`, linked from the English
-   one) are in ([PR #93](https://github.com/Herofresh/SkillForge/pull/93)). Left: check the German build on a device (Settings → Language →
-   Deutsch; plan notes, a summary, the Tree, Customize, the guide: long German words may wrap or
-   clip in chips and tiles) and `chore: version 1.4.0`. The validator's texts in the editor and
-   the Maestro flows stay English (ADR-080).
+1. **1.4.0 (versionCode 14, German) is built** ([PR #94](https://github.com/Herofresh/SkillForge/pull/94)): `builds/SkillForge-1.4.0-vc14-*.aab`. Check
+   it on a device first (Settings → Language → Deutsch; plan notes, a summary, the Tree, Customize,
+   the guide: long German words may wrap or clip in chips and tiles), then upload it to the closed
+   track with the 1.4.0 release notes (English and German) and add the German store listing
+   (`docs/play/listing.md`). If 1.3.0 wasn't uploaded yet, upload 1.4.0 instead. The validator's
+   texts in the editor and the Maestro flows stay English (ADR-080).
 2. 7.5 with the user: the Play listing kit (texts, screenshots, feature graphic from the pixel
    assets) and the Play Console setup (content rating, Data safety from the privacy policy, app
    access, target audience).
